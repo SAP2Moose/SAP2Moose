@@ -1,0 +1,7 @@
+Selection texts:
+
+P_DM	Usages outside package grouped
+P_DOWN	Download model to file
+P_LIST	List Tokens of selctd programs
+P_PACK	Package to be analyzed
+P_SAP	Extract from SAP
