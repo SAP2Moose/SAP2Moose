@@ -26,11 +26,24 @@
 "! Short abbreviations are used if only locally used, in that case an ABAP Doc comment explains the variable
 REPORT yrw1_moose_extractor.
 
-PARAMETERS: p_down AS CHECKBOX DEFAULT ' '.
 PARAMETERS: p_sap AS CHECKBOX DEFAULT 'X'.
+"! Extract from SAP
+DATA parameter_extract_from_sap TYPE abap_bool.
+parameter_extract_from_sap = p_sap.
+
 PARAMETERS: p_pack TYPE parentcl DEFAULT 'YRW1'.
+"! Package to be analyzed
+DATA parameter_package_to_analyze TYPE parentcl.
+parameter_package_to_analyze = p_pack.
+
 PARAMETERS: p_list AS CHECKBOX DEFAULT 'X'.
+"! List Tokens of selected programs
+DATA parameter_list_tokens TYPE abap_bool.
+parameter_list_tokens = p_list.
+
 PARAMETERS: p_dm AS CHECKBOX DEFAULT 'X'.
+"! Usages outside package grouped
+DATA parameter_usage_outpack_groupd TYPE abap_bool.
 
 include z_mse.
 
@@ -41,6 +54,30 @@ TYPES: BEGIN OF ty_class_component,
          cmpname TYPE seocompo-cmpname,
          cmptype TYPE seocompo-cmptype,
        END OF ty_class_component.
+
+TYPES: BEGIN OF ty_tadir_object,
+          obj_name TYPE sobj_name,
+          object   TYPE trobjtype,
+          devclass TYPE devclass,
+       END OF ty_tadir_object.
+
+TYPES: BEGIN OF ty_classes_interfaces,
+        obj_name TYPE seoclsname,
+      END OF ty_classes_interfaces.
+
+TYPES: BEGIN OF ty_program,
+         program TYPE string,
+       END OF ty_program.
+
+TYPES:BEGIN OF ty_class,
+        class TYPE seoclsname,
+      END OF ty_class.
+
+TYPES: BEGIN OF ty_inheritances,
+         clsname    TYPE seometarel-clsname,
+         refclsname TYPE seometarel-refclsname,
+         reltype    TYPE seometarel-reltype,
+       END OF ty_inheritances.
 
 CLASS cl_extract_sap DEFINITION.
   PUBLIC SECTION.
@@ -60,6 +97,51 @@ CLASS cl_extract_sap DEFINITION.
         i_famix_invocation TYPE REF TO cl_famix_invocation
         i_famix_access     TYPE REF TO cl_famix_access
         iv_used_id         TYPE i.
+
+    CLASS-METHODS _set_default_language
+      IMPORTING
+        i_model TYPE REF TO cl_model.
+
+    TYPES: BEGIN OF ty_devclass,
+          devclass TYPE DEVCLASS,
+          END OF ty_devclass.
+    TYPES:
+      ty_processed_dev_classes TYPE HASHED TABLE OF ty_devclass WITH UNIQUE KEY devclass.
+    CLASS-METHODS _determine_packages_to_analyze
+      IMPORTING
+        i_model                        TYPE REF TO cl_model
+        is_devclass_first              TYPE tdevc
+      RETURNING
+        VALUE(r_processed_dev_classes) TYPE ty_processed_dev_classes.
+    TYPES:
+      ty_lt_tadir_objects TYPE HASHED TABLE OF ty_tadir_object WITH UNIQUE KEY obj_name,
+      ty_lt_classes_2     TYPE STANDARD TABLE OF ty_classes_interfaces WITH DEFAULT KEY,
+      ty_lt_programs      TYPE STANDARD TABLE OF ty_program WITH DEFAULT KEY.
+    CLASS-METHODS _objects_to_analyze_by_tadir
+      IMPORTING
+        it_tadir_objects TYPE ty_lt_tadir_objects
+      EXPORTING
+        et_classes_2     TYPE ty_lt_classes_2
+        et_programs      TYPE ty_lt_programs.
+    TYPES:
+      ty_lt_tadir_objects_1 TYPE HASHED TABLE OF ty_tadir_object WITH UNIQUE KEY obj_name,
+      ty_lt_programs_1      TYPE STANDARD TABLE OF ty_program WITH DEFAULT KEY.
+    CLASS-METHODS _read_all_programs
+      IMPORTING
+        it_tadir_objects TYPE ty_lt_tadir_objects_1
+        it_programs      TYPE ty_lt_programs_1
+      CHANGING
+        c_model          TYPE REF TO cl_model.
+    TYPES:
+      ty_lt_tadir_objects_2  TYPE HASHED TABLE OF ty_tadir_object WITH UNIQUE KEY obj_name,
+      ty_lt_existing_classes TYPE HASHED TABLE OF ty_class WITH UNIQUE KEY class.
+    CLASS-METHODS _add_to_model
+      IMPORTING
+        i_model              TYPE REF TO cl_model
+        it_tadir_objects     TYPE ty_lt_tadir_objects_2
+        it_existing_classes  TYPE ty_lt_existing_classes
+      RETURNING
+        VALUE(r_famix_class) TYPE REF TO cl_famix_class.
 
 ENDCLASS.
 
@@ -248,7 +330,7 @@ CLASS cl_extract_program IMPLEMENTATION.
     SORT lt_statements BY from.
 
 
-    IF p_list EQ true.
+    IF parameter_list_tokens EQ true.
       WRITE: /.
       WRITE: / i_program.
 
@@ -364,12 +446,12 @@ CLASS cl_extract_program IMPLEMENTATION.
               context-implementation_of_class = aok->info-name.
             WHEN aok->start_method_implementation.
               context-implementation_of_method = aok->info-name.
-              IF p_list EQ abap_true.
+              IF parameter_list_tokens EQ abap_true.
                 FORMAT COLOR COL_GROUP.
               ENDIF.
             WHEN aok->end_method_implementation.
               context-implementation_of_method = VALUE #( ).
-              IF p_list EQ abap_true.
+              IF parameter_list_tokens EQ abap_true.
                 FORMAT COLOR COL_BACKGROUND.
               ENDIF.
             WHEN OTHERS.
@@ -380,7 +462,7 @@ CLASS cl_extract_program IMPLEMENTATION.
 
       ENDCASE.
 
-      IF p_list EQ abap_true.
+      IF parameter_list_tokens EQ abap_true.
         WRITE: / <ls_statement>-type.
         LOOP AT lt_sorted_tokens ASSIGNING FIELD-SYMBOL(<ls_token_3>) WHERE
             index >= <ls_statement>-from
@@ -461,142 +543,44 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     DATA(model) = NEW cl_model( ).
 
-    " Set default language
-
-    DATA(famix_custom_source_language) = NEW cl_famix_custom_source_lang( model ).
-
-    famix_custom_source_language->add( i_name = 'ABAP' ).
-
-    " Do not assign any entities to ABAP, because otherwise this will not be the default language anymore
-    " So do not do this for ABAP, but maybe for another language
-    " famix_package->set_declared_source_language( EXPORTING i_source_language_element = 'FAMIX.CustomSourceLanguage'
-    "                                                        i_source_language_name    = 'ABAP' ).
-
-    " Loop over all packages
-
-    DATA(famix_package) = NEW cl_famix_package( model ).
-
-    DATA: lt_processed_dev_classes TYPE HASHED TABLE OF ty_devclass WITH UNIQUE KEY devclass.
-
-    DATA: lt_dev_class_to_search TYPE STANDARD TABLE OF ty_devclass.
+    _set_default_language( model ).
 
     " SAP_2_FAMIX_3     Select all Objects in a package and the sub packages of this package
 
-    SELECT SINGLE devclass, parentcl FROM tdevc INTO @DATA(ls_devclass_first) WHERE devclass = @p_pack.
+    DATA ls_devclass_first type tdevc.
+
+    SELECT SINGLE devclass, parentcl FROM tdevc INTO @ls_devclass_first WHERE devclass = @parameter_package_to_analyze.
     IF sy-subrc <> ok.
-      WRITE: 'Package does not exist: ', p_pack.
+      WRITE: 'Package does not exist: ', parameter_package_to_analyze.
       RETURN.
     ENDIF.
 
-    famix_package->add( i_name = CONV string( ls_devclass_first-devclass ) ).
+    DATA processed_dev_classes TYPE ty_processed_dev_classes.
 
-    INSERT VALUE ty_devclass( devclass = ls_devclass_first-devclass ) INTO TABLE lt_processed_dev_classes.
-
-    lt_dev_class_to_search = VALUE #( ( devclass = p_pack ) ).
-    WHILE lt_dev_class_to_search IS NOT INITIAL.
-      IF lt_dev_class_to_search IS NOT INITIAL.
-        SELECT devclass, parentcl FROM tdevc INTO TABLE @DATA(lt_devclass)
-         FOR ALL ENTRIES IN @lt_dev_class_to_search WHERE parentcl = @lt_dev_class_to_search-devclass.
-      ENDIF.
-
-      lt_dev_class_to_search = VALUE #( ).
-
-      LOOP AT lt_devclass INTO DATA(ls_devclass).
-
-        INSERT VALUE ty_devclass( devclass = ls_devclass-devclass ) INTO TABLE lt_processed_dev_classes.
-        IF sy-subrc EQ ok.
-          " New devclass
-          " Search again
-          lt_dev_class_to_search = VALUE #( BASE lt_dev_class_to_search ( devclass = ls_devclass-devclass ) ).
-          famix_package->add( i_name = CONV string( ls_devclass-devclass ) ).
-          famix_package->set_parent_package( i_parent_package = CONV string( ls_devclass-parentcl ) ).
-        ENDIF.
-
-      ENDLOOP.
-
-      SORT lt_dev_class_to_search.
-      DELETE ADJACENT DUPLICATES FROM lt_dev_class_to_search.
-
-    ENDWHILE.
-
-    " Loop over all packages to find classes
-
-    " SAP_2_FAMIX_1     Extract classes from Dictionary
-    " SAP_2_FAMIX_2     Extract interfaces as FAMIX.Class with attribute isinterface
-
-    TYPES: BEGIN OF ty_tadir_object,
-             obj_name TYPE sobj_name,
-             object   TYPE trobjtype,
-             devclass TYPE devclass,
-           END OF ty_tadir_object.
+    processed_dev_classes = _determine_packages_to_analyze( i_model           = model
+                                                            is_devclass_first = ls_devclass_first ).
 
     DATA: lt_tadir_objects TYPE HASHED TABLE OF ty_tadir_object WITH UNIQUE KEY obj_name.
+    DATA: lt_classes_2 TYPE STANDARD TABLE OF ty_classes_interfaces.
+    DATA: lt_programs TYPE STANDARD TABLE OF ty_program.
 
-    IF lt_processed_dev_classes IS NOT INITIAL.
-      SELECT obj_name, object, devclass FROM tadir INTO TABLE @lt_tadir_objects FOR ALL ENTRIES IN @lt_processed_dev_classes
+    IF processed_dev_classes IS NOT INITIAL.
+      SELECT obj_name, object, devclass FROM tadir INTO TABLE @lt_tadir_objects FOR ALL ENTRIES IN @processed_dev_classes
         WHERE
           pgmid = 'R3TR'
           AND ( object = 'CLAS' OR object = 'INTF' OR object = 'PROG' )
-          AND devclass = @lt_processed_dev_classes-devclass.
+          AND devclass = @processed_dev_classes-devclass.
     ENDIF.
 
-    TYPES: BEGIN OF ty_classes_interfaces,
-             obj_name TYPE seoclsname,
-           END OF ty_classes_interfaces.
+   _objects_to_analyze_by_tadir( EXPORTING it_tadir_objects = lt_tadir_objects
+                                 IMPORTING et_classes_2 = lt_classes_2
+                                           et_programs  = lt_programs ).
 
-    DATA: lt_classes_2 TYPE STANDARD TABLE OF ty_classes_interfaces.
+   _read_all_programs( EXPORTING it_tadir_objects = lt_tadir_objects
+                                 it_programs      = lt_programs
+                        CHANGING c_model = model ).
 
-    TYPES: BEGIN OF ty_program,
-             program TYPE string,
-           END OF ty_program.
-
-    DATA: lt_programs TYPE STANDARD TABLE OF ty_program.
-
-    MOVE-CORRESPONDING lt_tadir_objects TO lt_classes_2.
-
-    LOOP AT lt_tadir_objects ASSIGNING FIELD-SYMBOL(<ls_tadir_objects>).
-
-      IF <ls_tadir_objects>-object EQ 'CLAS'
-        OR <ls_tadir_objects>-object EQ 'INTF'.
-
-        lt_classes_2 = VALUE #( BASE lt_classes_2 ( obj_name = <ls_tadir_objects>-obj_name ) ).
-
-      ELSE.
-
-        lt_programs = VALUE #( BASE lt_programs ( program = <ls_tadir_objects>-obj_name ) ).
-
-      ENDIF.
-
-    ENDLOOP.
-
-    " Read all programs
-
-    " SAP_2_FAMIX_4     Extract programs
-
-    DATA(famix_module) = NEW cl_famix_module( model ).
-
-    LOOP AT lt_programs ASSIGNING FIELD-SYMBOL(<ls_program>).
-
-
-      " SAP_2_FAMIX_5     Map program to FAMIX.Module
-      DATA(lv_module_reference) = famix_module->add( EXPORTING i_name = <ls_program>-program ).
-
-      READ TABLE lt_tadir_objects ASSIGNING FIELD-SYMBOL(<ls_tadir_object_2>) WITH TABLE KEY obj_name = <ls_program>-program.
-      ASSERT sy-subrc EQ ok.
-
-      famix_module->set_parent_package( i_parent_package = CONV string( <ls_tadir_object_2>-devclass ) ).
-
-      DATA(lv_program_analyzer) = NEW cl_extract_program( ).
-
-      lv_program_analyzer->extract( EXPORTING i_module_reference = lv_module_reference
-                                              i_program          = CONV #( <ls_program>-program )
-                                     CHANGING cr_model           = model ).
-
-    ENDLOOP.
-
-    TYPES:BEGIN OF ty_class,
-            class TYPE seoclsname,
-          END OF ty_class.
+    " Read all classes
 
     DATA: lt_existing_classes TYPE HASHED TABLE OF ty_class WITH UNIQUE KEY class.
 
@@ -607,34 +591,16 @@ CLASS cl_extract_sap IMPLEMENTATION.
           clsname = @lt_classes_2-obj_name.
     ENDIF.
 
-    " Add to model
-    LOOP AT lt_existing_classes INTO DATA(ls_existing_class).
-      DATA(famix_class) = NEW cl_famix_class( model ).
+    DATA famix_class TYPE REF TO cl_famix_class.
 
-      " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
-      " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
-      famix_class->add( i_name = CONV string( ls_existing_class-class ) ).
 
-      READ TABLE lt_tadir_objects ASSIGNING FIELD-SYMBOL(<ls_tadir_object>) WITH TABLE KEY obj_name = ls_existing_class-class.
-      ASSERT sy-subrc EQ ok.
-
-      famix_class->set_parent_package( i_parent_package = CONV string( <ls_tadir_object>-devclass ) ).
-      IF <ls_tadir_object>-object EQ 'INTF'.
-        " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
-        famix_class->is_interface( ).
-      ENDIF.
-
-    ENDLOOP.
+    famix_class = _add_to_model( i_model             = model
+                                 it_tadir_objects    = lt_tadir_objects
+                                 it_existing_classes = lt_existing_classes ).
 
     " Determine inheritances between selected classes
 
     DATA(famix_inheritance) = NEW cl_famix_inheritance( model ).
-
-    TYPES: BEGIN OF ty_inheritances,
-             clsname    TYPE seometarel-clsname,
-             refclsname TYPE seometarel-refclsname,
-             reltype    TYPE seometarel-reltype,
-           END OF ty_inheritances.
 
     DATA: lt_inheritances TYPE STANDARD TABLE OF  ty_inheritances.
 
@@ -652,6 +618,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
 
+    " Add inheritances to model
     LOOP AT lt_inheritances INTO DATA(ls_inheritance).
       CASE ls_inheritance-reltype.
         WHEN 2.
@@ -824,7 +791,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
                                                                i_method = lv_using_method ).
             IF lv_using_method_id EQ 0.
 
-              IF p_dm EQ false.
+              IF parameter_usage_outpack_groupd EQ false.
 
                 " Method does not exist, create the class
                 " SAP_2_FAMIX_21      If an object is used by a class that is not selected, add this class to the model
@@ -843,7 +810,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
               " Now there is a class, but no duplicate class
 
-              IF p_dm EQ false.
+              IF parameter_usage_outpack_groupd EQ false.
                 lv_using_method_id = i_famix_method->get_id( i_class  = CONV string( ls_prog_tadir-object_name )
                                                                 i_method = lv_using_method ).
               ELSE.
@@ -853,7 +820,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
 
               IF lv_using_method_id EQ 0.
-                IF p_dm EQ false.
+                IF parameter_usage_outpack_groupd EQ false.
                   " Now also the method is to be created
                   " SAP_2_FAMIX_23        If an object is used by a class that is not selected, add the using methods to the model
 
@@ -916,12 +883,159 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD _set_default_language.
+
+    " Set default language
+
+    DATA(famix_custom_source_language) = NEW cl_famix_custom_source_lang( i_model ).
+
+    famix_custom_source_language->add( i_name = 'ABAP' ).
+
+    " Do not assign any entities to ABAP, because otherwise this will not be the default language anymore
+    " So do not do this for ABAP, but maybe for another language
+    " famix_package->set_declared_source_language( EXPORTING i_source_language_element = 'FAMIX.CustomSourceLanguage'
+    "                                                        i_source_language_name    = 'ABAP' ).
+
+  ENDMETHOD.
+
+
+  METHOD _determine_packages_to_analyze.
+
+    TYPES devclass TYPE devclass.
+    DATA ty_devclass TYPE ty_devclass.
+
+    " Determine packages to analyze
+
+    DATA(famix_package) = NEW cl_famix_package( i_model ).
+
+    "! This are all packages and sub packages that are selected (package = development class)
+    DATA processed_dev_classes TYPE HASHED TABLE OF ty_devclass WITH UNIQUE KEY devclass.
+
+    "! A temporal helper table used to find all packages (development classes) in the selection
+    DATA temp_dev_classes_to_search TYPE STANDARD TABLE OF ty_devclass.
+
+
+
+    famix_package->add( i_name = CONV string( is_devclass_first-devclass ) ).
+
+    INSERT VALUE ty_devclass( devclass = is_devclass_first-devclass ) INTO TABLE r_processed_dev_classes.
+
+    temp_dev_classes_to_search = VALUE #( ( devclass = parameter_package_to_analyze ) ).
+    WHILE temp_dev_classes_to_search IS NOT INITIAL.
+      IF temp_dev_classes_to_search IS NOT INITIAL.
+        SELECT devclass, parentcl FROM tdevc INTO TABLE @DATA(lt_devclass)
+         FOR ALL ENTRIES IN @temp_dev_classes_to_search WHERE parentcl = @temp_dev_classes_to_search-devclass.
+      ENDIF.
+
+      temp_dev_classes_to_search = VALUE #( ).
+
+      LOOP AT lt_devclass INTO DATA(ls_devclass).
+
+        INSERT VALUE ty_devclass( devclass = ls_devclass-devclass ) INTO TABLE r_processed_dev_classes.
+        IF sy-subrc EQ ok.
+          " New devclass
+          " Search again
+          temp_dev_classes_to_search = VALUE #( BASE temp_dev_classes_to_search ( devclass = ls_devclass-devclass ) ).
+          famix_package->add( i_name = CONV string( ls_devclass-devclass ) ).
+          famix_package->set_parent_package( i_parent_package = CONV string( ls_devclass-parentcl ) ).
+        ENDIF.
+
+      ENDLOOP.
+
+      SORT temp_dev_classes_to_search.
+      DELETE ADJACENT DUPLICATES FROM temp_dev_classes_to_search.
+
+    ENDWHILE.
+
+  ENDMETHOD.
+
+
+  METHOD _objects_to_analyze_by_tadir.
+
+    " Loop over all packages to find classes and programms
+
+    " SAP_2_FAMIX_1     Extract classes from Dictionary
+    " SAP_2_FAMIX_2     Extract interfaces as FAMIX.Class with attribute isinterface
+
+    MOVE-CORRESPONDING it_tadir_objects TO et_classes_2.
+
+    LOOP AT it_tadir_objects ASSIGNING FIELD-SYMBOL(<ls_tadir_objects>).
+
+      IF <ls_tadir_objects>-object EQ 'CLAS'
+        OR <ls_tadir_objects>-object EQ 'INTF'.
+
+        et_classes_2 = VALUE #( BASE et_classes_2 ( obj_name = <ls_tadir_objects>-obj_name ) ).
+
+      ELSE.
+
+        et_programs = VALUE #( BASE et_programs ( program = <ls_tadir_objects>-obj_name ) ).
+
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD _read_all_programs.
+
+    " Read all programs
+
+    " SAP_2_FAMIX_4     Extract programs
+
+    DATA(famix_module) = NEW cl_famix_module( c_model ).
+
+    LOOP AT it_programs ASSIGNING FIELD-SYMBOL(<ls_program>).
+
+      " SAP_2_FAMIX_5     Map program to FAMIX.Module
+      DATA(lv_module_reference) = famix_module->add( EXPORTING i_name = <ls_program>-program ).
+
+      READ TABLE it_tadir_objects ASSIGNING FIELD-SYMBOL(<ls_tadir_object_2>) WITH TABLE KEY obj_name = <ls_program>-program.
+      ASSERT sy-subrc EQ ok.
+
+      famix_module->set_parent_package( i_parent_package = CONV string( <ls_tadir_object_2>-devclass ) ).
+
+      DATA(lv_program_analyzer) = NEW cl_extract_program( ).
+
+      lv_program_analyzer->extract( EXPORTING i_module_reference = lv_module_reference
+                                              i_program          = CONV #( <ls_program>-program )
+                                     CHANGING cr_model           = c_model ).
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD _add_to_model.
+
+    " Add to model
+    LOOP AT it_existing_classes INTO DATA(ls_existing_class).
+      r_famix_class  = NEW cl_famix_class( i_model ).
+
+      " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
+      " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
+      r_famix_class->add( i_name = CONV string( ls_existing_class-class ) ).
+
+      READ TABLE it_tadir_objects ASSIGNING FIELD-SYMBOL(<ls_tadir_object>) WITH TABLE KEY obj_name = ls_existing_class-class.
+      ASSERT sy-subrc EQ ok.
+
+      r_famix_class->set_parent_package( i_parent_package = CONV string( <ls_tadir_object>-devclass ) ).
+      IF <ls_tadir_object>-object EQ 'INTF'.
+        " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
+        r_famix_class->is_interface( ).
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
 ENDCLASS.
 
 START-OF-SELECTION.
 
   DATA: lt_model TYPE cl_model=>ty_lines.
-  IF p_sap EQ false.
+  IF parameter_extract_from_sap EQ false.
     cl_make_demo_model=>make( IMPORTING et_model = lt_model ).
   ELSE.
     cl_extract_sap=>extract( IMPORTING et_model = lt_model ).

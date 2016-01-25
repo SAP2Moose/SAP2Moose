@@ -20,6 +20,11 @@
 *OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 *SOFTWARE.
 
+PARAMETERS p_down AS CHECKBOX DEFAULT ' '.
+"! Download model to file
+data l_parameter_download_file type abap_bool.
+l_parameter_download_file = p_down.
+
 " Begin Model
 "! To not compare sy-subrc to zero, but more readable to ok
 CONSTANTS ok TYPE i VALUE 0.
@@ -315,7 +320,7 @@ CLASS cl_output_model IMPLEMENTATION.
           fullpath    TYPE string,
           user_action TYPE i.
 
-    IF p_down EQ true.
+    IF l_parameter_download_file EQ true.
 
       cl_gui_frontend_services=>file_save_dialog( CHANGING filename    = filename       " File Name to Save
                                                            path        = pathname       " Path to File
