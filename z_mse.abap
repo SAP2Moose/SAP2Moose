@@ -23,7 +23,7 @@
 
 PARAMETERS p_down AS CHECKBOX DEFAULT ' '.
 "! Download model to file
-data parameter_download_file type abap_bool.
+data parameter_download_file type bool.
 parameter_download_file = p_down.
 
 " Begin Model
@@ -43,8 +43,8 @@ CLASS cl_model DEFINITION.
     "! @parameter name_group | optional to handle cases where names may be duplicates
     "! @parameter is_named_entity | True if the entity has a name
     "! @parameter can_be_referenced_by_name | True if referencing by name is possible (For this the name has to be unique)
-    "! @parameter name | the name of a FAMIX Entity that inherits from FAMIX.NamedEntity leave empty is i_is_named_entity is false
-    "! @parameter exists_already_with_id | only if i_can_be_referenced_by_name true. Zero if it does not yet exist, otherwise filled with id
+    "! @parameter name | the name of a FAMIX Entity that inherits from FAMIX.NamedEntity leave empty is is_named_entity is false
+    "! @parameter exists_already_with_id | only if can_be_referenced_by_name true. Zero if it does not yet exist, otherwise filled with id
     "! @parameter processedid | the id in model either if just created or already existing
     METHODS add_entity
       IMPORTING elementname                   TYPE string
@@ -61,17 +61,17 @@ CLASS cl_model DEFINITION.
         mse_model TYPE lines_type.
 
     "! Generates an attribute of type string
-    "! @parameter i_attribute_name | the name of the attribute
-    "! @parameter i_string | The value of the attribute
+    "! @parameter attribute_name | the name of the attribute
+    "! @parameter string | The value of the attribute
     METHODS add_string
       IMPORTING
         attribute_name TYPE string
         string         TYPE string.
 
     "! Generates an attribute of type reference using a name
-    "! @parameter i_attribute_name | the name of the attribute
-    "! @parameter i_elementname | the element type of the reference
-    "! @parameter i_name_of_reference | the reference
+    "! @parameter attribute_name | the name of the attribute
+    "! @parameter elementname | the element type of the reference
+    "! @parameter name_of_reference | the reference
     METHODS add_reference
       IMPORTING
         attribute_name          TYPE string
@@ -80,8 +80,8 @@ CLASS cl_model DEFINITION.
         name_of_reference       TYPE string.
 
     "! Generates an attribute of type reference using an id
-    "! @parameter i_attribute_name | the name of the attribute
-    "! @parameter i_reference_id | the id of the reference
+    "! @parameter attribute_name | the name of the attribute
+    "! @parameter reference_id | the id of the reference
     METHODS add_reference_by_id
       IMPORTING
         attribute_name TYPE string

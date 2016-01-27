@@ -71,7 +71,7 @@ CLASS cl_famix_named_entity DEFINITION INHERITING FROM cl_famix_sourced_entity A
       EXPORTING VALUE(exists_already_with_id) TYPE i
       RETURNING VALUE(id)                     TYPE i.
     "! Call once to set the parent package
-    "! @parameter i_parent_package | the name of an element of type FAMIX.Package
+    "! @parameter parent_package | the name of an element of type FAMIX.Package
     METHODS set_parent_package IMPORTING parent_package TYPE string.
 
   PROTECTED SECTION.
@@ -103,7 +103,7 @@ CLASS cl_famix_parameter DEFINITION INHERITING FROM cl_famix_named_entity.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS add REDEFINITION.
     "! Set the parent behavioural entity, either a method or a function
-    "! @parameter i_parent_id | id of parent entity
+    "! @parameter parent_id | id of parent entity
     METHODS set_parent_behavioural_entity
       IMPORTING
         parent_id TYPE i.

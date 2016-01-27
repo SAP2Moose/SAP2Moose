@@ -39,7 +39,7 @@
 "!
 "! Short abbreviations are used if only locally used, in that case an ABAP Doc comments explains the variable
 "! See the start of the report for this
-REPORT yrw1_moose_extractor.
+REPORT z_moose_extractor.
 
 "! To not compare sy-subrc to zero, but more readable to ok
 CONSTANTS ok TYPE i VALUE 0.
@@ -53,7 +53,7 @@ CONSTANTS:
 
 PARAMETERS: p_sap AS CHECKBOX DEFAULT 'X'.
 "! Extract from SAP
-DATA parameter_extract_from_sap TYPE abap_bool.
+DATA parameter_extract_from_sap TYPE bool.
 parameter_extract_from_sap = p_sap.
 
 PARAMETERS: p_pack TYPE parentcl DEFAULT 'YRW1'.
@@ -63,12 +63,12 @@ parameter_package_to_analyze = p_pack.
 
 PARAMETERS: p_list AS CHECKBOX DEFAULT 'X'.
 "! List Tokens of selected programs
-DATA parameter_list_tokens TYPE abap_bool.
+DATA parameter_list_tokens TYPE bool.
 parameter_list_tokens = p_list.
 
 PARAMETERS: p_dm AS CHECKBOX DEFAULT 'X'.
 "! Usages outside package grouped
-DATA parameter_usage_outpack_groupd TYPE abap_bool.
+DATA parameter_usage_outpack_groupd TYPE bool.
 
 include z_mse.
 
@@ -404,56 +404,54 @@ CLASS cl_program_analyzer IMPLEMENTATION.
 
     ENDIF.
 
-    " TBD Continue here <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-    TYPES: ty_statement_type TYPE c LENGTH 1.
-    TYPES ty_section_type TYPE c LENGTH 1.
+    TYPES: statement_type TYPE c LENGTH 1.
+    TYPES section_type TYPE c LENGTH 1.
 
     CONSTANTS: "! Is in public section
-      public    TYPE ty_section_type VALUE '1',
+      public    TYPE section_type VALUE '1',
       "! Is in protected section
-      protected TYPE ty_section_type VALUE '2',
+      protected TYPE section_type VALUE '2',
       "! Is in private section
-      private   TYPE ty_section_type VALUE '3',
+      private   TYPE section_type VALUE '3',
       "! Not in a section
-      none      TYPE ty_section_type VALUE ' '.
+      none      TYPE section_type VALUE ' '.
 
-    TYPES: BEGIN OF ty_codecontext,
-             in_section               TYPE ty_section_type,
+    TYPES: BEGIN OF codecontext_type,
+             in_section               TYPE section_type,
              in_class_definition      TYPE bool,
              implementation_of_class  TYPE string,
              implementation_of_method TYPE string,
-           END OF ty_codecontext.
+           END OF codecontext_type.
 
     "! Context of statement in the code
-    DATA context TYPE ty_codecontext.
+    DATA context TYPE codecontext_type.
 
-    TYPES: BEGIN OF ty_class,
+    TYPES: BEGIN OF class_with_model_id_type,
              classname   TYPE string,
              id_in_model TYPE i,
-           END OF ty_class.
+           END OF class_with_model_id_type.
 
-    DATA: classes      TYPE HASHED TABLE OF ty_class WITH UNIQUE KEY classname,
-          actual_class TYPE ty_class.
+    DATA: classes_with_model_id      TYPE HASHED TABLE OF class_with_model_id_type WITH UNIQUE KEY classname,
+          actual_class_with_model_id TYPE class_with_model_id_type.
 
-    TYPES: BEGIN OF ty_method,
+    TYPES: BEGIN OF method_type,
              classname          TYPE string,
              class_id_in_model  TYPE i,
              methodname         TYPE string,
              method_id_in_model TYPE i,
-             in_section         TYPE ty_section_type,
+             in_section         TYPE section_type,
              instanciable       TYPE bool,
-           END OF ty_method.
+           END OF method_type.
 
-    DATA: methods       TYPE STANDARD TABLE OF ty_method,
-          actual_method TYPE ty_method.
+    DATA: methods       TYPE STANDARD TABLE OF method_type,
+          actual_method TYPE method_type.
 
-    TYPES: BEGIN OF ty_inheritance,
+    TYPES: BEGIN OF inheritance_type,
              subclass   TYPE string,
              superclass TYPE string,
-           END OF ty_inheritance.
+           END OF inheritance_type.
 
-    DATA: inheritances TYPE STANDARD TABLE OF ty_inheritance.
+    DATA: inheritances TYPE STANDARD TABLE OF inheritance_type.
 
     DATA token_number TYPE i.
 
@@ -461,22 +459,22 @@ CLASS cl_program_analyzer IMPLEMENTATION.
     DATA aok TYPE REF TO cl_ep_analyze_other_keyword.
     aok = NEW cl_ep_analyze_other_keyword( sorted_tokens = sorted_tokens ).
 
-    LOOP AT statements ASSIGNING FIELD-SYMBOL(<ls_statement>).
+    LOOP AT statements ASSIGNING FIELD-SYMBOL(<statement>).
 
       token_number = 0.
-      CASE <ls_statement>-type.
+      CASE <statement>-type.
         WHEN 'K'.
 
-          aok->analyze( statement = <ls_statement> ).
+          aok->analyze( statement = <statement> ).
           CASE aok->g_info-statement_type.
             WHEN aok->start_class_definition.
               " SAP_2_FAMIX_28        Determine local classes in programs
               context-in_class_definition = true.
-              actual_class-classname = aok->g_info-name.
-              classes = VALUE #( BASE classes ( actual_class ) ).
+              actual_class_with_model_id-classname = aok->g_info-name.
+              classes_with_model_id = VALUE #( BASE classes_with_model_id ( actual_class_with_model_id ) ).
               IF aok->g_info-class_is_inheriting EQ true.
                 " SAP_2_FAMIX_37        Determine local inheritances of classes
-                inheritances = VALUE #( BASE inheritances ( subclass = actual_class-classname
+                inheritances = VALUE #( BASE inheritances ( subclass = actual_class_with_model_id-classname
                                                                   superclass = aok->g_info-class_inherits_from ) ).
               ENDIF.
             WHEN aok->start_public.
@@ -492,24 +490,24 @@ CLASS cl_program_analyzer IMPLEMENTATION.
             WHEN aok->method_definition.
               " SAP_2_FAMIX_29      Determine local class methods in programs
               IF aok->g_info-is_static EQ true.
-                actual_method = VALUE #( classname = actual_class-classname
-                                            in_section = context-in_section ).
+                actual_method = VALUE #( classname = actual_class_with_model_id-classname
+                                         in_section = context-in_section ).
               ELSE.
-                actual_method = VALUE #( classname = actual_class-classname
-                                            in_section = context-in_section
-                                            instanciable = true ).
+                actual_method = VALUE #( classname = actual_class_with_model_id-classname
+                                         in_section = context-in_section
+                                         instanciable = true ).
               ENDIF.
               actual_method-methodname = aok->g_info-name.
             WHEN aok->start_class_implementation.
               context-implementation_of_class = aok->g_info-name.
             WHEN aok->start_method_implementation.
               context-implementation_of_method = aok->g_info-name.
-              IF parameter_list_tokens EQ abap_true.
+              IF parameter_list_tokens EQ true.
                 FORMAT COLOR COL_GROUP.
               ENDIF.
             WHEN aok->end_method_implementation.
               context-implementation_of_method = VALUE #( ).
-              IF parameter_list_tokens EQ abap_true.
+              IF parameter_list_tokens EQ true.
                 FORMAT COLOR COL_BACKGROUND.
               ENDIF.
             WHEN OTHERS.
@@ -520,11 +518,11 @@ CLASS cl_program_analyzer IMPLEMENTATION.
 
       ENDCASE.
 
-      IF parameter_list_tokens EQ abap_true.
-        WRITE: / <ls_statement>-type.
+      IF parameter_list_tokens EQ true.
+        WRITE: / <statement>-type.
         LOOP AT sorted_tokens ASSIGNING FIELD-SYMBOL(<token>) WHERE
-            index >= <ls_statement>-from
-        AND index <= <ls_statement>-to.
+            index >= <statement>-from
+        AND index <= <statement>-to.
           WRITE: '|', <token>-type, <token>-str.
         ENDLOOP.
       ENDIF.
@@ -535,11 +533,11 @@ CLASS cl_program_analyzer IMPLEMENTATION.
 
     DATA(famix_class) = NEW cl_famix_class( model ).
 
-    LOOP AT classes ASSIGNING FIELD-SYMBOL(<class>).
+    LOOP AT classes_with_model_id ASSIGNING FIELD-SYMBOL(<class>).
       " SAP_2_FAMIX_30        Map local classes of programs to FAMIX.Class
 
       <class>-id_in_model = famix_class->add( EXPORTING name_group = CONV string( program )
-                                                        name                   = <class>-classname ).
+                                                        name       = <class>-classname ).
 
       " SAP_2_FAMIX_31     Assign local classes to a container of type FAMIX.Module with the name of the program
 
@@ -554,7 +552,7 @@ CLASS cl_program_analyzer IMPLEMENTATION.
     DATA(famix_method) = NEW cl_famix_method( model ).
 
     LOOP AT methods ASSIGNING FIELD-SYMBOL(<method>).
-      READ TABLE classes ASSIGNING FIELD-SYMBOL(<class_2>) WITH TABLE KEY classname = <method>-classname.
+      READ TABLE classes_with_model_id ASSIGNING FIELD-SYMBOL(<class_2>) WITH TABLE KEY classname = <method>-classname.
       <method>-class_id_in_model = <class_2>-id_in_model.
 
       " SAP_2_FAMIX_32      Map local methods to the FAMIX.Method
@@ -594,19 +592,20 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
   METHOD extract.
 
-    TYPES:BEGIN OF ty_devclass,
+    TYPES:BEGIN OF devclass_type,
             devclass TYPE devclass,
-          END OF ty_devclass.
+          END OF devclass_type.
 
 
     DATA first_devclass type tdevc.
     DATA processed_dev_classes TYPE processed_dev_classes_type.
-    DATA: tadir_objects TYPE HASHED TABLE OF tadir_object_type WITH UNIQUE KEY obj_name.
-    DATA: classes TYPE STANDARD TABLE OF class_interface_type.
-    DATA: programs TYPE STANDARD TABLE OF program_type.
-    DATA: existing_classes TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
 
-    DATA: class_components TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
+    DATA tadir_objects TYPE HASHED TABLE OF tadir_object_type WITH UNIQUE KEY obj_name.
+    DATA classes TYPE STANDARD TABLE OF class_interface_type.
+    DATA programs TYPE STANDARD TABLE OF program_type.
+    DATA existing_classes TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
+
+    DATA class_components TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
 
     DATA class_component TYPE class_component_type.
 
@@ -622,8 +621,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     _set_default_language( model ).
 
-    DATA do_return TYPE abap_bool.
-
+    DATA do_return TYPE bool.
 
     _select_objects_in_package_and( EXPORTING model = model
                                     IMPORTING tadir_objects = tadir_objects
@@ -666,7 +664,6 @@ CLASS cl_extract_sap IMPLEMENTATION.
     model->make_mse( IMPORTING mse_model = mse_model ).
 
   ENDMETHOD.
-
 
   METHOD _determine_usages.
 
@@ -715,13 +712,13 @@ CLASS cl_extract_sap IMPLEMENTATION.
                 " SAP_2_FAMIX_22      Do not assign classes that included due to usage to a package
 
                 famix_class->add( EXPORTING name = CONV string( ris_prog_tadir_line-object_name )
-                                  IMPORTING exists_already_with_id = DATA(lv_exists_already_with_id) ).
+                                  IMPORTING exists_already_with_id = DATA(exists_already_with_id) ).
 
               ELSE.
                 " SAP_2_FAMIX_35        Add a usage to a single dummy class "OTHER_SAP_CLASS" if required by a parameter
 
                 famix_class->add( EXPORTING name = 'OTHER_SAP_CLASS'
-                                  IMPORTING exists_already_with_id = lv_exists_already_with_id ).
+                                  IMPORTING exists_already_with_id = exists_already_with_id ).
 
               ENDIF.
 
@@ -729,10 +726,10 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
               IF parameter_usage_outpack_groupd EQ false.
                 using_method_id = famix_method->get_id( class  = CONV string( ris_prog_tadir_line-object_name )
-                                                                method = using_method ).
+                                                        method = using_method ).
               ELSE.
                 using_method_id = famix_method->get_id( class  = 'OTHER_SAP_CLASS'
-                                                             method = 'OTHER_SAP_METHOD' ).
+                                                        method = 'OTHER_SAP_METHOD' ).
               ENDIF.
 
 
@@ -746,8 +743,8 @@ CLASS cl_extract_sap IMPLEMENTATION.
                   famix_method->set_signature( signature = using_method ).
                   famix_method->set_parent_type( EXPORTING parent_element = 'FAMIX.Class'
                                                            parent_name    = CONV string( ris_prog_tadir_line-object_name ) ).
-                  famix_method->store_id( class = CONV string( ris_prog_tadir_line-object_name )
-                                            method = using_method ).
+                  famix_method->store_id( class  = CONV string( ris_prog_tadir_line-object_name )
+                                          method = using_method ).
                 ELSE.
 
                   " SAP_2_FAMIX_36        Add a usage to a single dummy method "OTHER_SAP_METHOD" if required by a parameter
@@ -757,8 +754,8 @@ CLASS cl_extract_sap IMPLEMENTATION.
                   famix_method->set_signature( signature = 'OTHER_SAP_METHOD' ).
                   famix_method->set_parent_type( EXPORTING parent_element = 'FAMIX.Class'
                                                            parent_name    = 'OTHER_SAP_CLASS' ).
-                  famix_method->store_id( class = 'OTHER_SAP_CLASS'
-                                            method = 'OTHER_SAP_METHOD' ).
+                  famix_method->store_id( class  = 'OTHER_SAP_CLASS'
+                                          method = 'OTHER_SAP_METHOD' ).
                 ENDIF.
               ENDIF.
 
@@ -811,15 +808,13 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     " Do not assign any entities to ABAP, because otherwise this will not be the default language anymore
     " So do not do this for ABAP, but maybe for another language
-    " famix_package->set_declared_source_language( EXPORTING i_source_language_element = 'FAMIX.CustomSourceLanguage'
-    "                                                        i_source_language_name    = 'ABAP' ).
+    " famix_package->set_declared_source_language( EXPORTING source_language_element = 'FAMIX.CustomSourceLanguage'
+    "                                                        source_language_name    = 'ABAP' ).
 
   ENDMETHOD.
 
 
   METHOD _determine_packages_to_analyze.
-
-    DATA ty_devclass TYPE devclass_type.
 
     " Determine packages to analyze
 
@@ -911,7 +906,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       program_analyzer->extract( EXPORTING module_reference = module_reference
                                            program          = CONV #( <program>-program )
-                                  CHANGING model           = model ).
+                                  CHANGING model            = model ).
 
     ENDLOOP.
 
@@ -1123,7 +1118,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
     SELECT SINGLE devclass, parentcl FROM tdevc INTO @first_devclass WHERE devclass = @parameter_package_to_analyze.
     IF sy-subrc <> ok.
       WRITE: 'Package does not exist: ', parameter_package_to_analyze.
-      return  = abap_true.
+      return  = true.
     ENDIF.
 
     processed_dev_classes = _determine_packages_to_analyze( model           = model
@@ -1131,8 +1126,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     IF processed_dev_classes IS NOT INITIAL.
       SELECT obj_name, object, devclass FROM tadir INTO TABLE @tadir_objects FOR ALL ENTRIES IN @processed_dev_classes
-        WHERE
-          pgmid = 'R3TR'
+        WHERE pgmid = 'R3TR'
           AND ( object = 'CLAS' OR object = 'INTF' OR object = 'PROG' )
           AND devclass = @processed_dev_classes-devclass.
     ENDIF.
