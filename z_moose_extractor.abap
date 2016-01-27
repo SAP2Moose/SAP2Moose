@@ -20,11 +20,36 @@
 *OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 *SOFTWARE.
 
-"! This is an experimental prototype, that may have errors
-"! The program follows the naming conventions proposed in the ABAP Programming Guidelines from 2016.
+"! This is an experimental prototype, that has errors
+"!
+"! The latest version are available on https://github.com/RainerWinkler/Moose-FAMIX-SAP-Extractor
+"!
+"! The program follows the naming conventions proposed in the ABAP Programming Guidelines from 2009.
+"!
+"! Semantics of variables and parameters have to be very strict
+"! The code shall be able to be read near to as fluent as a well written English text
+"! Use ABAP Doc comments if the technical name is not precise enough
+"! Tables are in most cases specified with plural (classes). But not always, mse_model is a table.
+"!
 "! Prefixes are omitted if the reading is simplified
-"! Short abbreviations are used if only locally used, in that case an ABAP Doc comment explains the variable
+"!
+"! Classes are prefixed with cl_ the instances have no prefixes
+"! Global attributes are normally prefixed with g_
+"! Instances are normally instanciated only once, to simplify coding no singleton pattern is used
+"!
+"! Short abbreviations are used if only locally used, in that case an ABAP Doc comments explains the variable
+"! See the start of the report for this
 REPORT yrw1_moose_extractor.
+
+"! To not compare sy-subrc to zero, but more readable to ok
+CONSTANTS ok TYPE i VALUE 0.
+"! Redefines abap_bool to simplify coding (Not always reading abap_...)
+TYPES bool TYPE abap_bool.
+CONSTANTS:
+  "! Redefines abap_true to simplify coding (Not always reading abap_...)
+  true  TYPE bool VALUE abap_true,
+  "! Redefines abap_false to simplify coding (Not always reading abap_...)
+  false TYPE bool VALUE abap_false.
 
 PARAMETERS: p_sap AS CHECKBOX DEFAULT 'X'.
 "! Extract from SAP
@@ -49,195 +74,242 @@ include z_mse.
 
 include z_famix.
 
-TYPES: BEGIN OF ty_class_component,
+TYPES: BEGIN OF class_component_type,
          clsname TYPE seocompo-clsname,
          cmpname TYPE seocompo-cmpname,
          cmptype TYPE seocompo-cmptype,
-       END OF ty_class_component.
+       END OF class_component_type.
 
-TYPES: BEGIN OF ty_tadir_object,
+TYPES: BEGIN OF tadir_object_type,
           obj_name TYPE sobj_name,
           object   TYPE trobjtype,
           devclass TYPE devclass,
-       END OF ty_tadir_object.
+       END OF tadir_object_type.
 
-TYPES: BEGIN OF ty_classes_interfaces,
+TYPES: BEGIN OF class_interface_type,
         obj_name TYPE seoclsname,
-      END OF ty_classes_interfaces.
+      END OF class_interface_type.
 
-TYPES: BEGIN OF ty_program,
+TYPES: BEGIN OF program_type,
          program TYPE string,
-       END OF ty_program.
+       END OF program_type.
 
-TYPES:BEGIN OF ty_class,
+TYPES:BEGIN OF class_type,
         class TYPE seoclsname,
-      END OF ty_class.
+      END OF class_type.
 
-TYPES: BEGIN OF ty_inheritances,
+TYPES: BEGIN OF inheritance_type,
          clsname    TYPE seometarel-clsname,
          refclsname TYPE seometarel-refclsname,
          reltype    TYPE seometarel-reltype,
-       END OF ty_inheritances.
+       END OF inheritance_type.
 
 CLASS cl_extract_sap DEFINITION.
   PUBLIC SECTION.
     CLASS-METHODS extract
       EXPORTING
-        et_model TYPE cl_model=>ty_lines.
+        mse_model TYPE cl_model=>lines_type.
   PRIVATE SECTION.
 
-    CONSTANTS c_cmptype_attribute TYPE seocmptype VALUE '0'.
-    CONSTANTS c_cmptype_method TYPE seocmptype VALUE '1'.
+    CONSTANTS comptype_attribute TYPE seocmptype VALUE '0'.
+    CONSTANTS comptype_method TYPE seocmptype VALUE '1'.
 
     CLASS-METHODS _determine_usages
       IMPORTING
-        i_famix_class      TYPE REF TO cl_famix_class
-        is_class_component TYPE ty_class_component
-        i_famix_method     TYPE REF TO cl_famix_method
-        i_famix_invocation TYPE REF TO cl_famix_invocation
-        i_famix_access     TYPE REF TO cl_famix_access
-        iv_used_id         TYPE i.
+        famix_class      TYPE REF TO cl_famix_class
+        class_component  TYPE class_component_type
+        famix_method     TYPE REF TO cl_famix_method
+        famix_invocation TYPE REF TO cl_famix_invocation
+        famix_access     TYPE REF TO cl_famix_access
+        used_id          TYPE i.
 
     CLASS-METHODS _set_default_language
       IMPORTING
-        i_model TYPE REF TO cl_model.
+        model TYPE REF TO cl_model.
 
-    TYPES: BEGIN OF ty_devclass,
+    TYPES: BEGIN OF devclass_type,
           devclass TYPE DEVCLASS,
-          END OF ty_devclass.
+          END OF devclass_type.
     TYPES:
-      ty_processed_dev_classes TYPE HASHED TABLE OF ty_devclass WITH UNIQUE KEY devclass.
+      processed_dev_classes_type TYPE HASHED TABLE OF devclass_type WITH UNIQUE KEY devclass.
     CLASS-METHODS _determine_packages_to_analyze
       IMPORTING
-        i_model                        TYPE REF TO cl_model
-        is_devclass_first              TYPE tdevc
+        model                       TYPE REF TO cl_model
+        devclass_first              TYPE tdevc
       RETURNING
-        VALUE(r_processed_dev_classes) TYPE ty_processed_dev_classes.
+        VALUE(processed_dev_classes) TYPE processed_dev_classes_type.
     TYPES:
-      ty_lt_tadir_objects TYPE HASHED TABLE OF ty_tadir_object WITH UNIQUE KEY obj_name,
-      ty_lt_classes_2     TYPE STANDARD TABLE OF ty_classes_interfaces WITH DEFAULT KEY,
-      ty_lt_programs      TYPE STANDARD TABLE OF ty_program WITH DEFAULT KEY.
+      tadir_objects_type TYPE HASHED TABLE OF tadir_object_type WITH UNIQUE KEY obj_name,
+      classes_type     TYPE STANDARD TABLE OF class_interface_type WITH DEFAULT KEY,
+      programs_type      TYPE STANDARD TABLE OF program_type WITH DEFAULT KEY.
     CLASS-METHODS _objects_to_analyze_by_tadir
       IMPORTING
-        it_tadir_objects TYPE ty_lt_tadir_objects
+        tadir_objects TYPE tadir_objects_type
       EXPORTING
-        et_classes_2     TYPE ty_lt_classes_2
-        et_programs      TYPE ty_lt_programs.
+        classes     TYPE classes_type
+        programs      TYPE programs_type.
     TYPES:
-      ty_lt_tadir_objects_1 TYPE HASHED TABLE OF ty_tadir_object WITH UNIQUE KEY obj_name,
-      ty_lt_programs_1      TYPE STANDARD TABLE OF ty_program WITH DEFAULT KEY.
+      tadir_objects_2_type TYPE HASHED TABLE OF tadir_object_type WITH UNIQUE KEY obj_name,
+      programs_1_type      TYPE STANDARD TABLE OF program_type WITH DEFAULT KEY.
     CLASS-METHODS _read_all_programs
       IMPORTING
-        it_tadir_objects TYPE ty_lt_tadir_objects_1
-        it_programs      TYPE ty_lt_programs_1
+        tadir_objects TYPE tadir_objects_2_type
+        programs      TYPE programs_1_type
       CHANGING
-        c_model          TYPE REF TO cl_model.
+        model          TYPE REF TO cl_model.
     TYPES:
-      ty_lt_tadir_objects_2  TYPE HASHED TABLE OF ty_tadir_object WITH UNIQUE KEY obj_name,
-      ty_lt_existing_classes TYPE HASHED TABLE OF ty_class WITH UNIQUE KEY class.
-    CLASS-METHODS _add_to_model
+      tadir_objects_3_type  TYPE HASHED TABLE OF tadir_object_type WITH UNIQUE KEY obj_name,
+      existing_classes_type TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
+    CLASS-METHODS _add_classes_to_model
       IMPORTING
-        i_model              TYPE REF TO cl_model
-        it_tadir_objects     TYPE ty_lt_tadir_objects_2
-        it_existing_classes  TYPE ty_lt_existing_classes
+        famix_class        TYPE REF TO cl_famix_class
+        tadir_objects     TYPE tadir_objects_3_type
+        existing_classes  TYPE existing_classes_type.
+    TYPES:
+      existing_classes_1_type TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
+    CLASS-METHODS _determine_inheritances_betwee
+      IMPORTING
+        famix_inheritance        TYPE REF TO cl_famix_inheritance
+        existing_classes        TYPE existing_classes_1_type.
+    TYPES:
+      existing_classes_2_type TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class,
+      class_components_type   TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
+    CLASS-METHODS _determine_class_components
+      IMPORTING
+        existing_classes        TYPE existing_classes_2_type
       RETURNING
-        VALUE(r_famix_class) TYPE REF TO cl_famix_class.
+        VALUE(class_components) TYPE class_components_type.
+    TYPES:
+      class_components_1_type TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
+    CLASS-METHODS _add_to_class_components_to_mo
+      IMPORTING
+        class_components       TYPE class_components_1_type
+        famix_method           TYPE REF TO cl_famix_method
+        famix_attribute        TYPE REF TO cl_famix_attribute
+      RETURNING
+        VALUE(class_component) TYPE class_component_type.
+    TYPES:
+      class_components_2_type TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
+    CLASS-METHODS _determine_usage_of_methods
+      IMPORTING
+        famix_class       TYPE REF TO cl_famix_class
+        class_components TYPE class_components_2_type
+        famix_method      TYPE REF TO cl_famix_method
+        famix_attribute   TYPE REF TO cl_famix_attribute
+        famix_invocation  TYPE REF TO cl_famix_invocation
+        famix_access      TYPE REF TO cl_famix_access.
+    TYPES:
+      classes_4_type        TYPE STANDARD TABLE OF class_interface_type WITH DEFAULT KEY,
+      existing_classes_3_type TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
+    CLASS-METHODS _read_all_classes
+      IMPORTING
+        classes               TYPE classes_4_type
+      RETURNING
+        VALUE(existing_classes) TYPE existing_classes_3_type.
+    TYPES:
+      tadir_objects_4_type TYPE HASHED TABLE OF tadir_object_type WITH UNIQUE KEY obj_name.
+    CLASS-METHODS _select_objects_in_package_and
+      IMPORTING
+        model          TYPE REF TO cl_model
+      EXPORTING
+        tadir_objects TYPE tadir_objects_4_type
+        return        TYPE bool.
 
 ENDCLASS.
 
-TYPES: BEGIN OF ty_indexed_token,
+TYPES: BEGIN OF indexed_token_type,
          index TYPE i,
          str   TYPE string,
          row   TYPE token_row,
          col   TYPE token_col,
          type  TYPE token_type,
-       END OF ty_indexed_token.
+       END OF indexed_token_type.
 
-TYPES ty_sorted_tokens TYPE SORTED TABLE OF ty_indexed_token WITH UNIQUE KEY index.
+TYPES sorted_tokens_type TYPE SORTED TABLE OF indexed_token_type WITH UNIQUE KEY index.
 
 "! Analyze ABAP Statement of type K (Other ABAP key word)
 CLASS cl_ep_analyze_other_keyword DEFINITION.
   PUBLIC SECTION.
     METHODS constructor
       IMPORTING
-        it_sorted_tokens TYPE ty_sorted_tokens.
+        sorted_tokens TYPE sorted_tokens_type.
     METHODS analyze
       IMPORTING
-        i_statement TYPE sstmnt.
-    TYPES ty_statement_type TYPE c LENGTH 2.
+        statement TYPE sstmnt.
+    TYPES statement_type TYPE c LENGTH 2.
     CONSTANTS:
 
-      start_class_definition      TYPE ty_statement_type VALUE 'CD',
-      start_class_implementation  TYPE ty_statement_type VALUE 'CI',
-      end_class                   TYPE ty_statement_type VALUE 'CE',
-      method_definition           TYPE ty_statement_type VALUE 'MD',
-      start_method_implementation TYPE ty_statement_type VALUE 'MI',
-      end_method_implementation   TYPE ty_statement_type VALUE 'ME',
-      attribute_definition        TYPE ty_statement_type VALUE 'AD',
-      start_public                TYPE ty_statement_type VALUE 'PU',
-      start_protected             TYPE ty_statement_type VALUE 'PO',
-      start_private               TYPE ty_statement_type VALUE 'PR'.
+      start_class_definition      TYPE statement_type VALUE 'CD',
+      start_class_implementation  TYPE statement_type VALUE 'CI',
+      end_class                   TYPE statement_type VALUE 'CE',
+      method_definition           TYPE statement_type VALUE 'MD',
+      start_method_implementation TYPE statement_type VALUE 'MI',
+      end_method_implementation   TYPE statement_type VALUE 'ME',
+      attribute_definition        TYPE statement_type VALUE 'AD',
+      start_public                TYPE statement_type VALUE 'PU',
+      start_protected             TYPE statement_type VALUE 'PO',
+      start_private               TYPE statement_type VALUE 'PR'.
 
 
-    TYPES: BEGIN OF ty_info,
-             statement_type      TYPE ty_statement_type,
+    TYPES: BEGIN OF info_type,
+             statement_type      TYPE statement_type,
              is_class_stmnt_info TYPE bool,
              class_is_inheriting TYPE bool,
              class_inherits_from TYPE string,
              is_static           TYPE bool,
              name                TYPE string,
-           END OF ty_info.
-    DATA: info TYPE ty_info READ-ONLY.
+           END OF info_type.
+    DATA: g_info TYPE info_type READ-ONLY.
   PRIVATE SECTION.
-    DATA sorted_tokens TYPE ty_sorted_tokens.
+    DATA g_sorted_tokens TYPE sorted_tokens_type.
 ENDCLASS.
 
 CLASS cl_ep_analyze_other_keyword IMPLEMENTATION.
 
   METHOD constructor.
-    sorted_tokens = it_sorted_tokens.
+    g_sorted_tokens = sorted_tokens.
   ENDMETHOD.
 
   METHOD analyze.
-    ASSERT i_statement-type EQ 'K'.
-    info = VALUE #( ).
+    ASSERT statement-type EQ 'K'.
+    g_info = VALUE #( ).
 
     " First Run, what is the keyword
-    READ TABLE sorted_tokens ASSIGNING FIELD-SYMBOL(<ls_token>) WITH TABLE KEY index = i_statement-from.
+    READ TABLE g_sorted_tokens ASSIGNING FIELD-SYMBOL(<token>) WITH TABLE KEY index = statement-from.
     IF sy-subrc <> ok.
       " TBD Error handling
       " In the moment ignore
       RETURN.
     ENDIF.
 
-    CASE <ls_token>-str.
+    CASE <token>-str.
       WHEN 'CLASS'.
-        info-is_class_stmnt_info = true.
+        g_info-is_class_stmnt_info = true.
 
       WHEN 'ENDCLASS'.
-        info-statement_type = end_class.
+        g_info-statement_type = end_class.
       WHEN 'PUBLIC'.
-        info-statement_type = start_public.
+        g_info-statement_type = start_public.
       WHEN 'PROTECTED'.
-        info-statement_type = start_protected.
+        g_info-statement_type = start_protected.
       WHEN 'PRIVATE'.
-        info-statement_type = start_private.
+        g_info-statement_type = start_private.
       WHEN 'METHODS'.
         " info-is_method_stmnt = true.
-        info-statement_type = method_definition.
+        g_info-statement_type = method_definition.
       WHEN 'CLASS-METHODS'.
-        info-statement_type = method_definition.
-        info-is_static = true.
+        g_info-statement_type = method_definition.
+        g_info-is_static = true.
       WHEN 'METHOD'.
-        info-statement_type = start_method_implementation.
+        g_info-statement_type = start_method_implementation.
       WHEN 'ENDMETHOD'.
-        info-statement_type = end_method_implementation.
+        g_info-statement_type = end_method_implementation.
 
       WHEN 'DATA'.
-        info-statement_type = attribute_definition.
+        g_info-statement_type = attribute_definition.
       WHEN 'CLASS-DATA'.
-        info-statement_type = attribute_definition.
-        info-is_static = true.
+        g_info-statement_type = attribute_definition.
+        g_info-is_static = true.
       WHEN OTHERS.
         " TBD
         " Add further, in the moment ignore
@@ -245,36 +317,36 @@ CLASS cl_ep_analyze_other_keyword IMPLEMENTATION.
     ENDCASE.
 
     " Second Run, what is the name
-    IF info-is_class_stmnt_info EQ true
-    OR info-statement_type EQ method_definition
-    OR info-statement_type EQ start_method_implementation
-    OR info-statement_type EQ attribute_definition.
+    IF g_info-is_class_stmnt_info EQ true
+    OR g_info-statement_type EQ method_definition
+    OR g_info-statement_type EQ start_method_implementation
+    OR g_info-statement_type EQ attribute_definition.
 
-      DATA(lv_position_of_name) = i_statement-from + 1.
-      READ TABLE sorted_tokens ASSIGNING <ls_token> WITH TABLE KEY index = lv_position_of_name.
+      DATA(position_of_name) = statement-from + 1.
+      READ TABLE g_sorted_tokens ASSIGNING <token> WITH TABLE KEY index = position_of_name.
       IF sy-subrc <> ok.
         " TBD Error handling
         " In the moment ignore
         RETURN.
       ENDIF.
 
-      info-name = <ls_token>-str.
+      g_info-name = <token>-str.
 
       " Third run, further keywords
-      IF info-is_class_stmnt_info EQ true.
-        LOOP AT sorted_tokens ASSIGNING <ls_token> WHERE index > lv_position_of_name
-                                                                      AND index <= i_statement-to.
-          CASE <ls_token>-str.
+      IF g_info-is_class_stmnt_info EQ true.
+        LOOP AT g_sorted_tokens ASSIGNING <token> WHERE index > position_of_name
+                                                       AND index <= statement-to.
+          CASE <token>-str.
             WHEN 'DEFINITION'.
-              info-statement_type = start_class_definition.
+              g_info-statement_type = start_class_definition.
             WHEN 'IMPLEMENTATION'.
-              info-statement_type = start_class_implementation.
+              g_info-statement_type = start_class_implementation.
             WHEN 'INHERITING'.
-              info-class_is_inheriting = true.
+              g_info-class_is_inheriting = true.
               DATA(superclass_is_at) = sy-tabix + 2.
-              READ TABLE sorted_tokens ASSIGNING FIELD-SYMBOL(<ls_superclass_token>) WITH TABLE KEY index = superclass_is_at.
+              READ TABLE g_sorted_tokens ASSIGNING FIELD-SYMBOL(<ls_superclass_token>) WITH TABLE KEY index = superclass_is_at.
               IF sy-subrc EQ ok.
-                info-class_inherits_from = <ls_superclass_token>-str.
+                g_info-class_inherits_from = <ls_superclass_token>-str.
               ELSE.
                 " TBD Error handling
                 " In the moment ignore
@@ -291,60 +363,48 @@ CLASS cl_ep_analyze_other_keyword IMPLEMENTATION.
 ENDCLASS.
 
 
-CLASS cl_extract_program DEFINITION.
+CLASS cl_program_analyzer DEFINITION.
   PUBLIC SECTION.
     METHODS extract
       IMPORTING
-        i_module_reference TYPE i
-        i_program          TYPE progname
+        module_reference TYPE i
+        program          TYPE progname
       CHANGING
-        cr_model           TYPE REF TO cl_model.
+        model           TYPE REF TO cl_model.
 
 ENDCLASS.
 
-CLASS cl_extract_program IMPLEMENTATION.
+CLASS cl_program_analyzer IMPLEMENTATION.
 
   METHOD extract.
     DATA source TYPE TABLE OF string.
-    READ REPORT i_program INTO source.
+    READ REPORT program INTO source.
 
-    DATA: lt_tokens TYPE STANDARD TABLE OF stokes.
+    DATA: tokens TYPE STANDARD TABLE OF stokes.
 
+    DATA: sorted_tokens TYPE sorted_tokens_type.
 
+    DATA statements TYPE STANDARD TABLE OF sstmnt.
 
-    DATA: lt_sorted_tokens TYPE ty_sorted_tokens.
+    SCAN ABAP-SOURCE source TOKENS INTO tokens STATEMENTS INTO statements.
 
-    DATA lt_statements TYPE STANDARD TABLE OF sstmnt.
-
-    SCAN ABAP-SOURCE source TOKENS INTO lt_tokens STATEMENTS INTO lt_statements.
-
-    LOOP AT lt_tokens ASSIGNING FIELD-SYMBOL(<ls_token_2>).
-      lt_sorted_tokens = VALUE #( BASE lt_sorted_tokens ( index = sy-tabix
-                                                          str = <ls_token_2>-str
-                                                          row = <ls_token_2>-row
-                                                          col = <ls_token_2>-col
-                                                          type = <ls_token_2>-type ) ).
+    LOOP AT tokens ASSIGNING FIELD-SYMBOL(<ls_token_2>).
+      sorted_tokens = VALUE #( BASE sorted_tokens ( index = sy-tabix
+                                                    str   = <ls_token_2>-str
+                                                    row   = <ls_token_2>-row
+                                                    col   = <ls_token_2>-col
+                                                    type  = <ls_token_2>-type ) ).
     ENDLOOP.
 
-
-    SORT lt_statements BY from.
-
+    SORT statements BY from.
 
     IF parameter_list_tokens EQ true.
       WRITE: /.
-      WRITE: / i_program.
-
-
-*      LOOP AT lt_statements ASSIGNING FIELD-SYMBOL(<ls_statement_2>).
-*        WRITE: / <ls_statement_2>-type.
-*        LOOP AT lt_sorted_tokens ASSIGNING FIELD-SYMBOL(<ls_token_3>) WHERE
-*            index >= <ls_statement_2>-from
-*        AND index <= <ls_statement_2>-to.
-*          WRITE: '|', <ls_token_3>-type, <ls_token_3>-str.
-*        ENDLOOP.
-*      ENDLOOP.
+      WRITE: / program.
 
     ENDIF.
+
+    " TBD Continue here <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     TYPES: ty_statement_type TYPE c LENGTH 1.
     TYPES ty_section_type TYPE c LENGTH 1.
@@ -373,8 +433,8 @@ CLASS cl_extract_program IMPLEMENTATION.
              id_in_model TYPE i,
            END OF ty_class.
 
-    DATA: lt_classes      TYPE HASHED TABLE OF ty_class WITH UNIQUE KEY classname,
-          ls_actual_class TYPE ty_class.
+    DATA: classes      TYPE HASHED TABLE OF ty_class WITH UNIQUE KEY classname,
+          actual_class TYPE ty_class.
 
     TYPES: BEGIN OF ty_method,
              classname          TYPE string,
@@ -385,41 +445,39 @@ CLASS cl_extract_program IMPLEMENTATION.
              instanciable       TYPE bool,
            END OF ty_method.
 
-    DATA: lt_methods       TYPE STANDARD TABLE OF ty_method,
-          ls_actual_method TYPE ty_method.
+    DATA: methods       TYPE STANDARD TABLE OF ty_method,
+          actual_method TYPE ty_method.
 
     TYPES: BEGIN OF ty_inheritance,
              subclass   TYPE string,
              superclass TYPE string,
            END OF ty_inheritance.
 
-    DATA: lt_inheritances TYPE STANDARD TABLE OF ty_inheritance.
+    DATA: inheritances TYPE STANDARD TABLE OF ty_inheritance.
 
-    DATA lv_token_number TYPE i.
+    DATA token_number TYPE i.
 
     "! Instance that analyzes other ABAP Keywords
     DATA aok TYPE REF TO cl_ep_analyze_other_keyword.
-    aok = NEW cl_ep_analyze_other_keyword( it_sorted_tokens = lt_sorted_tokens ).
+    aok = NEW cl_ep_analyze_other_keyword( sorted_tokens = sorted_tokens ).
 
-    LOOP AT lt_statements ASSIGNING FIELD-SYMBOL(<ls_statement>).
+    LOOP AT statements ASSIGNING FIELD-SYMBOL(<ls_statement>).
 
-
-
-      lv_token_number = 0.
+      token_number = 0.
       CASE <ls_statement>-type.
         WHEN 'K'.
 
-          aok->analyze( i_statement = <ls_statement> ).
-          CASE aok->info-statement_type.
+          aok->analyze( statement = <ls_statement> ).
+          CASE aok->g_info-statement_type.
             WHEN aok->start_class_definition.
               " SAP_2_FAMIX_28        Determine local classes in programs
               context-in_class_definition = true.
-              ls_actual_class-classname = aok->info-name.
-              lt_classes = VALUE #( BASE lt_classes ( ls_actual_class ) ).
-              IF aok->info-class_is_inheriting EQ true.
+              actual_class-classname = aok->g_info-name.
+              classes = VALUE #( BASE classes ( actual_class ) ).
+              IF aok->g_info-class_is_inheriting EQ true.
                 " SAP_2_FAMIX_37        Determine local inheritances of classes
-                lt_inheritances = VALUE #( BASE lt_inheritances ( subclass = ls_actual_class-classname
-                                                                  superclass = aok->info-class_inherits_from ) ).
+                inheritances = VALUE #( BASE inheritances ( subclass = actual_class-classname
+                                                                  superclass = aok->g_info-class_inherits_from ) ).
               ENDIF.
             WHEN aok->start_public.
               context-in_section = public.
@@ -433,19 +491,19 @@ CLASS cl_extract_program IMPLEMENTATION.
               context-implementation_of_class = VALUE #( ).
             WHEN aok->method_definition.
               " SAP_2_FAMIX_29      Determine local class methods in programs
-              IF aok->info-is_static EQ true.
-                ls_actual_method = VALUE #( classname = ls_actual_class-classname
+              IF aok->g_info-is_static EQ true.
+                actual_method = VALUE #( classname = actual_class-classname
                                             in_section = context-in_section ).
               ELSE.
-                ls_actual_method = VALUE #( classname = ls_actual_class-classname
+                actual_method = VALUE #( classname = actual_class-classname
                                             in_section = context-in_section
                                             instanciable = true ).
               ENDIF.
-              ls_actual_method-methodname = aok->info-name.
+              actual_method-methodname = aok->g_info-name.
             WHEN aok->start_class_implementation.
-              context-implementation_of_class = aok->info-name.
+              context-implementation_of_class = aok->g_info-name.
             WHEN aok->start_method_implementation.
-              context-implementation_of_method = aok->info-name.
+              context-implementation_of_method = aok->g_info-name.
               IF parameter_list_tokens EQ abap_true.
                 FORMAT COLOR COL_GROUP.
               ENDIF.
@@ -464,68 +522,67 @@ CLASS cl_extract_program IMPLEMENTATION.
 
       IF parameter_list_tokens EQ abap_true.
         WRITE: / <ls_statement>-type.
-        LOOP AT lt_sorted_tokens ASSIGNING FIELD-SYMBOL(<ls_token_3>) WHERE
+        LOOP AT sorted_tokens ASSIGNING FIELD-SYMBOL(<token>) WHERE
             index >= <ls_statement>-from
         AND index <= <ls_statement>-to.
-          WRITE: '|', <ls_token_3>-type, <ls_token_3>-str.
+          WRITE: '|', <token>-type, <token>-str.
         ENDLOOP.
       ENDIF.
 
     ENDLOOP.
 
-
     " Add local classes to model
 
-    DATA(famix_class) = NEW cl_famix_class( cr_model ).
+    DATA(famix_class) = NEW cl_famix_class( model ).
 
-    LOOP AT lt_classes ASSIGNING FIELD-SYMBOL(<ls_class>).
+    LOOP AT classes ASSIGNING FIELD-SYMBOL(<class>).
       " SAP_2_FAMIX_30        Map local classes of programs to FAMIX.Class
 
-      <ls_class>-id_in_model = famix_class->add( EXPORTING i_name_group = CONV string( i_program )
-                                                           i_name                   = <ls_class>-classname ).
+      <class>-id_in_model = famix_class->add( EXPORTING name_group = CONV string( program )
+                                                        name                   = <class>-classname ).
 
       " SAP_2_FAMIX_31     Assign local classes to a container of type FAMIX.Module with the name of the program
 
-      famix_class->set_container( EXPORTING i_container_element = 'FAMIX.Module'
-                                            i_parent_container  = CONV string( i_program ) ).
+      famix_class->set_container( EXPORTING container_element = 'FAMIX.Module'
+                                            parent_container  = CONV string( program ) ).
 
 
     ENDLOOP.
 
     " Add local methods to model
 
-    DATA(famix_method) = NEW cl_famix_method( cr_model ).
+    DATA(famix_method) = NEW cl_famix_method( model ).
 
-    LOOP AT lt_methods ASSIGNING FIELD-SYMBOL(<ls_method>).
-      READ TABLE lt_classes ASSIGNING FIELD-SYMBOL(<ls_classes_2>) WITH TABLE KEY classname = <ls_method>-classname.
-      <ls_method>-class_id_in_model = <ls_classes_2>-id_in_model.
+    LOOP AT methods ASSIGNING FIELD-SYMBOL(<method>).
+      READ TABLE classes ASSIGNING FIELD-SYMBOL(<class_2>) WITH TABLE KEY classname = <method>-classname.
+      <method>-class_id_in_model = <class_2>-id_in_model.
 
       " SAP_2_FAMIX_32      Map local methods to the FAMIX.Method
 
-      <ls_method>-method_id_in_model = famix_method->add( EXPORTING i_name_group = <ls_classes_2>-classname
-                                                                    i_name       = <ls_method>-methodname ).
+      <method>-method_id_in_model = famix_method->add( EXPORTING name_group = <class_2>-classname
+                                                                 name       = <method>-methodname ).
       " SAP_2_FAMIX_43        Fill the attribut signature of FAMIX.METHOD with the name of the method
-      famix_method->set_signature( i_signature = <ls_method>-methodname ).
+      famix_method->set_signature( signature = <method>-methodname ).
 
       " SAP_2_FAMIX_33      Set the attribute parentType of FAMIX.Method for local methods to the name of the local class
 
 
-      famix_method->set_parent_type( EXPORTING i_parent_element = 'FAMIX.Class'
-                                               i_parent_id      =  <ls_classes_2>-id_in_model ).
+      famix_method->set_parent_type( EXPORTING parent_element = 'FAMIX.Class'
+                                               parent_id      =  <class_2>-id_in_model ).
     ENDLOOP.
 
     " Add local inheritances to model
 
-    DATA(famix_inheritance) = NEW cl_famix_inheritance( cr_model ).
-    LOOP AT lt_inheritances INTO DATA(ls_inheritance).
+    DATA(famix_inheritance) = NEW cl_famix_inheritance( model ).
+    LOOP AT inheritances INTO DATA(inheritance).
       " SAP_2_FAMIX_38        Map local inheritances of classes to FAMIX.Inheritance
       famix_inheritance->add( ).
-      famix_inheritance->set_sub_and_super_class( EXPORTING i_subclass_element      = 'FAMIX.Class'
-                                                            i_subclass_name_group   = CONV #( i_program )
-                                                            i_subclass_name         = ls_inheritance-subclass
-                                                            i_superclass_element    = 'FAMIX.Class'
-                                                            i_superclass_name_group = CONV #( i_program )
-                                                            i_superclass_name       = ls_inheritance-superclass ).
+      famix_inheritance->set_sub_and_super_class( EXPORTING subclass_element      = 'FAMIX.Class'
+                                                            subclass_name_group   = CONV #( program )
+                                                            subclass_name         = inheritance-subclass
+                                                            superclass_element    = 'FAMIX.Class'
+                                                            superclass_name_group = CONV #( program )
+                                                            superclass_name       = inheritance-superclass ).
 
     ENDLOOP.
 
@@ -541,255 +598,115 @@ CLASS cl_extract_sap IMPLEMENTATION.
             devclass TYPE devclass,
           END OF ty_devclass.
 
+
+    DATA first_devclass type tdevc.
+    DATA processed_dev_classes TYPE processed_dev_classes_type.
+    DATA: tadir_objects TYPE HASHED TABLE OF tadir_object_type WITH UNIQUE KEY obj_name.
+    DATA: classes TYPE STANDARD TABLE OF class_interface_type.
+    DATA: programs TYPE STANDARD TABLE OF program_type.
+    DATA: existing_classes TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
+
+    DATA: class_components TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
+
+    DATA class_component TYPE class_component_type.
+
+    " Do not use singleton pattern, but define each instance only one time at the start
+
     DATA(model) = NEW cl_model( ).
-
-    _set_default_language( model ).
-
-    " SAP_2_FAMIX_3     Select all Objects in a package and the sub packages of this package
-
-    DATA ls_devclass_first type tdevc.
-
-    SELECT SINGLE devclass, parentcl FROM tdevc INTO @ls_devclass_first WHERE devclass = @parameter_package_to_analyze.
-    IF sy-subrc <> ok.
-      WRITE: 'Package does not exist: ', parameter_package_to_analyze.
-      RETURN.
-    ENDIF.
-
-    DATA processed_dev_classes TYPE ty_processed_dev_classes.
-
-    processed_dev_classes = _determine_packages_to_analyze( i_model           = model
-                                                            is_devclass_first = ls_devclass_first ).
-
-    DATA: lt_tadir_objects TYPE HASHED TABLE OF ty_tadir_object WITH UNIQUE KEY obj_name.
-    DATA: lt_classes_2 TYPE STANDARD TABLE OF ty_classes_interfaces.
-    DATA: lt_programs TYPE STANDARD TABLE OF ty_program.
-
-    IF processed_dev_classes IS NOT INITIAL.
-      SELECT obj_name, object, devclass FROM tadir INTO TABLE @lt_tadir_objects FOR ALL ENTRIES IN @processed_dev_classes
-        WHERE
-          pgmid = 'R3TR'
-          AND ( object = 'CLAS' OR object = 'INTF' OR object = 'PROG' )
-          AND devclass = @processed_dev_classes-devclass.
-    ENDIF.
-
-   _objects_to_analyze_by_tadir( EXPORTING it_tadir_objects = lt_tadir_objects
-                                 IMPORTING et_classes_2 = lt_classes_2
-                                           et_programs  = lt_programs ).
-
-   _read_all_programs( EXPORTING it_tadir_objects = lt_tadir_objects
-                                 it_programs      = lt_programs
-                        CHANGING c_model = model ).
-
-    " Read all classes
-
-    DATA: lt_existing_classes TYPE HASHED TABLE OF ty_class WITH UNIQUE KEY class.
-
-    " Read from SEOCLASS
-    IF lt_classes_2 IS NOT INITIAL.
-      SELECT clsname AS class FROM seoclass INTO TABLE @lt_existing_classes FOR ALL ENTRIES IN @lt_classes_2
-        WHERE
-          clsname = @lt_classes_2-obj_name.
-    ENDIF.
-
-    DATA famix_class TYPE REF TO cl_famix_class.
-
-
-    famix_class = _add_to_model( i_model             = model
-                                 it_tadir_objects    = lt_tadir_objects
-                                 it_existing_classes = lt_existing_classes ).
-
-    " Determine inheritances between selected classes
-
+    DATA(famix_class) = NEW cl_famix_class( model ).
     DATA(famix_inheritance) = NEW cl_famix_inheritance( model ).
-
-    DATA: lt_inheritances TYPE STANDARD TABLE OF  ty_inheritances.
-
-    IF lt_existing_classes IS NOT INITIAL.
-      SELECT clsname, refclsname, reltype FROM seometarel INTO CORRESPONDING FIELDS OF TABLE @lt_inheritances
-        FOR ALL ENTRIES IN @lt_existing_classes WHERE clsname = @lt_existing_classes-class
-                                                 AND version = 1.
-    ENDIF.
-
-    " Delete all inheritances where superclass is not in selected packages
-    LOOP AT lt_inheritances INTO DATA(ls_inheritance_2).
-      READ TABLE lt_existing_classes TRANSPORTING NO FIELDS WITH TABLE KEY class = ls_inheritance_2-refclsname.
-      IF sy-subrc <> ok.
-        DELETE lt_inheritances.
-      ENDIF.
-    ENDLOOP.
-
-    " Add inheritances to model
-    LOOP AT lt_inheritances INTO DATA(ls_inheritance).
-      CASE ls_inheritance-reltype.
-        WHEN 2.
-          " Inheritance
-          " SAP_2_FAMIX_39     Map all inheritances between classes in selected packages to FAMIX.Inheritance
-          famix_inheritance->add( ).
-          famix_inheritance->set_sub_and_super_class( EXPORTING i_subclass_element      = 'FAMIX.Class'
-                                                                i_subclass_name_group   = ''
-                                                                i_subclass_name         = CONV #( ls_inheritance-clsname )
-                                                                i_superclass_element    = 'FAMIX.Class'
-                                                                i_superclass_name_group = ''
-                                                                i_superclass_name       = CONV #( ls_inheritance-refclsname ) ).
-        WHEN 1.
-          " Interface implementation
-          " SAP_2_FAMIX_40        Map all interface implementations of interfaces in selected packages by classes of selected packages by FAMIX.Inheritance
-
-          famix_inheritance->add( ).
-          famix_inheritance->set_sub_and_super_class( EXPORTING i_subclass_element      = 'FAMIX.Class'
-                                                                i_subclass_name_group   = ''
-                                                                i_subclass_name         = CONV #( ls_inheritance-clsname )
-                                                                i_superclass_element    = 'FAMIX.Class'
-                                                                i_superclass_name_group = ''
-                                                                i_superclass_name       = CONV #( ls_inheritance-refclsname ) ).
-
-        WHEN 0.
-          " Interface composition     (i COMPRISING i_ref)
-          " TBD
-        WHEN 5.
-          " Enhancement            ( c enhances c_ref)
-          " TBD
-      ENDCASE.
-    ENDLOOP.
-
-    " Determine all methods
-
-    DATA: ls_class_component  TYPE ty_class_component,
-          lt_class_components TYPE HASHED TABLE OF ty_class_component WITH UNIQUE KEY clsname cmpname.
-
-    " SAP_2_FAMIX_9     Extract methods of classes
-    " SAP_2_FAMIX_10        Extract methods of interfaces
-    " SAP_2_FAMIX_11        Extract attributes of classes
-    " SAP_2_FAMIX_12        Extract attributes of interfaces
-
-    IF lt_existing_classes IS NOT INITIAL.
-      "
-      SELECT clsname, cmpname, cmptype FROM seocompo INTO TABLE @lt_class_components
-        FOR ALL ENTRIES IN @lt_existing_classes
-        WHERE
-          clsname = @lt_existing_classes-class.
-
-    ENDIF.
-
-    " Add to model
-
     DATA(famix_method) = NEW cl_famix_method( model ).
     DATA(famix_attribute) = NEW cl_famix_attribute( model ).
-
-    LOOP AT lt_class_components INTO ls_class_component.
-
-      CASE ls_class_component-cmptype.
-        WHEN c_cmptype_attribute. "Attribute
-
-          " SAP_2_FAMIX_13        Mapp attributes of classes to FAMIX.Attribute
-          " SAP_2_FAMIX_14        Mapp attributes of interfaces to FAMIX.Attribute
-
-          famix_attribute->add( i_name = CONV string( ls_class_component-cmpname ) ).
-          famix_attribute->set_parent_type(
-            EXPORTING
-              i_parent_element = 'FAMIX.Class'
-              i_parent_name    = CONV string( ls_class_component-clsname ) ).
-          famix_attribute->store_id( EXPORTING i_class     = CONV string( ls_class_component-clsname )
-                                               i_attribute = CONV string( ls_class_component-cmpname ) ).
-
-        WHEN c_cmptype_method. "Method
-
-          " SAP_2_FAMIX_15        Map methods of classes to FAMIX.Method
-          " SAP_2_FAMIX_16        Map methods of interfaces to FAMIX.Method
-
-          famix_method->add( i_name = CONV string( ls_class_component-cmpname ) ).
-          " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
-          " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
-          famix_method->set_signature( i_signature = CONV string( ls_class_component-cmpname ) ).
-          famix_method->set_parent_type(
-            EXPORTING
-              i_parent_element = 'FAMIX.Class'
-              i_parent_name    = CONV string( ls_class_component-clsname ) ).
-          famix_method->store_id( EXPORTING i_class  = CONV string( ls_class_component-clsname )
-                                            i_method = CONV string( ls_class_component-cmpname ) ).
-        WHEN 2. "Event
-        WHEN 3. "Type
-        WHEN OTHERS.
-          " TBD Warn
-
-      ENDCASE.
-
-    ENDLOOP.
-
-    " Determine usage of methods
-
     DATA(famix_invocation) = NEW cl_famix_invocation( model ).
     DATA(famix_access) = NEW cl_famix_access( model ).
 
-    LOOP AT lt_class_components INTO ls_class_component WHERE cmptype = c_cmptype_attribute  " Methods
-                                                           OR cmptype = c_cmptype_method. "Attributes
+    _set_default_language( model ).
 
-      CASE ls_class_component-cmptype.
-        WHEN c_cmptype_method.
-          DATA(lv_used_id) = famix_method->get_id( i_class  = CONV string( ls_class_component-clsname )
-                                                   i_method = CONV string( ls_class_component-cmpname ) ).
+    DATA do_return TYPE abap_bool.
 
-        WHEN c_cmptype_attribute.
-          lv_used_id = famix_attribute->get_id( i_class     = CONV string( ls_class_component-clsname )
-                                                i_attribute = CONV string( ls_class_component-cmpname ) ).
 
-        WHEN OTHERS.
-          ASSERT 1 = 2.
-      ENDCASE.
+    _select_objects_in_package_and( EXPORTING model = model
+                                    IMPORTING tadir_objects = tadir_objects
+                                              return        = do_return ).
 
-      _determine_usages( i_famix_class      = famix_class
-                         is_class_component = ls_class_component
-                         i_famix_method     = famix_method
-                         i_famix_invocation = famix_invocation
-                         i_famix_access     = famix_access
-                         iv_used_id         = lv_used_id ).
+    IF do_return EQ true.
+      RETURN.
+    ENDIF.
 
-    ENDLOOP.
+   _objects_to_analyze_by_tadir( EXPORTING tadir_objects = tadir_objects
+                                 IMPORTING classes = classes
+                                           programs  = programs ).
 
-    model->make_mse( IMPORTING et_mse = et_model ).
+   _read_all_programs( EXPORTING tadir_objects = tadir_objects
+                                 programs      = programs
+                        CHANGING model = model ).
+
+    existing_classes = _read_all_classes( classes ).
+
+    _add_classes_to_model( famix_class       = famix_class
+                           tadir_objects    = tadir_objects
+                           existing_classes = existing_classes ).
+
+    _determine_inheritances_betwee( famix_inheritance             = famix_inheritance
+                                    existing_classes = existing_classes ).
+
+    class_components = _determine_class_components( existing_classes ).
+
+    class_component = _add_to_class_components_to_mo( class_components = class_components
+                                                         famix_method      = famix_method
+                                                         famix_attribute   = famix_attribute ).
+
+    _determine_usage_of_methods( famix_class       = famix_class
+                                 class_components = class_components
+                                 famix_method      = famix_method
+                                 famix_attribute   = famix_attribute
+                                 famix_invocation  = famix_invocation
+                                 famix_access      = famix_access ).
+
+    model->make_mse( IMPORTING mse_model = mse_model ).
 
   ENDMETHOD.
 
 
   METHOD _determine_usages.
 
-    DATA lv_where_used_name TYPE eu_lname.
-    CASE is_class_component-cmptype.
-      WHEN c_cmptype_method.
+    DATA where_used_name TYPE eu_lname.
+    CASE class_component-cmptype.
+      WHEN comptype_method.
 
         " SAP_2_FAMIX_17      Determine usage of class methods by programs and classes
         " SAP_2_FAMIX_18      Determine usage of interface methods by programs and classes
 
-        lv_where_used_name = is_class_component-clsname && |\\ME:| && is_class_component-cmpname.
-        SELECT * FROM wbcrossgt INTO TABLE @DATA(lt_where_used) WHERE otype = 'ME' AND name = @lv_where_used_name.
-      WHEN c_cmptype_attribute.
+        where_used_name = class_component-clsname && |\\ME:| && class_component-cmpname.
+        SELECT * FROM wbcrossgt INTO TABLE @DATA(where_used_objects) WHERE otype = 'ME' AND name = @where_used_name.
+      WHEN comptype_attribute.
 
         " SAP_2_FAMIX_19      Determine usage of class attributes by programs and classes
         " SAP_2_FAMIX_20      Determine usage of interface attributes by programs and classes
 
-        lv_where_used_name = is_class_component-clsname && |\\DA:| && is_class_component-cmpname.
-        SELECT * FROM wbcrossgt INTO TABLE @lt_where_used WHERE otype = 'DA' AND name = @lv_where_used_name.
+        where_used_name = class_component-clsname && |\\DA:| && class_component-cmpname.
+        SELECT * FROM wbcrossgt INTO TABLE @where_used_objects WHERE otype = 'DA' AND name = @where_used_name.
       WHEN OTHERS.
         ASSERT 1 = 2.
     ENDCASE.
 
-    LOOP AT lt_where_used ASSIGNING FIELD-SYMBOL(<ls_where_used>).
-      SELECT SINGLE * FROM ris_prog_tadir INTO @DATA(ls_prog_tadir) WHERE program_name = @<ls_where_used>-include.
+    LOOP AT where_used_objects ASSIGNING FIELD-SYMBOL(<where_used_object>).
+      SELECT SINGLE * FROM ris_prog_tadir INTO @DATA(ris_prog_tadir_line) WHERE program_name = @<where_used_object>-include.
       IF sy-subrc EQ ok.
-        CASE ls_prog_tadir-object_type.
+        CASE ris_prog_tadir_line-object_type.
           WHEN 'CLAS'.
             " Used by method
-            DATA: lv_using_method TYPE string.
-            IF ls_prog_tadir-method_name IS INITIAL.
-              lv_using_method = 'DUMMY'.
+            DATA: using_method TYPE string.
+            IF ris_prog_tadir_line-method_name IS INITIAL.
+              using_method = 'DUMMY'.
             ELSE.
-              lv_using_method = CONV string( ls_prog_tadir-method_name ).
+              using_method = CONV string( ris_prog_tadir_line-method_name ).
             ENDIF.
 
 
-            DATA(lv_using_method_id) = i_famix_method->get_id( i_class  = CONV string( ls_prog_tadir-object_name )
-                                                               i_method = lv_using_method ).
-            IF lv_using_method_id EQ 0.
+            DATA(using_method_id) = famix_method->get_id( class  = CONV string( ris_prog_tadir_line-object_name )
+                                                             method = using_method ).
+            IF using_method_id EQ 0.
 
               IF parameter_usage_outpack_groupd EQ false.
 
@@ -797,77 +714,77 @@ CLASS cl_extract_sap IMPLEMENTATION.
                 " SAP_2_FAMIX_21      If an object is used by a class that is not selected, add this class to the model
                 " SAP_2_FAMIX_22      Do not assign classes that included due to usage to a package
 
-                i_famix_class->add( EXPORTING i_name = CONV string( ls_prog_tadir-object_name )
-                                  IMPORTING e_exists_already_with_id = DATA(lv_exists_already_with_id) ).
+                famix_class->add( EXPORTING name = CONV string( ris_prog_tadir_line-object_name )
+                                  IMPORTING exists_already_with_id = DATA(lv_exists_already_with_id) ).
 
               ELSE.
                 " SAP_2_FAMIX_35        Add a usage to a single dummy class "OTHER_SAP_CLASS" if required by a parameter
 
-                i_famix_class->add( EXPORTING i_name = 'OTHER_SAP_CLASS'
-                                  IMPORTING e_exists_already_with_id = lv_exists_already_with_id ).
+                famix_class->add( EXPORTING name = 'OTHER_SAP_CLASS'
+                                  IMPORTING exists_already_with_id = lv_exists_already_with_id ).
 
               ENDIF.
 
               " Now there is a class, but no duplicate class
 
               IF parameter_usage_outpack_groupd EQ false.
-                lv_using_method_id = i_famix_method->get_id( i_class  = CONV string( ls_prog_tadir-object_name )
-                                                                i_method = lv_using_method ).
+                using_method_id = famix_method->get_id( class  = CONV string( ris_prog_tadir_line-object_name )
+                                                                method = using_method ).
               ELSE.
-                lv_using_method_id = i_famix_method->get_id( i_class  = 'OTHER_SAP_CLASS'
-                                                             i_method = 'OTHER_SAP_METHOD' ).
+                using_method_id = famix_method->get_id( class  = 'OTHER_SAP_CLASS'
+                                                             method = 'OTHER_SAP_METHOD' ).
               ENDIF.
 
 
-              IF lv_using_method_id EQ 0.
+              IF using_method_id EQ 0.
                 IF parameter_usage_outpack_groupd EQ false.
                   " Now also the method is to be created
                   " SAP_2_FAMIX_23        If an object is used by a class that is not selected, add the using methods to the model
 
-                  lv_using_method_id = i_famix_method->add( EXPORTING i_name = lv_using_method ).
+                  using_method_id = famix_method->add( EXPORTING name = using_method ).
                   " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
-                  i_famix_method->set_signature( i_signature = lv_using_method ).
-                  i_famix_method->set_parent_type( EXPORTING i_parent_element = 'FAMIX.Class'
-                                                           i_parent_name    = CONV string( ls_prog_tadir-object_name ) ).
-                  i_famix_method->store_id( i_class = CONV string( ls_prog_tadir-object_name )
-                                            i_method = lv_using_method ).
+                  famix_method->set_signature( signature = using_method ).
+                  famix_method->set_parent_type( EXPORTING parent_element = 'FAMIX.Class'
+                                                           parent_name    = CONV string( ris_prog_tadir_line-object_name ) ).
+                  famix_method->store_id( class = CONV string( ris_prog_tadir_line-object_name )
+                                            method = using_method ).
                 ELSE.
 
                   " SAP_2_FAMIX_36        Add a usage to a single dummy method "OTHER_SAP_METHOD" if required by a parameter
 
-                  lv_using_method_id = i_famix_method->add( EXPORTING i_name = 'OTHER_SAP_METHOD' ).
+                  using_method_id = famix_method->add( EXPORTING name = 'OTHER_SAP_METHOD' ).
                   " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
-                  i_famix_method->set_signature( i_signature = 'OTHER_SAP_METHOD' ).
-                  i_famix_method->set_parent_type( EXPORTING i_parent_element = 'FAMIX.Class'
-                                                           i_parent_name    = 'OTHER_SAP_CLASS' ).
-                  i_famix_method->store_id( i_class = 'OTHER_SAP_CLASS'
-                                            i_method = 'OTHER_SAP_METHOD' ).
+                  famix_method->set_signature( signature = 'OTHER_SAP_METHOD' ).
+                  famix_method->set_parent_type( EXPORTING parent_element = 'FAMIX.Class'
+                                                           parent_name    = 'OTHER_SAP_CLASS' ).
+                  famix_method->store_id( class = 'OTHER_SAP_CLASS'
+                                            method = 'OTHER_SAP_METHOD' ).
                 ENDIF.
               ENDIF.
 
             ENDIF.
 
-            CASE is_class_component-cmptype.
-              WHEN c_cmptype_method.
+            CASE class_component-cmptype.
+              WHEN comptype_method.
 
                 " SAP_2_FAMIX_24      Map usage of ABAP class methods by methods of classes to FAMIX.Invocation
                 " SAP_2_FAMIX_25      Map usage of ABAP interface methods by methods of classes to FAMIX.Invocation
-                IF i_famix_invocation->is_new_invocation_to_candidate( i_sender_id   = lv_using_method_id
-                                                                       i_candidates_id = iv_used_id ).
-                  i_famix_invocation->add( ).
-                  i_famix_invocation->set_invocation_by_reference( EXPORTING i_sender_id   = lv_using_method_id
-                                                                           i_candidates_id = iv_used_id
-                                                                           i_signature = 'DUMMY' ).
+                IF famix_invocation->is_new_invocation_to_candidate( sender_id     = using_method_id
+                                                                     candidates_id = used_id ).
+                  famix_invocation->add( ).
+                  famix_invocation->set_invocation_by_reference( EXPORTING sender_id     = using_method_id
+                                                                           candidates_id = used_id
+                                                                           signature     = 'DUMMY' ).
                 ENDIF.
-              WHEN c_cmptype_attribute.
+              WHEN comptype_attribute.
                 " SAP_2_FAMIX_26      Map usage of ABAP class attributes by methods of classes to FAMIX.Invocation
                 " SAP_2_FAMIX_27      Map usage of ABAP interface attributes by methods of classes to FAMIX.Invocation
 
-                IF i_famix_access->is_new_access( i_accessor_id = lv_using_method_id
-                                                  i_variable_id = iv_used_id ).
-                  i_famix_access->add( ).
-                  i_famix_access->set_accessor_variable_relation( EXPORTING i_accessor_id = lv_using_method_id
-                                                                            i_variable_id = iv_used_id ).
+                IF famix_access->is_new_access( accessor_id = using_method_id
+                                                variable_id = used_id ).
+                  famix_access->add( ).
+                  famix_access->set_accessor_variable_relation( EXPORTING accessor_id = using_method_id
+                                                                          variable_id = used_id ).
                 ENDIF.
               WHEN OTHERS.
                 ASSERT 1 = 2.
@@ -888,9 +805,9 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     " Set default language
 
-    DATA(famix_custom_source_language) = NEW cl_famix_custom_source_lang( i_model ).
+    DATA(famix_custom_source_language) = NEW cl_famix_custom_source_lang( model ).
 
-    famix_custom_source_language->add( i_name = 'ABAP' ).
+    famix_custom_source_language->add( name = 'ABAP' ).
 
     " Do not assign any entities to ABAP, because otherwise this will not be the default language anymore
     " So do not do this for ABAP, but maybe for another language
@@ -902,43 +819,37 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
   METHOD _determine_packages_to_analyze.
 
-    TYPES devclass TYPE devclass.
-    DATA ty_devclass TYPE ty_devclass.
+    DATA ty_devclass TYPE devclass_type.
 
     " Determine packages to analyze
 
-    DATA(famix_package) = NEW cl_famix_package( i_model ).
-
-    "! This are all packages and sub packages that are selected (package = development class)
-    DATA processed_dev_classes TYPE HASHED TABLE OF ty_devclass WITH UNIQUE KEY devclass.
+    DATA(famix_package) = NEW cl_famix_package( model ).
 
     "! A temporal helper table used to find all packages (development classes) in the selection
-    DATA temp_dev_classes_to_search TYPE STANDARD TABLE OF ty_devclass.
+    DATA temp_dev_classes_to_search TYPE STANDARD TABLE OF devclass_type.
 
+    famix_package->add( name = CONV string( devclass_first-devclass ) ).
 
-
-    famix_package->add( i_name = CONV string( is_devclass_first-devclass ) ).
-
-    INSERT VALUE ty_devclass( devclass = is_devclass_first-devclass ) INTO TABLE r_processed_dev_classes.
+    INSERT VALUE devclass_type( devclass = devclass_first-devclass ) INTO TABLE processed_dev_classes.
 
     temp_dev_classes_to_search = VALUE #( ( devclass = parameter_package_to_analyze ) ).
     WHILE temp_dev_classes_to_search IS NOT INITIAL.
       IF temp_dev_classes_to_search IS NOT INITIAL.
-        SELECT devclass, parentcl FROM tdevc INTO TABLE @DATA(lt_devclass)
+        SELECT devclass, parentcl FROM tdevc INTO TABLE @DATA(devclasses)
          FOR ALL ENTRIES IN @temp_dev_classes_to_search WHERE parentcl = @temp_dev_classes_to_search-devclass.
       ENDIF.
 
       temp_dev_classes_to_search = VALUE #( ).
 
-      LOOP AT lt_devclass INTO DATA(ls_devclass).
+      LOOP AT devclasses INTO DATA(devclass).
 
-        INSERT VALUE ty_devclass( devclass = ls_devclass-devclass ) INTO TABLE r_processed_dev_classes.
+        INSERT VALUE devclass_type( devclass = devclass-devclass ) INTO TABLE processed_dev_classes.
         IF sy-subrc EQ ok.
           " New devclass
           " Search again
-          temp_dev_classes_to_search = VALUE #( BASE temp_dev_classes_to_search ( devclass = ls_devclass-devclass ) ).
-          famix_package->add( i_name = CONV string( ls_devclass-devclass ) ).
-          famix_package->set_parent_package( i_parent_package = CONV string( ls_devclass-parentcl ) ).
+          temp_dev_classes_to_search = VALUE #( BASE temp_dev_classes_to_search ( devclass = devclass-devclass ) ).
+          famix_package->add( name = CONV string( devclass-devclass ) ).
+          famix_package->set_parent_package( parent_package = CONV string( devclass-parentcl ) ).
         ENDIF.
 
       ENDLOOP.
@@ -958,18 +869,18 @@ CLASS cl_extract_sap IMPLEMENTATION.
     " SAP_2_FAMIX_1     Extract classes from Dictionary
     " SAP_2_FAMIX_2     Extract interfaces as FAMIX.Class with attribute isinterface
 
-    MOVE-CORRESPONDING it_tadir_objects TO et_classes_2.
+    MOVE-CORRESPONDING tadir_objects TO classes.
 
-    LOOP AT it_tadir_objects ASSIGNING FIELD-SYMBOL(<ls_tadir_objects>).
+    LOOP AT tadir_objects ASSIGNING FIELD-SYMBOL(<tadir_object>).
 
-      IF <ls_tadir_objects>-object EQ 'CLAS'
-        OR <ls_tadir_objects>-object EQ 'INTF'.
+      IF <tadir_object>-object EQ 'CLAS'
+      OR <tadir_object>-object EQ 'INTF'.
 
-        et_classes_2 = VALUE #( BASE et_classes_2 ( obj_name = <ls_tadir_objects>-obj_name ) ).
+        classes = VALUE #( BASE classes ( obj_name = <tadir_object>-obj_name ) ).
 
       ELSE.
 
-        et_programs = VALUE #( BASE et_programs ( program = <ls_tadir_objects>-obj_name ) ).
+        programs = VALUE #( BASE programs ( program = <tadir_object>-obj_name ) ).
 
       ENDIF.
 
@@ -984,49 +895,247 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     " SAP_2_FAMIX_4     Extract programs
 
-    DATA(famix_module) = NEW cl_famix_module( c_model ).
+    DATA(famix_module) = NEW cl_famix_module( model ).
 
-    LOOP AT it_programs ASSIGNING FIELD-SYMBOL(<ls_program>).
+    LOOP AT programs ASSIGNING FIELD-SYMBOL(<program>).
 
       " SAP_2_FAMIX_5     Map program to FAMIX.Module
-      DATA(lv_module_reference) = famix_module->add( EXPORTING i_name = <ls_program>-program ).
+      DATA(module_reference) = famix_module->add( EXPORTING name = <program>-program ).
 
-      READ TABLE it_tadir_objects ASSIGNING FIELD-SYMBOL(<ls_tadir_object_2>) WITH TABLE KEY obj_name = <ls_program>-program.
+      READ TABLE tadir_objects ASSIGNING FIELD-SYMBOL(<tadir_object>) WITH TABLE KEY obj_name = <program>-program.
       ASSERT sy-subrc EQ ok.
 
-      famix_module->set_parent_package( i_parent_package = CONV string( <ls_tadir_object_2>-devclass ) ).
+      famix_module->set_parent_package( parent_package = CONV string( <tadir_object>-devclass ) ).
 
-      DATA(lv_program_analyzer) = NEW cl_extract_program( ).
+      DATA(program_analyzer) = NEW cl_program_analyzer( ).
 
-      lv_program_analyzer->extract( EXPORTING i_module_reference = lv_module_reference
-                                              i_program          = CONV #( <ls_program>-program )
-                                     CHANGING cr_model           = c_model ).
+      program_analyzer->extract( EXPORTING module_reference = module_reference
+                                           program          = CONV #( <program>-program )
+                                  CHANGING model           = model ).
 
     ENDLOOP.
 
   ENDMETHOD.
 
 
-  METHOD _add_to_model.
+  METHOD _add_classes_to_model.
 
     " Add to model
-    LOOP AT it_existing_classes INTO DATA(ls_existing_class).
-      r_famix_class  = NEW cl_famix_class( i_model ).
+    LOOP AT existing_classes INTO DATA(existing_class).
 
       " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
       " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
-      r_famix_class->add( i_name = CONV string( ls_existing_class-class ) ).
+      famix_class->add( name = CONV string( existing_class-class ) ).
 
-      READ TABLE it_tadir_objects ASSIGNING FIELD-SYMBOL(<ls_tadir_object>) WITH TABLE KEY obj_name = ls_existing_class-class.
+      READ TABLE tadir_objects ASSIGNING FIELD-SYMBOL(<tadir_object>) WITH TABLE KEY obj_name = existing_class-class.
       ASSERT sy-subrc EQ ok.
 
-      r_famix_class->set_parent_package( i_parent_package = CONV string( <ls_tadir_object>-devclass ) ).
-      IF <ls_tadir_object>-object EQ 'INTF'.
+      famix_class->set_parent_package( parent_package = CONV string( <tadir_object>-devclass ) ).
+      IF <tadir_object>-object EQ 'INTF'.
         " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
-        r_famix_class->is_interface( ).
+        famix_class->is_interface( ).
       ENDIF.
 
     ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD _determine_inheritances_betwee.
+
+    " Determine inheritances between selected classes
+
+    DATA: inheritances TYPE STANDARD TABLE OF  inheritance_type.
+
+    IF existing_classes IS NOT INITIAL.
+      SELECT clsname, refclsname, reltype FROM seometarel INTO CORRESPONDING FIELDS OF TABLE @inheritances
+        FOR ALL ENTRIES IN @existing_classes WHERE clsname = @existing_classes-class
+                                               AND version = 1.
+    ENDIF.
+
+    " Delete all inheritances where superclass is not in selected packages
+    LOOP AT inheritances INTO DATA(inheritance).
+      READ TABLE existing_classes TRANSPORTING NO FIELDS WITH TABLE KEY class = inheritance-refclsname.
+      IF sy-subrc <> ok.
+        DELETE inheritances.
+      ENDIF.
+    ENDLOOP.
+
+    " Add inheritances to model
+    LOOP AT inheritances INTO DATA(inheritance_2).
+      CASE inheritance_2-reltype.
+        WHEN 2.
+          " Inheritance
+          " SAP_2_FAMIX_39     Map all inheritances between classes in selected packages to FAMIX.Inheritance
+          famix_inheritance->add( ).
+          famix_inheritance->set_sub_and_super_class( EXPORTING subclass_element      = 'FAMIX.Class'
+                                                                subclass_name_group   = ''
+                                                                subclass_name         = CONV #( inheritance_2-clsname )
+                                                                superclass_element    = 'FAMIX.Class'
+                                                                superclass_name_group = ''
+                                                                superclass_name       = CONV #( inheritance_2-refclsname ) ).
+        WHEN 1.
+          " Interface implementation
+          " SAP_2_FAMIX_40        Map all interface implementations of interfaces in selected packages by classes of selected packages by FAMIX.Inheritance
+
+          famix_inheritance->add( ).
+          famix_inheritance->set_sub_and_super_class( EXPORTING subclass_element      = 'FAMIX.Class'
+                                                                subclass_name_group   = ''
+                                                                subclass_name         = CONV #( inheritance_2-clsname )
+                                                                superclass_element    = 'FAMIX.Class'
+                                                                superclass_name_group = ''
+                                                                superclass_name       = CONV #( inheritance_2-refclsname ) ).
+
+        WHEN 0.
+          " Interface composition     (i COMPRISING i_ref)
+          " TBD
+        WHEN 5.
+          " Enhancement            ( c enhances c_ref)
+          " TBD
+      ENDCASE.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD _determine_class_components.
+
+    " Determine class components
+
+    " SAP_2_FAMIX_9         Extract methods of classes
+    " SAP_2_FAMIX_10        Extract methods of interfaces
+    " SAP_2_FAMIX_11        Extract attributes of classes
+    " SAP_2_FAMIX_12        Extract attributes of interfaces
+
+    IF existing_classes IS NOT INITIAL.
+      "
+      SELECT clsname, cmpname, cmptype FROM seocompo INTO TABLE @class_components
+        FOR ALL ENTRIES IN @existing_classes
+        WHERE
+          clsname = @existing_classes-class.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD _add_to_class_components_to_mo.
+
+    " Add to class components to model
+
+    LOOP AT class_components INTO class_component.
+
+      CASE class_component-cmptype.
+        WHEN comptype_attribute. "Attribute
+
+          " SAP_2_FAMIX_13        Mapp attributes of classes to FAMIX.Attribute
+          " SAP_2_FAMIX_14        Mapp attributes of interfaces to FAMIX.Attribute
+
+          famix_attribute->add( name = CONV string( class_component-cmpname ) ).
+          famix_attribute->set_parent_type(
+            EXPORTING
+              parent_element = 'FAMIX.Class'
+              parent_name    = CONV string( class_component-clsname ) ).
+          famix_attribute->store_id( EXPORTING class     = CONV string( class_component-clsname )
+                                               attribute = CONV string( class_component-cmpname ) ).
+
+        WHEN comptype_method. "Method
+
+          " SAP_2_FAMIX_15        Map methods of classes to FAMIX.Method
+          " SAP_2_FAMIX_16        Map methods of interfaces to FAMIX.Method
+
+          famix_method->add( name = CONV string( class_component-cmpname ) ).
+          " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
+          " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
+          famix_method->set_signature( signature = CONV string( class_component-cmpname ) ).
+          famix_method->set_parent_type(
+            EXPORTING
+              parent_element = 'FAMIX.Class'
+              parent_name    = CONV string( class_component-clsname ) ).
+          famix_method->store_id( EXPORTING class  = CONV string( class_component-clsname )
+                                            method = CONV string( class_component-cmpname ) ).
+        WHEN 2. "Event
+        WHEN 3. "Type
+        WHEN OTHERS.
+          " TBD Warn
+
+      ENDCASE.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD _determine_usage_of_methods.
+
+    DATA class_component TYPE class_component_type.
+
+    " Determine usage of methods
+
+    LOOP AT class_components INTO class_component WHERE cmptype = comptype_attribute  " Methods
+                                                     OR cmptype = comptype_method. "Attributes
+
+      CASE class_component-cmptype.
+        WHEN comptype_method.
+          DATA(used_id) = famix_method->get_id( class  = CONV string( class_component-clsname )
+                                                method = CONV string( class_component-cmpname ) ).
+
+        WHEN comptype_attribute.
+          used_id = famix_attribute->get_id( class     = CONV string( class_component-clsname )
+                                             attribute = CONV string( class_component-cmpname ) ).
+
+        WHEN OTHERS.
+          ASSERT 1 = 2.
+      ENDCASE.
+
+      _determine_usages( famix_class      = famix_class
+                         class_component  = class_component
+                         famix_method     = famix_method
+                         famix_invocation = famix_invocation
+                         famix_access     = famix_access
+                         used_id          = used_id ).
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD _read_all_classes.
+
+    " Read all classes
+
+    " Determine existing classes
+    IF classes IS NOT INITIAL.
+      SELECT clsname AS class FROM seoclass INTO TABLE @existing_classes FOR ALL ENTRIES IN @classes
+        WHERE
+          clsname = @classes-obj_name.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD _select_objects_in_package_and.
+
+    DATA first_devclass TYPE tdevc.
+    DATA processed_dev_classes TYPE cl_extract_sap=>processed_dev_classes_type.
+
+    " Select objects in package and sub package
+    " SAP_2_FAMIX_3     Select all Objects in a package and the sub packages of this package
+
+    SELECT SINGLE devclass, parentcl FROM tdevc INTO @first_devclass WHERE devclass = @parameter_package_to_analyze.
+    IF sy-subrc <> ok.
+      WRITE: 'Package does not exist: ', parameter_package_to_analyze.
+      return  = abap_true.
+    ENDIF.
+
+    processed_dev_classes = _determine_packages_to_analyze( model           = model
+                                                            devclass_first = first_devclass ).
+
+    IF processed_dev_classes IS NOT INITIAL.
+      SELECT obj_name, object, devclass FROM tadir INTO TABLE @tadir_objects FOR ALL ENTRIES IN @processed_dev_classes
+        WHERE
+          pgmid = 'R3TR'
+          AND ( object = 'CLAS' OR object = 'INTF' OR object = 'PROG' )
+          AND devclass = @processed_dev_classes-devclass.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -1034,11 +1143,11 @@ ENDCLASS.
 
 START-OF-SELECTION.
 
-  DATA: lt_model TYPE cl_model=>ty_lines.
+  DATA: mse_model TYPE cl_model=>lines_type.
   IF parameter_extract_from_sap EQ false.
-    cl_make_demo_model=>make( IMPORTING et_model = lt_model ).
+    cl_make_demo_model=>make( IMPORTING mse_model = mse_model ).
   ELSE.
-    cl_extract_sap=>extract( IMPORTING et_model = lt_model ).
+    cl_extract_sap=>extract( IMPORTING mse_model = mse_model ).
   ENDIF.
 
-  cl_output_model=>make( it_model = lt_model ).
+  cl_output_model=>make( mse_model = mse_model ).

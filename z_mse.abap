@@ -23,61 +23,50 @@
 
 PARAMETERS p_down AS CHECKBOX DEFAULT ' '.
 "! Download model to file
-data l_parameter_download_file type abap_bool.
-l_parameter_download_file = p_down.
+data parameter_download_file type abap_bool.
+parameter_download_file = p_down.
 
 " Begin Model
-"! To not compare sy-subrc to zero, but more readable to ok
-CONSTANTS ok TYPE i VALUE 0.
-"! Redefines abap_bool to simplify coding (Not always reading abap_...)
-TYPES bool TYPE abap_bool.
-CONSTANTS:
-  "! Redefines abap_true to simplify coding (Not always reading abap_...)
-  true  TYPE bool VALUE abap_true,
-  "! Redefines abap_false to simplify coding (Not always reading abap_...)
-  false TYPE bool VALUE abap_false.
-
-
 
 CLASS cl_model DEFINITION.
   PUBLIC SECTION.
 
-    TYPES: BEGIN OF ty_line,
+    TYPES: BEGIN OF line_type,
              line TYPE string,
-           END OF ty_line.
-    TYPES: ty_lines TYPE STANDARD TABLE OF ty_line.
+           END OF line_type.
+    TYPES: lines_type TYPE STANDARD TABLE OF line_type.
 
     METHODS constructor.
 
     "! Add a named entity
-    "! @parameter i_elementname | The name of the FAMIX Element. Like FAMIX.NamedEntity
-    "! @parameter i_name_group | optional to handle cases where names may be duplicates
-    "! @parameter i_is_named_entity | True if the entity has a name
-    "! @parameter i_can_be_referenced_by_name | True if referencing by name is possible (For this the name has to be unique)
-    "! @parameter i_name | the name of a FAMIX Entity that inherits from FAMIX.NamedEntity leave empty is i_is_named_entity is false
-    "! @parameter e_exists_already_with_id | only if i_can_be_referenced_by_name true. Zero if it does not yet exist, otherwise filled with id
-    "! @parameter r_id | the id in model either if just created or already existing
+    "! @parameter elementname | The name of the FAMIX Element. Like FAMIX.NamedEntity
+    "! @parameter name_group | optional to handle cases where names may be duplicates
+    "! @parameter is_named_entity | True if the entity has a name
+    "! @parameter can_be_referenced_by_name | True if referencing by name is possible (For this the name has to be unique)
+    "! @parameter name | the name of a FAMIX Entity that inherits from FAMIX.NamedEntity leave empty is i_is_named_entity is false
+    "! @parameter exists_already_with_id | only if i_can_be_referenced_by_name true. Zero if it does not yet exist, otherwise filled with id
+    "! @parameter processedid | the id in model either if just created or already existing
     METHODS add_entity
-      IMPORTING i_elementname                   TYPE string
-                i_name_group                    TYPE string DEFAULT ''
-                i_is_named_entity               TYPE bool
-                i_can_be_referenced_by_name     TYPE bool
-                i_name                          TYPE string OPTIONAL
-      EXPORTING VALUE(e_exists_already_with_id) TYPE i
-      RETURNING VALUE(r_id)                     TYPE i.
+      IMPORTING elementname                   TYPE string
+                name_group                    TYPE string DEFAULT ''
+                is_named_entity               TYPE bool
+                can_be_referenced_by_name     TYPE bool
+                name                          TYPE string OPTIONAL
+      EXPORTING VALUE(exists_already_with_id) TYPE i
+      RETURNING VALUE(processed_id)                     TYPE i.
 
     "! Generates a string with a valid MSE file
     METHODS make_mse
       EXPORTING
-        et_mse TYPE ty_lines.
+        mse_model TYPE lines_type.
 
     "! Generates an attribute of type string
     "! @parameter i_attribute_name | the name of the attribute
     "! @parameter i_string | The value of the attribute
     METHODS add_string
       IMPORTING
-        i_attribute_name TYPE string
-        i_string         TYPE string.
+        attribute_name TYPE string
+        string         TYPE string.
 
     "! Generates an attribute of type reference using a name
     "! @parameter i_attribute_name | the name of the attribute
@@ -85,70 +74,70 @@ CLASS cl_model DEFINITION.
     "! @parameter i_name_of_reference | the reference
     METHODS add_reference
       IMPORTING
-        i_attribute_name          TYPE string
-        i_elementname             TYPE string
-        i_name_group_of_reference TYPE string OPTIONAL
-        i_name_of_reference       TYPE string.
+        attribute_name          TYPE string
+        elementname             TYPE string
+        name_group_of_reference TYPE string OPTIONAL
+        name_of_reference       TYPE string.
 
     "! Generates an attribute of type reference using an id
     "! @parameter i_attribute_name | the name of the attribute
     "! @parameter i_reference_id | the id of the reference
     METHODS add_reference_by_id
       IMPORTING
-        i_attribute_name TYPE string
-        i_reference_id   TYPE i.
+        attribute_name TYPE string
+        reference_id   TYPE i.
 
     METHODS add_boolean
       IMPORTING
-        i_attribute_name TYPE string
-        i_is_true        TYPE bool.
+        attribute_name TYPE string
+        is_true        TYPE bool.
 
   PRIVATE SECTION.
-    TYPES: BEGIN OF ty_id,
+    TYPES: BEGIN OF element_in_model_type,
              id              TYPE i,
              is_named_entity TYPE bool,
              elementname     TYPE string,
-           END OF ty_id.
+           END OF element_in_model_type.
     "! A table with all Elements in the model
-    DATA mt_ids TYPE HASHED TABLE OF ty_id WITH UNIQUE KEY id.
+    DATA g_elements_in_model TYPE HASHED TABLE OF element_in_model_type WITH UNIQUE KEY id.
 
-    TYPES: BEGIN OF ty_named_entities,
+    TYPES: BEGIN OF named_entity_type,
              elementname TYPE string,
              name_group  TYPE string,
              xname       TYPE string,
              id          TYPE i,
-           END OF ty_named_entities.
+           END OF named_entity_type.
 
     "! A table to find IDs using the names
-    DATA mt_names TYPE HASHED TABLE OF ty_named_entities WITH UNIQUE KEY elementname name_group xname.
+    DATA g_named_entities TYPE HASHED TABLE OF named_entity_type WITH UNIQUE KEY elementname name_group xname.
 
-    TYPES ty_value_type TYPE c LENGTH 1.
+    TYPES value_type TYPE c LENGTH 1.
 
     "! An attribute where a name is specified
-    CONSTANTS c_string_type TYPE ty_value_type VALUE 'S'.
+    CONSTANTS string_value TYPE value_type VALUE 'S'.
 
     "! An attribute where a reference is specified
-    CONSTANTS c_reference_type TYPE ty_value_type VALUE 'R'.
+    CONSTANTS reference_value TYPE value_type VALUE 'R'.
 
-    CONSTANTS c_boolean_type TYPE ty_value_type VALUE 'B'.
+    CONSTANTS boolean_value TYPE value_type VALUE 'B'.
 
-    TYPES: BEGIN OF ty_attributes,
+    TYPES: BEGIN OF attribute_type,
              id             TYPE i,
              attribute_id   TYPE i,
              attribute_name TYPE string,
-             value_type     TYPE ty_value_type,
+             value_type     TYPE value_type,
              string         TYPE string,
              reference      TYPE i,
              boolean        TYPE bool,
-           END OF ty_attributes.
+           END OF attribute_type.
 
     "! A table with all the attributes of an entity
-    DATA mt_attributes TYPE SORTED TABLE OF ty_attributes WITH UNIQUE KEY id attribute_id.
+    DATA g_attributes TYPE SORTED TABLE OF attribute_type WITH UNIQUE KEY id attribute_id.
 
-    "! The ID of any entity in the model
-    DATA mv_id TYPE i.
+    "! The ID of processed entity in the model
+    DATA g_processed_id TYPE i.
     "! The ID of any attribute. Unique together with mv_id
-    DATA mv_attribute_id TYPE i.
+    DATA g_attribute_id TYPE i.
 
 
 ENDCLASS.
@@ -156,36 +145,38 @@ ENDCLASS.
 CLASS cl_model IMPLEMENTATION.
 
   METHOD constructor.
-    mv_id = 0.
+    g_processed_id = 0.
   ENDMETHOD.
 
   METHOD add_entity.
 
-    IF i_can_be_referenced_by_name EQ true.
+    IF can_be_referenced_by_name EQ true.
 
-      READ TABLE mt_names ASSIGNING FIELD-SYMBOL(<ls_name>) WITH TABLE KEY elementname = i_elementname name_group = i_name_group xname = i_name.
+      READ TABLE g_named_entities ASSIGNING FIELD-SYMBOL(<ls_name>) WITH TABLE KEY elementname = elementname name_group = name_group xname = name.
       IF sy-subrc EQ ok.
-        e_exists_already_with_id = <ls_name>-id.
-        r_id = <ls_name>-id.
+        exists_already_with_id = <ls_name>-id.
+        processed_id = <ls_name>-id.
         RETURN.
       ENDIF.
 
     ENDIF.
 
-    ADD 1 TO mv_id.
-    mv_attribute_id = 0.
+    ADD 1 TO g_processed_id.
+    g_attribute_id = 0.
 
-    IF i_can_be_referenced_by_name EQ true.
-      mt_names = VALUE #( BASE mt_names ( elementname = i_elementname name_group = i_name_group xname = i_name id = mv_id ) ).
+    IF can_be_referenced_by_name EQ true.
+      g_named_entities = VALUE #( BASE g_named_entities ( elementname = elementname name_group = name_group xname = name id = g_processed_id ) ).
     ENDIF.
 
-    mt_ids = VALUE #( BASE mt_ids ( id = mv_id is_named_entity = i_is_named_entity elementname = i_elementname ) ).
+    g_elements_in_model = VALUE #( BASE g_elements_in_model ( id = g_processed_id
+                                                              is_named_entity = is_named_entity
+                                                              elementname = elementname ) ).
 
-    IF i_is_named_entity EQ true.
-      me->add_string( EXPORTING i_attribute_name = 'name' i_string = i_name ).
+    IF is_named_entity EQ true.
+      me->add_string( EXPORTING attribute_name = 'name' string = name ).
     ENDIF.
 
-    r_id = mv_id.
+    processed_id = g_processed_id.
 
   ENDMETHOD.
 
@@ -193,47 +184,47 @@ CLASS cl_model IMPLEMENTATION.
 
     " SAP_2_FAMIX_34      Allow to export the model in the .mse Moose format
 
-    DATA: ls_line TYPE ty_line.
+    DATA: mse_model_line TYPE line_type.
 
-    ls_line-line = |( |.
+    mse_model_line-line = |( |.
 
-    SORT mt_ids BY id.
+    SORT g_elements_in_model BY id.
 
-    DATA(lv_is_first) = true.
+    DATA(is_first) = true.
 
-    LOOP AT mt_ids ASSIGNING FIELD-SYMBOL(<ls_id>).
-      IF lv_is_first EQ false.
+    LOOP AT g_elements_in_model ASSIGNING FIELD-SYMBOL(<element_in_model>).
+      IF is_first EQ false.
 
-        et_mse = VALUE #( BASE et_mse ( ls_line ) ).
-        ls_line = VALUE #( ).
+        mse_model = VALUE #( BASE mse_model ( mse_model_line ) ).
+        mse_model_line = VALUE #( ).
       ENDIF.
 
-      ls_line-line = ls_line-line && |(| && <ls_id>-elementname.
-      IF <ls_id>-is_named_entity EQ true.
+      mse_model_line-line = mse_model_line-line && |(| && <element_in_model>-elementname.
+      IF <element_in_model>-is_named_entity EQ true.
 
-        ls_line-line = ls_line-line && | (id: | && <ls_id>-id && | )|.
+        mse_model_line-line = mse_model_line-line && | (id: | && <element_in_model>-id && | )|.
       ENDIF.
 
-      LOOP AT mt_attributes ASSIGNING FIELD-SYMBOL(<ls_attribute>) WHERE id = <ls_id>-id.
+      LOOP AT g_attributes ASSIGNING FIELD-SYMBOL(<attribute>) WHERE id = <element_in_model>-id.
 
-        et_mse = VALUE #( BASE et_mse ( ls_line ) ).
-        ls_line-line = |  (| && <ls_attribute>-attribute_name.
-        CASE <ls_attribute>-value_type.
-          WHEN c_string_type.
+        mse_model = VALUE #( BASE mse_model ( mse_model_line ) ).
+        mse_model_line-line = |  (| && <attribute>-attribute_name.
+        CASE <attribute>-value_type.
+          WHEN string_value.
 
-            ls_line-line = ls_line-line && | '| && <ls_attribute>-string && |')|.
+            mse_model_line-line = mse_model_line-line && | '| && <attribute>-string && |')|.
 
-          WHEN c_reference_type.
+          WHEN reference_value.
 
-            ls_line-line = ls_line-line && | (ref: | && <ls_attribute>-reference && |))|.
+            mse_model_line-line = mse_model_line-line && | (ref: | && <attribute>-reference && |))|.
 
-          WHEN c_boolean_type.
+          WHEN boolean_value.
 
-            CASE <ls_attribute>-boolean.
+            CASE <attribute>-boolean.
               WHEN true.
-                ls_line-line = ls_line-line && | true)|.
+                mse_model_line-line = mse_model_line-line && | true)|.
               WHEN false.
-                ls_line-line = ls_line-line && | false)|.
+                mse_model_line-line = mse_model_line-line && | false)|.
               WHEN OTHERS.
                 ASSERT 1 = 2.
             ENDCASE.
@@ -244,63 +235,61 @@ CLASS cl_model IMPLEMENTATION.
 
       ENDLOOP.
 
-      ls_line-line = ls_line-line && |)|.
+      mse_model_line-line = mse_model_line-line && |)|.
 
-      lv_is_first = false.
+      is_first = false.
     ENDLOOP.
 
-    ls_line-line = ls_line-line && |)|.
-    et_mse = VALUE #( BASE et_mse ( ls_line ) ).
+    mse_model_line-line = mse_model_line-line && |)|.
+    mse_model = VALUE #( BASE mse_model ( mse_model_line ) ).
 
   ENDMETHOD.
 
   METHOD add_reference.
 
-    READ TABLE mt_names ASSIGNING FIELD-SYMBOL(<ls_name>) WITH TABLE KEY elementname = i_elementname
-                                                                         name_group = i_name_group_of_reference
-                                                                         xname = i_name_of_reference.
+    READ TABLE g_named_entities ASSIGNING FIELD-SYMBOL(<named_entity>) WITH TABLE KEY elementname = elementname
+                                                                                      name_group = name_group_of_reference
+                                                                                      xname = name_of_reference.
     ASSERT sy-subrc EQ ok.
-    ADD 1 TO mv_attribute_id.
-    mt_attributes = VALUE #( BASE mt_attributes ( id = mv_id
-                                                  attribute_id = mv_attribute_id
-                                                  attribute_name = i_attribute_name
-                                                  value_type = c_reference_type
-                                                  reference = <ls_name>-id ) ).
+    ADD 1 TO g_attribute_id.
+    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id
+                                                attribute_id   = g_attribute_id
+                                                attribute_name = attribute_name
+                                                value_type     = reference_value
+                                                reference      = <named_entity>-id ) ).
 
   ENDMETHOD.
 
   METHOD add_reference_by_id.
 
-    ADD 1 TO mv_attribute_id.
-    mt_attributes = VALUE #( BASE mt_attributes ( id = mv_id
-                                                  attribute_id = mv_attribute_id
-                                                  attribute_name = i_attribute_name
-                                                  value_type = c_reference_type
-                                                  reference = i_reference_id ) ).
+    ADD 1 TO g_attribute_id.
+    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id
+                                                attribute_id   = g_attribute_id
+                                                attribute_name = attribute_name
+                                                value_type     = reference_value
+                                                reference      = reference_id ) ).
 
   ENDMETHOD.
 
   METHOD add_string.
 
-    ADD 1 TO mv_attribute_id.
-    mt_attributes = VALUE #( BASE mt_attributes ( id = mv_id
-                                                  attribute_id = mv_attribute_id
-                                                  attribute_name = i_attribute_name
-                                                  value_type = c_string_type
-                                                  string = i_string ) ).
+    ADD 1 TO g_attribute_id.
+    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id
+                                                attribute_id   = g_attribute_id
+                                                attribute_name = attribute_name
+                                                value_type     = string_value
+                                                string         = string ) ).
 
   ENDMETHOD.
 
   METHOD add_boolean.
-    ADD 1 TO mv_attribute_id.
-    mt_attributes = VALUE #( BASE mt_attributes ( id = mv_id
-                                                  attribute_id = mv_attribute_id
-                                                  attribute_name = i_attribute_name
-                                                  value_type = c_boolean_type
-                                                  boolean = i_is_true ) ).
+    ADD 1 TO g_attribute_id.
+    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id
+                                                attribute_id   = g_attribute_id
+                                                attribute_name = attribute_name
+                                                value_type     = boolean_value
+                                                boolean        = is_true ) ).
   ENDMETHOD.
-
-
 
 ENDCLASS.
 
@@ -308,7 +297,7 @@ CLASS cl_output_model DEFINITION.
   PUBLIC SECTION.
     CLASS-METHODS make
       IMPORTING
-        it_model TYPE cl_model=>ty_lines.
+        mse_model TYPE cl_model=>lines_type.
 ENDCLASS.
 
 CLASS cl_output_model IMPLEMENTATION.
@@ -321,7 +310,7 @@ CLASS cl_output_model IMPLEMENTATION.
           fullpath    TYPE string,
           user_action TYPE i.
 
-    IF l_parameter_download_file EQ true.
+    IF parameter_download_file EQ true.
 
       cl_gui_frontend_services=>file_save_dialog( CHANGING filename    = filename       " File Name to Save
                                                            path        = pathname       " Path to File
@@ -332,18 +321,15 @@ CLASS cl_output_model IMPLEMENTATION.
         WRITE: / 'Canceled by user'.
       ELSE.
 
-        CALL FUNCTION 'GUI_DOWNLOAD'
-          EXPORTING
-            filename = fullpath  " Name of file
-          TABLES
-            data_tab = it_model.    " Transfer table
+        CALL FUNCTION 'GUI_DOWNLOAD' EXPORTING filename = fullpath
+                                        TABLES data_tab = mse_model.
 
       ENDIF.
 
     ENDIF.
 
-    LOOP AT it_model ASSIGNING FIELD-SYMBOL(<ls_model>).
-      WRITE: / <ls_model>-line.
+    LOOP AT mse_model ASSIGNING FIELD-SYMBOL(<mse_model_line>).
+      WRITE: / <mse_model_line>-line.
     ENDLOOP.
   ENDMETHOD.
 
