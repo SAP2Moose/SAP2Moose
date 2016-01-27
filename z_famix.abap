@@ -1,3 +1,4 @@
+******************************************** Begin Include Z_FAMIX_ABAP ******************************************************************************************
 *The MIT License (MIT)
 *
 *Copyright (c) 2016 Rainer Winkler, CubeServ
@@ -706,3 +707,4 @@ CLASS cl_make_demo_model IMPLEMENTATION.
   ENDMETHOD.
 
 ENDCLASS.
+******************************************** End Include Z_FAMIX_ABAP ******************************************************************************************
