@@ -511,7 +511,7 @@ CLASS cl_famix_invocation DEFINITION INHERITING FROM cl_famix_association.
       RETURNING VALUE(is_new) TYPE bool.
 
     "! defines an invocation
-    "! this also models standard call by functions or methods to objects other than attributes
+    "! this also models standard call by functions or methods to components other than attributes
     "! Us this method to reference the receiver using his id
     "! @parameter sender_id | the id of the sender or calling method or function
     "! @parameter candidates_id | the id of the candidate, this is the used method or function of type BehaviouralEntity in case of method or function usage

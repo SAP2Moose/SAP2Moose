@@ -37,9 +37,12 @@
 "! Global attributes are normally prefixed with g_
 "! Instances are normally instanciated only once, to simplify coding no singleton pattern is used
 "!
+"! Object shall be used only for real classes
+"! Component shall be used for programming entities like function, class, method, program, database table, attribute, ...
+"!
 "! Short abbreviations are used if only locally used, in that case an ABAP Doc comments explains the variable
 "! See the start of the report for this
-REPORT z_moose_extractor.
+REPORT Z_MOOSE_EXTRACTOR_ABAP.
 
 "! To not compare sy-subrc to zero, but more readable to ok
 CONSTANTS ok TYPE i VALUE 0.
@@ -69,6 +72,7 @@ parameter_list_tokens = p_list.
 PARAMETERS: p_dm AS CHECKBOX DEFAULT 'X'.
 "! Usages outside package grouped
 DATA parameter_usage_outpack_groupd TYPE bool.
+parameter_usage_outpack_groupd = p_dm.
 
 include z_mse.
 
@@ -80,11 +84,11 @@ TYPES: BEGIN OF class_component_type,
          cmptype TYPE seocompo-cmptype,
        END OF class_component_type.
 
-TYPES: BEGIN OF tadir_object_type,
+TYPES: BEGIN OF tadir_component_type,
           obj_name TYPE sobj_name,
           object   TYPE trobjtype,
           devclass TYPE devclass,
-       END OF tadir_object_type.
+       END OF tadir_component_type.
 
 TYPES: BEGIN OF class_interface_type,
         obj_name TYPE seoclsname,
@@ -114,6 +118,8 @@ CLASS cl_extract_sap DEFINITION.
     CONSTANTS comptype_attribute TYPE seocmptype VALUE '0'.
     CONSTANTS comptype_method TYPE seocmptype VALUE '1'.
 
+    "! Determine usages for components
+    "! If using components are not part of the model, they are either added or replaced by a dummy component
     CLASS-METHODS _determine_usages
       IMPORTING
         famix_class      TYPE REF TO cl_famix_class
@@ -127,43 +133,43 @@ CLASS cl_extract_sap DEFINITION.
       IMPORTING
         model TYPE REF TO cl_model.
 
-    TYPES: BEGIN OF devclass_type,
+    TYPES: BEGIN OF package_type,
           devclass TYPE DEVCLASS,
-          END OF devclass_type.
+          END OF package_type.
     TYPES:
-      processed_dev_classes_type TYPE HASHED TABLE OF devclass_type WITH UNIQUE KEY devclass.
+      processed_packages_type TYPE HASHED TABLE OF package_type WITH UNIQUE KEY devclass.
     CLASS-METHODS _determine_packages_to_analyze
       IMPORTING
         model                       TYPE REF TO cl_model
-        devclass_first              TYPE tdevc
+        package_first              TYPE tdevc
       RETURNING
-        VALUE(processed_dev_classes) TYPE processed_dev_classes_type.
+        VALUE(processed_packages) TYPE processed_packages_type.
     TYPES:
-      tadir_objects_type TYPE HASHED TABLE OF tadir_object_type WITH UNIQUE KEY obj_name,
+      tadir_components_type TYPE HASHED TABLE OF tadir_component_type WITH UNIQUE KEY obj_name,
       classes_type     TYPE STANDARD TABLE OF class_interface_type WITH DEFAULT KEY,
       programs_type      TYPE STANDARD TABLE OF program_type WITH DEFAULT KEY.
-    CLASS-METHODS _objects_to_analyze_by_tadir
+    CLASS-METHODS _components_to_analyze_tadir
       IMPORTING
-        tadir_objects TYPE tadir_objects_type
+        tadir_components TYPE tadir_components_type
       EXPORTING
         classes     TYPE classes_type
         programs      TYPE programs_type.
     TYPES:
-      tadir_objects_2_type TYPE HASHED TABLE OF tadir_object_type WITH UNIQUE KEY obj_name,
+      tadir_components_2_type TYPE HASHED TABLE OF tadir_component_type WITH UNIQUE KEY obj_name,
       programs_1_type      TYPE STANDARD TABLE OF program_type WITH DEFAULT KEY.
     CLASS-METHODS _read_all_programs
       IMPORTING
-        tadir_objects TYPE tadir_objects_2_type
+        tadir_components TYPE tadir_components_2_type
         programs      TYPE programs_1_type
       CHANGING
         model          TYPE REF TO cl_model.
     TYPES:
-      tadir_objects_3_type  TYPE HASHED TABLE OF tadir_object_type WITH UNIQUE KEY obj_name,
+      tadir_components_3_type  TYPE HASHED TABLE OF tadir_component_type WITH UNIQUE KEY obj_name,
       existing_classes_type TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
     CLASS-METHODS _add_classes_to_model
       IMPORTING
         famix_class        TYPE REF TO cl_famix_class
-        tadir_objects     TYPE tadir_objects_3_type
+        tadir_components     TYPE tadir_components_3_type
         existing_classes  TYPE existing_classes_type.
     TYPES:
       existing_classes_1_type TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
@@ -185,9 +191,7 @@ CLASS cl_extract_sap DEFINITION.
       IMPORTING
         class_components       TYPE class_components_1_type
         famix_method           TYPE REF TO cl_famix_method
-        famix_attribute        TYPE REF TO cl_famix_attribute
-      RETURNING
-        VALUE(class_component) TYPE class_component_type.
+        famix_attribute        TYPE REF TO cl_famix_attribute.
     TYPES:
       class_components_2_type TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
     CLASS-METHODS _determine_usage_of_methods
@@ -207,12 +211,12 @@ CLASS cl_extract_sap DEFINITION.
       RETURNING
         VALUE(existing_classes) TYPE existing_classes_3_type.
     TYPES:
-      tadir_objects_4_type TYPE HASHED TABLE OF tadir_object_type WITH UNIQUE KEY obj_name.
-    CLASS-METHODS _select_objects_in_package_and
+      tadir_components_4_type TYPE HASHED TABLE OF tadir_component_type WITH UNIQUE KEY obj_name.
+    CLASS-METHODS _select_components_in_package
       IMPORTING
         model          TYPE REF TO cl_model
       EXPORTING
-        tadir_objects TYPE tadir_objects_4_type
+        tadir_components TYPE tadir_components_4_type
         return        TYPE bool.
 
 ENDCLASS.
@@ -592,15 +596,11 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
   METHOD extract.
 
-    TYPES:BEGIN OF devclass_type,
+    TYPES:BEGIN OF package_type,
             devclass TYPE devclass,
-          END OF devclass_type.
+          END OF package_type.
 
-
-    DATA first_devclass type tdevc.
-    DATA processed_dev_classes TYPE processed_dev_classes_type.
-
-    DATA tadir_objects TYPE HASHED TABLE OF tadir_object_type WITH UNIQUE KEY obj_name.
+    DATA tadir_components TYPE HASHED TABLE OF tadir_component_type WITH UNIQUE KEY obj_name.
     DATA classes TYPE STANDARD TABLE OF class_interface_type.
     DATA programs TYPE STANDARD TABLE OF program_type.
     DATA existing_classes TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
@@ -623,26 +623,26 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     DATA do_return TYPE bool.
 
-    _select_objects_in_package_and( EXPORTING model = model
-                                    IMPORTING tadir_objects = tadir_objects
+    _select_components_in_package( EXPORTING model = model
+                                    IMPORTING tadir_components = tadir_components
                                               return        = do_return ).
 
     IF do_return EQ true.
       RETURN.
     ENDIF.
 
-   _objects_to_analyze_by_tadir( EXPORTING tadir_objects = tadir_objects
+   _components_to_analyze_tadir( EXPORTING tadir_components = tadir_components
                                  IMPORTING classes = classes
                                            programs  = programs ).
 
-   _read_all_programs( EXPORTING tadir_objects = tadir_objects
+   _read_all_programs( EXPORTING tadir_components = tadir_components
                                  programs      = programs
                         CHANGING model = model ).
 
     existing_classes = _read_all_classes( classes ).
 
     _add_classes_to_model( famix_class       = famix_class
-                           tadir_objects    = tadir_objects
+                           tadir_components    = tadir_components
                            existing_classes = existing_classes ).
 
     _determine_inheritances_betwee( famix_inheritance             = famix_inheritance
@@ -650,9 +650,9 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     class_components = _determine_class_components( existing_classes ).
 
-    class_component = _add_to_class_components_to_mo( class_components = class_components
-                                                         famix_method      = famix_method
-                                                         famix_attribute   = famix_attribute ).
+    _add_to_class_components_to_mo( class_components = class_components
+                                    famix_method     = famix_method
+                                    famix_attribute  = famix_attribute ).
 
     _determine_usage_of_methods( famix_class       = famix_class
                                  class_components = class_components
@@ -675,20 +675,20 @@ CLASS cl_extract_sap IMPLEMENTATION.
         " SAP_2_FAMIX_18      Determine usage of interface methods by programs and classes
 
         where_used_name = class_component-clsname && |\\ME:| && class_component-cmpname.
-        SELECT * FROM wbcrossgt INTO TABLE @DATA(where_used_objects) WHERE otype = 'ME' AND name = @where_used_name.
+        SELECT * FROM wbcrossgt INTO TABLE @DATA(where_used_components) WHERE otype = 'ME' AND name = @where_used_name.
       WHEN comptype_attribute.
 
         " SAP_2_FAMIX_19      Determine usage of class attributes by programs and classes
         " SAP_2_FAMIX_20      Determine usage of interface attributes by programs and classes
 
         where_used_name = class_component-clsname && |\\DA:| && class_component-cmpname.
-        SELECT * FROM wbcrossgt INTO TABLE @where_used_objects WHERE otype = 'DA' AND name = @where_used_name.
+        SELECT * FROM wbcrossgt INTO TABLE @where_used_components WHERE otype = 'DA' AND name = @where_used_name.
       WHEN OTHERS.
         ASSERT 1 = 2.
     ENDCASE.
 
-    LOOP AT where_used_objects ASSIGNING FIELD-SYMBOL(<where_used_object>).
-      SELECT SINGLE * FROM ris_prog_tadir INTO @DATA(ris_prog_tadir_line) WHERE program_name = @<where_used_object>-include.
+    LOOP AT where_used_components ASSIGNING FIELD-SYMBOL(<where_used_component>).
+      SELECT SINGLE * FROM ris_prog_tadir INTO @DATA(ris_prog_tadir_line) WHERE program_name = @<where_used_component>-include.
       IF sy-subrc EQ ok.
         CASE ris_prog_tadir_line-object_type.
           WHEN 'CLAS'.
@@ -708,7 +708,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
               IF parameter_usage_outpack_groupd EQ false.
 
                 " Method does not exist, create the class
-                " SAP_2_FAMIX_21      If an object is used by a class that is not selected, add this class to the model
+                " SAP_2_FAMIX_21      If a component is used by a class that is not selected, add this class to the model
                 " SAP_2_FAMIX_22      Do not assign classes that included due to usage to a package
 
                 famix_class->add( EXPORTING name = CONV string( ris_prog_tadir_line-object_name )
@@ -736,7 +736,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
               IF using_method_id EQ 0.
                 IF parameter_usage_outpack_groupd EQ false.
                   " Now also the method is to be created
-                  " SAP_2_FAMIX_23        If an object is used by a class that is not selected, add the using methods to the model
+                  " SAP_2_FAMIX_23       If a component is used by a class that is not selected, add the using methods to the model
 
                   using_method_id = famix_method->add( EXPORTING name = using_method ).
                   " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
@@ -821,61 +821,61 @@ CLASS cl_extract_sap IMPLEMENTATION.
     DATA(famix_package) = NEW cl_famix_package( model ).
 
     "! A temporal helper table used to find all packages (development classes) in the selection
-    DATA temp_dev_classes_to_search TYPE STANDARD TABLE OF devclass_type.
+    DATA temp_packages_to_search TYPE STANDARD TABLE OF package_type.
 
-    famix_package->add( name = CONV string( devclass_first-devclass ) ).
+    famix_package->add( name = CONV string( package_first-devclass ) ).
 
-    INSERT VALUE devclass_type( devclass = devclass_first-devclass ) INTO TABLE processed_dev_classes.
+    INSERT VALUE package_type( devclass = package_first-devclass ) INTO TABLE processed_packages.
 
-    temp_dev_classes_to_search = VALUE #( ( devclass = parameter_package_to_analyze ) ).
-    WHILE temp_dev_classes_to_search IS NOT INITIAL.
-      IF temp_dev_classes_to_search IS NOT INITIAL.
-        SELECT devclass, parentcl FROM tdevc INTO TABLE @DATA(devclasses)
-         FOR ALL ENTRIES IN @temp_dev_classes_to_search WHERE parentcl = @temp_dev_classes_to_search-devclass.
+    temp_packages_to_search = VALUE #( ( devclass = parameter_package_to_analyze ) ).
+    WHILE temp_packages_to_search IS NOT INITIAL.
+      IF temp_packages_to_search IS NOT INITIAL.
+        SELECT devclass, parentcl FROM tdevc INTO TABLE @DATA(packages)
+         FOR ALL ENTRIES IN @temp_packages_to_search WHERE parentcl = @temp_packages_to_search-devclass.
       ENDIF.
 
-      temp_dev_classes_to_search = VALUE #( ).
+      temp_packages_to_search = VALUE #( ).
 
-      LOOP AT devclasses INTO DATA(devclass).
+      LOOP AT packages INTO DATA(package).
 
-        INSERT VALUE devclass_type( devclass = devclass-devclass ) INTO TABLE processed_dev_classes.
+        INSERT VALUE package_type( devclass = package-devclass ) INTO TABLE processed_packages.
         IF sy-subrc EQ ok.
-          " New devclass
+          " New package
           " Search again
-          temp_dev_classes_to_search = VALUE #( BASE temp_dev_classes_to_search ( devclass = devclass-devclass ) ).
-          famix_package->add( name = CONV string( devclass-devclass ) ).
-          famix_package->set_parent_package( parent_package = CONV string( devclass-parentcl ) ).
+          temp_packages_to_search = VALUE #( BASE temp_packages_to_search ( devclass = package-devclass ) ).
+          famix_package->add( name = CONV string( package-devclass ) ).
+          famix_package->set_parent_package( parent_package = CONV string( package-parentcl ) ).
         ENDIF.
 
       ENDLOOP.
 
-      SORT temp_dev_classes_to_search.
-      DELETE ADJACENT DUPLICATES FROM temp_dev_classes_to_search.
+      SORT temp_packages_to_search.
+      DELETE ADJACENT DUPLICATES FROM temp_packages_to_search.
 
     ENDWHILE.
 
   ENDMETHOD.
 
 
-  METHOD _objects_to_analyze_by_tadir.
+  METHOD _components_to_analyze_tadir.
 
     " Loop over all packages to find classes and programms
 
     " SAP_2_FAMIX_1     Extract classes from Dictionary
     " SAP_2_FAMIX_2     Extract interfaces as FAMIX.Class with attribute isinterface
 
-    MOVE-CORRESPONDING tadir_objects TO classes.
+    MOVE-CORRESPONDING tadir_components TO classes.
 
-    LOOP AT tadir_objects ASSIGNING FIELD-SYMBOL(<tadir_object>).
+    LOOP AT tadir_components ASSIGNING FIELD-SYMBOL(<tadir_component>).
 
-      IF <tadir_object>-object EQ 'CLAS'
-      OR <tadir_object>-object EQ 'INTF'.
+      IF <tadir_component>-object EQ 'CLAS'
+      OR <tadir_component>-object EQ 'INTF'.
 
-        classes = VALUE #( BASE classes ( obj_name = <tadir_object>-obj_name ) ).
+        classes = VALUE #( BASE classes ( obj_name = <tadir_component>-obj_name ) ).
 
       ELSE.
 
-        programs = VALUE #( BASE programs ( program = <tadir_object>-obj_name ) ).
+        programs = VALUE #( BASE programs ( program = <tadir_component>-obj_name ) ).
 
       ENDIF.
 
@@ -897,10 +897,10 @@ CLASS cl_extract_sap IMPLEMENTATION.
       " SAP_2_FAMIX_5     Map program to FAMIX.Module
       DATA(module_reference) = famix_module->add( EXPORTING name = <program>-program ).
 
-      READ TABLE tadir_objects ASSIGNING FIELD-SYMBOL(<tadir_object>) WITH TABLE KEY obj_name = <program>-program.
+      READ TABLE tadir_components ASSIGNING FIELD-SYMBOL(<tadir_component>) WITH TABLE KEY obj_name = <program>-program.
       ASSERT sy-subrc EQ ok.
 
-      famix_module->set_parent_package( parent_package = CONV string( <tadir_object>-devclass ) ).
+      famix_module->set_parent_package( parent_package = CONV string( <tadir_component>-devclass ) ).
 
       DATA(program_analyzer) = NEW cl_program_analyzer( ).
 
@@ -922,11 +922,11 @@ CLASS cl_extract_sap IMPLEMENTATION.
       " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
       famix_class->add( name = CONV string( existing_class-class ) ).
 
-      READ TABLE tadir_objects ASSIGNING FIELD-SYMBOL(<tadir_object>) WITH TABLE KEY obj_name = existing_class-class.
+      READ TABLE tadir_components ASSIGNING FIELD-SYMBOL(<tadir_component>) WITH TABLE KEY obj_name = existing_class-class.
       ASSERT sy-subrc EQ ok.
 
-      famix_class->set_parent_package( parent_package = CONV string( <tadir_object>-devclass ) ).
-      IF <tadir_object>-object EQ 'INTF'.
+      famix_class->set_parent_package( parent_package = CONV string( <tadir_component>-devclass ) ).
+      IF <tadir_component>-object EQ 'INTF'.
         " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
         famix_class->is_interface( ).
       ENDIF.
@@ -1017,7 +1017,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     " Add to class components to model
 
-    LOOP AT class_components INTO class_component.
+    LOOP AT class_components INTO data(class_component).
 
       CASE class_component-cmptype.
         WHEN comptype_attribute. "Attribute
@@ -1107,28 +1107,28 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD _select_objects_in_package_and.
+  METHOD _select_components_in_package.
 
-    DATA first_devclass TYPE tdevc.
-    DATA processed_dev_classes TYPE cl_extract_sap=>processed_dev_classes_type.
+    DATA first_package TYPE tdevc.
+    DATA processed_packages TYPE cl_extract_sap=>processed_packages_type.
 
-    " Select objects in package and sub package
-    " SAP_2_FAMIX_3     Select all Objects in a package and the sub packages of this package
+    " Select components in package and sub package
+    " SAP_2_FAMIX_3     Select all components in a package and the sub packages of this package
 
-    SELECT SINGLE devclass, parentcl FROM tdevc INTO @first_devclass WHERE devclass = @parameter_package_to_analyze.
+    SELECT SINGLE devclass, parentcl FROM tdevc INTO @first_package WHERE devclass = @parameter_package_to_analyze.
     IF sy-subrc <> ok.
       WRITE: 'Package does not exist: ', parameter_package_to_analyze.
       return  = true.
     ENDIF.
 
-    processed_dev_classes = _determine_packages_to_analyze( model           = model
-                                                            devclass_first = first_devclass ).
+    processed_packages = _determine_packages_to_analyze( model           = model
+                                                            package_first = first_package ).
 
-    IF processed_dev_classes IS NOT INITIAL.
-      SELECT obj_name, object, devclass FROM tadir INTO TABLE @tadir_objects FOR ALL ENTRIES IN @processed_dev_classes
+    IF processed_packages IS NOT INITIAL.
+      SELECT obj_name, object, devclass FROM tadir INTO TABLE @tadir_components FOR ALL ENTRIES IN @processed_packages
         WHERE pgmid = 'R3TR'
           AND ( object = 'CLAS' OR object = 'INTF' OR object = 'PROG' )
-          AND devclass = @processed_dev_classes-devclass.
+          AND devclass = @processed_packages-devclass.
     ENDIF.
 
   ENDMETHOD.
