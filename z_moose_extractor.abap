@@ -42,7 +42,7 @@
 "!
 "! Short abbreviations are used if only locally used, in that case an ABAP Doc comments explains the variable
 "! See the start of the report for this
-REPORT YRW1_MOOSE_EXTRACTOR_ABAP.
+REPORT Z_MOOSE_EXTRACTOR_ABAP.
 
 "! To not compare sy-subrc to zero, but more readable to ok
 CONSTANTS ok TYPE i VALUE 0.
@@ -74,9 +74,9 @@ PARAMETERS: p_dm AS CHECKBOX DEFAULT 'X'.
 DATA parameter_usage_outpack_groupd TYPE bool.
 parameter_usage_outpack_groupd = p_dm.
 
-include yrw1_mse.
+include z_mse.
 
-include yrw1_famix.
+include z_famix.
 
 TYPES: BEGIN OF class_component_type,
          clsname TYPE seocompo-clsname,
