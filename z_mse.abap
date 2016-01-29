@@ -312,10 +312,11 @@ CLASS cl_output_model IMPLEMENTATION.
 
     IF parameter_download_file EQ true.
 
-      cl_gui_frontend_services=>file_save_dialog( CHANGING filename    = filename       " File Name to Save
-                                                           path        = pathname       " Path to File
-                                                           fullpath    = fullpath       " Path + File Name
-                                                           user_action = user_action ). " User Action (C Class Const ACTION_OK, ACTION_OVERWRITE etc)
+      cl_gui_frontend_services=>file_save_dialog( EXPORTING default_extension = 'mse'
+                                                  CHANGING  filename    = filename       " File Name to Save
+                                                            path        = pathname       " Path to File
+                                                            fullpath    = fullpath       " Path + File Name
+                                                            user_action = user_action ). " User Action (C Class Const ACTION_OK, ACTION_OVERWRITE etc)
 
       IF user_action = cl_gui_frontend_services=>action_cancel.
         WRITE: / 'Canceled by user'.
