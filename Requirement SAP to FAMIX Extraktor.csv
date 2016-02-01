@@ -1,4 +1,4 @@
-"Attention, insert new columns only after column ""Status Requirement"", because otherwise the macros work wrong";;;;;;;;
+Attention, insert new columns only after column Status Requirement, because otherwise the macros work wrong;;;;;;;;
 Attention, the header has to lay in line 10, because the macros require this;;;;;;;;
 ;;;;;;;;
 ;;;;;;;;
