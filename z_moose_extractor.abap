@@ -42,10 +42,16 @@
 "!
 "! Short abbreviations are used if only locally used, in that case an ABAP Doc comments explains the variable
 "! See the start of the report for this
-REPORT Z_MOOSE_EXTRACTOR_ABAP.
+"!
+"! 01.02.2016 21:53 Rainer Winkler
+"!
+REPORT Z_MOOSE_EXTRACTOR.
 
 "! To not compare sy-subrc to zero, but more readable to ok
 CONSTANTS ok TYPE i VALUE 0.
+
+"! To compare with ID that are returned from methods where the value 0 denotes not found
+constants not_found TYPE i VALUE 0.
 "! Redefines abap_bool to simplify coding (Not always reading abap_...)
 TYPES bool TYPE abap_bool.
 CONSTANTS:
@@ -118,16 +124,7 @@ CLASS cl_extract_sap DEFINITION.
     CONSTANTS comptype_attribute TYPE seocmptype VALUE '0'.
     CONSTANTS comptype_method TYPE seocmptype VALUE '1'.
 
-    "! Determine usages for components
-    "! If using components are not part of the model, they are either added or replaced by a dummy component
-    CLASS-METHODS _determine_usages
-      IMPORTING
-        famix_class      TYPE REF TO cl_famix_class
-        class_component  TYPE class_component_type
-        famix_method     TYPE REF TO cl_famix_method
-        famix_invocation TYPE REF TO cl_famix_invocation
-        famix_access     TYPE REF TO cl_famix_access
-        used_id          TYPE i.
+
 
     CLASS-METHODS _set_default_language
       IMPORTING
@@ -140,83 +137,80 @@ CLASS cl_extract_sap DEFINITION.
       processed_packages_type TYPE HASHED TABLE OF package_type WITH UNIQUE KEY devclass.
     CLASS-METHODS _determine_packages_to_analyze
       IMPORTING
-        model                       TYPE REF TO cl_model
-        package_first              TYPE tdevc
+        famix_package             TYPE REF TO cl_famix_package
+        package_first             TYPE tdevc
       RETURNING
         VALUE(processed_packages) TYPE processed_packages_type.
     TYPES:
-      tadir_components_type TYPE HASHED TABLE OF tadir_component_type WITH UNIQUE KEY obj_name,
+      tadir_components_type TYPE HASHED TABLE OF tadir_component_type WITH UNIQUE KEY object obj_name,
       classes_type     TYPE STANDARD TABLE OF class_interface_type WITH DEFAULT KEY,
       programs_type      TYPE STANDARD TABLE OF program_type WITH DEFAULT KEY.
     CLASS-METHODS _components_to_analyze_tadir
       IMPORTING
         tadir_components TYPE tadir_components_type
       EXPORTING
-        classes     TYPE classes_type
-        programs      TYPE programs_type.
-    TYPES:
-      tadir_components_2_type TYPE HASHED TABLE OF tadir_component_type WITH UNIQUE KEY obj_name,
-      programs_1_type      TYPE STANDARD TABLE OF program_type WITH DEFAULT KEY.
+        value(classes)     TYPE classes_type
+        value(programs)      TYPE programs_type.
     CLASS-METHODS _read_all_programs
       IMPORTING
-        tadir_components TYPE tadir_components_2_type
-        programs      TYPE programs_1_type
+        tadir_components TYPE tadir_components_type
+        programs      TYPE programs_type
       CHANGING
         model          TYPE REF TO cl_model.
-    TYPES:
-      tadir_components_3_type  TYPE HASHED TABLE OF tadir_component_type WITH UNIQUE KEY obj_name,
-      existing_classes_type TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
+    TYPES:existing_classes_type TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
     CLASS-METHODS _add_classes_to_model
       IMPORTING
-        famix_class        TYPE REF TO cl_famix_class
-        tadir_components     TYPE tadir_components_3_type
-        existing_classes  TYPE existing_classes_type.
-    TYPES:
-      existing_classes_1_type TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
+        famix_package    TYPE REF TO cl_famix_package
+        famix_class      TYPE REF TO cl_famix_class
+        tadir_components TYPE tadir_components_type
+        existing_classes TYPE existing_classes_type.
     CLASS-METHODS _determine_inheritances_betwee
       IMPORTING
         famix_inheritance        TYPE REF TO cl_famix_inheritance
-        existing_classes        TYPE existing_classes_1_type.
-    TYPES:
-      existing_classes_2_type TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class,
-      class_components_type   TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
+        existing_classes        TYPE existing_classes_type.
+    TYPES: class_components_type   TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
     CLASS-METHODS _determine_class_components
       IMPORTING
-        existing_classes        TYPE existing_classes_2_type
+        existing_classes        TYPE existing_classes_type
       RETURNING
         VALUE(class_components) TYPE class_components_type.
-    TYPES:
-      class_components_1_type TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
     CLASS-METHODS _add_to_class_components_to_mo
       IMPORTING
-        class_components       TYPE class_components_1_type
+        class_components       TYPE class_components_type
         famix_method           TYPE REF TO cl_famix_method
         famix_attribute        TYPE REF TO cl_famix_attribute.
-    TYPES:
-      class_components_2_type TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
     CLASS-METHODS _determine_usage_of_methods
       IMPORTING
         famix_class       TYPE REF TO cl_famix_class
-        class_components TYPE class_components_2_type
+        class_components TYPE class_components_type
         famix_method      TYPE REF TO cl_famix_method
         famix_attribute   TYPE REF TO cl_famix_attribute
         famix_invocation  TYPE REF TO cl_famix_invocation
-        famix_access      TYPE REF TO cl_famix_access.
+        famix_access      TYPE REF TO cl_famix_access
+      RETURNING VALUE(new_tadir_components) type tadir_components_type.
+    "! Determine usages for components
+    "! If using components are not part of the model, they are either added or replaced by a dummy component
+    CLASS-METHODS _determine_usages
+      IMPORTING
+        famix_class      TYPE REF TO cl_famix_class
+        class_component  TYPE class_component_type
+        famix_method     TYPE REF TO cl_famix_method
+        famix_invocation TYPE REF TO cl_famix_invocation
+        famix_access     TYPE REF TO cl_famix_access
+        used_id          TYPE i
+      RETURNING VALUE(new_tadir_components) type tadir_components_type.
     TYPES:
-      classes_4_type        TYPE STANDARD TABLE OF class_interface_type WITH DEFAULT KEY,
-      existing_classes_3_type TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
+      classes_4_type        TYPE STANDARD TABLE OF class_interface_type WITH DEFAULT KEY.
     CLASS-METHODS _read_all_classes
       IMPORTING
         classes               TYPE classes_4_type
       RETURNING
-        VALUE(existing_classes) TYPE existing_classes_3_type.
-    TYPES:
-      tadir_components_4_type TYPE HASHED TABLE OF tadir_component_type WITH UNIQUE KEY obj_name.
+        VALUE(existing_classes) TYPE existing_classes_type.
     CLASS-METHODS _select_components_in_package
       IMPORTING
-        model          TYPE REF TO cl_model
+        famix_package type ref to cl_famix_package
       EXPORTING
-        tadir_components TYPE tadir_components_4_type
+        tadir_components TYPE tadir_components_type
         return        TYPE bool.
 
 ENDCLASS.
@@ -600,7 +594,9 @@ CLASS cl_extract_sap IMPLEMENTATION.
             devclass TYPE devclass,
           END OF package_type.
 
-    DATA tadir_components TYPE HASHED TABLE OF tadir_component_type WITH UNIQUE KEY obj_name.
+    DATA tadir_components TYPE tadir_components_type.
+    DATA new_tadir_components TYPE tadir_components_type.
+    DATA processed_tadir_components TYPE tadir_components_type.
     DATA classes TYPE STANDARD TABLE OF class_interface_type.
     DATA programs TYPE STANDARD TABLE OF program_type.
     DATA existing_classes TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
@@ -612,6 +608,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
     " Do not use singleton pattern, but define each instance only one time at the start
 
     DATA(model) = NEW cl_model( ).
+    DATA(famix_package) = NEW cl_famix_package( model ).
     DATA(famix_class) = NEW cl_famix_class( model ).
     DATA(famix_inheritance) = NEW cl_famix_inheritance( model ).
     DATA(famix_method) = NEW cl_famix_method( model ).
@@ -623,43 +620,84 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     DATA do_return TYPE bool.
 
-    _select_components_in_package( EXPORTING model = model
-                                    IMPORTING tadir_components = tadir_components
-                                              return        = do_return ).
+    _select_components_in_package( EXPORTING famix_package    = famix_package
+                                   IMPORTING tadir_components = tadir_components
+                                             return           = do_return ).
 
     IF do_return EQ true.
       RETURN.
     ENDIF.
 
-   _components_to_analyze_tadir( EXPORTING tadir_components = tadir_components
-                                 IMPORTING classes = classes
-                                           programs  = programs ).
+    WHILE lines( tadir_components ) <> 0.
 
-   _read_all_programs( EXPORTING tadir_components = tadir_components
-                                 programs      = programs
-                        CHANGING model = model ).
+      _components_to_analyze_tadir( EXPORTING tadir_components = tadir_components
+                                    IMPORTING classes = classes
+                                              programs  = programs ).
 
-    existing_classes = _read_all_classes( classes ).
+      _read_all_programs( EXPORTING tadir_components = tadir_components
+                                    programs      = programs
+                           CHANGING model = model ).
 
-    _add_classes_to_model( famix_class       = famix_class
-                           tadir_components    = tadir_components
-                           existing_classes = existing_classes ).
+      existing_classes = _read_all_classes( classes ).
 
-    _determine_inheritances_betwee( famix_inheritance             = famix_inheritance
-                                    existing_classes = existing_classes ).
+      _add_classes_to_model( famix_package     = famix_package
+                             famix_class       = famix_class
+                             tadir_components  = tadir_components
+                             existing_classes = existing_classes ).
 
-    class_components = _determine_class_components( existing_classes ).
+      _determine_inheritances_betwee( famix_inheritance             = famix_inheritance
+                                      existing_classes = existing_classes ).
 
-    _add_to_class_components_to_mo( class_components = class_components
-                                    famix_method     = famix_method
-                                    famix_attribute  = famix_attribute ).
+      class_components = _determine_class_components( existing_classes ).
 
-    _determine_usage_of_methods( famix_class       = famix_class
-                                 class_components = class_components
-                                 famix_method      = famix_method
-                                 famix_attribute   = famix_attribute
-                                 famix_invocation  = famix_invocation
-                                 famix_access      = famix_access ).
+      _add_to_class_components_to_mo( class_components = class_components
+                                      famix_method     = famix_method
+                                      famix_attribute  = famix_attribute ).
+
+      new_tadir_components = _determine_usage_of_methods( famix_class       = famix_class
+                                                          class_components = class_components
+                                                          famix_method      = famix_method
+                                                          famix_attribute   = famix_attribute
+                                                          famix_invocation  = famix_invocation
+                                                          famix_access      = famix_access ).
+
+      " Determine package for new components
+
+      " TBD Find more performant solution
+
+      LOOP AT new_tadir_components ASSIGNING FIELD-SYMBOL(<tadir_component>).
+
+        SELECT SINGLE devclass FROM tadir INTO @<tadir_component>-devclass
+          WHERE pgmid = 'R3TR'
+            AND object = @<tadir_component>-object
+            AND obj_name = @<tadir_component>-obj_name.
+
+        IF sy-subrc <> ok.
+          " TBD
+          " Report errors
+          DELETE new_tadir_components WHERE object = <tadir_component>-object
+                                        AND obj_name = <tadir_component>-obj_name.
+        ENDIF.
+
+      ENDLOOP.
+
+      INSERT LINES OF tadir_components INTO TABLE processed_tadir_components.
+
+      tadir_components = VALUE #( ).
+
+      LOOP AT new_tadir_components ASSIGNING FIELD-SYMBOL(<tadir_component_2>).
+
+        READ TABLE processed_tadir_components TRANSPORTING NO FIELDS WITH TABLE KEY object = <tadir_component_2>-object obj_name = <tadir_component_2>-obj_name.
+
+        IF sy-subrc <> ok.
+
+          tadir_components = VALUE #( BASE tadir_components ( <tadir_component_2> ) ).
+
+        ENDIF.
+
+      ENDLOOP.
+
+    ENDWHILE.
 
     model->make_mse( IMPORTING mse_model = mse_model ).
 
@@ -713,6 +751,15 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
                 famix_class->add( EXPORTING name = CONV string( ris_prog_tadir_line-object_name )
                                   IMPORTING exists_already_with_id = DATA(exists_already_with_id) ).
+
+                IF exists_already_with_id IS INITIAL.
+
+                  " SAP_2_FAMIX_47      If no dummy class is specified in case a using class is not in the initial selection, analyze this classes also
+
+                  new_tadir_components = VALUE #( BASE new_tadir_components (  obj_name = ris_prog_tadir_line-object_name
+                                                                               object   = 'CLAS' ) ).
+
+                ENDIF.
 
               ELSE.
                 " SAP_2_FAMIX_35        Add a usage to a single dummy class "OTHER_SAP_CLASS" if required by a parameter
@@ -818,8 +865,6 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     " Determine packages to analyze
 
-    DATA(famix_package) = NEW cl_famix_package( model ).
-
     "! A temporal helper table used to find all packages (development classes) in the selection
     DATA temp_packages_to_search TYPE STANDARD TABLE OF package_type.
 
@@ -897,7 +942,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
       " SAP_2_FAMIX_5     Map program to FAMIX.Module
       DATA(module_reference) = famix_module->add( EXPORTING name = <program>-program ).
 
-      READ TABLE tadir_components ASSIGNING FIELD-SYMBOL(<tadir_component>) WITH TABLE KEY obj_name = <program>-program.
+      READ TABLE tadir_components ASSIGNING FIELD-SYMBOL(<tadir_component>) WITH TABLE KEY object = 'PROG' obj_name = <program>-program.
       ASSERT sy-subrc EQ ok.
 
       famix_module->set_parent_package( parent_package = CONV string( <tadir_component>-devclass ) ).
@@ -922,8 +967,15 @@ CLASS cl_extract_sap IMPLEMENTATION.
       " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
       famix_class->add( name = CONV string( existing_class-class ) ).
 
-      READ TABLE tadir_components ASSIGNING FIELD-SYMBOL(<tadir_component>) WITH TABLE KEY obj_name = existing_class-class.
-      ASSERT sy-subrc EQ ok.
+      READ TABLE tadir_components ASSIGNING FIELD-SYMBOL(<tadir_component>) WITH TABLE KEY object = 'CLAS' obj_name = existing_class-class.
+      IF sy-subrc <> ok.
+        " It may be an interface
+        READ TABLE tadir_components ASSIGNING <tadir_component> WITH TABLE KEY object = 'INTF' obj_name = existing_class-class.
+        ASSERT sy-subrc EQ ok.
+
+      ENDIF.
+
+      famix_package->add( EXPORTING name = conv string( <tadir_component>-devclass ) ).
 
       famix_class->set_parent_package( parent_package = CONV string( <tadir_component>-devclass ) ).
       IF <tadir_component>-object EQ 'INTF'.
@@ -1025,29 +1077,41 @@ CLASS cl_extract_sap IMPLEMENTATION.
           " SAP_2_FAMIX_13        Mapp attributes of classes to FAMIX.Attribute
           " SAP_2_FAMIX_14        Mapp attributes of interfaces to FAMIX.Attribute
 
-          famix_attribute->add( name = CONV string( class_component-cmpname ) ).
-          famix_attribute->set_parent_type(
-            EXPORTING
-              parent_element = 'FAMIX.Class'
-              parent_name    = CONV string( class_component-clsname ) ).
-          famix_attribute->store_id( EXPORTING class     = CONV string( class_component-clsname )
-                                               attribute = CONV string( class_component-cmpname ) ).
+          DATA(existing_id) = famix_attribute->get_id( EXPORTING class     = CONV string( class_component-clsname )
+                                                                 attribute = CONV string( class_component-cmpname ) ).
+          IF existing_id EQ not_found.
+
+            famix_attribute->add( name = CONV string( class_component-cmpname ) ).
+            famix_attribute->set_parent_type(
+              EXPORTING
+                parent_element = 'FAMIX.Class'
+                parent_name    = CONV string( class_component-clsname ) ).
+            famix_attribute->store_id( EXPORTING class     = CONV string( class_component-clsname )
+                                                 attribute = CONV string( class_component-cmpname ) ).
+
+          ENDIF.
 
         WHEN comptype_method. "Method
 
           " SAP_2_FAMIX_15        Map methods of classes to FAMIX.Method
           " SAP_2_FAMIX_16        Map methods of interfaces to FAMIX.Method
 
-          famix_method->add( name = CONV string( class_component-cmpname ) ).
-          " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
-          " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
-          famix_method->set_signature( signature = CONV string( class_component-cmpname ) ).
-          famix_method->set_parent_type(
-            EXPORTING
-              parent_element = 'FAMIX.Class'
-              parent_name    = CONV string( class_component-clsname ) ).
-          famix_method->store_id( EXPORTING class  = CONV string( class_component-clsname )
-                                            method = CONV string( class_component-cmpname ) ).
+          existing_id = famix_method->get_id( class  = CONV string( class_component-clsname )
+                                              method = CONV string( class_component-cmpname ) ).
+
+          IF existing_id EQ not_found.
+
+            famix_method->add( name = CONV string( class_component-cmpname ) ).
+            " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
+            " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
+            famix_method->set_signature( signature = CONV string( class_component-cmpname ) ).
+            famix_method->set_parent_type(
+              EXPORTING
+                parent_element = 'FAMIX.Class'
+                parent_name    = CONV string( class_component-clsname ) ).
+            famix_method->store_id( EXPORTING class  = CONV string( class_component-clsname )
+                                              method = CONV string( class_component-cmpname ) ).
+          ENDIF.
         WHEN 2. "Event
         WHEN 3. "Type
         WHEN OTHERS.
@@ -1082,12 +1146,12 @@ CLASS cl_extract_sap IMPLEMENTATION.
           ASSERT 1 = 2.
       ENDCASE.
 
-      _determine_usages( famix_class      = famix_class
-                         class_component  = class_component
-                         famix_method     = famix_method
-                         famix_invocation = famix_invocation
-                         famix_access     = famix_access
-                         used_id          = used_id ).
+     insert lines of _determine_usages( famix_class      = famix_class
+                                        class_component  = class_component
+                                        famix_method     = famix_method
+                                        famix_invocation = famix_invocation
+                                        famix_access     = famix_access
+                                        used_id          = used_id ) into table new_tadir_components.
 
     ENDLOOP.
 
@@ -1121,8 +1185,8 @@ CLASS cl_extract_sap IMPLEMENTATION.
       return  = true.
     ENDIF.
 
-    processed_packages = _determine_packages_to_analyze( model           = model
-                                                            package_first = first_package ).
+    processed_packages = _determine_packages_to_analyze( famix_package = famix_package
+                                                         package_first = first_package ).
 
     IF processed_packages IS NOT INITIAL.
       SELECT obj_name, object, devclass FROM tadir INTO TABLE @tadir_components FOR ALL ENTRIES IN @processed_packages
