@@ -34,10 +34,10 @@ SAP_2_FAMIX_13;;Mapp attributes of classes to FAMIX.Attribute;;Requirement;devel
 ;;;;;;;;
 ;1.1.3;Common logic in case objects are used by classes;;Header Level 3;;;;
 SAP_2_FAMIX_21;;If a component is used by a class that is not selected, add this class to the model;;Requirement;developed;Requirement Confirmed;;
-SAP_2_FAMIX_35;;"Add a usage to a single dummy class ""OTHER_SAP_CLASS"" if required by a parameter";;Requirement;developed;;;
+SAP_2_FAMIX_35;;Add a usage to a single dummy class OTHER_SAP_CLASS if required by a parameter;;Requirement;developed;;;
 SAP_2_FAMIX_22;;Do not assign classes that included due to usage to a package;;Requirement;developed;Check Requirement;;
 SAP_2_FAMIX_23;;If a component is used by a class that is not selected, add the using methods to the model;Therefore some methods may not be included in the model;Requirement;developed;Requirement Confirmed;;
-SAP_2_FAMIX_36;;"Add a usage to a single dummy method ""OTHER_SAP_METHOD"" if required by a parameter";;Requirement;developed;Requirement Confirmed;;
+SAP_2_FAMIX_36;;Add a usage to a single dummy method OTHER_SAP_METHOD if required by a parameter;;Requirement;developed;Requirement Confirmed;;
 ;;;;;;;;
 ;1.1.4;Usage of ABAP Classes;;Header Level 3;;;;
 SAP_2_FAMIX_17;;Determine usage of class methods by programs and classes;;Requirement;developed;Requirement Confirmed;;
