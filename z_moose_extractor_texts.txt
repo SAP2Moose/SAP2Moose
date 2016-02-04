@@ -5,3 +5,9 @@ P_DOWN	Download model to file
 P_LIST	List Tokens of selctd programs
 P_PACK	Package to be analyzed
 P_SAP	Extract from SAP
+
+Documentation:
+
+Parameters:
+
+Usages outside package grouped - If not set, using components are included into the model. The program searches also for usages of this components until it finds no further using components.

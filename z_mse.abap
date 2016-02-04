@@ -21,7 +21,7 @@
 *OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 *SOFTWARE.
 
-PARAMETERS p_down AS CHECKBOX DEFAULT ' '.
+PARAMETERS p_down AS CHECKBOX DEFAULT 'X'.
 "! Download model to file
 data parameter_download_file type bool.
 parameter_download_file = p_down.
@@ -295,7 +295,7 @@ ENDCLASS.
 
 CLASS cl_output_model DEFINITION.
   PUBLIC SECTION.
-    CLASS-METHODS make
+    METHODS make
       IMPORTING
         mse_model TYPE cl_model=>lines_type.
 ENDCLASS.
