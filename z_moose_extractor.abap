@@ -43,7 +43,7 @@
 "! Short abbreviations are used if only locally used, in that case an ABAP Doc comments explains the variable
 "! See the start of the report for this
 "!
-"! 04.02.2016 21:00 issue7 Rainer Winkler
+"! 05.02.2016 13:46 issue7 Rainer Winkler
 "!
 REPORT Z_MOOSE_EXTRACTOR.
 
@@ -90,8 +90,8 @@ TYPES: BEGIN OF class_component_type,
          cmpname TYPE seocompo-cmpname,
          cmptype TYPE seocompo-cmptype,
        END OF class_component_type.
-       
-types component_type type string.       
+
+types component_type type string.
 
 TYPES: BEGIN OF tadir_component_type,
           component type component_type,
@@ -101,14 +101,14 @@ TYPES: BEGIN OF tadir_component_type,
           "object   TYPE trobjtype,
           "devclass TYPE devclass,
        END OF tadir_component_type.
-       
-types tadir_components_type TYPE HASHED TABLE OF tadir_component_type WITH UNIQUE KEY component component_name. 
+
+types tadir_components_type TYPE HASHED TABLE OF tadir_component_type WITH UNIQUE KEY component component_name.
 
 types: BEGIN OF map_tadir_component_type,
          object   TYPE trobjtype, " The SAP TADIR Name
          component type component_type, " As called here
-       END OF map_tadir_component_type.  
-       
+       END OF map_tadir_component_type.
+
 TYPES tadir_components_mapping_type TYPE HASHED TABLE OF map_tadir_component_type WITH UNIQUE KEY object
                                                                             WITH UNIQUE HASHED KEY comp COMPONENTS component.
 
@@ -137,12 +137,12 @@ CLASS cl_extract_sap DEFINITION.
                 mse_model           TYPE cl_model=>lines_type
       RETURNING VALUE(nothing_done) TYPE bool.
   PRIVATE SECTION.
-    
+
     data g_tadir_components_mapping type tadir_components_mapping_type.
-    
+
     CONSTANTS comptype_attribute TYPE seocmptype VALUE '0'.
     CONSTANTS comptype_method TYPE seocmptype VALUE '1'.
-   
+
 
 
     METHODS _set_default_language
@@ -634,10 +634,11 @@ CLASS cl_extract_sap IMPLEMENTATION.
     DATA(famix_attribute) = NEW cl_famix_attribute( model ).
     DATA(famix_invocation) = NEW cl_famix_invocation( model ).
     DATA(famix_access) = NEW cl_famix_access( model ).
-    
+
     " Set TADIR mapping
-    g_tadir_components_mapping = VALUE #( ( object = 'CLAS' component = 'GlobClass' ) 
-                                          ( object = 'INTF' component = 'GlobIntf' ) ).
+    g_tadir_components_mapping = VALUE #( ( object = 'CLAS' component = 'GlobClass' )
+                                          ( object = 'INTF' component = 'GlobIntf' )
+                                          ( object = 'PROG' component = 'ABAPProgramm') ).
 
     _set_default_language( model ).
 
@@ -713,7 +714,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       LOOP AT new_tadir_components ASSIGNING FIELD-SYMBOL(<tadir_component_2>).
 
-        READ TABLE processed_tadir_components TRANSPORTING NO FIELDS WITH TABLE KEY object = <tadir_component_2>-object obj_name = <tadir_component_2>-obj_name.
+        READ TABLE processed_tadir_components TRANSPORTING NO FIELDS WITH TABLE KEY component = <tadir_component_2>-component component_name = <tadir_component_2>-component_name.
 
         IF sy-subrc <> ok.
 
@@ -782,8 +783,8 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
                   " SAP_2_FAMIX_47      If no dummy class is specified in case a using class is not in the initial selection, analyze this classes also
 
-                  new_tadir_components = VALUE #( BASE new_tadir_components (  obj_name = ris_prog_tadir_line-object_name
-                                                                               object   = 'CLAS' ) ).
+                  new_tadir_components = VALUE #( BASE new_tadir_components (  component_name = ris_prog_tadir_line-object_name
+                                                                               component   = g_tadir_components_mapping[ object = 'CLAS' ]-component ) ).
 
                 ENDIF.
 
@@ -939,14 +940,14 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     LOOP AT tadir_components ASSIGNING FIELD-SYMBOL(<tadir_component>).
 
-      IF <tadir_component>-object EQ 'CLAS'
-      OR <tadir_component>-object EQ 'INTF'.
+      IF <tadir_component>-component EQ 'GlobClass'
+      OR <tadir_component>-component EQ 'GlobIntf'.
 
-        classes = VALUE #( BASE classes ( obj_name = <tadir_component>-obj_name ) ).
+        classes = VALUE #( BASE classes ( obj_name = <tadir_component>-component_name ) ).
 
       ELSE.
 
-        programs = VALUE #( BASE programs ( program = <tadir_component>-obj_name ) ).
+        programs = VALUE #( BASE programs ( program = <tadir_component>-component_name ) ).
 
       ENDIF.
 
@@ -968,10 +969,10 @@ CLASS cl_extract_sap IMPLEMENTATION.
       " SAP_2_FAMIX_5     Map program to FAMIX.Module
       DATA(module_reference) = famix_module->add( EXPORTING name = <program>-program ).
 
-      READ TABLE tadir_components ASSIGNING FIELD-SYMBOL(<tadir_component>) WITH TABLE KEY object = 'PROG' obj_name = <program>-program.
+      READ TABLE tadir_components ASSIGNING FIELD-SYMBOL(<tadir_component>) WITH TABLE KEY component = 'ABAPProgramm' component_name = <program>-program.
       ASSERT sy-subrc EQ ok.
 
-      famix_module->set_parent_package( parent_package = CONV string( <tadir_component>-devclass ) ).
+      famix_module->set_parent_package( parent_package = CONV string( <tadir_component>-package ) ).
 
       DATA(program_analyzer) = NEW cl_program_analyzer( ).
 
@@ -993,18 +994,18 @@ CLASS cl_extract_sap IMPLEMENTATION.
       " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
       famix_class->add( name = CONV string( existing_class-class ) ).
 
-      READ TABLE tadir_components ASSIGNING FIELD-SYMBOL(<tadir_component>) WITH TABLE KEY object = 'CLAS' obj_name = existing_class-class.
+      READ TABLE tadir_components ASSIGNING FIELD-SYMBOL(<tadir_component>) WITH TABLE KEY component = 'GlobClass' component_name = existing_class-class.
       IF sy-subrc <> ok.
         " It may be an interface
-        READ TABLE tadir_components ASSIGNING <tadir_component> WITH TABLE KEY object = 'INTF' obj_name = existing_class-class.
+        READ TABLE tadir_components ASSIGNING <tadir_component> WITH TABLE KEY component = 'GlobIntf' component_name = existing_class-class.
         ASSERT sy-subrc EQ ok.
 
       ENDIF.
 
-      famix_package->add( EXPORTING name = conv string( <tadir_component>-devclass ) ).
+      famix_package->add( EXPORTING name = conv string( <tadir_component>-package ) ).
 
-      famix_class->set_parent_package( parent_package = CONV string( <tadir_component>-devclass ) ).
-      IF <tadir_component>-object EQ 'INTF'.
+      famix_class->set_parent_package( parent_package = CONV string( <tadir_component>-package ) ).
+      IF <tadir_component>-component EQ 'GlobIntf'.
         " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
         famix_class->is_interface( ).
       ENDIF.
@@ -1215,10 +1216,22 @@ CLASS cl_extract_sap IMPLEMENTATION.
                                                          package_first = first_package ).
 
     IF processed_packages IS NOT INITIAL.
-      SELECT obj_name, object, devclass FROM tadir INTO TABLE @tadir_components FOR ALL ENTRIES IN @processed_packages
+*      SELECT obj_name, object, devclass FROM tadir INTO TABLE @tadir_components FOR ALL ENTRIES IN @processed_packages
+*        WHERE pgmid = 'R3TR'
+*          AND ( object = 'CLAS' OR object = 'INTF' OR object = 'PROG' )
+*          AND devclass = @processed_packages-devclass.
+
+      SELECT obj_name, object, devclass FROM tadir INTO @data(tadir_component) FOR ALL ENTRIES IN @processed_packages
         WHERE pgmid = 'R3TR'
           AND ( object = 'CLAS' OR object = 'INTF' OR object = 'PROG' )
           AND devclass = @processed_packages-devclass.
+
+      tadir_components = value #( base tadir_components ( component = g_tadir_components_mapping[ object = tadir_component-object ]-component
+                                                          component_name = tadir_component-obj_name
+                                                          package = tadir_component-devclass ) ).
+
+      ENDSELECT.
+
     ENDIF.
 
   ENDMETHOD.
