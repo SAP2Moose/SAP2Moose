@@ -1,10 +1,26 @@
 Selection texts:
 
+P_CLAS	Select global classes
 P_DM	Usages outside package grouped
 P_DOWN	Download model to file
+P_INTF	Select global interfaces
+P_IPROG	Read report internal component
 P_LIST	List Tokens of selctd programs
 P_PACK	Package to be analyzed
+P_PROG	Select programs
 P_SAP	Extract from SAP
+RB_FNAME	Filter using component name
+RB_FPACK	Filter using top package
+S_COMPSN	Component names
+S_PACK	Packages
+
+Text Symbols (0-99: Belong to main program):
+001	Select global source for model data
+002	Select SAP components that are part of initial selection
+003	Handle using components
+004	Infos during processing
+Text Symbols (100-199: Belong to Include Z_MSE)
+100	Settings for processing modelPA
 
 Documentation:
 

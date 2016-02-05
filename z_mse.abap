@@ -21,10 +21,13 @@
 *OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 *SOFTWARE.
 
+SELECTION-SCREEN BEGIN OF BLOCK bl_model_settings WITH FRAME TITLE text-100.
+
 PARAMETERS p_down AS CHECKBOX DEFAULT 'X'.
 "! Download model to file
-data parameter_download_file type bool.
-parameter_download_file = p_down.
+DATA g_parameter_download_file TYPE bool.
+g_parameter_download_file = p_down.
+SELECTION-SCREEN END OF BLOCK bl_model_settings.
 
 " Begin Model
 
@@ -53,7 +56,7 @@ CLASS cl_model DEFINITION.
                 can_be_referenced_by_name     TYPE bool
                 name                          TYPE string OPTIONAL
       EXPORTING VALUE(exists_already_with_id) TYPE i
-      RETURNING VALUE(processed_id)                     TYPE i.
+      RETURNING VALUE(processed_id)           TYPE i.
 
     "! Generates a string with a valid MSE file
     METHODS make_mse
@@ -310,7 +313,7 @@ CLASS cl_output_model IMPLEMENTATION.
           fullpath    TYPE string,
           user_action TYPE i.
 
-    IF parameter_download_file EQ true.
+    IF g_parameter_download_file EQ true.
 
       cl_gui_frontend_services=>file_save_dialog( EXPORTING default_extension = 'mse'
                                                   CHANGING  filename    = filename       " File Name to Save
@@ -322,8 +325,11 @@ CLASS cl_output_model IMPLEMENTATION.
         WRITE: / 'Canceled by user'.
       ELSE.
 
-        CALL FUNCTION 'GUI_DOWNLOAD' EXPORTING filename = fullpath
-                                        TABLES data_tab = mse_model.
+        CALL FUNCTION 'GUI_DOWNLOAD'
+          EXPORTING
+            filename = fullpath
+          TABLES
+            data_tab = mse_model.
 
       ENDIF.
 

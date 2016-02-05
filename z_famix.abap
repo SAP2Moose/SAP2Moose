@@ -213,11 +213,11 @@ CLASS cl_famix_container_entity DEFINITION INHERITING FROM cl_famix_named_entity
     "! @parameter container_element | the FAMIX element of the Container
     "! @parameter parent_container | the name of the Container
     METHODS set_container IMPORTING container_element TYPE string
-                                    parent_container TYPE string.
+                                    parent_container  TYPE string.
     "! Set the container an element is in using the reference
     "! @parameter container_element | the FAMIX element of the Container
     "! @parameter parent_container_id | the id of the Container
-    METHODS set_container_by_id IMPORTING container_element TYPE string
+    METHODS set_container_by_id IMPORTING container_element   TYPE string
                                           parent_container_id TYPE i.
   PROTECTED SECTION.
 
