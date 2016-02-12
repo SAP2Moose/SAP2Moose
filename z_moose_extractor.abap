@@ -43,7 +43,7 @@
 "! Short abbreviations are used if only locally used, in that case an ABAP Doc comments explains the variable
 "! See the start of the report for this
 "!
-"! 05.02.2016 16:47 issue7 Rainer Winkler
+"! 12.02.2016 11:03 issue20 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -121,6 +121,8 @@ SELECTION-SCREEN END OF BLOCK block_infos.
 include z_mse.
 
 include z_famix.
+
+include z_sap_2_famix
 
 TYPES: BEGIN OF class_component_type,
          clsname TYPE seocompo-clsname,
@@ -216,7 +218,7 @@ CLASS cl_extract_sap DEFINITION.
     METHODS _add_classes_to_model
       IMPORTING
         famix_package    TYPE REF TO cl_famix_package
-        famix_class      TYPE REF TO cl_famix_class
+        sap_class        TYPE REF TO cl_sap_class
         components_infos TYPE components_infos_type
         existing_classes TYPE existing_classes_type.
     METHODS _determine_inheritances_betwee
@@ -236,7 +238,7 @@ CLASS cl_extract_sap DEFINITION.
         famix_attribute  TYPE REF TO cl_famix_attribute.
     METHODS _determine_usage_of_methods
       IMPORTING
-                famix_class                 TYPE REF TO cl_famix_class
+                sap_class                   TYPE REF TO cl_sap_class
                 class_components            TYPE class_components_type
                 famix_method                TYPE REF TO cl_famix_method
                 famix_attribute             TYPE REF TO cl_famix_attribute
@@ -247,7 +249,7 @@ CLASS cl_extract_sap DEFINITION.
     "! If using components are not part of the model, they are either added or replaced by a dummy component
     METHODS _determine_usages
       IMPORTING
-                famix_class                 TYPE REF TO cl_famix_class
+                famix_class                 TYPE REF TO cl_sap_class
                 class_component             TYPE class_component_type
                 famix_method                TYPE REF TO cl_famix_method
                 famix_invocation            TYPE REF TO cl_famix_invocation
@@ -588,18 +590,15 @@ CLASS cl_program_analyzer IMPLEMENTATION.
 
     " Add local classes to model
 
-    DATA(famix_class) = NEW cl_famix_class( model ).
+    DATA(sap_class) = NEW cl_sap_class( model ).
 
     LOOP AT classes_with_model_id ASSIGNING FIELD-SYMBOL(<class>).
       " SAP_2_FAMIX_30        Map local classes of programs to FAMIX.Class
 
-      <class>-id_in_model = famix_class->add( EXPORTING name_group = CONV string( program )
+      <class>-id_in_model = sap_class->add( EXPORTING name_group = CONV string( program )
                                                         name       = <class>-classname ).
 
-      " SAP_2_FAMIX_31     Assign local classes to a container of type FAMIX.Module with the name of the program
-
-      famix_class->set_container( EXPORTING container_element = 'FAMIX.Module'
-                                            parent_container  = CONV string( program ) ).
+      sap_class->set_parent_program( sap_program = CONV string( program ) ).
 
 
     ENDLOOP.
@@ -667,7 +666,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
     DATA(model) = NEW cl_model( ).
     DATA(famix_package) = NEW cl_famix_package( model ).
     DATA(famix_module) = NEW cl_famix_module( model ).
-    DATA(famix_class) = NEW cl_famix_class( model ).
+    DATA(sap_class) = NEW cl_sap_class( model ).
     DATA(famix_inheritance) = NEW cl_famix_inheritance( model ).
     DATA(famix_method) = NEW cl_famix_method( model ).
     DATA(famix_attribute) = NEW cl_famix_attribute( model ).
@@ -724,7 +723,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
       existing_classes = _read_all_classes( classes ).
 
       _add_classes_to_model( famix_package     = famix_package
-                             famix_class       = famix_class
+                             sap_class       = sap_class
                              components_infos  = components_infos
                              existing_classes  = existing_classes ).
 
@@ -737,7 +736,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
                                       famix_method     = famix_method
                                       famix_attribute  = famix_attribute ).
 
-      new_components_infos = _determine_usage_of_methods( famix_class       = famix_class
+      new_components_infos = _determine_usage_of_methods( sap_class       = sap_class
                                                           class_components  = class_components
                                                           famix_method      = famix_method
                                                           famix_attribute   = famix_attribute
@@ -1058,7 +1057,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
       " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
-      famix_class->add( name = CONV string( existing_class-class ) ).
+      sap_class->add( name = CONV string( existing_class-class ) ).
 
       READ TABLE components_infos ASSIGNING FIELD-SYMBOL(<component_infos>) WITH TABLE KEY component = 'GlobClass' component_name = existing_class-class.
       IF sy-subrc <> ok.
@@ -1070,10 +1069,10 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       famix_package->add( EXPORTING name = CONV string( <component_infos>-package ) ).
 
-      famix_class->set_parent_package( parent_package = CONV string( <component_infos>-package ) ).
+      sap_class->set_parent_package( parent_package = CONV string( <component_infos>-package ) ).
       IF <component_infos>-component EQ 'GlobIntf'.
         " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
-        famix_class->is_interface( ).
+        sap_class->is_interface( ).
       ENDIF.
 
     ENDLOOP.
@@ -1239,7 +1238,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
           ASSERT 1 = 2.
       ENDCASE.
 
-      INSERT LINES OF _determine_usages( famix_class      = famix_class
+      INSERT LINES OF _determine_usages( famix_class      = sap_class
                                          class_component  = class_component
                                          famix_method     = famix_method
                                          famix_invocation = famix_invocation
