@@ -43,7 +43,7 @@
 "! Short abbreviations are used if only locally used, in that case an ABAP Doc comments explains the variable
 "! See the start of the report for this
 "!
-"! 15.02.2016 22:45 issue20 Rainer Winkler
+"! 15.02.2016 23:01 issue20 Rainer Winkler
 "!
 REPORT yrw1_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -1197,6 +1197,36 @@ ENDCLASS.
 " include z_sap_2_famix
 ******************************************** Begin Include Z_SAP_2_FAMIX ****************************
 
+CLASS cl_sap_package DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING model TYPE REF TO cl_model.
+    METHODS add
+      IMPORTING
+        name TYPE string.
+    "! Call once to set the parent package
+    METHODS set_parent_package
+      IMPORTING
+        parent_package TYPE string.
+  PRIVATE SECTION.
+    DATA: g_famix_package TYPE REF TO cl_famix_package.
+ENDCLASS.
+
+CLASS cl_sap_package IMPLEMENTATION.
+
+  METHOD constructor.
+    g_famix_package = NEW cl_famix_package( model = model ).
+  ENDMETHOD.
+
+  METHOD add.
+    g_famix_package->add( name = name ).
+  ENDMETHOD.
+
+  METHOD set_parent_package.
+    g_famix_package->set_parent_package( parent_package = parent_package ).
+  ENDMETHOD.
+
+ENDCLASS.
+
 CLASS cl_sap_class DEFINITION.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
@@ -1357,7 +1387,7 @@ CLASS cl_extract_sap DEFINITION.
       processed_packages_type TYPE HASHED TABLE OF package_type WITH UNIQUE KEY devclass.
     METHODS _determine_packages_to_analyze
       IMPORTING
-        famix_package             TYPE REF TO cl_famix_package
+        sap_package               TYPE REF TO cl_sap_package
         package_first             TYPE tdevc
       RETURNING
         VALUE(processed_packages) TYPE processed_packages_type.
@@ -1372,7 +1402,7 @@ CLASS cl_extract_sap DEFINITION.
         VALUE(programs)  TYPE programs_type.
     METHODS _read_all_programs
       IMPORTING
-        famix_package    TYPE REF TO cl_famix_package
+        sap_package      TYPE REF TO cl_sap_package
         sap_program      TYPE REF TO cl_sap_program
         components_infos TYPE components_infos_type
         programs         TYPE programs_type
@@ -1381,7 +1411,7 @@ CLASS cl_extract_sap DEFINITION.
     TYPES:existing_classes_type TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
     METHODS _add_classes_to_model
       IMPORTING
-        famix_package    TYPE REF TO cl_famix_package
+        sap_package      TYPE REF TO cl_sap_package
         sap_class        TYPE REF TO cl_sap_class
         components_infos TYPE components_infos_type
         existing_classes TYPE existing_classes_type.
@@ -1431,7 +1461,7 @@ CLASS cl_extract_sap DEFINITION.
     "! @parameter nothing_selected | nothing is selected
     METHODS _select_requested_components
       IMPORTING
-        famix_package         TYPE REF TO cl_famix_package
+        sap_package           TYPE REF TO cl_sap_package
         package_to_analyze    TYPE parentcl
         select_by_top_package TYPE bool
       EXPORTING
@@ -1828,7 +1858,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
     " Do not use singleton pattern, but define each instance only one time at the start
 
     DATA(model) = NEW cl_model( ).
-    DATA(famix_package) = NEW cl_famix_package( model ).
+    DATA(sap_package) = NEW cl_sap_package( model ).
     DATA(sap_program) = NEW cl_sap_program( model ).
     DATA(sap_class) = NEW cl_sap_class( model ).
     DATA(famix_inheritance) = NEW cl_famix_inheritance( model ).
@@ -1853,7 +1883,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
     ELSE.
       ASSERT 1 = 2.
     ENDIF.
-    _select_requested_components( EXPORTING famix_package          = famix_package
+    _select_requested_components( EXPORTING  sap_package          = sap_package
                                              select_by_top_package = select_by_top_package
                                              package_to_analyze    = g_parameter_package_to_analyze
                                    IMPORTING components_infos      = components_infos
@@ -1878,7 +1908,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
                            IMPORTING classes          = classes
                                      programs         = programs ).
 
-      _read_all_programs( EXPORTING famix_package    = famix_package
+      _read_all_programs( EXPORTING sap_package    = sap_package
                                     sap_program      = sap_program
                                     components_infos = components_infos
                                     programs         = programs
@@ -1886,7 +1916,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       existing_classes = _read_all_classes( classes ).
 
-      _add_classes_to_model( famix_package     = famix_package
+      _add_classes_to_model( sap_package     = sap_package
                              sap_class       = sap_class
                              components_infos  = components_infos
                              existing_classes  = existing_classes ).
@@ -2120,7 +2150,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
     "! A temporal helper table used to find all packages (development classes) in the selection
     DATA temp_packages_to_search TYPE STANDARD TABLE OF package_type.
 
-    famix_package->add( name = CONV string( package_first-devclass ) ).
+    sap_package->add( name = CONV string( package_first-devclass ) ).
 
     INSERT VALUE package_type( devclass = package_first-devclass ) INTO TABLE processed_packages.
 
@@ -2140,8 +2170,8 @@ CLASS cl_extract_sap IMPLEMENTATION.
           " New package
           " Search again
           temp_packages_to_search = VALUE #( BASE temp_packages_to_search ( devclass = package-devclass ) ).
-          famix_package->add( name = CONV string( package-devclass ) ).
-          famix_package->set_parent_package( parent_package = CONV string( package-parentcl ) ).
+          sap_package->add( name = CONV string( package-devclass ) ).
+          sap_package->set_parent_package( parent_package = CONV string( package-parentcl ) ).
         ENDIF.
 
       ENDLOOP.
@@ -2194,7 +2224,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
       READ TABLE components_infos ASSIGNING FIELD-SYMBOL(<component_infos>) WITH TABLE KEY component = 'ABAPProgramm' component_name = <program>-program.
       ASSERT sy-subrc EQ ok.
 
-      famix_package->add( name  = CONV string( <component_infos>-package ) ).
+      sap_package->add( name  = CONV string( <component_infos>-package ) ).
 
       sap_program->set_parent_package( parent_package = CONV string( <component_infos>-package ) ).
 
@@ -2230,7 +2260,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       ENDIF.
 
-      famix_package->add( EXPORTING name = CONV string( <component_infos>-package ) ).
+      sap_package->add( EXPORTING name = CONV string( <component_infos>-package ) ).
 
       sap_class->set_parent_package( parent_package = CONV string( <component_infos>-package ) ).
       IF <component_infos>-component EQ 'GlobIntf'.
@@ -2443,7 +2473,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
         nothing_selected  = true.
       ENDIF.
 
-      processed_packages = _determine_packages_to_analyze( famix_package = famix_package
+      processed_packages = _determine_packages_to_analyze( sap_package = sap_package
                                                            package_first = first_package ).
 
     ENDIF.
