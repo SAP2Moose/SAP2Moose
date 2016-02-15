@@ -43,7 +43,7 @@
 "! Short abbreviations are used if only locally used, in that case an ABAP Doc comments explains the variable
 "! See the start of the report for this
 "!
-"! 15.02.2016 23:01 issue20 Rainer Winkler
+"! 15.02.2016 23:45 issue20 Rainer Winkler
 "!
 REPORT yrw1_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -1230,9 +1230,9 @@ ENDCLASS.
 CLASS cl_sap_class DEFINITION.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
+    "! Add global class
     METHODS add
-      IMPORTING name_group                    TYPE string OPTIONAL
-                name                          TYPE string
+      IMPORTING name                          TYPE string
       EXPORTING VALUE(exists_already_with_id) TYPE i
       RETURNING VALUE(id)                     TYPE i.
     "! Specify the parent program for a local class
@@ -1243,6 +1243,14 @@ CLASS cl_sap_class DEFINITION.
       IMPORTING
         parent_package TYPE string.
     METHODS is_interface.
+    "! Add local class of a program
+    "! @parameter program | the name of the program the local class is part of
+    METHODS add_local
+      IMPORTING
+        program      TYPE string
+        name            TYPE any
+      RETURNING
+        VALUE(id) TYPE i.
   PRIVATE SECTION.
     DATA: g_famix_class TYPE REF TO cl_famix_class.
 ENDCLASS.
@@ -1253,7 +1261,7 @@ CLASS cl_sap_class IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD add.
-    id = g_famix_class->add( EXPORTING name_group             = name_group
+    id = g_famix_class->add( EXPORTING name_group             = ''
                                        name                   = name
                              IMPORTING exists_already_with_id = exists_already_with_id ).
   ENDMETHOD.
@@ -1273,6 +1281,82 @@ CLASS cl_sap_class IMPLEMENTATION.
 
   METHOD is_interface.
     g_famix_class->is_interface( ).
+  ENDMETHOD.
+
+
+  METHOD add_local.
+    id = g_famix_class->add( EXPORTING name_group = program
+                                             name       = name ).
+  ENDMETHOD.
+
+ENDCLASS.
+
+CLASS cl_sap_inheritance DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING model TYPE REF TO cl_model.
+    METHODS add.
+    METHODS set_sub_and_super_class
+      IMPORTING
+        subclass_name   TYPE string
+        superclass_name TYPE string.
+    METHODS set_interface_for_class
+      IMPORTING
+        interface_name TYPE string
+        class_name     TYPE string.
+    METHODS set_local_sub_and_super_class
+      IMPORTING
+        program         TYPE string
+        subclass_name   TYPE any
+        superclass_name TYPE any.
+  PRIVATE SECTION.
+    DATA: g_famix_inheritance TYPE REF TO cl_famix_inheritance.
+ENDCLASS.
+
+CLASS cl_sap_inheritance IMPLEMENTATION.
+
+  METHOD constructor.
+    g_famix_inheritance = NEW cl_famix_inheritance( model = model ).
+  ENDMETHOD.
+
+
+  METHOD add.
+    g_famix_inheritance->add( ).
+  ENDMETHOD.
+
+
+  METHOD set_sub_and_super_class.
+
+    " SAP_2_FAMIX_39     Map all inheritances between classes in selected packages to FAMIX.Inheritance
+    g_famix_inheritance->set_sub_and_super_class( EXPORTING subclass_element      = 'FAMIX.Class'
+                                                            subclass_name_group   = ''
+                                                            subclass_name         = subclass_name
+                                                            superclass_element    = 'FAMIX.Class'
+                                                            superclass_name_group = ''
+                                                            superclass_name       = superclass_name ).
+  ENDMETHOD.
+
+
+  METHOD set_interface_for_class.
+
+    " SAP_2_FAMIX_40        Map all interface implementations of interfaces in selected packages by classes of selected packages by FAMIX.Inheritance
+    g_famix_inheritance->set_sub_and_super_class( EXPORTING subclass_element      = 'FAMIX.Class'
+                                                          subclass_name_group   = ''
+                                                          subclass_name         = interface_name
+                                                          superclass_element    = 'FAMIX.Class'
+                                                          superclass_name_group = ''
+                                                          superclass_name       = class_name ).
+  ENDMETHOD.
+
+
+  METHOD set_local_sub_and_super_class.
+
+    " SAP_2_FAMIX_38        Map local inheritances of classes to FAMIX.Inheritance
+    g_famix_inheritance->set_sub_and_super_class( EXPORTING subclass_element      = 'FAMIX.Class'
+                                                            subclass_name_group   = program
+                                                            subclass_name         = subclass_name
+                                                            superclass_element    = 'FAMIX.Class'
+                                                            superclass_name_group = program
+                                                            superclass_name       = superclass_name ).
   ENDMETHOD.
 
 ENDCLASS.
@@ -1417,8 +1501,8 @@ CLASS cl_extract_sap DEFINITION.
         existing_classes TYPE existing_classes_type.
     METHODS _determine_inheritances_betwee
       IMPORTING
-        famix_inheritance TYPE REF TO cl_famix_inheritance
-        existing_classes  TYPE existing_classes_type.
+        sap_inheritance  TYPE REF TO cl_sap_inheritance
+        existing_classes TYPE existing_classes_type.
     TYPES: class_components_type   TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
     METHODS _determine_class_components
       IMPORTING
@@ -1789,8 +1873,8 @@ CLASS cl_program_analyzer IMPLEMENTATION.
     LOOP AT classes_with_model_id ASSIGNING FIELD-SYMBOL(<class>).
       " SAP_2_FAMIX_30        Map local classes of programs to FAMIX.Class
 
-      <class>-id_in_model = sap_class->add( EXPORTING name_group = CONV string( program )
-                                                        name       = <class>-classname ).
+      <class>-id_in_model = sap_class->add_local( EXPORTING program = CONV string( program )
+                                                            name    = <class>-classname ).
 
       sap_class->set_parent_program( sap_program = CONV string( program ) ).
 
@@ -1809,7 +1893,7 @@ CLASS cl_program_analyzer IMPLEMENTATION.
 
       <method>-method_id_in_model = famix_method->add( EXPORTING name_group = <class_2>-classname
                                                                  name       = <method>-methodname ).
-      " SAP_2_FAMIX_43        Fill the attribut signature of FAMIX.METHOD with the name of the method
+      " SAP_2_FAMIX_43        Fill the attribute signature of FAMIX.METHOD with the name of the method
       famix_method->set_signature( signature = <method>-methodname ).
 
       " SAP_2_FAMIX_33      Set the attribute parentType of FAMIX.Method for local methods to the name of the local class
@@ -1821,16 +1905,13 @@ CLASS cl_program_analyzer IMPLEMENTATION.
 
     " Add local inheritances to model
 
-    DATA(famix_inheritance) = NEW cl_famix_inheritance( model ).
+    DATA(sap_inheritance) = NEW cl_sap_inheritance( model ).
     LOOP AT inheritances INTO DATA(inheritance).
-      " SAP_2_FAMIX_38        Map local inheritances of classes to FAMIX.Inheritance
-      famix_inheritance->add( ).
-      famix_inheritance->set_sub_and_super_class( EXPORTING subclass_element      = 'FAMIX.Class'
-                                                            subclass_name_group   = CONV #( program )
-                                                            subclass_name         = inheritance-subclass
-                                                            superclass_element    = 'FAMIX.Class'
-                                                            superclass_name_group = CONV #( program )
-                                                            superclass_name       = inheritance-superclass ).
+
+      sap_inheritance->add( ).
+      sap_inheritance->set_local_sub_and_super_class( EXPORTING program = CONV string( program )
+                                                                subclass_name   = inheritance-subclass
+                                                                superclass_name = inheritance-superclass ).
 
     ENDLOOP.
 
@@ -1861,7 +1942,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
     DATA(sap_package) = NEW cl_sap_package( model ).
     DATA(sap_program) = NEW cl_sap_program( model ).
     DATA(sap_class) = NEW cl_sap_class( model ).
-    DATA(famix_inheritance) = NEW cl_famix_inheritance( model ).
+    DATA(sap_inheritance) = NEW cl_sap_inheritance( model ).
     DATA(famix_method) = NEW cl_famix_method( model ).
     DATA(famix_attribute) = NEW cl_famix_attribute( model ).
     DATA(famix_invocation) = NEW cl_famix_invocation( model ).
@@ -1921,7 +2002,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
                              components_infos  = components_infos
                              existing_classes  = existing_classes ).
 
-      _determine_inheritances_betwee( famix_inheritance = famix_inheritance
+      _determine_inheritances_betwee( sap_inheritance = sap_inheritance
                                       existing_classes  = existing_classes ).
 
       class_components = _determine_class_components( existing_classes ).
@@ -2297,25 +2378,16 @@ CLASS cl_extract_sap IMPLEMENTATION.
       CASE inheritance_2-reltype.
         WHEN 2.
           " Inheritance
-          " SAP_2_FAMIX_39     Map all inheritances between classes in selected packages to FAMIX.Inheritance
-          famix_inheritance->add( ).
-          famix_inheritance->set_sub_and_super_class( EXPORTING subclass_element      = 'FAMIX.Class'
-                                                                subclass_name_group   = ''
-                                                                subclass_name         = CONV #( inheritance_2-clsname )
-                                                                superclass_element    = 'FAMIX.Class'
-                                                                superclass_name_group = ''
-                                                                superclass_name       = CONV #( inheritance_2-refclsname ) ).
+
+          sap_inheritance->add( ).
+          sap_inheritance->set_sub_and_super_class( EXPORTING subclass_name         = CONV #( inheritance_2-clsname )
+                                                              superclass_name       = CONV #( inheritance_2-refclsname ) ).
         WHEN 1.
           " Interface implementation
-          " SAP_2_FAMIX_40        Map all interface implementations of interfaces in selected packages by classes of selected packages by FAMIX.Inheritance
 
-          famix_inheritance->add( ).
-          famix_inheritance->set_sub_and_super_class( EXPORTING subclass_element      = 'FAMIX.Class'
-                                                                subclass_name_group   = ''
-                                                                subclass_name         = CONV #( inheritance_2-clsname )
-                                                                superclass_element    = 'FAMIX.Class'
-                                                                superclass_name_group = ''
-                                                                superclass_name       = CONV #( inheritance_2-refclsname ) ).
+          sap_inheritance->add( ).
+          sap_inheritance->set_interface_for_class( EXPORTING interface_name         = CONV #( inheritance_2-clsname )
+                                                              class_name       = CONV #( inheritance_2-refclsname ) ).
 
         WHEN 0.
           " Interface composition     (i COMPRISING i_ref)
