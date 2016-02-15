@@ -43,7 +43,7 @@
 "! Short abbreviations are used if only locally used, in that case an ABAP Doc comments explains the variable
 "! See the start of the report for this
 "!
-"! 12.02.2016 17:38 issue20 Rainer Winkler
+"! 15.02.2016 22:45 issue20 Rainer Winkler
 "!
 REPORT yrw1_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -1247,6 +1247,45 @@ CLASS cl_sap_class IMPLEMENTATION.
 
 ENDCLASS.
 
+CLASS cl_sap_program DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING model TYPE REF TO cl_model.
+    METHODS add
+      IMPORTING
+        name      TYPE string
+      RETURNING
+        VALUE(id) TYPE i.
+    "! Call once to set the parent package of a program
+    METHODS set_parent_package
+      IMPORTING
+        parent_package TYPE string.
+  PRIVATE SECTION.
+    DATA g_famix_module TYPE REF TO cl_famix_module.
+ENDCLASS.
+
+CLASS cl_sap_program IMPLEMENTATION.
+
+  METHOD constructor.
+    g_famix_module = NEW cl_famix_module( model = model ).
+  ENDMETHOD.
+
+
+  METHOD add.
+
+    " SAP_2_FAMIX_5     Map program to FAMIX.Module
+    id = g_famix_module->add( name = name ).
+
+  ENDMETHOD.
+
+
+  METHOD set_parent_package.
+    g_famix_module->set_parent_package( parent_package = parent_package ).
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+
 ******************************************** End Include Z_SAP_2_FAMIX ******************************
 
 TYPES: BEGIN OF class_component_type,
@@ -1334,7 +1373,7 @@ CLASS cl_extract_sap DEFINITION.
     METHODS _read_all_programs
       IMPORTING
         famix_package    TYPE REF TO cl_famix_package
-        famix_module     TYPE REF TO cl_famix_module
+        sap_program      TYPE REF TO cl_sap_program
         components_infos TYPE components_infos_type
         programs         TYPE programs_type
       CHANGING
@@ -1790,7 +1829,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     DATA(model) = NEW cl_model( ).
     DATA(famix_package) = NEW cl_famix_package( model ).
-    DATA(famix_module) = NEW cl_famix_module( model ).
+    DATA(sap_program) = NEW cl_sap_program( model ).
     DATA(sap_class) = NEW cl_sap_class( model ).
     DATA(famix_inheritance) = NEW cl_famix_inheritance( model ).
     DATA(famix_method) = NEW cl_famix_method( model ).
@@ -1840,7 +1879,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
                                      programs         = programs ).
 
       _read_all_programs( EXPORTING famix_package    = famix_package
-                                    famix_module     = famix_module
+                                    sap_program      = sap_program
                                     components_infos = components_infos
                                     programs         = programs
                            CHANGING model = model ).
@@ -2150,15 +2189,14 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     LOOP AT programs ASSIGNING FIELD-SYMBOL(<program>).
 
-      " SAP_2_FAMIX_5     Map program to FAMIX.Module
-      DATA(module_reference) = famix_module->add( EXPORTING name = <program>-program ).
+      DATA(module_reference) = sap_program->add( EXPORTING name = <program>-program ).
 
       READ TABLE components_infos ASSIGNING FIELD-SYMBOL(<component_infos>) WITH TABLE KEY component = 'ABAPProgramm' component_name = <program>-program.
       ASSERT sy-subrc EQ ok.
 
       famix_package->add( name  = CONV string( <component_infos>-package ) ).
 
-      famix_module->set_parent_package( parent_package = CONV string( <component_infos>-package ) ).
+      sap_program->set_parent_package( parent_package = CONV string( <component_infos>-package ) ).
 
       IF p_iprog EQ true.
 
