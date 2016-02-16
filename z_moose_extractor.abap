@@ -43,7 +43,8 @@
 "! Short abbreviations are used if only locally used, in that case an ABAP Doc comments explains the variable
 "! See the start of the report for this
 "!
-"! 16.02.2016 21:09 issue20 Rainer Winkler
+"! Last activation:
+"! 16.02.2016 21:44 issue20 Rainer Winkler
 "!
 REPORT yrw1_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -1198,7 +1199,17 @@ ENDCLASS.
 " include z_sap_2_famix
 ******************************************** Begin Include Z_SAP_2_FAMIX ****************************
 
-CLASS cl_sap_package DEFINITION.
+"! This is the master class for all classes that build a model for the SAP system.
+"! Its main usage is in the moment to display the connection of the classes to extract SAP model data in the extracted model.
+"! It may later be replaced by cl_sap_abap, cl_sap_bw, ...
+CLASS cl_sap DEFINITION.
+ENDCLASS.
+
+CLASS cl_sap IMPLEMENTATION.
+
+ENDCLASS.
+
+CLASS cl_sap_package DEFINITION INHERITING FROM cl_sap.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS add
@@ -1215,6 +1226,7 @@ ENDCLASS.
 CLASS cl_sap_package IMPLEMENTATION.
 
   METHOD constructor.
+    super->constructor( ).
     g_famix_package = NEW cl_famix_package( model = model ).
   ENDMETHOD.
 
@@ -1228,7 +1240,7 @@ CLASS cl_sap_package IMPLEMENTATION.
 
 ENDCLASS.
 
-CLASS cl_sap_class DEFINITION.
+CLASS cl_sap_class DEFINITION INHERITING FROM cl_sap.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     "! Add global class
@@ -1258,6 +1270,7 @@ ENDCLASS.
 
 CLASS cl_sap_class IMPLEMENTATION.
   METHOD constructor.
+    super->constructor( ).
     g_famix_class = NEW cl_famix_class( model = model ).
   ENDMETHOD.
 
@@ -1292,7 +1305,7 @@ CLASS cl_sap_class IMPLEMENTATION.
 
 ENDCLASS.
 
-CLASS cl_sap_attribute DEFINITION.
+CLASS cl_sap_attribute DEFINITION INHERITING FROM cl_sap.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS get_id
@@ -1312,6 +1325,7 @@ ENDCLASS.
 CLASS cl_sap_attribute IMPLEMENTATION.
 
   METHOD constructor.
+    super->constructor( ).
     g_famix_attribute = NEW cl_famix_attribute( model = model ).
   ENDMETHOD.
 
@@ -1337,7 +1351,7 @@ CLASS cl_sap_attribute IMPLEMENTATION.
 ENDCLASS.
 
 "! Specifies a SAP method
-CLASS cl_sap_method DEFINITION.
+CLASS cl_sap_method DEFINITION INHERITING FROM cl_sap.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     "! Returns the ID for a given method of a global class
@@ -1358,6 +1372,13 @@ CLASS cl_sap_method DEFINITION.
         method    TYPE string
       RETURNING
         VALUE(id) TYPE i.
+    METHODS add_local_method
+      IMPORTING
+        class_name  TYPE string
+        class_id    TYPE i
+        method_name TYPE string
+      RETURNING
+        VALUE(id)   TYPE i.
   PRIVATE SECTION.
     DATA: g_famix_method TYPE REF TO cl_famix_method.
 
@@ -1366,6 +1387,7 @@ ENDCLASS.
 CLASS cl_sap_method IMPLEMENTATION.
 
   METHOD constructor.
+    super->constructor( ).
     g_famix_method = NEW cl_famix_method( model = model ).
   ENDMETHOD.
 
@@ -1393,9 +1415,23 @@ CLASS cl_sap_method IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD add_local_method.
+
+    " SAP_2_FAMIX_32      Map local methods to the FAMIX.Method
+    id = g_famix_method->add( EXPORTING name_group = class_name " TBD Why name of class in name_group?
+                                        name       = method_name ).
+    " SAP_2_FAMIX_43        Fill the attribute signature of FAMIX.METHOD with the name of the method
+    g_famix_method->set_signature( signature = method_name ).
+
+    " SAP_2_FAMIX_33      Set the attribute parentType of FAMIX.Method for local methods to the name of the local class
+    g_famix_method->set_parent_type( EXPORTING parent_element = 'FAMIX.Class'
+                                               parent_id      =  class_id ).
+  ENDMETHOD.
+
 ENDCLASS.
 
-CLASS cl_sap_inheritance DEFINITION.
+CLASS cl_sap_inheritance DEFINITION INHERITING FROM cl_sap.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS add.
@@ -1419,6 +1455,7 @@ ENDCLASS.
 CLASS cl_sap_inheritance IMPLEMENTATION.
 
   METHOD constructor.
+    super->constructor( ).
     g_famix_inheritance = NEW cl_famix_inheritance( model = model ).
   ENDMETHOD.
 
@@ -1465,7 +1502,7 @@ CLASS cl_sap_inheritance IMPLEMENTATION.
 
 ENDCLASS.
 
-CLASS cl_sap_invocation DEFINITION.
+CLASS cl_sap_invocation DEFINITION INHERITING FROM cl_sap.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS add_invocation
@@ -1479,6 +1516,7 @@ ENDCLASS.
 CLASS cl_sap_invocation IMPLEMENTATION.
 
   METHOD constructor.
+    super->constructor( ).
     g_famix_invocation = NEW cl_famix_invocation( model = model ).
   ENDMETHOD.
 
@@ -1497,8 +1535,41 @@ CLASS cl_sap_invocation IMPLEMENTATION.
 
 ENDCLASS.
 
+CLASS cl_sap_access DEFINITION INHERITING FROM cl_sap.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING model TYPE REF TO cl_model.
+    METHODS add_access
+      IMPORTING
+        used_attribute TYPE i
+        using_method   TYPE i.
+  PRIVATE SECTION.
+    DATA: g_famix_access TYPE REF TO cl_famix_access.
+ENDCLASS.
 
-CLASS cl_sap_program DEFINITION.
+CLASS cl_sap_access IMPLEMENTATION.
+
+  METHOD constructor.
+    super->constructor( ).
+    g_famix_access = NEW cl_famix_access( model = model ).
+  ENDMETHOD.
+
+
+  METHOD add_access.
+    " SAP_2_FAMIX_26      Map usage of ABAP class attributes by methods of classes to FAMIX.Invocation
+    " SAP_2_FAMIX_27      Map usage of ABAP interface attributes by methods of classes to FAMIX.Invocation
+
+    IF g_famix_access->is_new_access( accessor_id = using_method
+                                      variable_id = used_attribute ).
+      g_famix_access->add( ).
+      g_famix_access->set_accessor_variable_relation( EXPORTING accessor_id = using_method
+                                                                variable_id = used_attribute ).
+    ENDIF.
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+CLASS cl_sap_program DEFINITION INHERITING FROM cl_sap.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS add
@@ -1517,6 +1588,7 @@ ENDCLASS.
 CLASS cl_sap_program IMPLEMENTATION.
 
   METHOD constructor.
+    super->constructor( ).
     g_famix_module = NEW cl_famix_module( model = model ).
   ENDMETHOD.
 
@@ -1658,7 +1730,7 @@ CLASS cl_extract_sap DEFINITION.
                 sap_method                  TYPE REF TO cl_sap_method
                 sap_attribute               TYPE REF TO cl_sap_attribute
                 sap_invocation              TYPE REF TO cl_sap_invocation
-                famix_access                TYPE REF TO cl_famix_access
+                sap_access                  TYPE REF TO cl_sap_access
       RETURNING VALUE(new_components_infos) TYPE components_infos_type.
     "! Determine usages for components
     "! If using components are not part of the model, they are either added or replaced by a dummy component
@@ -1668,7 +1740,7 @@ CLASS cl_extract_sap DEFINITION.
                 class_component             TYPE class_component_type
                 sap_method                  TYPE REF TO cl_sap_method
                 sap_invocation              TYPE REF TO cl_sap_invocation
-                famix_access                TYPE REF TO cl_famix_access
+                sap_access                  TYPE REF TO cl_sap_access
                 used_id                     TYPE i
       RETURNING VALUE(new_components_infos) TYPE components_infos_type.
     TYPES:
@@ -2020,24 +2092,28 @@ CLASS cl_program_analyzer IMPLEMENTATION.
 
     " Add local methods to model
 
-    DATA(famix_method) = NEW cl_famix_method( model ).
+    DATA(sap_method) = NEW cl_sap_method( model ).
 
     LOOP AT methods ASSIGNING FIELD-SYMBOL(<method>).
       READ TABLE classes_with_model_id ASSIGNING FIELD-SYMBOL(<class_2>) WITH TABLE KEY classname = <method>-classname.
       <method>-class_id_in_model = <class_2>-id_in_model.
 
-      " SAP_2_FAMIX_32      Map local methods to the FAMIX.Method
+      <method>-method_id_in_model = sap_method->add_local_method( class_name  = <class_2>-classname
+                                                                  class_id    = <class_2>-id_in_model
+                                                                  method_name = <method>-methodname ).
 
-      <method>-method_id_in_model = famix_method->add( EXPORTING name_group = <class_2>-classname
-                                                                 name       = <method>-methodname ).
-      " SAP_2_FAMIX_43        Fill the attribute signature of FAMIX.METHOD with the name of the method
-      famix_method->set_signature( signature = <method>-methodname ).
-
-      " SAP_2_FAMIX_33      Set the attribute parentType of FAMIX.Method for local methods to the name of the local class
-
-
-      famix_method->set_parent_type( EXPORTING parent_element = 'FAMIX.Class'
-                                               parent_id      =  <class_2>-id_in_model ).
+*      " SAP_2_FAMIX_32      Map local methods to the FAMIX.Method
+*
+*      <method>-method_id_in_model = famix_method->add( EXPORTING name_group = <class_2>-classname " Why classname in name_group?
+*                                                                 name       = <method>-methodname ).
+*      " SAP_2_FAMIX_43        Fill the attribute signature of FAMIX.METHOD with the name of the method
+*      famix_method->set_signature( signature = <method>-methodname ).
+*
+*      " SAP_2_FAMIX_33      Set the attribute parentType of FAMIX.Method for local methods to the name of the local class
+*
+*
+*      famix_method->set_parent_type( EXPORTING parent_element = 'FAMIX.Class'
+*                                               parent_id      =  <class_2>-id_in_model ).
     ENDLOOP.
 
     " Add local inheritances to model
@@ -2084,7 +2160,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
     DATA(sap_method) = NEW cl_sap_method( model ).
     DATA(sap_attribute) = NEW cl_sap_attribute( model ).
     DATA(sap_invocation) = NEW cl_sap_invocation( model ).
-    DATA(famix_access) = NEW cl_famix_access( model ).
+    DATA(sap_access) = NEW cl_sap_access( model ).
 
     " Set TADIR mapping
     g_tadir_components_mapping = VALUE #( ( object = 'CLAS' component = 'GlobClass' )
@@ -2154,7 +2230,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
                                                           sap_method      = sap_method
                                                           sap_attribute   = sap_attribute
                                                           sap_invocation  = sap_invocation
-                                                          famix_access      = famix_access ).
+                                                          sap_access      = sap_access ).
 
       " Determine package for new components
 
@@ -2307,63 +2383,58 @@ CLASS cl_extract_sap IMPLEMENTATION.
                 sap_invocation->add_invocation( used_method_id = used_id
                                                 using_method_id = using_method_id ).
 
-            WHEN comptype_attribute.
-              " SAP_2_FAMIX_26      Map usage of ABAP class attributes by methods of classes to FAMIX.Invocation
-              " SAP_2_FAMIX_27      Map usage of ABAP interface attributes by methods of classes to FAMIX.Invocation
+              WHEN comptype_attribute.
 
-              IF famix_access->is_new_access( accessor_id = using_method_id
-                                              variable_id = used_id ).
-                famix_access->add( ).
-                famix_access->set_accessor_variable_relation( EXPORTING accessor_id = using_method_id
-                                                                        variable_id = used_id ).
-              ENDIF.
-            WHEN OTHERS.
-              ASSERT 1 = 2.
-          ENDCASE.
+                sap_access->add_access( used_attribute = used_id
+                                        using_method = using_method_id ).
+
+              WHEN OTHERS.
+                ASSERT 1 = 2.
+            ENDCASE.
 
 
-        WHEN OTHERS.
-          " TBD Implement other usages
-      ENDCASE.
-    ENDIF.
+          WHEN OTHERS.
+            " TBD Implement other usages
+        ENDCASE.
+      ENDIF.
 
-  ENDLOOP.
+    ENDLOOP.
 
-ENDMETHOD.
-
-
-METHOD _set_default_language.
-
-  " Set default language
-
-  DATA(famix_custom_source_language) = NEW cl_famix_custom_source_lang( model ).
-
-  famix_custom_source_language->add( name = 'ABAP' ).
-
-  " Do not assign any entities to ABAP, because otherwise this will not be the default language anymore
-  " So do not do this for ABAP, but maybe for another language
-  " famix_package->set_declared_source_language( EXPORTING source_language_element = 'FAMIX.CustomSourceLanguage'
-  "                                                        source_language_name    = 'ABAP' ).
-
-ENDMETHOD.
+  ENDMETHOD.
 
 
-METHOD _determine_packages_to_analyze.
+  METHOD _set_default_language.
 
-  " Determine packages to analyze
+    " Set default language
 
-  "! A temporal helper table used to find all packages (development classes) in the selection
-  DATA temp_packages_to_search TYPE STANDARD TABLE OF package_type.
+    DATA(famix_custom_source_language) = NEW cl_famix_custom_source_lang( model ).
 
-  sap_package->add( name = CONV string( package_first-devclass ) ).
+    famix_custom_source_language->add( name = 'ABAP' ).
 
-  INSERT VALUE package_type( devclass = package_first-devclass ) INTO TABLE processed_packages.
+    " Do not assign any entities to ABAP, because otherwise this will not be the default language anymore
+    " So do not do this for ABAP, but maybe for another language
+    " famix_package->set_declared_source_language( EXPORTING source_language_element = 'FAMIX.CustomSourceLanguage'
+    "                                                        source_language_name    = 'ABAP' ).
 
-  temp_packages_to_search = VALUE #( ( devclass = g_parameter_package_to_analyze ) ).
-  WHILE temp_packages_to_search IS NOT INITIAL.
-    IF temp_packages_to_search IS NOT INITIAL.
-      SELECT devclass, parentcl FROM tdevc INTO TABLE @DATA(packages)
-       FOR ALL ENTRIES IN @temp_packages_to_search WHERE parentcl = @temp_packages_to_search-devclass.
+  ENDMETHOD.
+
+
+  METHOD _determine_packages_to_analyze.
+
+    " Determine packages to analyze
+
+    "! A temporal helper table used to find all packages (development classes) in the selection
+    DATA temp_packages_to_search TYPE STANDARD TABLE OF package_type.
+
+    sap_package->add( name = CONV string( package_first-devclass ) ).
+
+    INSERT VALUE package_type( devclass = package_first-devclass ) INTO TABLE processed_packages.
+
+    temp_packages_to_search = VALUE #( ( devclass = g_parameter_package_to_analyze ) ).
+    WHILE temp_packages_to_search IS NOT INITIAL.
+      IF temp_packages_to_search IS NOT INITIAL.
+        SELECT devclass, parentcl FROM tdevc INTO TABLE @DATA(packages)
+         FOR ALL ENTRIES IN @temp_packages_to_search WHERE parentcl = @temp_packages_to_search-devclass.
       ENDIF.
 
       temp_packages_to_search = VALUE #( ).
@@ -2487,80 +2558,80 @@ METHOD _determine_packages_to_analyze.
       SELECT clsname, refclsname, reltype FROM seometarel INTO CORRESPONDING FIELDS OF TABLE @inheritances
         FOR ALL ENTRIES IN @existing_classes WHERE clsname = @existing_classes-class
                                                AND version = 1.
+    ENDIF.
+
+    " Delete all inheritances where superclass is not in selected packages
+    LOOP AT inheritances INTO DATA(inheritance).
+      READ TABLE existing_classes TRANSPORTING NO FIELDS WITH TABLE KEY class = inheritance-refclsname.
+      IF sy-subrc <> ok.
+        DELETE inheritances.
       ENDIF.
+    ENDLOOP.
 
-      " Delete all inheritances where superclass is not in selected packages
-      LOOP AT inheritances INTO DATA(inheritance).
-        READ TABLE existing_classes TRANSPORTING NO FIELDS WITH TABLE KEY class = inheritance-refclsname.
-        IF sy-subrc <> ok.
-          DELETE inheritances.
-        ENDIF.
-      ENDLOOP.
+    " Add inheritances to model
+    LOOP AT inheritances INTO DATA(inheritance_2).
+      CASE inheritance_2-reltype.
+        WHEN 2.
+          " Inheritance
 
-      " Add inheritances to model
-      LOOP AT inheritances INTO DATA(inheritance_2).
-        CASE inheritance_2-reltype.
-          WHEN 2.
-            " Inheritance
+          sap_inheritance->add( ).
+          sap_inheritance->set_sub_and_super_class( EXPORTING subclass_name         = CONV #( inheritance_2-clsname )
+                                                              superclass_name       = CONV #( inheritance_2-refclsname ) ).
+        WHEN 1.
+          " Interface implementation
 
-            sap_inheritance->add( ).
-            sap_inheritance->set_sub_and_super_class( EXPORTING subclass_name         = CONV #( inheritance_2-clsname )
-                                                                superclass_name       = CONV #( inheritance_2-refclsname ) ).
-          WHEN 1.
-            " Interface implementation
+          sap_inheritance->add( ).
+          sap_inheritance->set_interface_for_class( EXPORTING interface_name         = CONV #( inheritance_2-clsname )
+                                                              class_name       = CONV #( inheritance_2-refclsname ) ).
 
-            sap_inheritance->add( ).
-            sap_inheritance->set_interface_for_class( EXPORTING interface_name         = CONV #( inheritance_2-clsname )
-                                                                class_name       = CONV #( inheritance_2-refclsname ) ).
+        WHEN 0.
+          " Interface composition     (i COMPRISING i_ref)
+          " TBD
+        WHEN 5.
+          " Enhancement            ( c enhances c_ref)
+          " TBD
+      ENDCASE.
+    ENDLOOP.
 
-          WHEN 0.
-            " Interface composition     (i COMPRISING i_ref)
-            " TBD
-          WHEN 5.
-            " Enhancement            ( c enhances c_ref)
-            " TBD
-        ENDCASE.
-      ENDLOOP.
-
-    ENDMETHOD.
+  ENDMETHOD.
 
 
-    METHOD _determine_class_components.
+  METHOD _determine_class_components.
 
-      " Determine class components
+    " Determine class components
 
-      " SAP_2_FAMIX_9         Extract methods of classes
-      " SAP_2_FAMIX_10        Extract methods of interfaces
-      " SAP_2_FAMIX_11        Extract attributes of classes
-      " SAP_2_FAMIX_12        Extract attributes of interfaces
+    " SAP_2_FAMIX_9         Extract methods of classes
+    " SAP_2_FAMIX_10        Extract methods of interfaces
+    " SAP_2_FAMIX_11        Extract attributes of classes
+    " SAP_2_FAMIX_12        Extract attributes of interfaces
 
-      IF existing_classes IS NOT INITIAL.
-        "
-        SELECT clsname, cmpname, cmptype FROM seocompo INTO TABLE @class_components
-          FOR ALL ENTRIES IN @existing_classes
-          WHERE
-            clsname = @existing_classes-class.
+    IF existing_classes IS NOT INITIAL.
+      "
+      SELECT clsname, cmpname, cmptype FROM seocompo INTO TABLE @class_components
+        FOR ALL ENTRIES IN @existing_classes
+        WHERE
+          clsname = @existing_classes-class.
 
-        ENDIF.
+    ENDIF.
 
-      ENDMETHOD.
+  ENDMETHOD.
 
 
-      METHOD _add_to_class_components_to_mo.
+  METHOD _add_to_class_components_to_mo.
 
-        " Add to class components to model
+    " Add to class components to model
 
-        LOOP AT class_components INTO DATA(class_component).
+    LOOP AT class_components INTO DATA(class_component).
 
-          CASE class_component-cmptype.
-            WHEN comptype_attribute. "Attribute
+      CASE class_component-cmptype.
+        WHEN comptype_attribute. "Attribute
 
-              DATA(existing_id) = sap_attribute->get_id( EXPORTING class     = CONV string( class_component-clsname )
-                                                                   attribute = CONV string( class_component-cmpname ) ).
-              IF existing_id EQ not_found.
+          DATA(existing_id) = sap_attribute->get_id( EXPORTING class     = CONV string( class_component-clsname )
+                                                               attribute = CONV string( class_component-cmpname ) ).
+          IF existing_id EQ not_found.
 
-                sap_attribute->add( EXPORTING class     = CONV string( class_component-clsname )
-                                                     attribute = CONV string( class_component-cmpname ) ).
+            sap_attribute->add( EXPORTING class     = CONV string( class_component-clsname )
+                                                 attribute = CONV string( class_component-cmpname ) ).
 *            famix_attribute->set_parent_type(
 *              EXPORTING
 *                parent_element = 'FAMIX.Class'
@@ -2568,158 +2639,158 @@ METHOD _determine_packages_to_analyze.
 *            famix_attribute->store_id( EXPORTING class     = CONV string( class_component-clsname )
 *                                                 attribute = CONV string( class_component-cmpname ) ).
 
-              ENDIF.
-
-            WHEN comptype_method. "Method
-
-              existing_id = sap_method->get_id( class  = CONV string( class_component-clsname )
-                                                method = CONV string( class_component-cmpname ) ).
-
-              IF existing_id EQ not_found.
-
-                sap_method->add( class = CONV string( class_component-clsname )
-                                 method = CONV string( class_component-cmpname ) ).
-
-              ENDIF.
-            WHEN 2. "Event
-            WHEN 3. "Type
-            WHEN OTHERS.
-              " TBD Warn
-
-          ENDCASE.
-
-        ENDLOOP.
-
-      ENDMETHOD.
-
-
-      METHOD _determine_usage_of_methods.
-
-        DATA class_component TYPE class_component_type.
-
-        " Determine usage of methods
-
-        LOOP AT class_components INTO class_component WHERE cmptype = comptype_attribute  " Methods
-                                                         OR cmptype = comptype_method. "Attributes
-
-          CASE class_component-cmptype.
-            WHEN comptype_method.
-              DATA(used_id) = sap_method->get_id( class  = CONV string( class_component-clsname )
-                                                    method = CONV string( class_component-cmpname ) ).
-
-            WHEN comptype_attribute.
-              used_id = sap_attribute->get_id( class     = CONV string( class_component-clsname )
-                                                attribute = CONV string( class_component-cmpname ) ).
-
-            WHEN OTHERS.
-              ASSERT 1 = 2.
-          ENDCASE.
-
-          INSERT LINES OF _determine_usages( sap_class        = sap_class
-                                             class_component  = class_component
-                                             sap_method       = sap_method
-                                             sap_invocation   = sap_invocation
-                                             famix_access     = famix_access
-                                             used_id          = used_id ) INTO TABLE new_components_infos.
-
-        ENDLOOP.
-
-      ENDMETHOD.
-
-
-      METHOD _read_all_classes.
-
-        " Read all classes
-
-        " Determine existing classes
-        IF classes IS NOT INITIAL.
-          SELECT clsname AS class FROM seoclass INTO TABLE @existing_classes FOR ALL ENTRIES IN @classes
-            WHERE
-              clsname = @classes-obj_name.
           ENDIF.
 
-        ENDMETHOD.
+        WHEN comptype_method. "Method
 
-        METHOD _select_requested_components.
+          existing_id = sap_method->get_id( class  = CONV string( class_component-clsname )
+                                            method = CONV string( class_component-cmpname ) ).
 
-          DATA first_package TYPE tdevc.
-          DATA processed_packages TYPE cl_extract_sap=>processed_packages_type.
-          DATA object TYPE trobjtype.
+          IF existing_id EQ not_found.
 
-          IF select_by_top_package EQ true.
+            sap_method->add( class = CONV string( class_component-clsname )
+                             method = CONV string( class_component-cmpname ) ).
 
-            " Select components in package and sub package
-            " SAP_2_FAMIX_3     Select all components in a package and the sub packages of this package
+          ENDIF.
+        WHEN 2. "Event
+        WHEN 3. "Type
+        WHEN OTHERS.
+          " TBD Warn
 
-            SELECT SINGLE devclass, parentcl FROM tdevc INTO @first_package WHERE devclass = @package_to_analyze.
-              IF sy-subrc <> ok.
-                WRITE: 'Package does not exist: ', package_to_analyze.
-                nothing_selected  = true.
-              ENDIF.
+      ENDCASE.
 
-              processed_packages = _determine_packages_to_analyze( sap_package = sap_package
-                                                                   package_first = first_package ).
+    ENDLOOP.
 
+  ENDMETHOD.
+
+
+  METHOD _determine_usage_of_methods.
+
+    DATA class_component TYPE class_component_type.
+
+    " Determine usage of methods
+
+    LOOP AT class_components INTO class_component WHERE cmptype = comptype_attribute  " Methods
+                                                     OR cmptype = comptype_method. "Attributes
+
+      CASE class_component-cmptype.
+        WHEN comptype_method.
+          DATA(used_id) = sap_method->get_id( class  = CONV string( class_component-clsname )
+                                                method = CONV string( class_component-cmpname ) ).
+
+        WHEN comptype_attribute.
+          used_id = sap_attribute->get_id( class     = CONV string( class_component-clsname )
+                                            attribute = CONV string( class_component-cmpname ) ).
+
+        WHEN OTHERS.
+          ASSERT 1 = 2.
+      ENDCASE.
+
+      INSERT LINES OF _determine_usages( sap_class        = sap_class
+                                         class_component  = class_component
+                                         sap_method       = sap_method
+                                         sap_invocation   = sap_invocation
+                                         sap_access       = sap_access
+                                         used_id          = used_id ) INTO TABLE new_components_infos.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD _read_all_classes.
+
+    " Read all classes
+
+    " Determine existing classes
+    IF classes IS NOT INITIAL.
+      SELECT clsname AS class FROM seoclass INTO TABLE @existing_classes FOR ALL ENTRIES IN @classes
+        WHERE
+          clsname = @classes-obj_name.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD _select_requested_components.
+
+    DATA first_package TYPE tdevc.
+    DATA processed_packages TYPE cl_extract_sap=>processed_packages_type.
+    DATA object TYPE trobjtype.
+
+    IF select_by_top_package EQ true.
+
+      " Select components in package and sub package
+      " SAP_2_FAMIX_3     Select all components in a package and the sub packages of this package
+
+      SELECT SINGLE devclass, parentcl FROM tdevc INTO @first_package WHERE devclass = @package_to_analyze.
+      IF sy-subrc <> ok.
+        WRITE: 'Package does not exist: ', package_to_analyze.
+        nothing_selected  = true.
+      ENDIF.
+
+      processed_packages = _determine_packages_to_analyze( sap_package = sap_package
+                                                           package_first = first_package ).
+
+    ENDIF.
+
+    IF   select_by_top_package EQ false
+      OR processed_packages IS NOT INITIAL.
+      DO 3 TIMES.
+        CASE sy-index.
+          WHEN 1.
+            IF p_clas EQ true.
+              object = 'CLAS'.
+            ELSE.
+              CONTINUE.
             ENDIF.
-
-            IF   select_by_top_package EQ false
-              OR processed_packages IS NOT INITIAL.
-              DO 3 TIMES.
-                CASE sy-index.
-                  WHEN 1.
-                    IF p_clas EQ true.
-                      object = 'CLAS'.
-                    ELSE.
-                      CONTINUE.
-                    ENDIF.
-                  WHEN 2.
-                    IF p_intf EQ true.
-                      object = 'INTF'.
-                    ELSE.
-                      CONTINUE.
-                    ENDIF.
-                  WHEN 3.
-                    IF p_prog EQ true.
-                      object = 'PROG'.
-                    ELSE.
-                      CONTINUE.
-                    ENDIF.
-                  WHEN OTHERS.
-                    ASSERT 1 = 2.
-                ENDCASE.
-                IF select_by_top_package EQ true.
-                  SELECT obj_name, object, devclass FROM tadir INTO @DATA(tadir_component) FOR ALL ENTRIES IN @processed_packages
-                    WHERE pgmid = 'R3TR'
-                      AND object = @object
-                      AND devclass = @processed_packages-devclass.
-
-                    components_infos = VALUE #( BASE components_infos ( component = g_tadir_components_mapping[ object = tadir_component-object ]-component
-                                                                        component_name = tadir_component-obj_name
-                                                                        package = tadir_component-devclass ) ).
-
-                  ENDSELECT.
-                ELSE.
-                  SELECT obj_name, object, devclass FROM tadir INTO @tadir_component
-                    WHERE pgmid = 'R3TR'
-                      AND object = @object
-                      AND obj_name IN @s_compsn
-                      AND devclass IN @s_pack.
-
-                    components_infos = VALUE #( BASE components_infos ( component = g_tadir_components_mapping[ object = tadir_component-object ]-component
-                                                                        component_name = tadir_component-obj_name
-                                                                        package = tadir_component-devclass ) ).
-
-                  ENDSELECT.
-                ENDIF.
-              ENDDO.
+          WHEN 2.
+            IF p_intf EQ true.
+              object = 'INTF'.
+            ELSE.
+              CONTINUE.
             ENDIF.
-
-            IF lines( components_infos ) EQ 0.
-              WRITE: 'Nothing selected '.
-              nothing_selected  = true.
+          WHEN 3.
+            IF p_prog EQ true.
+              object = 'PROG'.
+            ELSE.
+              CONTINUE.
             ENDIF.
+          WHEN OTHERS.
+            ASSERT 1 = 2.
+        ENDCASE.
+        IF select_by_top_package EQ true.
+          SELECT obj_name, object, devclass FROM tadir INTO @DATA(tadir_component) FOR ALL ENTRIES IN @processed_packages
+            WHERE pgmid = 'R3TR'
+              AND object = @object
+              AND devclass = @processed_packages-devclass.
 
-          ENDMETHOD.
+            components_infos = VALUE #( BASE components_infos ( component = g_tadir_components_mapping[ object = tadir_component-object ]-component
+                                                                component_name = tadir_component-obj_name
+                                                                package = tadir_component-devclass ) ).
+
+          ENDSELECT.
+        ELSE.
+          SELECT obj_name, object, devclass FROM tadir INTO @tadir_component
+            WHERE pgmid = 'R3TR'
+              AND object = @object
+              AND obj_name IN @s_compsn
+              AND devclass IN @s_pack.
+
+            components_infos = VALUE #( BASE components_infos ( component = g_tadir_components_mapping[ object = tadir_component-object ]-component
+                                                                component_name = tadir_component-obj_name
+                                                                package = tadir_component-devclass ) ).
+
+          ENDSELECT.
+        ENDIF.
+      ENDDO.
+    ENDIF.
+
+    IF lines( components_infos ) EQ 0.
+      WRITE: 'Nothing selected '.
+      nothing_selected  = true.
+    ENDIF.
+
+  ENDMETHOD.
 
 ENDCLASS.
 
