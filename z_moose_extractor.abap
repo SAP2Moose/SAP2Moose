@@ -43,7 +43,7 @@
 "! Short abbreviations are used if only locally used, in that case an ABAP Doc comments explains the variable
 "! See the start of the report for this
 "!
-"! 15.02.2016 23:45 issue20 Rainer Winkler
+"! 16.02.2016 20:37 issue20 Rainer Winkler
 "!
 REPORT yrw1_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -153,7 +153,8 @@ g_parameter_download_file = p_down.
 SELECTION-SCREEN END OF BLOCK bl_model_settings.
 
 " Begin Model
-
+"! Specifies a model.
+"! Instanciate only once, otherwise there will be multiple models each containing only part of the informations.
 CLASS cl_model DEFINITION.
   PUBLIC SECTION.
 
@@ -1247,8 +1248,8 @@ CLASS cl_sap_class DEFINITION.
     "! @parameter program | the name of the program the local class is part of
     METHODS add_local
       IMPORTING
-        program      TYPE string
-        name            TYPE any
+        program   TYPE string
+        name      TYPE any
       RETURNING
         VALUE(id) TYPE i.
   PRIVATE SECTION.
@@ -1287,6 +1288,65 @@ CLASS cl_sap_class IMPLEMENTATION.
   METHOD add_local.
     id = g_famix_class->add( EXPORTING name_group = program
                                              name       = name ).
+  ENDMETHOD.
+
+ENDCLASS.
+
+"! Specifies a SAP method
+CLASS cl_sap_method DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING model TYPE REF TO cl_model.
+    "! Returns the ID for a given method of a global class
+    "! Returns 0 if the class is not known
+    "! @parameter class | the class of the method
+    "! @parameter method | the method name
+    "! @parameter id | the ID of the element
+    METHODS get_id
+      IMPORTING
+        class     TYPE string
+        method    TYPE string
+      RETURNING
+        VALUE(id) TYPE i.
+    "! Add a method for a global SAP class or a global SAP instance
+    METHODS add
+      IMPORTING
+        class  TYPE string
+        method TYPE string
+      RETURNING
+        VALUE(id) TYPE i.
+  PRIVATE SECTION.
+    DATA: g_famix_method TYPE REF TO cl_famix_method.
+
+ENDCLASS.
+
+CLASS cl_sap_method IMPLEMENTATION.
+
+  METHOD constructor.
+    g_famix_method = NEW cl_famix_method( model = model ).
+  ENDMETHOD.
+
+
+  METHOD get_id.
+    id = g_famix_method->get_id( class  = class
+                                 method = method ).
+  ENDMETHOD.
+
+
+  METHOD add.
+    " SAP_2_FAMIX_15        Map methods of classes to FAMIX.Method
+    " SAP_2_FAMIX_16        Map methods of interfaces to FAMIX.Method
+    id = g_famix_method->add( name = method ).
+
+    " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
+    " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
+    g_famix_method->set_signature( signature = method ).
+
+    g_famix_method->set_parent_type( EXPORTING parent_element = 'FAMIX.Class'
+                                               parent_name    = class ).
+
+    g_famix_method->store_id( EXPORTING class  = class
+                                        method = method ).
+
   ENDMETHOD.
 
 ENDCLASS.
@@ -1512,13 +1572,13 @@ CLASS cl_extract_sap DEFINITION.
     METHODS _add_to_class_components_to_mo
       IMPORTING
         class_components TYPE class_components_type
-        famix_method     TYPE REF TO cl_famix_method
+        sap_method       TYPE REF TO cl_sap_method
         famix_attribute  TYPE REF TO cl_famix_attribute.
     METHODS _determine_usage_of_methods
       IMPORTING
                 sap_class                   TYPE REF TO cl_sap_class
                 class_components            TYPE class_components_type
-                famix_method                TYPE REF TO cl_famix_method
+                sap_method                  TYPE REF TO cl_sap_method
                 famix_attribute             TYPE REF TO cl_famix_attribute
                 famix_invocation            TYPE REF TO cl_famix_invocation
                 famix_access                TYPE REF TO cl_famix_access
@@ -1527,9 +1587,9 @@ CLASS cl_extract_sap DEFINITION.
     "! If using components are not part of the model, they are either added or replaced by a dummy component
     METHODS _determine_usages
       IMPORTING
-                famix_class                 TYPE REF TO cl_sap_class
+                sap_class                 TYPE REF TO cl_sap_class
                 class_component             TYPE class_component_type
-                famix_method                TYPE REF TO cl_famix_method
+                sap_method                  TYPE REF TO cl_sap_method
                 famix_invocation            TYPE REF TO cl_famix_invocation
                 famix_access                TYPE REF TO cl_famix_access
                 used_id                     TYPE i
@@ -1936,14 +1996,15 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     DATA class_components TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
 
-    " Do not use singleton pattern, but define each instance only one time at the start
+    " Do not use singleton pattern, but define each instance only one time at the start. Multiple instanciation allowed unless
+    " specified for the class
 
     DATA(model) = NEW cl_model( ).
     DATA(sap_package) = NEW cl_sap_package( model ).
     DATA(sap_program) = NEW cl_sap_program( model ).
     DATA(sap_class) = NEW cl_sap_class( model ).
     DATA(sap_inheritance) = NEW cl_sap_inheritance( model ).
-    DATA(famix_method) = NEW cl_famix_method( model ).
+    DATA(sap_method) = NEW cl_sap_method( model ).
     DATA(famix_attribute) = NEW cl_famix_attribute( model ).
     DATA(famix_invocation) = NEW cl_famix_invocation( model ).
     DATA(famix_access) = NEW cl_famix_access( model ).
@@ -2008,12 +2069,12 @@ CLASS cl_extract_sap IMPLEMENTATION.
       class_components = _determine_class_components( existing_classes ).
 
       _add_to_class_components_to_mo( class_components = class_components
-                                      famix_method     = famix_method
+                                      sap_method     = sap_method
                                       famix_attribute  = famix_attribute ).
 
       new_components_infos = _determine_usage_of_methods( sap_class       = sap_class
                                                           class_components  = class_components
-                                                          famix_method      = famix_method
+                                                          sap_method      = sap_method
                                                           famix_attribute   = famix_attribute
                                                           famix_invocation  = famix_invocation
                                                           famix_access      = famix_access ).
@@ -2102,7 +2163,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
             ENDIF.
 
 
-            DATA(using_method_id) = famix_method->get_id( class  = CONV string( ris_prog_tadir_line-object_name )
+            DATA(using_method_id) = sap_method->get_id( class  = CONV string( ris_prog_tadir_line-object_name )
                                                              method = using_method ).
             IF using_method_id EQ 0.
 
@@ -2112,8 +2173,8 @@ CLASS cl_extract_sap IMPLEMENTATION.
                 " SAP_2_FAMIX_21      If a component is used by a class that is not selected, add this class to the model
                 " SAP_2_FAMIX_22      Do not assign classes that included due to usage to a package
 
-                famix_class->add( EXPORTING name = CONV string( ris_prog_tadir_line-object_name )
-                                  IMPORTING exists_already_with_id = DATA(exists_already_with_id) ).
+                sap_class->add( EXPORTING name = CONV string( ris_prog_tadir_line-object_name )
+                                IMPORTING exists_already_with_id = DATA(exists_already_with_id) ).
 
                 IF exists_already_with_id IS INITIAL.
 
@@ -2127,7 +2188,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
               ELSE.
                 " SAP_2_FAMIX_35        Add a usage to a single dummy class "OTHER_SAP_CLASS" if required by a parameter
 
-                famix_class->add( EXPORTING name = 'OTHER_SAP_CLASS'
+                sap_class->add( EXPORTING name = 'OTHER_SAP_CLASS'
                                   IMPORTING exists_already_with_id = exists_already_with_id ).
 
               ENDIF.
@@ -2135,11 +2196,11 @@ CLASS cl_extract_sap IMPLEMENTATION.
               " Now there is a class, but no duplicate class
 
               IF g_param_usage_outpack_groupd EQ false.
-                using_method_id = famix_method->get_id( class  = CONV string( ris_prog_tadir_line-object_name )
+                using_method_id = sap_method->get_id( class  = CONV string( ris_prog_tadir_line-object_name )
                                                         method = using_method ).
               ELSE.
-                using_method_id = famix_method->get_id( class  = 'OTHER_SAP_CLASS'
-                                                        method = 'OTHER_SAP_METHOD' ).
+                using_method_id = sap_method->get_id( class  = 'OTHER_SAP_CLASS'
+                                                      method = 'OTHER_SAP_METHOD' ).
               ENDIF.
 
 
@@ -2148,24 +2209,26 @@ CLASS cl_extract_sap IMPLEMENTATION.
                   " Now also the method is to be created
                   " SAP_2_FAMIX_23       If a component is used by a class that is not selected, add the using methods to the model
 
-                  using_method_id = famix_method->add( EXPORTING name = using_method ).
-                  " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
-                  famix_method->set_signature( signature = using_method ).
-                  famix_method->set_parent_type( EXPORTING parent_element = 'FAMIX.Class'
-                                                           parent_name    = CONV string( ris_prog_tadir_line-object_name ) ).
-                  famix_method->store_id( class  = CONV string( ris_prog_tadir_line-object_name )
-                                          method = using_method ).
+                  using_method_id = sap_method->add( EXPORTING class  = CONV string( ris_prog_tadir_line-object_name )
+                                                               method = using_method ).
+*                  " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
+*                  famix_method->set_signature( signature = using_method ).
+*                  famix_method->set_parent_type( EXPORTING parent_element = 'FAMIX.Class'
+*                                                           parent_name    = CONV string( ris_prog_tadir_line-object_name ) ).
+*                  famix_method->store_id( class  = CONV string( ris_prog_tadir_line-object_name )
+*                                          method = using_method ).
                 ELSE.
 
                   " SAP_2_FAMIX_36        Add a usage to a single dummy method "OTHER_SAP_METHOD" if required by a parameter
 
-                  using_method_id = famix_method->add( EXPORTING name = 'OTHER_SAP_METHOD' ).
-                  " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
-                  famix_method->set_signature( signature = 'OTHER_SAP_METHOD' ).
-                  famix_method->set_parent_type( EXPORTING parent_element = 'FAMIX.Class'
-                                                           parent_name    = 'OTHER_SAP_CLASS' ).
-                  famix_method->store_id( class  = 'OTHER_SAP_CLASS'
-                                          method = 'OTHER_SAP_METHOD' ).
+                  using_method_id = sap_method->add( EXPORTING class  = 'OTHER_SAP_CLASS'
+                                                                 method = 'OTHER_SAP_METHOD'  ).
+*                  " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
+*                  famix_method->set_signature( signature = 'OTHER_SAP_METHOD' ).
+*                  famix_method->set_parent_type( EXPORTING parent_element = 'FAMIX.Class'
+*                                                           parent_name    = 'OTHER_SAP_CLASS' ).
+*                  famix_method->store_id( class  = 'OTHER_SAP_CLASS'
+*                                          method = 'OTHER_SAP_METHOD' ).
                 ENDIF.
               ENDIF.
 
@@ -2450,24 +2513,14 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
         WHEN comptype_method. "Method
 
-          " SAP_2_FAMIX_15        Map methods of classes to FAMIX.Method
-          " SAP_2_FAMIX_16        Map methods of interfaces to FAMIX.Method
-
-          existing_id = famix_method->get_id( class  = CONV string( class_component-clsname )
-                                              method = CONV string( class_component-cmpname ) ).
+          existing_id = sap_method->get_id( class  = CONV string( class_component-clsname )
+                                            method = CONV string( class_component-cmpname ) ).
 
           IF existing_id EQ not_found.
 
-            famix_method->add( name = CONV string( class_component-cmpname ) ).
-            " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
-            " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
-            famix_method->set_signature( signature = CONV string( class_component-cmpname ) ).
-            famix_method->set_parent_type(
-              EXPORTING
-                parent_element = 'FAMIX.Class'
-                parent_name    = CONV string( class_component-clsname ) ).
-            famix_method->store_id( EXPORTING class  = CONV string( class_component-clsname )
-                                              method = CONV string( class_component-cmpname ) ).
+            sap_method->add( class = CONV string( class_component-clsname )
+                             method = CONV string( class_component-cmpname ) ).
+
           ENDIF.
         WHEN 2. "Event
         WHEN 3. "Type
@@ -2492,7 +2545,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       CASE class_component-cmptype.
         WHEN comptype_method.
-          DATA(used_id) = famix_method->get_id( class  = CONV string( class_component-clsname )
+          DATA(used_id) = sap_method->get_id( class  = CONV string( class_component-clsname )
                                                 method = CONV string( class_component-cmpname ) ).
 
         WHEN comptype_attribute.
@@ -2503,9 +2556,9 @@ CLASS cl_extract_sap IMPLEMENTATION.
           ASSERT 1 = 2.
       ENDCASE.
 
-      INSERT LINES OF _determine_usages( famix_class      = sap_class
+      INSERT LINES OF _determine_usages( sap_class        = sap_class
                                          class_component  = class_component
-                                         famix_method     = famix_method
+                                         sap_method       = sap_method
                                          famix_invocation = famix_invocation
                                          famix_access     = famix_access
                                          used_id          = used_id ) INTO TABLE new_components_infos.
