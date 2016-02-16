@@ -1,4 +1,4 @@
 # Moose-FAMIX-SAP-Extractor
-An project to extract model data from a SAP system with FAMIX and Moose
+A project to extract model data from a SAP system into the analysis platform Moose on Pharo Smalltalk. It uses FAMIX as a flexible enhancable meta model to do this. 
 
 See Wiki for further details
