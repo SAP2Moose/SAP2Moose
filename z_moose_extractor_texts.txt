@@ -18,8 +18,7 @@ Text Symbols (0-99: Belong to main program):
 001	Select global source for model data
 002	Select SAP components that are part of initial selection
 003	Handle using components
-004	Infos during processing
-Text Symbols (100-199: Belong to Include Z_MSE)
+004	Infos during processing Text Symbols (100-199: Belong to Include Z_MSE)
 100	Settings for processing modelPA
 
 Documentation:

@@ -2,6 +2,8 @@
 *& Report  Z_MOOSE
 *&---------------------------------------------------------------------*
 
+" Converted to ABAP 7.31 by Enno Wulff, Tricktresor
+
 REPORT z_moose NO STANDARD PAGE HEADING.
 *The MIT License (MIT)
 *
