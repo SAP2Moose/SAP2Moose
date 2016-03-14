@@ -44,9 +44,9 @@
 "! See the start of the report for this
 "!
 "! Last activation:
-"! 16.02.2016 21:44 issue20 Rainer Winkler
+"! 14.03.2016 18:43 issue20 Rainer Winkler
 "!
-REPORT yrw1_moose_extractor.
+REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
 
 "! To not compare sy-subrc to zero, but more readable to ok
@@ -175,11 +175,11 @@ CLASS cl_model DEFINITION.
     "! @parameter exists_already_with_id | only if can_be_referenced_by_name true. Zero if it does not yet exist, otherwise filled with id
     "! @parameter processedid | the id in model either if just created or already existing
     METHODS add_entity
-      IMPORTING elementname                   TYPE string
-                name_group                    TYPE string DEFAULT ''
+      IMPORTING elementname                   TYPE clike
+                name_group                    TYPE clike DEFAULT ''
                 is_named_entity               TYPE bool
                 can_be_referenced_by_name     TYPE bool
-                name                          TYPE string OPTIONAL
+                name                          TYPE clike OPTIONAL
       EXPORTING VALUE(exists_already_with_id) TYPE i
       RETURNING VALUE(processed_id)           TYPE i.
 
@@ -193,8 +193,8 @@ CLASS cl_model DEFINITION.
     "! @parameter string | The value of the attribute
     METHODS add_string
       IMPORTING
-        attribute_name TYPE string
-        string         TYPE string.
+        attribute_name TYPE clike
+        string         TYPE clike.
 
     "! Generates an attribute of type reference using a name
     "! @parameter attribute_name | the name of the attribute
@@ -202,22 +202,22 @@ CLASS cl_model DEFINITION.
     "! @parameter name_of_reference | the reference
     METHODS add_reference
       IMPORTING
-        attribute_name          TYPE string
-        elementname             TYPE string
-        name_group_of_reference TYPE string OPTIONAL
-        name_of_reference       TYPE string.
+        attribute_name          TYPE clike
+        elementname             TYPE clike
+        name_group_of_reference TYPE clike OPTIONAL
+        name_of_reference       TYPE clike.
 
     "! Generates an attribute of type reference using an id
     "! @parameter attribute_name | the name of the attribute
     "! @parameter reference_id | the id of the reference
     METHODS add_reference_by_id
       IMPORTING
-        attribute_name TYPE string
+        attribute_name TYPE clike
         reference_id   TYPE i.
 
     METHODS add_boolean
       IMPORTING
-        attribute_name TYPE string
+        attribute_name TYPE clike
         is_true        TYPE bool.
 
   PRIVATE SECTION.
@@ -516,8 +516,8 @@ CLASS cl_famix_sourced_entity DEFINITION ABSTRACT INHERITING FROM cl_famix_entit
     "! @parameter source_language_name | the name of the source language
     METHODS set_declared_source_language
       IMPORTING
-        source_language_element TYPE string
-        source_language_name    TYPE string.
+        source_language_element TYPE clike
+        source_language_name    TYPE clike.
 ENDCLASS.
 
 CLASS cl_famix_sourced_entity IMPLEMENTATION.
@@ -537,8 +537,8 @@ CLASS cl_famix_named_entity DEFINITION INHERITING FROM cl_famix_sourced_entity A
     "! @parameter exists_already_with_id | contains the id if entry already existed
     "! @parameter id | the id in model either if just created or already existing
     METHODS add
-      IMPORTING name_group                    TYPE string OPTIONAL
-                name                          TYPE string
+      IMPORTING name_group                    TYPE clike OPTIONAL
+                name                          TYPE clike
       EXPORTING VALUE(exists_already_with_id) TYPE i
       RETURNING VALUE(id)                     TYPE i.
     "! Call once to set the parent package
@@ -612,8 +612,8 @@ CLASS cl_famix_attribute DEFINITION INHERITING FROM cl_famix_named_entity.
     "! @parameter attribute | the attribute name
     METHODS store_id
       IMPORTING
-        class     TYPE string
-        attribute TYPE string.
+        class     TYPE clike
+        attribute TYPE clike.
     "! Returns the ID for a given attribute of a class
     "! Returns 0 if the attribute is not known
     "! @parameter class | the class of the attribute
@@ -621,8 +621,8 @@ CLASS cl_famix_attribute DEFINITION INHERITING FROM cl_famix_named_entity.
     "! @parameter id | the ID of the element
     METHODS get_id
       IMPORTING
-                class     TYPE string
-                attribute TYPE string
+                class     TYPE clike
+                attribute TYPE clike
       RETURNING VALUE(id) TYPE i.
     METHODS add REDEFINITION.
 
@@ -631,8 +631,8 @@ CLASS cl_famix_attribute DEFINITION INHERITING FROM cl_famix_named_entity.
     "! @parameter parent_name | the name of the parent element
     METHODS set_parent_type
       IMPORTING
-        parent_element TYPE string
-        parent_name    TYPE string.
+        parent_element TYPE clike
+        parent_name    TYPE clike.
   PRIVATE SECTION.
     TYPES: BEGIN OF attribute_id_type,
              class     TYPE string,
@@ -683,12 +683,12 @@ CLASS cl_famix_container_entity DEFINITION INHERITING FROM cl_famix_named_entity
     "! Set the container an element is in
     "! @parameter container_element | the FAMIX element of the Container
     "! @parameter parent_container | the name of the Container
-    METHODS set_container IMPORTING container_element TYPE string
-                                    parent_container  TYPE string.
+    METHODS set_container IMPORTING container_element TYPE clike
+                                    parent_container  TYPE clike.
     "! Set the container an element is in using the reference
     "! @parameter container_element | the FAMIX element of the Container
     "! @parameter parent_container_id | the id of the Container
-    METHODS set_container_by_id IMPORTING container_element   TYPE string
+    METHODS set_container_by_id IMPORTING container_element   TYPE clike
                                           parent_container_id TYPE i.
   PROTECTED SECTION.
 
@@ -715,7 +715,7 @@ CLASS cl_famix_behavioural_entity DEFINITION INHERITING FROM cl_famix_container_
     "! Set the signature of a method
     "! This might not be relevant for ABAP, but is contained here for completeness
     "! @parameter signature | The signature like myMethod( myParameters, ...)
-    METHODS set_signature IMPORTING signature TYPE string.
+    METHODS set_signature IMPORTING signature TYPE clike.
 
 ENDCLASS.
 
@@ -809,8 +809,8 @@ CLASS cl_famix_method DEFINITION INHERITING FROM cl_famix_behavioural_entity.
     "! @parameter parent_id | optional the id of the parent element
     METHODS set_parent_type
       IMPORTING
-        parent_element TYPE string
-        parent_name    TYPE string OPTIONAL
+        parent_element TYPE clike
+        parent_name    TYPE clike OPTIONAL
         parent_id      TYPE i OPTIONAL.
     "! Store the relation between class, method name and id in internal table to enable associations
     "! Call before performing the next time the method add, because the ID is stored internally after creating an element
@@ -818,8 +818,8 @@ CLASS cl_famix_method DEFINITION INHERITING FROM cl_famix_behavioural_entity.
     "! @parameter method | the method name
     METHODS store_id
       IMPORTING
-        class  TYPE string
-        method TYPE string.
+        class  TYPE clike
+        method TYPE clike.
     "! Returns the ID for a given method of a class
     "! Returns 0 if the class is not known
     "! @parameter class | the class of the method
@@ -827,8 +827,8 @@ CLASS cl_famix_method DEFINITION INHERITING FROM cl_famix_behavioural_entity.
     "! @parameter id | the ID of the element
     METHODS get_id
       IMPORTING
-                class     TYPE string
-                method    TYPE string
+                class     TYPE clike
+                method    TYPE clike
       RETURNING VALUE(id) TYPE i.
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_method_id,
@@ -994,8 +994,8 @@ CLASS cl_famix_invocation DEFINITION INHERITING FROM cl_famix_association.
         sender_id            TYPE i
         candidates_id        TYPE i OPTIONAL
         receiver_id          TYPE i OPTIONAL
-        signature            TYPE string OPTIONAL
-        receiver_source_code TYPE string OPTIONAL.
+        signature            TYPE clike OPTIONAL
+        receiver_source_code TYPE clike OPTIONAL.
 
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_sender_candidate,
@@ -1058,12 +1058,12 @@ CLASS cl_famix_inheritance DEFINITION INHERITING FROM cl_famix_association.
     "! @parameter superclass_name | the name of the subclass of the superclass
     METHODS set_sub_and_super_class
       IMPORTING
-        subclass_element      TYPE string
-        subclass_name_group   TYPE string
-        subclass_name         TYPE string
-        superclass_element    TYPE string
-        superclass_name_group TYPE string
-        superclass_name       TYPE string.
+        subclass_element      TYPE clike
+        subclass_name_group   TYPE clike
+        subclass_name         TYPE clike
+        superclass_element    TYPE clike
+        superclass_name_group TYPE clike
+        superclass_name       TYPE clike.
 
 ENDCLASS.
 
@@ -1118,7 +1118,7 @@ ENDCLASS.
 CLASS cl_famix_custom_source_lang DEFINITION INHERITING FROM cl_famix_entity.
   PUBLIC SECTION.
     "! @parameter exists_already_with_id | contains the id if entry already existed
-    METHODS add IMPORTING name                          TYPE string
+    METHODS add IMPORTING name                          TYPE clike
                 EXPORTING VALUE(exists_already_with_id) TYPE i
                 RETURNING VALUE(id)                     TYPE i.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
@@ -1214,11 +1214,11 @@ CLASS cl_sap_package DEFINITION INHERITING FROM cl_sap.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS add
       IMPORTING
-        name TYPE string.
+        name TYPE clike.
     "! Call once to set the parent package
     METHODS set_parent_package
       IMPORTING
-        parent_package TYPE string.
+        parent_package TYPE clike.
   PRIVATE SECTION.
     DATA: g_famix_package TYPE REF TO cl_famix_package.
 ENDCLASS.
@@ -1245,7 +1245,7 @@ CLASS cl_sap_class DEFINITION INHERITING FROM cl_sap.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     "! Add global class
     METHODS add
-      IMPORTING name                          TYPE string
+      IMPORTING name                          TYPE clike
       EXPORTING VALUE(exists_already_with_id) TYPE i
       RETURNING VALUE(id)                     TYPE i.
     "! Specify the parent program for a local class
@@ -1254,13 +1254,13 @@ CLASS cl_sap_class DEFINITION INHERITING FROM cl_sap.
         sap_program TYPE string.
     METHODS set_parent_package
       IMPORTING
-        parent_package TYPE string.
+        parent_package TYPE clike.
     METHODS is_interface.
     "! Add local class of a program
     "! @parameter program | the name of the program the local class is part of
     METHODS add_local
       IMPORTING
-        program   TYPE string
+        program   TYPE clike
         name      TYPE any
       RETURNING
         VALUE(id) TYPE i.
@@ -1310,14 +1310,14 @@ CLASS cl_sap_attribute DEFINITION INHERITING FROM cl_sap.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS get_id
       IMPORTING
-        class     TYPE string
-        attribute TYPE string
+        class     TYPE clike
+        attribute TYPE clike
       RETURNING
         VALUE(id) TYPE i.
     METHODS add
       IMPORTING
-        class     TYPE string
-        attribute TYPE string.
+        class     TYPE clike
+        attribute TYPE clike.
   PRIVATE SECTION.
     DATA: g_famix_attribute TYPE REF TO cl_famix_attribute.
 ENDCLASS.
@@ -1361,22 +1361,22 @@ CLASS cl_sap_method DEFINITION INHERITING FROM cl_sap.
     "! @parameter id | the ID of the element
     METHODS get_id
       IMPORTING
-        class     TYPE string
-        method    TYPE string
+        class     TYPE clike
+        method    TYPE clike
       RETURNING
         VALUE(id) TYPE i.
     "! Add a method for a global SAP class or a global SAP instance
     METHODS add
       IMPORTING
-        class     TYPE string
-        method    TYPE string
+        class     TYPE clike
+        method    TYPE clike
       RETURNING
         VALUE(id) TYPE i.
     METHODS add_local_method
       IMPORTING
-        class_name  TYPE string
+        class_name  TYPE clike
         class_id    TYPE i
-        method_name TYPE string
+        method_name TYPE clike
       RETURNING
         VALUE(id)   TYPE i.
   PRIVATE SECTION.
@@ -1437,15 +1437,15 @@ CLASS cl_sap_inheritance DEFINITION INHERITING FROM cl_sap.
     METHODS add.
     METHODS set_sub_and_super_class
       IMPORTING
-        subclass_name   TYPE string
-        superclass_name TYPE string.
+        subclass_name   TYPE clike
+        superclass_name TYPE clike.
     METHODS set_interface_for_class
       IMPORTING
-        interface_name TYPE string
-        class_name     TYPE string.
+        interface_name TYPE clike
+        class_name     TYPE clike.
     METHODS set_local_sub_and_super_class
       IMPORTING
-        program         TYPE string
+        program         TYPE clike
         subclass_name   TYPE any
         superclass_name TYPE any.
   PRIVATE SECTION.
@@ -1574,13 +1574,13 @@ CLASS cl_sap_program DEFINITION INHERITING FROM cl_sap.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS add
       IMPORTING
-        name      TYPE string
+        name      TYPE clike
       RETURNING
         VALUE(id) TYPE i.
     "! Call once to set the parent package of a program
     METHODS set_parent_package
       IMPORTING
-        parent_package TYPE string.
+        parent_package TYPE clike.
   PRIVATE SECTION.
     DATA g_famix_module TYPE REF TO cl_famix_module.
 ENDCLASS.
@@ -1915,7 +1915,7 @@ CLASS cl_program_analyzer DEFINITION.
     METHODS extract
       IMPORTING
         module_reference TYPE i
-        program          TYPE progname
+        program          TYPE clike
       CHANGING
         model            TYPE REF TO cl_model.
 
@@ -2082,10 +2082,10 @@ CLASS cl_program_analyzer IMPLEMENTATION.
     LOOP AT classes_with_model_id ASSIGNING FIELD-SYMBOL(<class>).
       " SAP_2_FAMIX_30        Map local classes of programs to FAMIX.Class
 
-      <class>-id_in_model = sap_class->add_local( EXPORTING program = CONV string( program )
+      <class>-id_in_model = sap_class->add_local( EXPORTING program = program
                                                             name    = <class>-classname ).
 
-      sap_class->set_parent_program( sap_program = CONV string( program ) ).
+      sap_class->set_parent_program( sap_program = program ).
 
 
     ENDLOOP.
@@ -2122,7 +2122,7 @@ CLASS cl_program_analyzer IMPLEMENTATION.
     LOOP AT inheritances INTO DATA(inheritance).
 
       sap_inheritance->add( ).
-      sap_inheritance->set_local_sub_and_super_class( EXPORTING program = CONV string( program )
+      sap_inheritance->set_local_sub_and_super_class( EXPORTING program = program
                                                                 subclass_name   = inheritance-subclass
                                                                 superclass_name = inheritance-superclass ).
 
@@ -2312,12 +2312,12 @@ CLASS cl_extract_sap IMPLEMENTATION.
             IF ris_prog_tadir_line-method_name IS INITIAL.
               using_method = 'DUMMY'.
             ELSE.
-              using_method = CONV string( ris_prog_tadir_line-method_name ).
+              using_method = ris_prog_tadir_line-method_name.
             ENDIF.
 
 
-            DATA(using_method_id) = sap_method->get_id( class  = CONV string( ris_prog_tadir_line-object_name )
-                                                             method = using_method ).
+            DATA(using_method_id) = sap_method->get_id( class  = ris_prog_tadir_line-object_name
+                                                        method = using_method ).
             IF using_method_id EQ 0.
 
               IF g_param_usage_outpack_groupd EQ false.
@@ -2326,7 +2326,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
                 " SAP_2_FAMIX_21      If a component is used by a class that is not selected, add this class to the model
                 " SAP_2_FAMIX_22      Do not assign classes that included due to usage to a package
 
-                sap_class->add( EXPORTING name = CONV string( ris_prog_tadir_line-object_name )
+                sap_class->add( EXPORTING name = ris_prog_tadir_line-object_name
                                 IMPORTING exists_already_with_id = DATA(exists_already_with_id) ).
 
                 IF exists_already_with_id IS INITIAL.
@@ -2349,7 +2349,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
               " Now there is a class, but no duplicate class
 
               IF g_param_usage_outpack_groupd EQ false.
-                using_method_id = sap_method->get_id( class  = CONV string( ris_prog_tadir_line-object_name )
+                using_method_id = sap_method->get_id( class  = ris_prog_tadir_line-object_name
                                                         method = using_method ).
               ELSE.
                 using_method_id = sap_method->get_id( class  = 'OTHER_SAP_CLASS'
@@ -2362,7 +2362,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
                   " Now also the method is to be created
                   " SAP_2_FAMIX_23       If a component is used by a class that is not selected, add the using methods to the model
 
-                  using_method_id = sap_method->add( EXPORTING class  = CONV string( ris_prog_tadir_line-object_name )
+                  using_method_id = sap_method->add( EXPORTING class  = ris_prog_tadir_line-object_name
                                                                method = using_method ).
 
                 ELSE.
@@ -2426,7 +2426,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
     "! A temporal helper table used to find all packages (development classes) in the selection
     DATA temp_packages_to_search TYPE STANDARD TABLE OF package_type.
 
-    sap_package->add( name = CONV string( package_first-devclass ) ).
+    sap_package->add( name = package_first-devclass ).
 
     INSERT VALUE package_type( devclass = package_first-devclass ) INTO TABLE processed_packages.
 
@@ -2446,8 +2446,8 @@ CLASS cl_extract_sap IMPLEMENTATION.
           " New package
           " Search again
           temp_packages_to_search = VALUE #( BASE temp_packages_to_search ( devclass = package-devclass ) ).
-          sap_package->add( name = CONV string( package-devclass ) ).
-          sap_package->set_parent_package( parent_package = CONV string( package-parentcl ) ).
+          sap_package->add( name = package-devclass ).
+          sap_package->set_parent_package( parent_package = package-parentcl ).
         ENDIF.
 
       ENDLOOP.
@@ -2500,16 +2500,16 @@ CLASS cl_extract_sap IMPLEMENTATION.
       READ TABLE components_infos ASSIGNING FIELD-SYMBOL(<component_infos>) WITH TABLE KEY component = 'ABAPProgramm' component_name = <program>-program.
       ASSERT sy-subrc EQ ok.
 
-      sap_package->add( name  = CONV string( <component_infos>-package ) ).
+      sap_package->add( name  = <component_infos>-package ).
 
-      sap_program->set_parent_package( parent_package = CONV string( <component_infos>-package ) ).
+      sap_program->set_parent_package( parent_package = <component_infos>-package ).
 
       IF p_iprog EQ true.
 
         DATA(program_analyzer) = NEW cl_program_analyzer( ).
 
         program_analyzer->extract( EXPORTING module_reference = module_reference
-                                             program          = CONV #( <program>-program )
+                                             program          = <program>-program
                                     CHANGING model            = model ).
 
       ENDIF.
@@ -2526,7 +2526,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
       " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
-      sap_class->add( name = CONV string( existing_class-class ) ).
+      sap_class->add( name = existing_class-class ).
 
       READ TABLE components_infos ASSIGNING FIELD-SYMBOL(<component_infos>) WITH TABLE KEY component = 'GlobClass' component_name = existing_class-class.
       IF sy-subrc <> ok.
@@ -2536,9 +2536,9 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       ENDIF.
 
-      sap_package->add( EXPORTING name = CONV string( <component_infos>-package ) ).
+      sap_package->add( EXPORTING name = <component_infos>-package ).
 
-      sap_class->set_parent_package( parent_package = CONV string( <component_infos>-package ) ).
+      sap_class->set_parent_package( parent_package = <component_infos>-package ).
       IF <component_infos>-component EQ 'GlobIntf'.
         " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
         sap_class->is_interface( ).
@@ -2575,14 +2575,14 @@ CLASS cl_extract_sap IMPLEMENTATION.
           " Inheritance
 
           sap_inheritance->add( ).
-          sap_inheritance->set_sub_and_super_class( EXPORTING subclass_name         = CONV #( inheritance_2-clsname )
-                                                              superclass_name       = CONV #( inheritance_2-refclsname ) ).
+          sap_inheritance->set_sub_and_super_class( EXPORTING subclass_name         = inheritance_2-clsname
+                                                              superclass_name       = inheritance_2-refclsname ).
         WHEN 1.
           " Interface implementation
 
           sap_inheritance->add( ).
-          sap_inheritance->set_interface_for_class( EXPORTING interface_name         = CONV #( inheritance_2-clsname )
-                                                              class_name       = CONV #( inheritance_2-refclsname ) ).
+          sap_inheritance->set_interface_for_class( EXPORTING interface_name         = inheritance_2-clsname
+                                                              class_name       = inheritance_2-refclsname ).
 
         WHEN 0.
           " Interface composition     (i COMPRISING i_ref)
@@ -2626,12 +2626,12 @@ CLASS cl_extract_sap IMPLEMENTATION.
       CASE class_component-cmptype.
         WHEN comptype_attribute. "Attribute
 
-          DATA(existing_id) = sap_attribute->get_id( EXPORTING class     = CONV string( class_component-clsname )
-                                                               attribute = CONV string( class_component-cmpname ) ).
+          DATA(existing_id) = sap_attribute->get_id( EXPORTING class     = class_component-clsname
+                                                               attribute = class_component-cmpname ).
           IF existing_id EQ not_found.
 
-            sap_attribute->add( EXPORTING class     = CONV string( class_component-clsname )
-                                                 attribute = CONV string( class_component-cmpname ) ).
+            sap_attribute->add( EXPORTING class     = class_component-clsname
+                                          attribute = class_component-cmpname ).
 *            famix_attribute->set_parent_type(
 *              EXPORTING
 *                parent_element = 'FAMIX.Class'
@@ -2643,13 +2643,13 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
         WHEN comptype_method. "Method
 
-          existing_id = sap_method->get_id( class  = CONV string( class_component-clsname )
-                                            method = CONV string( class_component-cmpname ) ).
+          existing_id = sap_method->get_id( class  = class_component-clsname
+                                            method = class_component-cmpname ).
 
           IF existing_id EQ not_found.
 
-            sap_method->add( class = CONV string( class_component-clsname )
-                             method = CONV string( class_component-cmpname ) ).
+            sap_method->add( class  = class_component-clsname
+                             method = class_component-cmpname ).
 
           ENDIF.
         WHEN 2. "Event
@@ -2675,12 +2675,12 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       CASE class_component-cmptype.
         WHEN comptype_method.
-          DATA(used_id) = sap_method->get_id( class  = CONV string( class_component-clsname )
-                                                method = CONV string( class_component-cmpname ) ).
+          DATA(used_id) = sap_method->get_id( class  = class_component-clsname
+                                                method = class_component-cmpname ).
 
         WHEN comptype_attribute.
-          used_id = sap_attribute->get_id( class     = CONV string( class_component-clsname )
-                                            attribute = CONV string( class_component-cmpname ) ).
+          used_id = sap_attribute->get_id( class     = class_component-clsname
+                                            attribute = class_component-cmpname ).
 
         WHEN OTHERS.
           ASSERT 1 = 2.
