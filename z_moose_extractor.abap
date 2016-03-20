@@ -44,9 +44,9 @@
 "! See the start of the report for this
 "!
 "! Last activation:
-"! 14.03.2016 18:43 issue20 Rainer Winkler
+"! 20.03.2016 01:17 issue17 Rainer Winkler
 "!
-REPORT z_moose_extractor.
+REPORT yrw1_moose_extractor.
 TABLES tadir. "So that select-options work
 
 "! To not compare sy-subrc to zero, but more readable to ok
@@ -543,7 +543,7 @@ CLASS cl_famix_named_entity DEFINITION INHERITING FROM cl_famix_sourced_entity A
       RETURNING VALUE(id)                     TYPE i.
     "! Call once to set the parent package
     "! @parameter parent_package | the name of an element of type FAMIX.Package
-    METHODS set_parent_package IMPORTING parent_package TYPE string.
+    METHODS set_parent_package IMPORTING parent_package TYPE clike.
 
   PROTECTED SECTION.
 
@@ -1251,7 +1251,7 @@ CLASS cl_sap_class DEFINITION INHERITING FROM cl_sap.
     "! Specify the parent program for a local class
     METHODS set_parent_program
       IMPORTING
-        sap_program TYPE string.
+        sap_program TYPE clike.
     METHODS set_parent_package
       IMPORTING
         parent_package TYPE clike.
@@ -2002,7 +2002,7 @@ CLASS cl_program_analyzer IMPLEMENTATION.
     DATA token_number TYPE i.
 
     "! Instance that analyzes other ABAP Keywords
-    DATA aok TYPE REF TO cl_ep_analyze_other_keyword.
+    DATA aok TYPE REF TO cl_ep_analyze_other_keyword. " So that ABAP Doc Comment is possible
     aok = NEW cl_ep_analyze_other_keyword( sorted_tokens = sorted_tokens ).
 
     LOOP AT statements ASSIGNING FIELD-SYMBOL(<statement>).
