@@ -43,10 +43,12 @@
 "! Short abbreviations are used if only locally used, in that case an ABAP Doc comments explains the variable
 "! See the start of the report for this
 "!
-"! Last activation:
-"! 20.03.2016 01:17 issue17 Rainer Winkler
+"! This is the original version implemented in ABAP 7.40 (Do not change this line, it will automatically be converted to the ABAP 7.31 statement)
 "!
-REPORT yrw1_moose_extractor.
+"! Last activation:
+"! 21.03.2016 21:32 issue17 Rainer Winkler
+"!
+REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
 
 "! To not compare sy-subrc to zero, but more readable to ok
