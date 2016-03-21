@@ -21,7 +21,7 @@
 *SOFTWARE.
 
 "! Last activation:
-"! 21.03.2016 21:31 issue17 Rainer Winkler
+"! 21.03.2016 22:59 issue17 Rainer Winkler
 "!
 "! Keep logic compatible to ABAP 7.31 to allow also conversion into the other direction
 REPORT z_release_translator.
@@ -199,7 +199,7 @@ CLASS cl_conversion IMPLEMENTATION.
     c = |  METHOD add_entity.                                                                                                                              |. add_abap_731 c.
     c = |                                                                                                                                                  |. add_abap_731 c.
     c = |    FIELD-SYMBOLS <ls_name> LIKE LINE OF g_named_entities.                                                                                        |. add_abap_731 c.
-    c = |    DATA ls_named_entity    LIKE LINE OF g_named_entities.                                                                                        |. add_abap_731 c.
+
     c = |                                                                                                                                                  |. add_abap_731 c.
     c = |    IF can_be_referenced_by_name EQ true.                                                                                                         |. add_abap_731 c.
     c = |                                                                                                                                                  |. add_abap_731 c.
@@ -211,8 +211,8 @@ CLASS cl_conversion IMPLEMENTATION.
 
     c = |      g_named_entities = VALUE #( BASE g_named_entities ( elementname = elementname name_group = name_group xname = name id = g_processed_id ) ).|. add_abap_740 c.
 
-    " TBD Add here a clear statement
-    " TBD do not use ls_ as prefix but only named_entity
+    c = |      DATA ls_named_entity    LIKE LINE OF g_named_entities.  " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion                   |. add_abap_731 c.
+    c = |      CLEAR ls_named_entity.                                                                                                                     |. add_abap_731 c.
     c = |      ls_named_entity-elementname = elementname.                                                                                                 |. add_abap_731 c.
     c = |      ls_named_entity-name_group  = name_group.                                                                                                  |. add_abap_731 c.
     c = |      ls_named_entity-xname       = name.                                                                                                        |. add_abap_731 c.
@@ -220,17 +220,16 @@ CLASS cl_conversion IMPLEMENTATION.
     c = |      INSERT ls_named_entity INTO TABLE g_named_entities.                                                                                        |. add_abap_731 c.
     add_replace.
 
-    c = |    g_elements_in_model = VALUE #( BASE g_elements_in_model ( id = g_processed_id              |. add_abap_740 c.
-    c = |                                                              is_named_entity = is_named_entity|. add_abap_740 c.
-    c = |                                                              elementname = elementname ) ).   |. add_abap_740 c.
+    c = |    g_elements_in_model = VALUE #( BASE g_elements_in_model ( id = g_processed_id                                               |. add_abap_740 c.
+    c = |                                                              is_named_entity = is_named_entity                                 |. add_abap_740 c.
+    c = |                                                              elementname = elementname ) ).                                    |. add_abap_740 c.
 
-    " TBD Add here a clear statement
-    " TBD do not use gs_ as prefix but only elements_in_model
-    c = |    DATA gs_elements_in_model LIKE LINE OF g_elements_in_model.                                |. add_abap_731 c.
-    c = |    gs_elements_in_model-id = g_processed_id.                                                  |. add_abap_731 c.
-    c = |    gs_elements_in_model-is_named_entity = is_named_entity.                                    |. add_abap_731 c.
-    c = |    gs_elements_in_model-elementname = elementname.                                            |. add_abap_731 c.
-    c = |    INSERT gs_elements_in_model INTO TABLE g_elements_in_model.                                |. add_abap_731 c.
+    c = |    DATA ls_elements_in_model LIKE LINE OF g_elements_in_model. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
+    c = |    CLEAR ls_elements_in_model.                                                                                                 |. add_abap_731 c.
+    c = |    ls_elements_in_model-id = g_processed_id.                                                                                   |. add_abap_731 c.
+    c = |    ls_elements_in_model-is_named_entity = is_named_entity.                                                                     |. add_abap_731 c.
+    c = |    ls_elements_in_model-elementname = elementname.                                                                             |. add_abap_731 c.
+    c = |    INSERT ls_elements_in_model INTO TABLE g_elements_in_model.                                                                 |. add_abap_731 c.
     add_replace.
 
     " METHOD make_mse.
@@ -279,76 +278,74 @@ CLASS cl_conversion IMPLEMENTATION.
 
 
 
-    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id        |. add_abap_740 c.
-    c = |                                                attribute_id   = g_attribute_id        |. add_abap_740 c.
-    c = |                                                attribute_name = attribute_name        |. add_abap_740 c.
-    c = |                                                value_type     = reference_value       |. add_abap_740 c.
-    c = |                                                reference      = <named_entity>-id ) ).|. add_abap_740 c.
+    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id                                   |. add_abap_740 c.
+    c = |                                                attribute_id   = g_attribute_id                                   |. add_abap_740 c.
+    c = |                                                attribute_name = attribute_name                                   |. add_abap_740 c.
+    c = |                                                value_type     = reference_value                                  |. add_abap_740 c.
+    c = |                                                reference      = <named_entity>-id ) ).                           |. add_abap_740 c.
 
-    " TBD Add here a clear statement
-    " TBD do not use gs_ as prefix but only attribute
-    c = |    DATA gs_attribute LIKE LINE OF g_attributes.                                       |. add_abap_731 c.
-    c = |    gs_attribute-id             = g_processed_id.                                      |. add_abap_731 c.
-    c = |    gs_attribute-attribute_id   = g_attribute_id.                                      |. add_abap_731 c.
-    c = |    gs_attribute-attribute_name = attribute_name.                                      |. add_abap_731 c.
-    c = |    gs_attribute-value_type     = reference_value.                                     |. add_abap_731 c.
-    c = |    gs_attribute-reference      = <named_entity>-id.                                   |. add_abap_731 c.
-    c = |    APPEND gs_attribute TO g_attributes.                                               |. add_abap_731 c.
+    c = |    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion |. add_abap_731 c.
+    c = |    CLEAR ls_attribute.                                                                                           |. add_abap_731 c.
+    c = |    ls_attribute-id             = g_processed_id.                                                                 |. add_abap_731 c.
+    c = |    ls_attribute-attribute_id   = g_attribute_id.                                                                 |. add_abap_731 c.
+    c = |    ls_attribute-attribute_name = attribute_name.                                                                 |. add_abap_731 c.
+    c = |    ls_attribute-value_type     = reference_value.                                                                |. add_abap_731 c.
+    c = |    ls_attribute-reference      = <named_entity>-id.                                                              |. add_abap_731 c.
+    c = |    APPEND ls_attribute TO g_attributes.                                                                          |. add_abap_731 c.
     add_replace.
 
     " METHOD add_reference_by_id.
 
-    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id   |. add_abap_740 c.
-    c = |                                                attribute_id   = g_attribute_id   |. add_abap_740 c.
-    c = |                                                attribute_name = attribute_name   |. add_abap_740 c.
-    c = |                                                value_type     = reference_value  |. add_abap_740 c.
-    c = |                                                reference      = reference_id ) ).|. add_abap_740 c.
+    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id                                  |. add_abap_740 c.
+    c = |                                                attribute_id   = g_attribute_id                                  |. add_abap_740 c.
+    c = |                                                attribute_name = attribute_name                                  |. add_abap_740 c.
+    c = |                                                value_type     = reference_value                                 |. add_abap_740 c.
+    c = |                                                reference      = reference_id ) ).                               |. add_abap_740 c.
 
-    " TBD Add here a clear statement
-    " TBD do not use gs_ as prefix but only attribute
-    c = |    DATA gs_attribute LIKE LINE OF g_attributes.                                  |. add_abap_731 c.
-    c = |    gs_attribute-id             = g_processed_id.                                 |. add_abap_731 c.
-    c = |    gs_attribute-attribute_id   = g_attribute_id.                                 |. add_abap_731 c.
-    c = |    gs_attribute-attribute_name = attribute_name.                                 |. add_abap_731 c.
-    c = |    gs_attribute-value_type     = reference_value.                                |. add_abap_731 c.
-    c = |    gs_attribute-reference      = reference_id.                                   |. add_abap_731 c.
-    c = |    APPEND gs_attribute TO g_attributes.                                          |. add_abap_731 c.
+    c = |    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
+    c = |    CLEAR ls_attribute.                                                                                          |. add_abap_731 c.
+    c = |    ls_attribute-id             = g_processed_id.                                                                |. add_abap_731 c.
+    c = |    ls_attribute-attribute_id   = g_attribute_id.                                                                |. add_abap_731 c.
+    c = |    ls_attribute-attribute_name = attribute_name.                                                                |. add_abap_731 c.
+    c = |    ls_attribute-value_type     = reference_value.                                                               |. add_abap_731 c.
+    c = |    ls_attribute-reference      = reference_id.                                                                  |. add_abap_731 c.
+    c = |    APPEND ls_attribute TO g_attributes.                                                                         |. add_abap_731 c.
     add_replace.
 
     " METHOD add_string.
 
-    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id|. add_abap_740 c.
-    c = |                                                attribute_id   = g_attribute_id|. add_abap_740 c.
-    c = |                                                attribute_name = attribute_name|. add_abap_740 c.
-    c = |                                                value_type     = string_value  |. add_abap_740 c.
-    c = |                                                string         = string ) ).   |. add_abap_740 c.
+    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id                                  |. add_abap_740 c.
+    c = |                                                attribute_id   = g_attribute_id                                  |. add_abap_740 c.
+    c = |                                                attribute_name = attribute_name                                  |. add_abap_740 c.
+    c = |                                                value_type     = string_value                                    |. add_abap_740 c.
+    c = |                                                string         = string ) ).                                     |. add_abap_740 c.
 
-    " TBD Add here a clear statement
-    " TBD do not use gs_ as prefix but only attribute
-    c = |    DATA gs_attribute LIKE LINE OF g_attributes.                               |. add_abap_731 c.
-    c = |    gs_attribute-id             = g_processed_id.                              |. add_abap_731 c.
-    c = |    gs_attribute-attribute_id   = g_attribute_id.                              |. add_abap_731 c.
-    c = |    gs_attribute-attribute_name = attribute_name.                              |. add_abap_731 c.
-    c = |    gs_attribute-value_type     = string_value.                                |. add_abap_731 c.
-    c = |    gs_attribute-string         = string.                                      |. add_abap_731 c.
-    c = |    APPEND gs_attribute TO g_attributes.                                       |. add_abap_731 c.
+    c = |    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
+    c = |    CLEAR ls_attribute.                                                                                          |. add_abap_731 c.
+    c = |    ls_attribute-id             = g_processed_id.                                                                |. add_abap_731 c.
+    c = |    ls_attribute-attribute_id   = g_attribute_id.                                                                |. add_abap_731 c.
+    c = |    ls_attribute-attribute_name = attribute_name.                                                                |. add_abap_731 c.
+    c = |    ls_attribute-value_type     = string_value.                                                                  |. add_abap_731 c.
+    c = |    ls_attribute-string         = string.                                                                        |. add_abap_731 c.
+    c = |    APPEND ls_attribute TO g_attributes.                                                                         |. add_abap_731 c.
     add_replace.
 
     " METHOD add_boolean.
 
-    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id|. add_abap_740 c.
-    c = |                                                attribute_id   = g_attribute_id|. add_abap_740 c.
-    c = |                                                attribute_name = attribute_name|. add_abap_740 c.
-    c = |                                                value_type     = boolean_value |. add_abap_740 c.
-    c = |                                                boolean        = is_true ) ).  |. add_abap_740 c.
+    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id                                  |. add_abap_740 c.
+    c = |                                                attribute_id   = g_attribute_id                                  |. add_abap_740 c.
+    c = |                                                attribute_name = attribute_name                                  |. add_abap_740 c.
+    c = |                                                value_type     = boolean_value                                   |. add_abap_740 c.
+    c = |                                                boolean        = is_true ) ).                                    |. add_abap_740 c.
 
-    c = |    DATA gs_attribute LIKE LINE OF g_attributes.                               |. add_abap_731 c.
-    c = |    gs_attribute-id             = g_processed_id.                              |. add_abap_731 c.
-    c = |    gs_attribute-attribute_id   = g_attribute_id.                              |. add_abap_731 c.
-    c = |    gs_attribute-attribute_name = attribute_name.                              |. add_abap_731 c.
-    c = |    gs_attribute-value_type     = boolean_value.                               |. add_abap_731 c.
-    c = |    gs_attribute-boolean        = is_true.                                     |. add_abap_731 c.
-    c = |    APPEND gs_attribute TO g_attributes.                                       |. add_abap_731 c.
+    c = |    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
+    c = |    CLEAR ls_attribute.                                                                                          |. add_abap_731 c.
+    c = |    ls_attribute-id             = g_processed_id.                                                                |. add_abap_731 c.
+    c = |    ls_attribute-attribute_id   = g_attribute_id.                                                                |. add_abap_731 c.
+    c = |    ls_attribute-attribute_name = attribute_name.                                                                |. add_abap_731 c.
+    c = |    ls_attribute-value_type     = boolean_value.                                                                 |. add_abap_731 c.
+    c = |    ls_attribute-boolean        = is_true.                                                                       |. add_abap_731 c.
+    c = |    APPEND ls_attribute TO g_attributes.                                                                         |. add_abap_731 c.
     add_replace.
 
     " CLASS cl_output_model
@@ -418,15 +415,16 @@ CLASS cl_conversion IMPLEMENTATION.
 
     " METHOD store_id.
 
-    c = |    g_attribute_ids = VALUE #( BASE g_attribute_ids ( id        = g_last_used_id|. add_abap_740 c.
-    c = |                                                    class     = class           |. add_abap_740 c.
-    c = |                                                    attribute = attribute ) ).  |. add_abap_740 c.
+    c = |    g_attribute_ids = VALUE #( BASE g_attribute_ids ( id        = g_last_used_id                                       |. add_abap_740 c.
+    c = |                                                    class     = class                                                  |. add_abap_740 c.
+    c = |                                                    attribute = attribute ) ).                                         |. add_abap_740 c.
 
-    c = |    DATA gs_attribute_id LIKE LINE OF g_attribute_ids.                          |. add_abap_731 c.
-    c = |    gs_attribute_id-id = g_last_used_id.                                        |. add_abap_731 c.
-    c = |    gs_attribute_id-class = class.                                              |. add_abap_731 c.
-    c = |    gs_attribute_id-attribute = attribute.                                      |. add_abap_731 c.
-    c = |    INSERT gs_attribute_id INTO TABLE g_attribute_ids.                          |. add_abap_731 c.
+    c = |    DATA ls_attribute_id LIKE LINE OF g_attribute_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
+    c = |    CLEAR ls_attribute_id.                                                                                             |. add_abap_731 c.
+    c = |    ls_attribute_id-id = g_last_used_id.                                                                               |. add_abap_731 c.
+    c = |    ls_attribute_id-class = class.                                                                                     |. add_abap_731 c.
+    c = |    ls_attribute_id-attribute = attribute.                                                                             |. add_abap_731 c.
+    c = |    INSERT ls_attribute_id INTO TABLE g_attribute_ids.                                                                 |. add_abap_731 c.
     add_replace.
 
     " METHOD get_id.
@@ -460,15 +458,15 @@ CLASS cl_conversion IMPLEMENTATION.
 
     " METHOD store_id.
 
-    c = |    g_method_ids = VALUE #( BASE g_method_ids ( id    = g_last_used_id            |. add_abap_740 c.
-    c = |                                                class = class method = method ) ).|. add_abap_740 c.
-    " TBD Add here a clear statement
-    " TBD do not use gs_ as prefix but only method
-    c = |    DATA gs_method_id LIKE LINE OF g_method_ids.                                  |. add_abap_731 c.
-    c = |    gs_method_id-id = g_last_used_id.                                             |. add_abap_731 c.
-    c = |    gs_method_id-class = class.                                                   |. add_abap_731 c.
-    c = |    gs_method_id-method = method.                                                 |. add_abap_731 c.
-    c = |    INSERT gs_method_id INTO TABLE g_method_ids.                                  |. add_abap_731 c.
+    c = |    g_method_ids = VALUE #( BASE g_method_ids ( id    = g_last_used_id                                           |. add_abap_740 c.
+    c = |                                                class = class method = method ) ).                               |. add_abap_740 c.
+
+    c = |    DATA ls_method_id LIKE LINE OF g_method_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
+    c = |    CLEAR ls_method_id.                                                                                          |. add_abap_731 c.
+    c = |    ls_method_id-id = g_last_used_id.                                                                            |. add_abap_731 c.
+    c = |    ls_method_id-class = class.                                                                                  |. add_abap_731 c.
+    c = |    ls_method_id-method = method.                                                                                |. add_abap_731 c.
+    c = |    INSERT ls_method_id INTO TABLE g_method_ids.                                                                 |. add_abap_731 c.
     add_replace.
 
     " METHOD get_id.
@@ -500,25 +498,23 @@ CLASS cl_conversion IMPLEMENTATION.
 
     c = |    g_accessor_variable_ids = VALUE #( BASE g_accessor_variable_ids ( accessor_id = accessor_id variable_id = variable_id ) ).|. add_abap_740 c.
 
-    " TBD Add here a clear statement
-    " TBD do not use gs_ as prefix but only accessor_id
-    c = |    DATA gs_accessor_id LIKE LINE OF g_accessor_variable_ids.                                                                 |. add_abap_731 c.
-    c = |    gs_accessor_id-accessor_id = accessor_id.                                                                                 |. add_abap_731 c.
-    c = |    gs_accessor_id-variable_id = variable_id.                                                                                 |. add_abap_731 c.
-    c = |    INSERT gs_accessor_id INTO TABLE g_accessor_variable_ids.                                                                 |. add_abap_731 c.
+    c = |    DATA ls_accessor_id LIKE LINE OF g_accessor_variable_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
+    c = |    CLEAR ls_accessor_id.                                                                                                     |. add_abap_731 c.
+    c = |    ls_accessor_id-accessor_id = accessor_id.                                                                                 |. add_abap_731 c.
+    c = |    ls_accessor_id-variable_id = variable_id.                                                                                 |. add_abap_731 c.
+    c = |    INSERT ls_accessor_id INTO TABLE g_accessor_variable_ids.                                                                 |. add_abap_731 c.
     add_replace.
 
     " CLASS cl_famix_invocation
     " METHOD set_invocation_by_reference.
 
-    c = |      g_sender_candidates = VALUE #( BASE g_sender_candidates ( sender_id = sender_id candidates_id = candidates_id ) ).|. add_abap_740 c.
+    c = |      g_sender_candidates = VALUE #( BASE g_sender_candidates ( sender_id = sender_id candidates_id = candidates_id ) ).         |. add_abap_740 c.
 
-    " TBD Add here a clear statement
-    " TBD do not use gs_ as prefix but only sender_candidate
-    c = |      DATA gs_sender_candidate LIKE LINE OF g_sender_candidates.                                                        |. add_abap_731 c.
-    c = |      gs_sender_candidate-sender_id = sender_id.                                                                        |. add_abap_731 c.
-    c = |      gs_sender_candidate-candidates_id = candidates_id.                                                                |. add_abap_731 c.
-    c = |      INSERT gs_sender_candidate INTO TABLE g_sender_candidates.                                                        |. add_abap_731 c.
+    c = |      DATA ls_sender_candidate LIKE LINE OF g_sender_candidates. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
+    c = |      CLEAR ls_sender_candidate.                                                                                                 |. add_abap_731 c.
+    c = |      ls_sender_candidate-sender_id = sender_id.                                                                                 |. add_abap_731 c.
+    c = |      ls_sender_candidate-candidates_id = candidates_id.                                                                         |. add_abap_731 c.
+    c = |      INSERT ls_sender_candidate INTO TABLE g_sender_candidates.                                                                 |. add_abap_731 c.
     add_replace.
 
     " CLASS cl_famix_custom_source_lang
@@ -752,19 +748,20 @@ CLASS cl_conversion IMPLEMENTATION.
 
     add_replace.
 
-    c = |      sorted_tokens = VALUE #( BASE sorted_tokens ( index = sy-tabix              |. add_abap_740 c.
-    c = |                                                    str   = <ls_token_2>-str      |. add_abap_740 c.
-    c = |                                                    row   = <ls_token_2>-row      |. add_abap_740 c.
-    c = |                                                    col   = <ls_token_2>-col      |. add_abap_740 c.
-    c = |                                                    type  = <ls_token_2>-type ) ).|. add_abap_740 c.
+    c = |      sorted_tokens = VALUE #( BASE sorted_tokens ( index = sy-tabix                                            |. add_abap_740 c.
+    c = |                                                    str   = <ls_token_2>-str                                    |. add_abap_740 c.
+    c = |                                                    row   = <ls_token_2>-row                                    |. add_abap_740 c.
+    c = |                                                    col   = <ls_token_2>-col                                    |. add_abap_740 c.
+    c = |                                                    type  = <ls_token_2>-type ) ).                              |. add_abap_740 c.
 
-    c = |      DATA token LIKE LINE OF sorted_tokens.                                      |. add_abap_731 c.
-    c = |      token-index = sy-tabix.                                                     |. add_abap_731 c.
-    c = |      token-str   = <ls_token_2>-str.                                             |. add_abap_731 c.
-    c = |      token-row   = <ls_token_2>-row.                                             |. add_abap_731 c.
-    c = |      token-col   = <ls_token_2>-col.                                             |. add_abap_731 c.
-    c = |      token-type  = <ls_token_2>-type.                                            |. add_abap_731 c.
-    c = |      INSERT token INTO TABLE sorted_tokens.                                      |. add_abap_731 c.
+    c = |      DATA ls_token LIKE LINE OF sorted_tokens. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
+    c = |      CLEAR ls_token.                                                                                           |. add_abap_731 c.
+    c = |      ls_token-index = sy-tabix.                                                                                |. add_abap_731 c.
+    c = |      ls_token-str   = <ls_token_2>-str.                                                                        |. add_abap_731 c.
+    c = |      ls_token-row   = <ls_token_2>-row.                                                                        |. add_abap_731 c.
+    c = |      ls_token-col   = <ls_token_2>-col.                                                                        |. add_abap_731 c.
+    c = |      ls_token-type  = <ls_token_2>-type.                                                                       |. add_abap_731 c.
+    c = |      INSERT ls_token INTO TABLE sorted_tokens.                                                                 |. add_abap_731 c.
     add_replace.
 
     c = |    aok = NEW cl_ep_analyze_other_keyword( sorted_tokens = sorted_tokens ).|. add_abap_740 c.
@@ -780,18 +777,17 @@ CLASS cl_conversion IMPLEMENTATION.
 
     c = |              classes_with_model_id = VALUE #( BASE classes_with_model_id ( actual_class_with_model_id ) ).|. add_abap_740 c.
 
-    "TBD here the 7.31 version appears to be more clear
     c = |              INSERT actual_class_with_model_id INTO TABLE classes_with_model_id.                          |. add_abap_731 c.
     add_replace.
 
-    c = |                inheritances = VALUE #( BASE inheritances ( subclass = actual_class_with_model_id-classname        |. add_abap_740 c.
-    c = |                                                                  superclass = aok->g_info-class_inherits_from ) ).|. add_abap_740 c.
+    c = |                inheritances = VALUE #( BASE inheritances ( subclass = actual_class_with_model_id-classname                      |. add_abap_740 c.
+    c = |                                                                  superclass = aok->g_info-class_inherits_from ) ).              |. add_abap_740 c.
 
-    " TBD add clear statement
-    c = |                DATA inheritance_2 LIKE LINE OF inheritances.                                                      |. add_abap_731 c.
-    c = |                inheritance_2-subclass = actual_class_with_model_id-classname.                                     |. add_abap_731 c.
-    c = |                inheritance_2-superclass = aok->g_info-class_inherits_from.                                        |. add_abap_731 c.
-    c = |                INSERT inheritance_2 INTO TABLE inheritances.                                                      |. add_abap_731 c.
+    c = |                DATA ls_inheritance_2 LIKE LINE OF inheritances. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
+    c = |                CLEAR ls_inheritance_2.                                                                                          |. add_abap_731 c.
+    c = |                ls_inheritance_2-subclass = actual_class_with_model_id-classname.                                                |. add_abap_731 c.
+    c = |                ls_inheritance_2-superclass = aok->g_info-class_inherits_from.                                                   |. add_abap_731 c.
+    c = |                INSERT ls_inheritance_2 INTO TABLE inheritances.                                                                 |. add_abap_731 c.
     add_replace.
 
     c = |              context-implementation_of_class = VALUE #( ).|. add_abap_740 c.
@@ -802,7 +798,7 @@ CLASS cl_conversion IMPLEMENTATION.
     c = |                actual_method = VALUE #( classname = actual_class_with_model_id-classname|. add_abap_740 c.
     c = |                                         in_section = context-in_section ).              |. add_abap_740 c.
 
-    " TBD add clear statement
+    c = |                CLEAR actual_method.                                                     |. add_abap_731 c.
     c = |                actual_method-classname = actual_class_with_model_id-classname.          |. add_abap_731 c.
     c = |                actual_method-in_section = context-in_section.                           |. add_abap_731 c.
     add_replace.
@@ -811,7 +807,7 @@ CLASS cl_conversion IMPLEMENTATION.
     c = |                                         in_section = context-in_section                 |. add_abap_740 c.
     c = |                                         instanciable = true ).                          |. add_abap_740 c.
 
-    " TBD add clear statement
+    c = |                CLEAR actual_method.                                                     |. add_abap_731 c.
     c = |                actual_method-classname = actual_class_with_model_id-classname.          |. add_abap_731 c.
     c = |                actual_method-in_section = context-in_section.                           |. add_abap_731 c.
     c = |                actual_method-instanciable = true.                                       |. add_abap_731 c.
@@ -915,20 +911,21 @@ CLASS cl_conversion IMPLEMENTATION.
     c = |                                          ( object = 'INTF' component = 'GlobIntf' )      |. add_abap_740 c.
     c = |                                          ( object = 'PROG' component = 'ABAPProgramm') ).|. add_abap_740 c.
 
-    " TBD add clear remove gs_
-
-    c = |    DATA gs_mapping TYPE map_tadir_component_type.                                        |. add_abap_731 c.
-    c = |    gs_mapping-object = 'CLAS'.                                                           |. add_abap_731 c.
-    c = |    gs_mapping-component = 'GlobClass'.                                                   |. add_abap_731 c.
-    c = |    INSERT gs_mapping INTO TABLE g_tadir_components_mapping.                              |. add_abap_731 c.
-    c = |                                                                                          |. add_abap_731 c.
-    c = |    gs_mapping-object = 'INTF'.                                                           |. add_abap_731 c.
-    c = |    gs_mapping-component = 'GlobIntf'.                                                    |. add_abap_731 c.
-    c = |    INSERT gs_mapping INTO TABLE g_tadir_components_mapping.                              |. add_abap_731 c.
-    c = |                                                                                          |. add_abap_731 c.
-    c = |    gs_mapping-object = 'PROG'.                                                           |. add_abap_731 c.
-    c = |    gs_mapping-component = 'ABAPProgram'.                                                 |. add_abap_731 c.
-    c = |    INSERT gs_mapping INTO TABLE g_tadir_components_mapping.                              |. add_abap_731 c.
+    c = |    DATA ls_mapping TYPE map_tadir_component_type. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
+    c = |    CLEAR ls_mapping.                                                                              |. add_abap_731 c.
+    c = |    ls_mapping-object = 'CLAS'.                                                                                    |. add_abap_731 c.
+    c = |    ls_mapping-component = 'GlobClass'.                                                                            |. add_abap_731 c.
+    c = |    INSERT ls_mapping INTO TABLE g_tadir_components_mapping.                                                       |. add_abap_731 c.
+    c = |                                                                                                                   |. add_abap_731 c.
+    c = |    CLEAR ls_mapping.                                                                              |. add_abap_731 c.
+    c = |    ls_mapping-object = 'INTF'.                                                                                    |. add_abap_731 c.
+    c = |    ls_mapping-component = 'GlobIntf'.                                                                             |. add_abap_731 c.
+    c = |    INSERT ls_mapping INTO TABLE g_tadir_components_mapping.                                                       |. add_abap_731 c.
+    c = |                                                                                                                   |. add_abap_731 c.
+    c = |    CLEAR ls_mapping.                                                                              |. add_abap_731 c.
+    c = |    ls_mapping-object = 'PROG'.                                                                                    |. add_abap_731 c.
+    c = |    ls_mapping-component = 'ABAPProgram'.                                                                          |. add_abap_731 c.
+    c = |    INSERT ls_mapping INTO TABLE g_tadir_components_mapping.                                                       |. add_abap_731 c.
     add_replace.
 
     c = |      DATA(select_by_top_package) = true.     |. add_abap_740 c.
@@ -943,15 +940,15 @@ CLASS cl_conversion IMPLEMENTATION.
     c = |      LOOP AT new_components_infos ASSIGNING <component_infos>.              |. add_abap_731 c.
     add_replace.
 
-    c = |        DATA(object) = g_tadir_components_mapping[ KEY comp component = <component_infos>-component ]-object.|. add_abap_740 c.
+    c = |        DATA(object) = g_tadir_components_mapping[ KEY comp component = <component_infos>-component ]-object.             |. add_abap_740 c.
 
-    "TBD Check ls_ add assert statement or other as the read statement in 7.40 causes not catched class based exception
-    c = |        DATA object TYPE trobjtype.                                                                          |. add_abap_731 c.
-    c = |        DATA ls_tadir LIKE LINE OF g_tadir_components_mapping.                                               |. add_abap_731 c.
-    c = |        READ TABLE g_tadir_components_mapping                                                                |. add_abap_731 c.
-    c = |              INTO ls_tadir                                                                                  |. add_abap_731 c.
-    c = |              WITH KEY component  = <component_infos>-component.                                             |. add_abap_731 c.
-    c = |        object = ls_tadir-object.                                                                            |. add_abap_731 c.
+    c = |        DATA object TYPE trobjtype.                                                                                       |. add_abap_731 c.
+    c = |        DATA ls_tadir LIKE LINE OF g_tadir_components_mapping.                                                            |. add_abap_731 c.
+    c = |        READ TABLE g_tadir_components_mapping                                                                             |. add_abap_731 c.
+    c = |              INTO ls_tadir                                                                                               |. add_abap_731 c.
+    c = |              WITH KEY component  = <component_infos>-component.                                                          |. add_abap_731 c.
+    c = |        ASSERT SY-SUBRC EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing|. add_abap_731 c.
+    c = |        object = ls_tadir-object.                                                                                         |. add_abap_731 c.
     add_replace.
 
     c = |        SELECT SINGLE devclass FROM tadir INTO @<component_infos>-package|. add_abap_740 c.
@@ -1057,15 +1054,15 @@ CLASS cl_conversion IMPLEMENTATION.
 
     " TBD Error, here a dump is to be raised if nothing is found in table g_tadir_components_mapping
 
-    c = |              DATA new_components_info LIKE LINE OF new_components_infos.                                                                                |. add_abap_731 c.
+    c = |              DATA ls_new_components_info LIKE LINE OF new_components_infos. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion            |. add_abap_731 c.
     c = |                                                                                                                                                         |. add_abap_731 c.
-    c = |              DATA gs_tadir_comp_map LIKE LINE OF g_tadir_components_mapping.                                                                            |. add_abap_731 c.
-    c = |              READ TABLE g_tadir_components_mapping INTO gs_tadir_comp_map WITH TABLE KEY object = 'CLAS'.                                               |. add_abap_731 c.
-    c = |              IF sy-subrc = 0.                                                                                                                           |. add_abap_731 c.
-    c = |                new_components_info-component_name = ls_mtdkey-cpdname.                                                                                  |. add_abap_731 c.
-    c = |                new_components_info-component   = gs_tadir_comp_map-component .                                                                          |. add_abap_731 c.
-    c = |                INSERT new_components_info INTO TABLE new_components_infos.                                                                              |. add_abap_731 c.
-    c = |              ENDIF.                                                                                                                                     |. add_abap_731 c.
+    c = |              DATA ls_tadir_comp_map LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion           |. add_abap_731 c.
+    c = |              READ TABLE g_tadir_components_mapping INTO ls_tadir_comp_map WITH TABLE KEY object = 'CLAS'.                                               |. add_abap_731 c.
+    c = |              ASSERT SY-SUBRC EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing                         |. add_abap_731 c.
+    c = |              CLEAR ls_new_components_info.                                                                                                              |. add_abap_731 c.
+    c = |              ls_new_components_info-component_name = ls_mtdkey-cpdname.                                                                                 |. add_abap_731 c.
+    c = |              ls_new_components_info-component   = ls_tadir_comp_map-component .                                                                         |. add_abap_731 c.
+    c = |              INSERT ls_new_components_info INTO TABLE new_components_infos.                                                                             |. add_abap_731 c.
     add_replace.
 
     c = |              IF g_param_usage_outpack_groupd EQ false.                                       |. add_abap_740 c.
@@ -1110,18 +1107,20 @@ CLASS cl_conversion IMPLEMENTATION.
 
     " METHOD _determine_packages_to_analyze.
 
-    c = |    INSERT VALUE package_type( devclass = package_first-devclass ) INTO TABLE processed_packages.|. add_abap_740 c.
+    c = |    INSERT VALUE package_type( devclass = package_first-devclass ) INTO TABLE processed_packages.                              |. add_abap_740 c.
 
-    c = |    DATA processed_package LIKE LINE OF processed_packages.                                      |. add_abap_731 c.
-    c = |    processed_package-devclass = package_first-devclass.                                         |. add_abap_731 c.
-    c = |    INSERT processed_package INTO TABLE processed_packages.                                      |. add_abap_731 c.
+    c = |    DATA ls_processed_package LIKE LINE OF processed_packages. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
+    c = |    CLEAR ls_processed_package.                                                                                                |. add_abap_731 c.
+    c = |    ls_processed_package-devclass = package_first-devclass.                                                                    |. add_abap_731 c.
+    c = |    INSERT ls_processed_package INTO TABLE processed_packages.                                                                 |. add_abap_731 c.
     add_replace.
 
-    c = |    temp_packages_to_search = VALUE #( ( devclass = g_parameter_package_to_analyze ) ).|. add_abap_740 c.
+    c = |    temp_packages_to_search = VALUE #( ( devclass = g_parameter_package_to_analyze ) ).                                                  |. add_abap_740 c.
 
-    c = |    DATA temp_package_to_search LIKE LINE OF temp_packages_to_search.                  |. add_abap_731 c.
-    c = |    temp_package_to_search-devclass = g_parameter_package_to_analyze.                  |. add_abap_731 c.
-    c = |    INSERT temp_package_to_search INTO TABLE temp_packages_to_search.                  |. add_abap_731 c.
+    c = |    DATA ls_temp_package_to_search LIKE LINE OF temp_packages_to_search. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
+    c = |    CLEAR ls_temp_package_to_search.                                                                                                     |. add_abap_731 c.
+    c = |    ls_temp_package_to_search-devclass = g_parameter_package_to_analyze.                                                                 |. add_abap_731 c.
+    c = |    INSERT ls_temp_package_to_search INTO TABLE temp_packages_to_search.                                                                 |. add_abap_731 c.
     add_replace.
 
     c = |        SELECT devclass, parentcl FROM tdevc INTO TABLE @DATA(packages)                                    |. add_abap_740 c.
@@ -1150,58 +1149,59 @@ CLASS cl_conversion IMPLEMENTATION.
 
     c = |        INSERT VALUE package_type( devclass = package-devclass ) INTO TABLE processed_packages.|. add_abap_740 c.
 
-    " TBD Add clear statement
-
-    c = |        processed_package-devclass = package-devclass.                                         |. add_abap_731 c.
-    c = |        INSERT processed_package INTO TABLE processed_packages.                                |. add_abap_731 c.
+    c = |        CLEAR ls_processed_package.                                                            |. add_abap_731 c.
+    c = |        ls_processed_package-devclass = package-devclass.                                      |. add_abap_731 c.
+    c = |        INSERT ls_processed_package INTO TABLE processed_packages.                             |. add_abap_731 c.
     add_replace.
 
     c = |          temp_packages_to_search = VALUE #( BASE temp_packages_to_search ( devclass = package-devclass ) ).|. add_abap_740 c.
-    " TBD Add clear statement
-    c = |          temp_package_to_search-devclass = package-devclass.                                               |. add_abap_731 c.
-    c = |          INSERT temp_package_to_search INTO TABLE temp_packages_to_search.                                 |. add_abap_731 c.
+
+    c = |          CLEAR ls_temp_package_to_search.                                                                  |. add_abap_731 c.
+    c = |          ls_temp_package_to_search-devclass = package-devclass.                                            |. add_abap_731 c.
+    c = |          INSERT ls_temp_package_to_search INTO TABLE temp_packages_to_search.                              |. add_abap_731 c.
     add_replace.
 
 
-    c = |    MOVE-CORRESPONDING components_infos TO classes.                                        |. add_abap_740 c.
-    c = |                                                                                           |. add_abap_740 c.
-    c = |    LOOP AT components_infos ASSIGNING FIELD-SYMBOL(<component_infos>).                    |. add_abap_740 c.
-    c = |                                                                                           |. add_abap_740 c.
-    c = |      IF <component_infos>-component EQ 'GlobClass'                                        |. add_abap_740 c.
-    c = |      OR <component_infos>-component EQ 'GlobIntf'.                                        |. add_abap_740 c.
-    c = |                                                                                           |. add_abap_740 c.
-    c = |        classes = VALUE #( BASE classes ( obj_name = <component_infos>-component_name ) ). |. add_abap_740 c.
-    c = |                                                                                           |. add_abap_740 c.
-    c = |      ELSE.                                                                                |. add_abap_740 c.
-    c = |                                                                                           |. add_abap_740 c.
-    c = |        programs = VALUE #( BASE programs ( program = <component_infos>-component_name ) ).|. add_abap_740 c.
-    c = |                                                                                           |. add_abap_740 c.
-    c = |      ENDIF.                                                                               |. add_abap_740 c.
-    c = |                                                                                           |. add_abap_740 c.
-    c = |    ENDLOOP.                                                                               |. add_abap_740 c.
+    c = |    MOVE-CORRESPONDING components_infos TO classes.                                                            |. add_abap_740 c.
+    c = |                                                                                                               |. add_abap_740 c.
+    c = |    LOOP AT components_infos ASSIGNING FIELD-SYMBOL(<component_infos>).                                        |. add_abap_740 c.
+    c = |                                                                                                               |. add_abap_740 c.
+    c = |      IF <component_infos>-component EQ 'GlobClass'                                                            |. add_abap_740 c.
+    c = |      OR <component_infos>-component EQ 'GlobIntf'.                                                            |. add_abap_740 c.
+    c = |                                                                                                               |. add_abap_740 c.
+    c = |        classes = VALUE #( BASE classes ( obj_name = <component_infos>-component_name ) ).                     |. add_abap_740 c.
+    c = |                                                                                                               |. add_abap_740 c.
+    c = |      ELSE.                                                                                                    |. add_abap_740 c.
+    c = |                                                                                                               |. add_abap_740 c.
+    c = |        programs = VALUE #( BASE programs ( program = <component_infos>-component_name ) ).                    |. add_abap_740 c.
+    c = |                                                                                                               |. add_abap_740 c.
+    c = |      ENDIF.                                                                                                   |. add_abap_740 c.
+    c = |                                                                                                               |. add_abap_740 c.
+    c = |    ENDLOOP.                                                                                                   |. add_abap_740 c.
 
-    c = |    DATA class LIKE LINE OF classes.                                                       |. add_abap_731 c.
-    c = |                                                                                           |. add_abap_731 c.
-    c = |    FIELD-SYMBOLS <component_infos> LIKE LINE OF components_infos.                         |. add_abap_731 c.
-    c = |                                                                                           |. add_abap_731 c.
-    c = |    LOOP AT components_infos ASSIGNING <component_infos>.                                  |. add_abap_731 c.
-    c = |      MOVE-CORRESPONDING <component_infos> TO class.                                       |. add_abap_731 c.
-    c = |      INSERT class INTO TABLE classes.                                                     |. add_abap_731 c.
-    c = |                                                                                           |. add_abap_731 c.
-    c = |      IF <component_infos>-component EQ 'GlobClass'                                        |. add_abap_731 c.
-    c = |      OR <component_infos>-component EQ 'GlobIntf'.                                        |. add_abap_731 c.
-    c = |                                                                                           |. add_abap_731 c.
-    c = |        class-obj_name = <component_infos>-component_name.                                 |. add_abap_731 c.
-    c = |        INSERT class INTO TABLE classes.                                                   |. add_abap_731 c.
-    c = |                                                                                           |. add_abap_731 c.
-    c = |      ELSE.                                                                                |. add_abap_731 c.
-    c = |        DATA program LIKE LINE OF programs.                                                |. add_abap_731 c.
-    c = |        program-program = <component_infos>-component_name.                                |. add_abap_731 c.
-    c = |        INSERT program INTO TABLE programs.                                                |. add_abap_731 c.
-    c = |                                                                                           |. add_abap_731 c.
-    c = |      ENDIF.                                                                               |. add_abap_731 c.
-    c = |                                                                                           |. add_abap_731 c.
-    c = |    ENDLOOP.                                                                               |. add_abap_731 c.
+    c = |    DATA class LIKE LINE OF classes.                                                                           |. add_abap_731 c.
+    c = |                                                                                                               |. add_abap_731 c.
+    c = |    FIELD-SYMBOLS <component_infos> LIKE LINE OF components_infos.                                             |. add_abap_731 c.
+    c = |                                                                                                               |. add_abap_731 c.
+    c = |    LOOP AT components_infos ASSIGNING <component_infos>.                                                      |. add_abap_731 c.
+    c = |      MOVE-CORRESPONDING <component_infos> TO class.                                                           |. add_abap_731 c.
+    c = |      INSERT class INTO TABLE classes.                                                                         |. add_abap_731 c.
+    c = |                                                                                                               |. add_abap_731 c.
+    c = |      IF <component_infos>-component EQ 'GlobClass'                                                            |. add_abap_731 c.
+    c = |      OR <component_infos>-component EQ 'GlobIntf'.                                                            |. add_abap_731 c.
+    c = |                                                                                                               |. add_abap_731 c.
+    c = |        class-obj_name = <component_infos>-component_name.                                                     |. add_abap_731 c.
+    c = |        INSERT class INTO TABLE classes.                                                                       |. add_abap_731 c.
+    c = |                                                                                                               |. add_abap_731 c.
+    c = |      ELSE.                                                                                                    |. add_abap_731 c.
+    c = |        DATA ls_program LIKE LINE OF programs. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
+    c = |        CLEAR ls_program.                                                                                      |. add_abap_731 c.
+    c = |        ls_program-program = <component_infos>-component_name.                                                 |. add_abap_731 c.
+    c = |        INSERT ls_program INTO TABLE programs.                                                                 |. add_abap_731 c.
+    c = |                                                                                                               |. add_abap_731 c.
+    c = |      ENDIF.                                                                                                   |. add_abap_731 c.
+    c = |                                                                                                               |. add_abap_731 c.
+    c = |    ENDLOOP.                                                                                                   |. add_abap_731 c.
     add_replace.
 
     c = |    LOOP AT programs ASSIGNING FIELD-SYMBOL(<program>).|. add_abap_740 c.
@@ -1345,19 +1345,17 @@ CLASS cl_conversion IMPLEMENTATION.
     c = |                                                                component_name = tadir_component-obj_name                                          |. add_abap_740 c.
     c = |                                                                package = tadir_component-devclass ) ).                                            |. add_abap_740 c.
 
-    " TBD Assert is missed, because the exception if no data is found is not added to 7.31 coding
-    " Add clear statement
-    c = |            DATA component_info LIKE LINE OF components_infos.                                                                                     |. add_abap_731 c.
-    c = |            DATA map LIKE LINE OF g_tadir_components_mapping.                                                                                      |. add_abap_731 c.
+    c = |            DATA ls_component_info LIKE LINE OF components_infos. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion                 |. add_abap_731 c.
+    c = |            DATA ls_map LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion                  |. add_abap_731 c.
     c = |                                                                                                                                                   |. add_abap_731 c.
-    c = |            READ TABLE g_tadir_components_mapping INTO map WITH TABLE KEY object = tadir_component-object.                                         |. add_abap_731 c.
-    c = |            IF sy-subrc = 0.                                                                                                                       |. add_abap_731 c.
+    c = |            READ TABLE g_tadir_components_mapping INTO ls_map WITH TABLE KEY object = tadir_component-object.                                      |. add_abap_731 c.
+    c = |            ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing                     |. add_abap_731 c.
     c = |                                                                                                                                                   |. add_abap_731 c.
-    c = |              component_info-component = map-component.                                                                                            |. add_abap_731 c.
-    c = |            ENDIF.                                                                                                                                 |. add_abap_731 c.
-    c = |            component_info-component_name = tadir_component-obj_name.                                                                              |. add_abap_731 c.
-    c = |            component_info-package = tadir_component-devclass.                                                                                     |. add_abap_731 c.
-    c = |            INSERT component_info INTO TABLE components_infos.                                                                                     |. add_abap_731 c.
+    c = |            CLEAR ls_component_info.                                                                                                               |. add_abap_731 c.
+    c = |            ls_component_info-component = ls_map-component.                                                                                        |. add_abap_731 c.
+    c = |            ls_component_info-component_name = tadir_component-obj_name.                                                                           |. add_abap_731 c.
+    c = |            ls_component_info-package = tadir_component-devclass.                                                                                  |. add_abap_731 c.
+    c = |            INSERT ls_component_info INTO TABLE components_infos.                                                                                  |. add_abap_731 c.
     add_replace.
 
     c = |          SELECT obj_name, object, devclass FROM tadir INTO @tadir_component|. add_abap_740 c.
@@ -1377,16 +1375,15 @@ CLASS cl_conversion IMPLEMENTATION.
     c = |                                                                component_name = tadir_component-obj_name                                          |. add_abap_740 c.
     c = |                                                                package = tadir_component-devclass ) ).                                            |. add_abap_740 c.
 
-    " TBD Assert is missed, because the exception if no data is found is not added to 7.31 coding
-    " Add clear statement
-    c = |            READ TABLE g_tadir_components_mapping INTO map WITH TABLE KEY object = tadir_component-object.                                         |. add_abap_731 c.
-    c = |            IF sy-subrc = 0.                                                                                                                       |. add_abap_731 c.
+    c = |            DATA ls_map_2 LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion                |. add_abap_731 c.
+    c = |            READ TABLE g_tadir_components_mapping INTO ls_map_2 WITH TABLE KEY object = tadir_component-object.                                    |. add_abap_731 c.
+    c = |            ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing                     |. add_abap_731 c.
     c = |                                                                                                                                                   |. add_abap_731 c.
-    c = |              component_info-component = map-component.                                                                                            |. add_abap_731 c.
-    c = |            ENDIF.                                                                                                                                 |. add_abap_731 c.
-    c = |            component_info-component_name = tadir_component-obj_name.                                                                              |. add_abap_731 c.
-    c = |            component_info-package = tadir_component-devclass.                                                                                     |. add_abap_731 c.
-    c = |            INSERT component_info INTO TABLE components_infos.                                                                                     |. add_abap_731 c.
+    c = |            CLEAR ls_component_info.                                                                                                               |. add_abap_731 c.
+    c = |            ls_component_info-component = ls_map_2-component.                                                                                      |. add_abap_731 c.
+    c = |            ls_component_info-component_name = tadir_component-obj_name.                                                                           |. add_abap_731 c.
+    c = |            ls_component_info-package = tadir_component-devclass.                                                                                  |. add_abap_731 c.
+    c = |            INSERT ls_component_info INTO TABLE components_infos.                                                                                  |. add_abap_731 c.
     add_replace.
 
     " START-OF-SELECTION.

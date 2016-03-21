@@ -283,7 +283,6 @@ CLASS cl_model IMPLEMENTATION.
   METHOD add_entity.
 
     FIELD-SYMBOLS <ls_name> LIKE LINE OF g_named_entities.
-    DATA ls_named_entity    LIKE LINE OF g_named_entities.
 
     IF can_be_referenced_by_name EQ true.
 
@@ -301,6 +300,8 @@ CLASS cl_model IMPLEMENTATION.
     g_attribute_id = 0.
 
     IF can_be_referenced_by_name EQ true.
+      DATA ls_named_entity    LIKE LINE OF g_named_entities.  " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+      CLEAR ls_named_entity.
       ls_named_entity-elementname = elementname.
       ls_named_entity-name_group  = name_group.
       ls_named_entity-xname       = name.
@@ -308,11 +309,12 @@ CLASS cl_model IMPLEMENTATION.
       INSERT ls_named_entity INTO TABLE g_named_entities.
     ENDIF.
 
-    DATA gs_elements_in_model LIKE LINE OF g_elements_in_model.
-    gs_elements_in_model-id = g_processed_id.
-    gs_elements_in_model-is_named_entity = is_named_entity.
-    gs_elements_in_model-elementname = elementname.
-    INSERT gs_elements_in_model INTO TABLE g_elements_in_model.
+    DATA ls_elements_in_model LIKE LINE OF g_elements_in_model. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_elements_in_model.
+    ls_elements_in_model-id = g_processed_id.
+    ls_elements_in_model-is_named_entity = is_named_entity.
+    ls_elements_in_model-elementname = elementname.
+    INSERT ls_elements_in_model INTO TABLE g_elements_in_model.
 
     IF is_named_entity EQ true.
       me->add_string( EXPORTING attribute_name = 'name' string = name ).
@@ -399,51 +401,55 @@ CLASS cl_model IMPLEMENTATION.
                                                                                       xname = name_of_reference.
     ASSERT sy-subrc EQ ok.
     ADD 1 TO g_attribute_id.
-    DATA gs_attribute LIKE LINE OF g_attributes.
-    gs_attribute-id             = g_processed_id.
-    gs_attribute-attribute_id   = g_attribute_id.
-    gs_attribute-attribute_name = attribute_name.
-    gs_attribute-value_type     = reference_value.
-    gs_attribute-reference      = <named_entity>-id.
-    APPEND gs_attribute TO g_attributes.
+    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_attribute.
+    ls_attribute-id             = g_processed_id.
+    ls_attribute-attribute_id   = g_attribute_id.
+    ls_attribute-attribute_name = attribute_name.
+    ls_attribute-value_type     = reference_value.
+    ls_attribute-reference      = <named_entity>-id.
+    APPEND ls_attribute TO g_attributes.
 
   ENDMETHOD.
 
   METHOD add_reference_by_id.
 
     ADD 1 TO g_attribute_id.
-    DATA gs_attribute LIKE LINE OF g_attributes.
-    gs_attribute-id             = g_processed_id.
-    gs_attribute-attribute_id   = g_attribute_id.
-    gs_attribute-attribute_name = attribute_name.
-    gs_attribute-value_type     = reference_value.
-    gs_attribute-reference      = reference_id.
-    APPEND gs_attribute TO g_attributes.
+    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_attribute.
+    ls_attribute-id             = g_processed_id.
+    ls_attribute-attribute_id   = g_attribute_id.
+    ls_attribute-attribute_name = attribute_name.
+    ls_attribute-value_type     = reference_value.
+    ls_attribute-reference      = reference_id.
+    APPEND ls_attribute TO g_attributes.
 
   ENDMETHOD.
 
   METHOD add_string.
 
     ADD 1 TO g_attribute_id.
-    DATA gs_attribute LIKE LINE OF g_attributes.
-    gs_attribute-id             = g_processed_id.
-    gs_attribute-attribute_id   = g_attribute_id.
-    gs_attribute-attribute_name = attribute_name.
-    gs_attribute-value_type     = string_value.
-    gs_attribute-string         = string.
-    APPEND gs_attribute TO g_attributes.
+    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_attribute.
+    ls_attribute-id             = g_processed_id.
+    ls_attribute-attribute_id   = g_attribute_id.
+    ls_attribute-attribute_name = attribute_name.
+    ls_attribute-value_type     = string_value.
+    ls_attribute-string         = string.
+    APPEND ls_attribute TO g_attributes.
 
   ENDMETHOD.
 
   METHOD add_boolean.
     ADD 1 TO g_attribute_id.
-    DATA gs_attribute LIKE LINE OF g_attributes.
-    gs_attribute-id             = g_processed_id.
-    gs_attribute-attribute_id   = g_attribute_id.
-    gs_attribute-attribute_name = attribute_name.
-    gs_attribute-value_type     = boolean_value.
-    gs_attribute-boolean        = is_true.
-    APPEND gs_attribute TO g_attributes.
+    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_attribute.
+    ls_attribute-id             = g_processed_id.
+    ls_attribute-attribute_id   = g_attribute_id.
+    ls_attribute-attribute_name = attribute_name.
+    ls_attribute-value_type     = boolean_value.
+    ls_attribute-boolean        = is_true.
+    APPEND ls_attribute TO g_attributes.
   ENDMETHOD.
 
 ENDCLASS.
@@ -694,11 +700,12 @@ CLASS cl_famix_attribute IMPLEMENTATION.
 
 
   METHOD store_id.
-    DATA gs_attribute_id LIKE LINE OF g_attribute_ids.
-    gs_attribute_id-id = g_last_used_id.
-    gs_attribute_id-class = class.
-    gs_attribute_id-attribute = attribute.
-    INSERT gs_attribute_id INTO TABLE g_attribute_ids.
+    DATA ls_attribute_id LIKE LINE OF g_attribute_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_attribute_id.
+    ls_attribute_id-id = g_last_used_id.
+    ls_attribute_id-class = class.
+    ls_attribute_id-attribute = attribute.
+    INSERT ls_attribute_id INTO TABLE g_attribute_ids.
   ENDMETHOD.
 
   METHOD get_id.
@@ -907,11 +914,12 @@ CLASS cl_famix_method IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD store_id.
-    DATA gs_method_id LIKE LINE OF g_method_ids.
-    gs_method_id-id = g_last_used_id.
-    gs_method_id-class = class.
-    gs_method_id-method = method.
-    INSERT gs_method_id INTO TABLE g_method_ids.
+    DATA ls_method_id LIKE LINE OF g_method_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_method_id.
+    ls_method_id-id = g_last_used_id.
+    ls_method_id-class = class.
+    ls_method_id-method = method.
+    INSERT ls_method_id INTO TABLE g_method_ids.
   ENDMETHOD.
 
   METHOD get_id.
@@ -1001,10 +1009,11 @@ CLASS cl_famix_access IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD set_accessor_variable_relation.
-    DATA gs_accessor_id LIKE LINE OF g_accessor_variable_ids.
-    gs_accessor_id-accessor_id = accessor_id.
-    gs_accessor_id-variable_id = variable_id.
-    INSERT gs_accessor_id INTO TABLE g_accessor_variable_ids.
+    DATA ls_accessor_id LIKE LINE OF g_accessor_variable_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_accessor_id.
+    ls_accessor_id-accessor_id = accessor_id.
+    ls_accessor_id-variable_id = variable_id.
+    INSERT ls_accessor_id INTO TABLE g_accessor_variable_ids.
     g_model->add_reference_by_id( EXPORTING attribute_name = 'accessor'
                                             reference_id   = accessor_id ).
     g_model->add_reference_by_id( EXPORTING attribute_name = 'variable'
@@ -1074,10 +1083,11 @@ CLASS cl_famix_invocation IMPLEMENTATION.
     g_model->add_reference_by_id( EXPORTING attribute_name = 'sender'
                                             reference_id   = sender_id ).
     IF candidates_id IS SUPPLIED.
-      DATA gs_sender_candidate LIKE LINE OF g_sender_candidates.
-      gs_sender_candidate-sender_id = sender_id.
-      gs_sender_candidate-candidates_id = candidates_id.
-      INSERT gs_sender_candidate INTO TABLE g_sender_candidates.
+      DATA ls_sender_candidate LIKE LINE OF g_sender_candidates. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+      CLEAR ls_sender_candidate.
+      ls_sender_candidate-sender_id = sender_id.
+      ls_sender_candidate-candidates_id = candidates_id.
+      INSERT ls_sender_candidate INTO TABLE g_sender_candidates.
       g_model->add_reference_by_id( EXPORTING attribute_name = 'candidates'
                                               reference_id   = candidates_id ).
     ENDIF.
@@ -2006,13 +2016,14 @@ CLASS cl_program_analyzer IMPLEMENTATION.
 
     FIELD-SYMBOLS <ls_token_2> LIKE LINE OF tokens.
     LOOP AT tokens ASSIGNING <ls_token_2>.
-      DATA token LIKE LINE OF sorted_tokens.
-      token-index = sy-tabix.
-      token-str   = <ls_token_2>-str.
-      token-row   = <ls_token_2>-row.
-      token-col   = <ls_token_2>-col.
-      token-type  = <ls_token_2>-type.
-      INSERT token INTO TABLE sorted_tokens.
+      DATA ls_token LIKE LINE OF sorted_tokens. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+      CLEAR ls_token.
+      ls_token-index = sy-tabix.
+      ls_token-str   = <ls_token_2>-str.
+      ls_token-row   = <ls_token_2>-row.
+      ls_token-col   = <ls_token_2>-col.
+      ls_token-type  = <ls_token_2>-type.
+      INSERT ls_token INTO TABLE sorted_tokens.
     ENDLOOP.
 
     SORT statements BY from.
@@ -2093,10 +2104,11 @@ CLASS cl_program_analyzer IMPLEMENTATION.
               INSERT actual_class_with_model_id INTO TABLE classes_with_model_id.
               IF aok->g_info-class_is_inheriting EQ true.
                 " SAP_2_FAMIX_37        Determine local inheritances of classes
-                DATA inheritance_2 LIKE LINE OF inheritances.
-                inheritance_2-subclass = actual_class_with_model_id-classname.
-                inheritance_2-superclass = aok->g_info-class_inherits_from.
-                INSERT inheritance_2 INTO TABLE inheritances.
+                DATA ls_inheritance_2 LIKE LINE OF inheritances. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+                CLEAR ls_inheritance_2.
+                ls_inheritance_2-subclass = actual_class_with_model_id-classname.
+                ls_inheritance_2-superclass = aok->g_info-class_inherits_from.
+                INSERT ls_inheritance_2 INTO TABLE inheritances.
               ENDIF.
             WHEN aok->start_public.
               context-in_section = public.
@@ -2111,9 +2123,11 @@ CLASS cl_program_analyzer IMPLEMENTATION.
             WHEN aok->method_definition.
               " SAP_2_FAMIX_29      Determine local class methods in programs
               IF aok->g_info-is_static EQ true.
+                CLEAR actual_method.
                 actual_method-classname = actual_class_with_model_id-classname.
                 actual_method-in_section = context-in_section.
               ELSE.
+                CLEAR actual_method.
                 actual_method-classname = actual_class_with_model_id-classname.
                 actual_method-in_section = context-in_section.
                 actual_method-instanciable = true.
@@ -2255,18 +2269,21 @@ CLASS cl_extract_sap IMPLEMENTATION.
     CREATE OBJECT sap_access EXPORTING model = model.
 
     " Set TADIR mapping
-    DATA gs_mapping TYPE map_tadir_component_type.
-    gs_mapping-object = 'CLAS'.
-    gs_mapping-component = 'GlobClass'.
-    INSERT gs_mapping INTO TABLE g_tadir_components_mapping.
+    DATA ls_mapping TYPE map_tadir_component_type. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_mapping.
+    ls_mapping-object = 'CLAS'.
+    ls_mapping-component = 'GlobClass'.
+    INSERT ls_mapping INTO TABLE g_tadir_components_mapping.
 
-    gs_mapping-object = 'INTF'.
-    gs_mapping-component = 'GlobIntf'.
-    INSERT gs_mapping INTO TABLE g_tadir_components_mapping.
+    CLEAR ls_mapping.
+    ls_mapping-object = 'INTF'.
+    ls_mapping-component = 'GlobIntf'.
+    INSERT ls_mapping INTO TABLE g_tadir_components_mapping.
 
-    gs_mapping-object = 'PROG'.
-    gs_mapping-component = 'ABAPProgram'.
-    INSERT gs_mapping INTO TABLE g_tadir_components_mapping.
+    CLEAR ls_mapping.
+    ls_mapping-object = 'PROG'.
+    ls_mapping-component = 'ABAPProgram'.
+    INSERT ls_mapping INTO TABLE g_tadir_components_mapping.
 
     _set_default_language( model ).
 
@@ -2346,6 +2363,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
         READ TABLE g_tadir_components_mapping
               INTO ls_tadir
               WITH KEY component  = <component_infos>-component.
+        ASSERT SY-SUBRC EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
         object = ls_tadir-object.
 
         SELECT SINGLE devclass FROM tadir
@@ -2451,15 +2469,15 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
                   " SAP_2_FAMIX_47      If no dummy class is specified in case a using class is not in the initial selection, analyze this classes also
 
-              DATA new_components_info LIKE LINE OF new_components_infos.
+              DATA ls_new_components_info LIKE LINE OF new_components_infos. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
 
-              DATA gs_tadir_comp_map LIKE LINE OF g_tadir_components_mapping.
-              READ TABLE g_tadir_components_mapping INTO gs_tadir_comp_map WITH TABLE KEY object = 'CLAS'.
-              IF sy-subrc = 0.
-                new_components_info-component_name = ls_mtdkey-cpdname.
-                new_components_info-component   = gs_tadir_comp_map-component .
-                INSERT new_components_info INTO TABLE new_components_infos.
-              ENDIF.
+              DATA ls_tadir_comp_map LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+              READ TABLE g_tadir_components_mapping INTO ls_tadir_comp_map WITH TABLE KEY object = 'CLAS'.
+              ASSERT SY-SUBRC EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
+              CLEAR ls_new_components_info.
+              ls_new_components_info-component_name = ls_mtdkey-cpdname.
+              ls_new_components_info-component   = ls_tadir_comp_map-component .
+              INSERT ls_new_components_info INTO TABLE new_components_infos.
 
                 ENDIF.
 
@@ -2552,13 +2570,15 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     sap_package->add( name = package_first-devclass ).
 
-    DATA processed_package LIKE LINE OF processed_packages.
-    processed_package-devclass = package_first-devclass.
-    INSERT processed_package INTO TABLE processed_packages.
+    DATA ls_processed_package LIKE LINE OF processed_packages. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_processed_package.
+    ls_processed_package-devclass = package_first-devclass.
+    INSERT ls_processed_package INTO TABLE processed_packages.
 
-    DATA temp_package_to_search LIKE LINE OF temp_packages_to_search.
-    temp_package_to_search-devclass = g_parameter_package_to_analyze.
-    INSERT temp_package_to_search INTO TABLE temp_packages_to_search.
+    DATA ls_temp_package_to_search LIKE LINE OF temp_packages_to_search. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_temp_package_to_search.
+    ls_temp_package_to_search-devclass = g_parameter_package_to_analyze.
+    INSERT ls_temp_package_to_search INTO TABLE temp_packages_to_search.
     WHILE temp_packages_to_search IS NOT INITIAL.
       IF temp_packages_to_search IS NOT INITIAL.
         types: BEGIN OF abap_731_package_type,
@@ -2576,13 +2596,15 @@ CLASS cl_extract_sap IMPLEMENTATION.
       DATA package LIKE LINE OF packages.
       LOOP AT packages INTO package.
 
-        processed_package-devclass = package-devclass.
-        INSERT processed_package INTO TABLE processed_packages.
+        CLEAR ls_processed_package.
+        ls_processed_package-devclass = package-devclass.
+        INSERT ls_processed_package INTO TABLE processed_packages.
         IF sy-subrc EQ ok.
           " New package
           " Search again
-          temp_package_to_search-devclass = package-devclass.
-          INSERT temp_package_to_search INTO TABLE temp_packages_to_search.
+          CLEAR ls_temp_package_to_search.
+          ls_temp_package_to_search-devclass = package-devclass.
+          INSERT ls_temp_package_to_search INTO TABLE temp_packages_to_search.
           sap_package->add( name = package-devclass ).
           sap_package->set_parent_package( parent_package = package-parentcl ).
         ENDIF.
@@ -2619,9 +2641,10 @@ CLASS cl_extract_sap IMPLEMENTATION.
         INSERT class INTO TABLE classes.
 
       ELSE.
-        DATA program LIKE LINE OF programs.
-        program-program = <component_infos>-component_name.
-        INSERT program INTO TABLE programs.
+        DATA ls_program LIKE LINE OF programs. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+        CLEAR ls_program.
+        ls_program-program = <component_infos>-component_name.
+        INSERT ls_program INTO TABLE programs.
 
       ENDIF.
 
@@ -2925,17 +2948,17 @@ CLASS cl_extract_sap IMPLEMENTATION.
               AND object = object
               AND devclass = processed_packages-devclass.
 
-            DATA component_info LIKE LINE OF components_infos.
-            DATA map LIKE LINE OF g_tadir_components_mapping.
+            DATA ls_component_info LIKE LINE OF components_infos. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+            DATA ls_map LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
 
-            READ TABLE g_tadir_components_mapping INTO map WITH TABLE KEY object = tadir_component-object.
-            IF sy-subrc = 0.
+            READ TABLE g_tadir_components_mapping INTO ls_map WITH TABLE KEY object = tadir_component-object.
+            ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
 
-              component_info-component = map-component.
-            ENDIF.
-            component_info-component_name = tadir_component-obj_name.
-            component_info-package = tadir_component-devclass.
-            INSERT component_info INTO TABLE components_infos.
+            CLEAR ls_component_info.
+            ls_component_info-component = ls_map-component.
+            ls_component_info-component_name = tadir_component-obj_name.
+            ls_component_info-package = tadir_component-devclass.
+            INSERT ls_component_info INTO TABLE components_infos.
 
           ENDSELECT.
         ELSE.
@@ -2945,14 +2968,15 @@ CLASS cl_extract_sap IMPLEMENTATION.
               AND obj_name IN s_compsn
               AND devclass IN s_pack.
 
-            READ TABLE g_tadir_components_mapping INTO map WITH TABLE KEY object = tadir_component-object.
-            IF sy-subrc = 0.
+            DATA ls_map_2 LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+            READ TABLE g_tadir_components_mapping INTO ls_map_2 WITH TABLE KEY object = tadir_component-object.
+            ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
 
-              component_info-component = map-component.
-            ENDIF.
-            component_info-component_name = tadir_component-obj_name.
-            component_info-package = tadir_component-devclass.
-            INSERT component_info INTO TABLE components_infos.
+            CLEAR ls_component_info.
+            ls_component_info-component = ls_map_2-component.
+            ls_component_info-component_name = tadir_component-obj_name.
+            ls_component_info-package = tadir_component-devclass.
+            INSERT ls_component_info INTO TABLE components_infos.
 
           ENDSELECT.
         ENDIF.
