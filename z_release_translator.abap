@@ -21,7 +21,7 @@
 *SOFTWARE.
 
 "! Last activation:
-"! 21.03.2016 22:59 issue17 Rainer Winkler
+"! 21.03.2016 23:04 issue17 Rainer Winkler
 "!
 "! Keep logic compatible to ABAP 7.31 to allow also conversion into the other direction
 REPORT z_release_translator.
@@ -1051,8 +1051,6 @@ CLASS cl_conversion IMPLEMENTATION.
 
     c = |                  new_components_infos = VALUE #( BASE new_components_infos (  component_name = ris_prog_tadir_line-object_name                          |. add_abap_740 c.
     c = |                                                                               component   = g_tadir_components_mapping[ object = 'CLAS' ]-component ) ).|. add_abap_740 c.
-
-    " TBD Error, here a dump is to be raised if nothing is found in table g_tadir_components_mapping
 
     c = |              DATA ls_new_components_info LIKE LINE OF new_components_infos. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion            |. add_abap_731 c.
     c = |                                                                                                                                                         |. add_abap_731 c.
