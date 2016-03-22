@@ -21,7 +21,7 @@
 *SOFTWARE.
 
 "! Last activation:
-"! 21.03.2016 23:04 issue17 Rainer Winkler
+"! 22.03.2016 20:35 issue17 Rainer Winkler
 "!
 "! Keep logic compatible to ABAP 7.31 to allow also conversion into the other direction
 REPORT z_release_translator.
@@ -1002,17 +1002,19 @@ CLASS cl_conversion IMPLEMENTATION.
     " TBD Check the validity
 
     c = |      SELECT SINGLE * FROM ris_prog_tadir INTO @DATA(ris_prog_tadir_line) WHERE program_name = @<where_used_component>-include.|. add_abap_740 c.
+    c = |      IF sy-subrc EQ ok.                                                                                                       |. add_abap_740 c.
 
-    " TBD This is wrong, this function does not return a sy-subrc with this declaration
+    " This is correct in cases where only classes are analyzed. But problematic if further types of coding like functions are analyzed.
     c = |      DATA ls_mtdkey TYPE seocpdkey.                                                                                           |. add_abap_731 c.
     c = |      CALL FUNCTION 'SEO_METHOD_GET_NAME_BY_INCLUDE'                                                                           |. add_abap_731 c.
     c = |        EXPORTING                                                                                                              |. add_abap_731 c.
     c = |          progname = <where_used_component>-include                                                                            |. add_abap_731 c.
     c = |        IMPORTING                                                                                                              |. add_abap_731 c.
     c = |          mtdkey   = ls_mtdkey.                                                                                                |. add_abap_731 c.
+    c = |      IF ls_mtdkey IS NOT INITIAL.                                                                                             |. add_abap_731 c.
     add_replace.
 
-    " TBD This is wrong, no check on whether a class is used
+    " This is correct in cases where only classes are analyzed. But problematic if further types of coding like functions are analyzed.
 
     c = |            CASE ris_prog_tadir_line-object_type.|. add_abap_740 c.
     c = |          WHEN 'CLAS'.                           |. add_abap_740 c.
@@ -1089,8 +1091,6 @@ CLASS cl_conversion IMPLEMENTATION.
     c = |          WHEN OTHERS.                  |. add_abap_740 c.
     c = |            " TBD Implement other usages|. add_abap_740 c.
     c = |        ENDCASE.                        |. add_abap_740 c.
-
-    " TBD See above this is wrong
 
     c = |        " TBD Implement other usages    |. add_abap_731 c.
     add_replace.

@@ -50,7 +50,7 @@
 "! Last activation:
 "! 21.03.2016 21:32 issue17 Rainer Winkler
 "!
-REPORT yrw1_moose_extractor.
+REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
 
 "! To not compare sy-subrc to zero, but more readable to ok
@@ -2439,7 +2439,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
           progname = <where_used_component>-include
         IMPORTING
           mtdkey   = ls_mtdkey.
-      IF sy-subrc EQ ok.
+      IF ls_mtdkey IS NOT INITIAL.
 
             " Used by method
             DATA: using_method TYPE string.
