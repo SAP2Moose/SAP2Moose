@@ -21,7 +21,7 @@
 *SOFTWARE.
 
 "! Last activation:
-"! 22.03.2016 20:35 issue17 Rainer Winkler
+"! 23.03.2016 00:27 issue21 Rainer Winkler
 "!
 "! Keep logic compatible to ABAP 7.31 to allow also conversion into the other direction
 REPORT z_release_translator.
@@ -278,7 +278,7 @@ CLASS cl_conversion IMPLEMENTATION.
 
 
 
-    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id                                   |. add_abap_740 c.
+    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_last_added_or_checked_id                       |. add_abap_740 c.
     c = |                                                attribute_id   = g_attribute_id                                   |. add_abap_740 c.
     c = |                                                attribute_name = attribute_name                                   |. add_abap_740 c.
     c = |                                                value_type     = reference_value                                  |. add_abap_740 c.
@@ -286,17 +286,17 @@ CLASS cl_conversion IMPLEMENTATION.
 
     c = |    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion |. add_abap_731 c.
     c = |    CLEAR ls_attribute.                                                                                           |. add_abap_731 c.
-    c = |    ls_attribute-id             = g_processed_id.                                                                 |. add_abap_731 c.
+    c = |    ls_attribute-id             = g_last_added_or_checked_id.                                                     |. add_abap_731 c.
     c = |    ls_attribute-attribute_id   = g_attribute_id.                                                                 |. add_abap_731 c.
     c = |    ls_attribute-attribute_name = attribute_name.                                                                 |. add_abap_731 c.
     c = |    ls_attribute-value_type     = reference_value.                                                                |. add_abap_731 c.
     c = |    ls_attribute-reference      = <named_entity>-id.                                                              |. add_abap_731 c.
-    c = |    APPEND ls_attribute TO g_attributes.                                                                          |. add_abap_731 c.
+    c = |    INSERT ls_attribute INTO TABLE g_attributes.                                                                  |. add_abap_731 c.
     add_replace.
 
     " METHOD add_reference_by_id.
 
-    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id                                  |. add_abap_740 c.
+    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_last_added_or_checked_id                      |. add_abap_740 c.
     c = |                                                attribute_id   = g_attribute_id                                  |. add_abap_740 c.
     c = |                                                attribute_name = attribute_name                                  |. add_abap_740 c.
     c = |                                                value_type     = reference_value                                 |. add_abap_740 c.
@@ -304,7 +304,7 @@ CLASS cl_conversion IMPLEMENTATION.
 
     c = |    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
     c = |    CLEAR ls_attribute.                                                                                          |. add_abap_731 c.
-    c = |    ls_attribute-id             = g_processed_id.                                                                |. add_abap_731 c.
+    c = |    ls_attribute-id             = g_last_added_or_checked_id.                                                    |. add_abap_731 c.
     c = |    ls_attribute-attribute_id   = g_attribute_id.                                                                |. add_abap_731 c.
     c = |    ls_attribute-attribute_name = attribute_name.                                                                |. add_abap_731 c.
     c = |    ls_attribute-value_type     = reference_value.                                                               |. add_abap_731 c.
@@ -314,7 +314,7 @@ CLASS cl_conversion IMPLEMENTATION.
 
     " METHOD add_string.
 
-    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id                                  |. add_abap_740 c.
+    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_last_added_or_checked_id                      |. add_abap_740 c.
     c = |                                                attribute_id   = g_attribute_id                                  |. add_abap_740 c.
     c = |                                                attribute_name = attribute_name                                  |. add_abap_740 c.
     c = |                                                value_type     = string_value                                    |. add_abap_740 c.
@@ -322,7 +322,7 @@ CLASS cl_conversion IMPLEMENTATION.
 
     c = |    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
     c = |    CLEAR ls_attribute.                                                                                          |. add_abap_731 c.
-    c = |    ls_attribute-id             = g_processed_id.                                                                |. add_abap_731 c.
+    c = |    ls_attribute-id             = g_last_added_or_checked_id.                                                    |. add_abap_731 c.
     c = |    ls_attribute-attribute_id   = g_attribute_id.                                                                |. add_abap_731 c.
     c = |    ls_attribute-attribute_name = attribute_name.                                                                |. add_abap_731 c.
     c = |    ls_attribute-value_type     = string_value.                                                                  |. add_abap_731 c.
@@ -332,7 +332,7 @@ CLASS cl_conversion IMPLEMENTATION.
 
     " METHOD add_boolean.
 
-    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id                                  |. add_abap_740 c.
+    c = |    g_attributes = VALUE #( BASE g_attributes ( id             = g_last_added_or_checked_id                      |. add_abap_740 c.
     c = |                                                attribute_id   = g_attribute_id                                  |. add_abap_740 c.
     c = |                                                attribute_name = attribute_name                                  |. add_abap_740 c.
     c = |                                                value_type     = boolean_value                                   |. add_abap_740 c.
@@ -340,7 +340,7 @@ CLASS cl_conversion IMPLEMENTATION.
 
     c = |    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion|. add_abap_731 c.
     c = |    CLEAR ls_attribute.                                                                                          |. add_abap_731 c.
-    c = |    ls_attribute-id             = g_processed_id.                                                                |. add_abap_731 c.
+    c = |    ls_attribute-id             = g_last_added_or_checked_id.                                                    |. add_abap_731 c.
     c = |    ls_attribute-attribute_id   = g_attribute_id.                                                                |. add_abap_731 c.
     c = |    ls_attribute-attribute_name = attribute_name.                                                                |. add_abap_731 c.
     c = |    ls_attribute-value_type     = boolean_value.                                                                 |. add_abap_731 c.
@@ -565,6 +565,13 @@ CLASS cl_conversion IMPLEMENTATION.
     c = |    g_famix_package = NEW cl_famix_package( model = model ).|. add_abap_740 c.
 
     c = |    CREATE OBJECT g_famix_package EXPORTING model = model.  |. add_abap_731 c.
+    add_replace.
+
+    " METHOD add.
+
+    c = |g_added_packages = VALUE #( BASE g_added_packages ( name ) ). |. add_abap_740 c.
+
+    c = |    INSERT name INTO TABLE g_added_packages.                  |. add_abap_731 c.
     add_replace.
 
     " CLASS cl_sap_class
@@ -1405,10 +1412,35 @@ CLASS cl_conversion IMPLEMENTATION.
     c = |  CREATE OBJECT model_outputer.                   |. add_abap_731 c.
     add_replace.
 
+    c = |    data(packages) = sap_package->get_all_packages( ).|. add_abap_740 c.
+    c = |    IF packages IS NOT INITIAL.                       |. add_abap_740 c.
 
+    c = |    DATA packages type sap_package->packages_type.    |. add_abap_731 c.
+    c = |    packages = sap_package->get_all_packages( ).      |. add_abap_731 c.
+    c = |    IF packages IS NOT INITIAL.                       |. add_abap_731 c.
+    add_replace.
 
+    c = |        packages_with_type_devclass = value #( base packages_with_type_devclass ( devclass = PACKAGE ) ).                                                                          |. add_abap_740 c.
+    c = |      ENDLOOP.                                                                                                                                                                     |. add_abap_740 c.
+    c = |      SELECT  devclass, parentcl from tdevc into table @data(packages_info) for all entries in @packages_with_type_devclass where devclass = @packages_with_type_devclass-devclass.|. add_abap_740 c.
+    c = |        LOOP AT packages_info INTO data(package_info).                                                                                                                             |. add_abap_740 c.
 
-
+    c = |        DATA ls_package_with_type_devclass LIKE LINE OF packages_with_type_devclass.                                                                                               |. add_abap_731 c.
+    c = |        CLEAR ls_package_with_type_devclass.                                                                                                                                       |. add_abap_731 c.
+    c = |        ls_package_with_type_devclass-devclass = package.                                                                                                                          |. add_abap_731 c.
+    c = |        APPEND ls_package_with_type_devclass TO packages_with_type_devclass.                                                                                                       |. add_abap_731 c.
+    c = |                                                                                                                                                                                   |. add_abap_731 c.
+    c = |      ENDLOOP.                                                                                                                                                                     |. add_abap_731 c.
+    c = |      TYPES: BEGIN OF packages_info_type,                                                                                                                                          |. add_abap_731 c.
+    c = |        devclass TYPE tdevc-devclass,                                                                                                                                              |. add_abap_731 c.
+    c = |        parentcl TYPE tdevc-parentcl,                                                                                                                                              |. add_abap_731 c.
+    c = |            END OF  packages_info_type.                                                                                                                                            |. add_abap_731 c.
+    c = |      DATA package_info TYPE packages_info_type.                                                                                                                                   |. add_abap_731 c.
+    c = |      DATA packages_info TYPE STANDARD TABLE OF packages_info_type WITH DEFAULT KEY.                                                                                               |. add_abap_731 c.
+    c = |                                                                                                                                                                                   |. add_abap_731 c.
+    c = |      SELECT  devclass parentcl from tdevc into table packages_info for all entries in packages_with_type_devclass where devclass = packages_with_type_devclass-devclass.          |. add_abap_731 c.
+    c = |        LOOP AT packages_info INTO package_info.                                                                                                                                   |. add_abap_731 c.
+    add_replace.
 
   ENDMETHOD.
 

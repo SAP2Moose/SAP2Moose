@@ -46,7 +46,7 @@
 "! This is the original version implemented in ABAP 7.40 (Do not change this line, it will automatically be converted to the ABAP 7.31 statement)
 "!
 "! Last activation:
-"! 21.03.2016 21:32 issue17 Rainer Winkler
+"! 23.03.2016 00:27 issue21 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -266,6 +266,8 @@ CLASS cl_model DEFINITION.
 
     "! The ID of processed entity in the model
     DATA g_processed_id TYPE i.
+    "! The ID of the entity that was last added or checked whether to add
+    data g_last_added_or_checked_id TYPE i.
     "! The ID of any attribute. Unique together with mv_id
     DATA g_attribute_id TYPE i.
 
@@ -286,12 +288,14 @@ CLASS cl_model IMPLEMENTATION.
       IF sy-subrc EQ ok.
         exists_already_with_id = <ls_name>-id.
         processed_id = <ls_name>-id.
+        g_last_added_or_checked_id = processed_id.
         RETURN.
       ENDIF.
 
     ENDIF.
 
     ADD 1 TO g_processed_id.
+    g_last_added_or_checked_id = g_processed_id.
     g_attribute_id = 0.
 
     IF can_be_referenced_by_name EQ true.
@@ -382,7 +386,7 @@ CLASS cl_model IMPLEMENTATION.
                                                                                       xname = name_of_reference.
     ASSERT sy-subrc EQ ok.
     ADD 1 TO g_attribute_id.
-    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id
+    g_attributes = VALUE #( BASE g_attributes ( id             = g_last_added_or_checked_id
                                                 attribute_id   = g_attribute_id
                                                 attribute_name = attribute_name
                                                 value_type     = reference_value
@@ -393,7 +397,7 @@ CLASS cl_model IMPLEMENTATION.
   METHOD add_reference_by_id.
 
     ADD 1 TO g_attribute_id.
-    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id
+    g_attributes = VALUE #( BASE g_attributes ( id             = g_last_added_or_checked_id
                                                 attribute_id   = g_attribute_id
                                                 attribute_name = attribute_name
                                                 value_type     = reference_value
@@ -404,7 +408,7 @@ CLASS cl_model IMPLEMENTATION.
   METHOD add_string.
 
     ADD 1 TO g_attribute_id.
-    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id
+    g_attributes = VALUE #( BASE g_attributes ( id             = g_last_added_or_checked_id
                                                 attribute_id   = g_attribute_id
                                                 attribute_name = attribute_name
                                                 value_type     = string_value
@@ -414,7 +418,7 @@ CLASS cl_model IMPLEMENTATION.
 
   METHOD add_boolean.
     ADD 1 TO g_attribute_id.
-    g_attributes = VALUE #( BASE g_attributes ( id             = g_processed_id
+    g_attributes = VALUE #( BASE g_attributes ( id             = g_last_added_or_checked_id
                                                 attribute_id   = g_attribute_id
                                                 attribute_name = attribute_name
                                                 value_type     = boolean_value
@@ -544,6 +548,9 @@ CLASS cl_famix_named_entity DEFINITION INHERITING FROM cl_famix_sourced_entity A
       EXPORTING VALUE(exists_already_with_id) TYPE i
       RETURNING VALUE(id)                     TYPE i.
     "! Call once to set the parent package
+    "! Call directly after calling the method name of the same class
+    "! TBD check that the last call of method name is done for the same class
+    "! TBD Do this for all similar methods
     "! @parameter parent_package | the name of an element of type FAMIX.Package
     METHODS set_parent_package IMPORTING parent_package TYPE clike.
 
@@ -1213,16 +1220,24 @@ ENDCLASS.
 
 CLASS cl_sap_package DEFINITION INHERITING FROM cl_sap.
   PUBLIC SECTION.
+    TYPES packages_type TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS add
       IMPORTING
         name TYPE clike.
     "! Call once to set the parent package
+    "! Call directly after calling the method name of the same class
+    "! TBD check that the last call of method name is done for the same class
+    "! TBD Do this for all similar methods    "!
     METHODS set_parent_package
       IMPORTING
         parent_package TYPE clike.
+    "! Returns all packages that are stored up to this time
+    METHODS get_all_packages
+      RETURNING VALUE(packages) TYPE packages_type.
   PRIVATE SECTION.
     DATA: g_famix_package TYPE REF TO cl_famix_package.
+    DATA: g_added_packages TYPE STANDARD TABLE OF devclass.
 ENDCLASS.
 
 CLASS cl_sap_package IMPLEMENTATION.
@@ -1234,10 +1249,17 @@ CLASS cl_sap_package IMPLEMENTATION.
 
   METHOD add.
     g_famix_package->add( name = name ).
+    g_added_packages = VALUE #( BASE g_added_packages ( name ) ).
   ENDMETHOD.
 
   METHOD set_parent_package.
     g_famix_package->set_parent_package( parent_package = parent_package ).
+  ENDMETHOD.
+
+  METHOD get_all_packages.
+    SORT g_added_packages.
+    DELETE ADJACENT DUPLICATES FROM g_added_packages.
+    packages = g_added_packages.
   ENDMETHOD.
 
 ENDCLASS.
@@ -1254,6 +1276,9 @@ CLASS cl_sap_class DEFINITION INHERITING FROM cl_sap.
     METHODS set_parent_program
       IMPORTING
         sap_program TYPE clike.
+    "! Call directly after calling the method name of the same class
+    "! TBD check that the last call of method name is done for the same class
+    "! TBD Do this for all similar methods
     METHODS set_parent_package
       IMPORTING
         parent_package TYPE clike.
@@ -1580,6 +1605,9 @@ CLASS cl_sap_program DEFINITION INHERITING FROM cl_sap.
       RETURNING
         VALUE(id) TYPE i.
     "! Call once to set the parent package of a program
+    "! Call directly after calling the method name of the same class
+    "! TBD check that the last call of method name is done for the same class
+    "! TBD Do this for all similar methods
     METHODS set_parent_package
       IMPORTING
         parent_package TYPE clike.
@@ -2278,6 +2306,29 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     ENDWHILE.
 
+    " Add parent packages
+
+    DATA(packages) = sap_package->get_all_packages( ).
+    IF packages IS NOT INITIAL.
+      TYPES: BEGIN OF devclass_type,
+               devclass TYPE tdevc-devclass,
+             END OF devclass_type.
+      DATA packages_with_type_devclass TYPE STANDARD TABLE OF devclass_type WITH KEY devclass.
+
+
+      LOOP AT packages INTO DATA(package).
+        packages_with_type_devclass = VALUE #( BASE packages_with_type_devclass ( devclass = package ) ).
+      ENDLOOP.
+      SELECT  devclass, parentcl FROM tdevc INTO TABLE @DATA(packages_info) FOR ALL ENTRIES IN @packages_with_type_devclass WHERE devclass = @packages_with_type_devclass-devclass.
+      LOOP AT packages_info INTO DATA(package_info).
+        IF package_info-parentcl IS NOT INITIAL.
+          sap_package->add( name = package_info-parentcl ). " So that parent class can always be assigned
+          sap_package->add( name = package_info-devclass ).
+          sap_package->set_parent_package( parent_package = package_info-parentcl ).
+        ENDIF.
+      ENDLOOP.
+    ENDIF.
+
     model->make_mse( IMPORTING mse_model = mse_model ).
 
   ENDMETHOD.
@@ -2449,7 +2500,10 @@ CLASS cl_extract_sap IMPLEMENTATION.
           " Search again
           temp_packages_to_search = VALUE #( BASE temp_packages_to_search ( devclass = package-devclass ) ).
           sap_package->add( name = package-devclass ).
-          sap_package->set_parent_package( parent_package = package-parentcl ).
+          IF package-parentcl IS NOT INITIAL.
+            " Assume that this is not a top package but that there exists a parent package
+            sap_package->set_parent_package( parent_package = package-parentcl ).
+          ENDIF.
         ENDIF.
 
       ENDLOOP.
@@ -2497,12 +2551,12 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     LOOP AT programs ASSIGNING FIELD-SYMBOL(<program>).
 
-      DATA(module_reference) = sap_program->add( EXPORTING name = <program>-program ).
-
       READ TABLE components_infos ASSIGNING FIELD-SYMBOL(<component_infos>) WITH TABLE KEY component = 'ABAPProgramm' component_name = <program>-program.
       ASSERT sy-subrc EQ ok.
 
       sap_package->add( name  = <component_infos>-package ).
+
+      DATA(module_reference) = sap_program->add( EXPORTING name = <program>-program ).
 
       sap_program->set_parent_package( parent_package = <component_infos>-package ).
 
@@ -2526,9 +2580,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
     " Add to model
     LOOP AT existing_classes INTO DATA(existing_class).
 
-      " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
-      " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
-      sap_class->add( name = existing_class-class ).
+
 
       READ TABLE components_infos ASSIGNING FIELD-SYMBOL(<component_infos>) WITH TABLE KEY component = 'GlobClass' component_name = existing_class-class.
       IF sy-subrc <> ok.
@@ -2540,6 +2592,9 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       sap_package->add( EXPORTING name = <component_infos>-package ).
 
+      " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
+      " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
+      sap_class->add( name = existing_class-class ).
       sap_class->set_parent_package( parent_package = <component_infos>-package ).
       IF <component_infos>-component EQ 'GlobIntf'.
         " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
