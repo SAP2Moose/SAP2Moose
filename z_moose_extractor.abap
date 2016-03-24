@@ -48,9 +48,9 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 23.03.2016 00:27 issue21 Rainer Winkler
+"! 24.03.2016 11:59 issue21 Rainer Winkler
 "!
-REPORT yrw1_moose_extractor.
+REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
 
 "! To not compare sy-subrc to zero, but more readable to ok
@@ -66,7 +66,7 @@ CONSTANTS:
   "! Redefines abap_false to simplify coding (Not always reading abap_...)
   false TYPE bool VALUE abap_false.
 
-SELECTION-SCREEN BEGIN OF BLOCK block_global_source WITH FRAME TITLE text-001.
+SELECTION-SCREEN BEGIN OF BLOCK block_global_source WITH FRAME TITLE TEXT-001.
 
 PARAMETERS: p_sap AS CHECKBOX DEFAULT 'X'.
 "! Extract from SAP
@@ -75,7 +75,7 @@ g_parameter_extract_from_sap = p_sap.
 
 SELECTION-SCREEN END OF BLOCK block_global_source.
 
-SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE text-002.
+SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE TEXT-002.
 
 PARAMETERS: p_clas AS CHECKBOX DEFAULT 'X'.
 PARAMETERS: p_intf AS CHECKBOX DEFAULT 'X'.
@@ -104,7 +104,7 @@ SELECT-OPTIONS s_compsn FOR tadir-obj_name.
 
 SELECTION-SCREEN END OF BLOCK block_selct_sap_comp.
 
-SELECTION-SCREEN BEGIN OF BLOCK block_using_comp WITH FRAME TITLE text-003.
+SELECTION-SCREEN BEGIN OF BLOCK block_using_comp WITH FRAME TITLE TEXT-003.
 
 PARAMETERS: p_dm AS CHECKBOX DEFAULT ' '.
 "! Usages outside package grouped
@@ -114,7 +114,7 @@ g_param_usage_outpack_groupd = p_dm.
 
 SELECTION-SCREEN END OF BLOCK block_using_comp.
 
-SELECTION-SCREEN BEGIN OF BLOCK block_infos WITH FRAME TITLE text-004.
+SELECTION-SCREEN BEGIN OF BLOCK block_infos WITH FRAME TITLE TEXT-004.
 
 PARAMETERS: p_list AS CHECKBOX DEFAULT ' '.
 "! List Tokens of selected programs
@@ -149,7 +149,7 @@ SELECTION-SCREEN END OF BLOCK block_infos.
 *OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 *SOFTWARE.
 
-SELECTION-SCREEN BEGIN OF BLOCK bl_model_settings WITH FRAME TITLE text-100.
+SELECTION-SCREEN BEGIN OF BLOCK bl_model_settings WITH FRAME TITLE TEXT-100.
 
 PARAMETERS p_down AS CHECKBOX DEFAULT 'X'.
 "! Download model to file
@@ -184,8 +184,8 @@ CLASS cl_model DEFINITION.
                 is_named_entity               TYPE bool
                 can_be_referenced_by_name     TYPE bool
                 name                          TYPE clike OPTIONAL
-      EXPORTING value(exists_already_with_id) TYPE i
-                value(processed_id)           TYPE i.
+      EXPORTING VALUE(exists_already_with_id) TYPE i
+                VALUE(processed_id)           TYPE i.
 
     "! Generates a string with a valid MSE file
     METHODS make_mse
@@ -269,7 +269,7 @@ CLASS cl_model DEFINITION.
     "! The ID of processed entity in the model
     DATA g_processed_id TYPE i.
     "! The ID of the entity that was last added or checked whether to add
-    data g_last_added_or_checked_id TYPE i.
+    DATA g_last_added_or_checked_id TYPE i.
     "! The ID of any attribute. Unique together with mv_id
     DATA g_attribute_id TYPE i.
 
@@ -392,7 +392,7 @@ CLASS cl_model IMPLEMENTATION.
     ENDLOOP.
 
     mse_model_line-line = mse_model_line-line && |)|.
-        APPEND mse_model_line TO mse_model.
+    APPEND mse_model_line TO mse_model.
 
   ENDMETHOD.
 
@@ -577,8 +577,8 @@ CLASS cl_famix_named_entity DEFINITION INHERITING FROM cl_famix_sourced_entity A
     METHODS add
       IMPORTING name_group                    TYPE clike OPTIONAL
                 name                          TYPE clike
-      EXPORTING value(exists_already_with_id) TYPE i
-                value(id)                     TYPE i.
+      EXPORTING VALUE(exists_already_with_id) TYPE i
+                VALUE(id)                     TYPE i.
     "! Call once to set the parent package
     "! Call directly after calling the method name of the same class
     "! TBD check that the last call of method name is done for the same class
@@ -1188,8 +1188,8 @@ CLASS cl_famix_custom_source_lang DEFINITION INHERITING FROM cl_famix_entity.
   PUBLIC SECTION.
     "! @parameter exists_already_with_id | contains the id if entry already existed
     METHODS add IMPORTING name                          TYPE clike
-      EXPORTING value(exists_already_with_id) TYPE i
-                value(id)                     TYPE i.
+                EXPORTING VALUE(exists_already_with_id) TYPE i
+                          VALUE(id)                     TYPE i.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
 ENDCLASS.
 
@@ -1338,8 +1338,8 @@ CLASS cl_sap_class DEFINITION INHERITING FROM cl_sap.
     "! Add global class
     METHODS add
       IMPORTING name                          TYPE clike
-      EXPORTING value(exists_already_with_id) TYPE i
-                value(id)                     TYPE i.
+      EXPORTING VALUE(exists_already_with_id) TYPE i
+                VALUE(id)                     TYPE i.
     "! Specify the parent program for a local class
     METHODS set_parent_program
       IMPORTING
@@ -1760,8 +1760,8 @@ CLASS cl_extract_sap DEFINITION.
   PUBLIC SECTION.
     METHODS extract
       EXPORTING
-                mse_model           TYPE cl_model=>lines_type
-                value(nothing_done) TYPE bool.
+        mse_model           TYPE cl_model=>lines_type
+        VALUE(nothing_done) TYPE bool.
   PRIVATE SECTION.
 
     "! Maps the component lists from SAP (table TADIR) to the component list used in this program
@@ -2391,7 +2391,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
         READ TABLE g_tadir_components_mapping
               INTO ls_tadir
               WITH KEY component  = <component_infos>-component.
-        ASSERT SY-SUBRC EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
+        ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
         object = ls_tadir-object.
 
         SELECT SINGLE devclass FROM tadir
@@ -2434,7 +2434,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     " Add parent packages
 
-    DATA packages type sap_package->packages_type.
+    DATA packages TYPE sap_package->packages_type.
     packages = sap_package->get_all_packages( ).
     IF packages IS NOT INITIAL.
       TYPES: BEGIN OF devclass_type,
@@ -2452,14 +2452,14 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       ENDLOOP.
       TYPES: BEGIN OF packages_info_type,
-        devclass TYPE tdevc-devclass,
-        parentcl TYPE tdevc-parentcl,
-            END OF  packages_info_type.
+               devclass TYPE tdevc-devclass,
+               parentcl TYPE tdevc-parentcl,
+             END OF  packages_info_type.
       DATA package_info TYPE packages_info_type.
       DATA packages_info TYPE STANDARD TABLE OF packages_info_type WITH DEFAULT KEY.
 
-      SELECT  devclass parentcl from tdevc into table packages_info for all entries in packages_with_type_devclass where devclass = packages_with_type_devclass-devclass.
-        LOOP AT packages_info INTO package_info.
+      SELECT  devclass parentcl FROM tdevc INTO TABLE packages_info FOR ALL ENTRIES IN packages_with_type_devclass WHERE devclass = packages_with_type_devclass-devclass.
+      LOOP AT packages_info INTO package_info.
         IF package_info-parentcl IS NOT INITIAL.
           sap_package->add( name = package_info-parentcl ). " So that parent class can always be assigned
           sap_package->add( name = package_info-devclass ).
@@ -2505,8 +2505,8 @@ CLASS cl_extract_sap IMPLEMENTATION.
           mtdkey   = ls_mtdkey.
       IF ls_mtdkey IS NOT INITIAL.
 
-            " Used by method
-            DATA: using_method TYPE string.
+        " Used by method
+        DATA: using_method TYPE string.
         IF ls_mtdkey-cpdname IS INITIAL.
           using_method = 'DUMMY'.
         ELSE.
@@ -2517,87 +2517,87 @@ CLASS cl_extract_sap IMPLEMENTATION.
         DATA using_method_id TYPE i.
         using_method_id = sap_method->get_id( class  = ls_mtdkey-clsname
                                               method = using_method ).
-            IF using_method_id EQ 0.
+        IF using_method_id EQ 0.
 
-              IF g_param_usage_outpack_groupd EQ false.
+          IF g_param_usage_outpack_groupd EQ false.
 
-                " Method does not exist, create the class
-                " SAP_2_FAMIX_21      If a component is used by a class that is not selected, add this class to the model
-                " SAP_2_FAMIX_22      Do not assign classes that included due to usage to a package
+            " Method does not exist, create the class
+            " SAP_2_FAMIX_21      If a component is used by a class that is not selected, add this class to the model
+            " SAP_2_FAMIX_22      Do not assign classes that included due to usage to a package
 
             DATA exists_already_with_id TYPE i.
-            sap_class->add( EXPORTING name = ls_mtdkey-cpdname
+            sap_class->add( EXPORTING name = ls_mtdkey-clsname
                             IMPORTING exists_already_with_id = exists_already_with_id ).
 
-                IF exists_already_with_id IS INITIAL.
+            IF exists_already_with_id IS INITIAL.
 
-                  " SAP_2_FAMIX_47      If no dummy class is specified in case a using class is not in the initial selection, analyze this classes also
+              " SAP_2_FAMIX_47      If no dummy class is specified in case a using class is not in the initial selection, analyze this classes also
 
               DATA ls_new_components_info LIKE LINE OF new_components_infos. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
 
               DATA ls_tadir_comp_map LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
               READ TABLE g_tadir_components_mapping INTO ls_tadir_comp_map WITH TABLE KEY object = 'CLAS'.
-              ASSERT SY-SUBRC EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
+              ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
               CLEAR ls_new_components_info.
-              ls_new_components_info-component_name = ls_mtdkey-cpdname.
+              ls_new_components_info-component_name = ls_mtdkey-clsname.
               ls_new_components_info-component   = ls_tadir_comp_map-component .
               INSERT ls_new_components_info INTO TABLE new_components_infos.
 
-                ENDIF.
-
-              ELSE.
-                " SAP_2_FAMIX_35        Add a usage to a single dummy class "OTHER_SAP_CLASS" if required by a parameter
-
-                sap_class->add( EXPORTING name = 'OTHER_SAP_CLASS'
-                                  IMPORTING exists_already_with_id = exists_already_with_id ).
-
-              ENDIF.
-
-              " Now there is a class, but no duplicate class
-
-          IF g_param_usage_outpack_groupd EQ false.
-            using_method_id = sap_method->get_id( class  = ls_mtdkey-cpdname
-                                                  method = using_method ).
-              ELSE.
-                using_method_id = sap_method->get_id( class  = 'OTHER_SAP_CLASS'
-                                                      method = 'OTHER_SAP_METHOD' ).
-              ENDIF.
-
-
-              IF using_method_id EQ 0.
-                IF g_param_usage_outpack_groupd EQ false.
-                  " Now also the method is to be created
-                  " SAP_2_FAMIX_23       If a component is used by a class that is not selected, add the using methods to the model
-
-              using_method_id = sap_method->add( class  = ls_mtdkey-cpdname
-                                                 method = using_method ).
-
-                ELSE.
-
-                  " SAP_2_FAMIX_36        Add a usage to a single dummy method "OTHER_SAP_METHOD" if required by a parameter
-
-                  using_method_id = sap_method->add( class  = 'OTHER_SAP_CLASS'
-                                                     method = 'OTHER_SAP_METHOD'  ).
-
-                ENDIF.
-              ENDIF.
-
             ENDIF.
 
-            CASE class_component-cmptype.
-              WHEN comptype_method.
+          ELSE.
+            " SAP_2_FAMIX_35        Add a usage to a single dummy class "OTHER_SAP_CLASS" if required by a parameter
 
-                sap_invocation->add_invocation( used_method_id = used_id
-                                                using_method_id = using_method_id ).
+            sap_class->add( EXPORTING name = 'OTHER_SAP_CLASS'
+                              IMPORTING exists_already_with_id = exists_already_with_id ).
 
-              WHEN comptype_attribute.
+          ENDIF.
 
-                sap_access->add_access( used_attribute = used_id
-                                        using_method = using_method_id ).
+          " Now there is a class, but no duplicate class
 
-              WHEN OTHERS.
-                ASSERT 1 = 2.
-            ENDCASE.
+          IF g_param_usage_outpack_groupd EQ false.
+            using_method_id = sap_method->get_id( class  = ls_mtdkey-clsname
+                                                  method = using_method ).
+          ELSE.
+            using_method_id = sap_method->get_id( class  = 'OTHER_SAP_CLASS'
+                                                  method = 'OTHER_SAP_METHOD' ).
+          ENDIF.
+
+
+          IF using_method_id EQ 0.
+            IF g_param_usage_outpack_groupd EQ false.
+              " Now also the method is to be created
+              " SAP_2_FAMIX_23       If a component is used by a class that is not selected, add the using methods to the model
+
+              using_method_id = sap_method->add( class  = ls_mtdkey-clsname
+                                                 method = using_method ).
+
+            ELSE.
+
+              " SAP_2_FAMIX_36        Add a usage to a single dummy method "OTHER_SAP_METHOD" if required by a parameter
+
+              using_method_id = sap_method->add( class  = 'OTHER_SAP_CLASS'
+                                                 method = 'OTHER_SAP_METHOD'  ).
+
+            ENDIF.
+          ENDIF.
+
+        ENDIF.
+
+        CASE class_component-cmptype.
+          WHEN comptype_method.
+
+            sap_invocation->add_invocation( used_method_id = used_id
+                                            using_method_id = using_method_id ).
+
+          WHEN comptype_attribute.
+
+            sap_access->add_access( used_attribute = used_id
+                                    using_method = using_method_id ).
+
+          WHEN OTHERS.
+            ASSERT 1 = 2.
+        ENDCASE.
 
 
         " TBD Implement other usages
@@ -2645,11 +2645,11 @@ CLASS cl_extract_sap IMPLEMENTATION.
     INSERT ls_temp_package_to_search INTO TABLE temp_packages_to_search.
     WHILE temp_packages_to_search IS NOT INITIAL.
       IF temp_packages_to_search IS NOT INITIAL.
-        types: BEGIN OF abap_731_package_type,
-          devclass TYPE tdevc-devclass,
-          parentcl type tdevc-parentcl,
+        TYPES: BEGIN OF abap_731_package_type,
+                 devclass TYPE tdevc-devclass,
+                 parentcl TYPE tdevc-parentcl,
                END OF abap_731_package_type.
-        data: packages type standard table of abap_731_package_type WITH DEFAULT KEY.
+        DATA: packages TYPE STANDARD TABLE OF abap_731_package_type WITH DEFAULT KEY.
         SELECT devclass  parentcl FROM tdevc INTO TABLE packages
          FOR ALL ENTRIES IN temp_packages_to_search
           WHERE parentcl = temp_packages_to_search-devclass.
@@ -3007,9 +3007,9 @@ CLASS cl_extract_sap IMPLEMENTATION.
         ENDCASE.
         IF select_by_top_package EQ true.
           DATA: BEGIN OF tadir_component,
-                   obj_name LIKE tadir-obj_name,
-                   object   LIKE tadir-object,
-                   devclass LIKE tadir-devclass,
+                  obj_name LIKE tadir-obj_name,
+                  object   LIKE tadir-object,
+                  devclass LIKE tadir-devclass,
                 END OF tadir_component.
           SELECT obj_name object devclass FROM tadir INTO tadir_component FOR ALL ENTRIES IN processed_packages
             WHERE pgmid = 'R3TR'
