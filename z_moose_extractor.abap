@@ -48,7 +48,7 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 24.03.2016 11:59 issue21 Rainer Winkler
+"! 31.03.2016 21:47 issue22 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -66,7 +66,7 @@ CONSTANTS:
   "! Redefines abap_false to simplify coding (Not always reading abap_...)
   false TYPE bool VALUE abap_false.
 
-SELECTION-SCREEN BEGIN OF BLOCK block_global_source WITH FRAME TITLE TEXT-001.
+SELECTION-SCREEN BEGIN OF BLOCK block_global_source WITH FRAME TITLE text-001.
 
 PARAMETERS: p_sap AS CHECKBOX DEFAULT 'X'.
 "! Extract from SAP
@@ -75,7 +75,7 @@ g_parameter_extract_from_sap = p_sap.
 
 SELECTION-SCREEN END OF BLOCK block_global_source.
 
-SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE TEXT-002.
+SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE text-002.
 
 PARAMETERS: p_clas AS CHECKBOX DEFAULT 'X'.
 PARAMETERS: p_intf AS CHECKBOX DEFAULT 'X'.
@@ -104,7 +104,7 @@ SELECT-OPTIONS s_compsn FOR tadir-obj_name.
 
 SELECTION-SCREEN END OF BLOCK block_selct_sap_comp.
 
-SELECTION-SCREEN BEGIN OF BLOCK block_using_comp WITH FRAME TITLE TEXT-003.
+SELECTION-SCREEN BEGIN OF BLOCK block_using_comp WITH FRAME TITLE text-003.
 
 PARAMETERS: p_dm AS CHECKBOX DEFAULT ' '.
 "! Usages outside package grouped
@@ -114,7 +114,7 @@ g_param_usage_outpack_groupd = p_dm.
 
 SELECTION-SCREEN END OF BLOCK block_using_comp.
 
-SELECTION-SCREEN BEGIN OF BLOCK block_infos WITH FRAME TITLE TEXT-004.
+SELECTION-SCREEN BEGIN OF BLOCK block_infos WITH FRAME TITLE text-004.
 
 PARAMETERS: p_list AS CHECKBOX DEFAULT ' '.
 "! List Tokens of selected programs
@@ -149,7 +149,7 @@ SELECTION-SCREEN END OF BLOCK block_infos.
 *OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 *SOFTWARE.
 
-SELECTION-SCREEN BEGIN OF BLOCK bl_model_settings WITH FRAME TITLE TEXT-100.
+SELECTION-SCREEN BEGIN OF BLOCK bl_model_settings WITH FRAME TITLE text-100.
 
 PARAMETERS p_down AS CHECKBOX DEFAULT 'X'.
 "! Download model to file
@@ -223,6 +223,43 @@ CLASS cl_model DEFINITION.
       IMPORTING
         attribute_name TYPE clike
         is_true        TYPE bool.
+
+    " Public type so that the caller is able to test the model
+
+    TYPES:
+      "! A public type that returns the attributes of the model
+      BEGIN OF public_attribute_type,
+        attribute_id   TYPE i,
+        attribute_name TYPE string,
+        string         TYPE string,
+        reference      TYPE i,
+        boolean        TYPE bool,
+      END OF public_attribute_type.
+
+
+    TYPES:
+      "! A public table type to contain the attributes of an element
+      public_attributes_type TYPE HASHED TABLE OF public_attribute_type WITH UNIQUE KEY attribute_id.
+
+
+    TYPES:
+      "! A type that contains informations on an element
+      BEGIN OF public_element_type,
+        id                TYPE i,
+        elementname       TYPE string,
+        is_named_entity   TYPE bool,
+        public_attributes TYPE public_attributes_type,
+      END OF public_element_type.
+    TYPES:
+      "! A public table type to contain all elements of a model
+      public_elements_type TYPE HASHED TABLE OF public_element_type WITH UNIQUE KEY id.
+
+    "! Returns the current model
+    "! Use for checks and to decide what further actions are done to build the model.
+    "! Also to give a feedback what is extracted
+    METHODS get_model
+      RETURNING VALUE(public_elements) TYPE public_elements_type.
+
 
   PRIVATE SECTION.
     TYPES: BEGIN OF element_in_model_type,
@@ -454,6 +491,45 @@ CLASS cl_model IMPLEMENTATION.
     ls_attribute-value_type     = boolean_value.
     ls_attribute-boolean        = is_true.
     APPEND ls_attribute TO g_attributes.
+  ENDMETHOD.
+
+  METHOD get_model.
+
+    DATA ls_public_element TYPE public_element_type.
+    DATA ls_public_attribute TYPE public_attribute_type.
+    DATA lt_public_attributes TYPE public_attributes_type.
+
+    CLEAR public_elements.
+
+    DATA ls_elements_in_model LIKE LINE OF g_elements_in_model.
+    LOOP AT g_elements_in_model INTO ls_elements_in_model.
+
+
+
+      CLEAR lt_public_attributes.
+
+      DATA ls_attributes LIKE LINE OF g_attributes.
+      LOOP AT g_attributes INTO ls_attributes WHERE id = ls_elements_in_model-id.
+
+        CLEAR ls_public_attribute.
+        ls_public_attribute-attribute_id = ls_attributes-attribute_id.
+        ls_public_attribute-attribute_name = ls_attributes-attribute_name.
+        ls_public_attribute-boolean = ls_attributes-boolean.
+        ls_public_attribute-reference = ls_attributes-reference.
+        ls_public_attribute-string = ls_attributes-string.
+        INSERT ls_public_attribute INTO TABLE lt_public_attributes.
+
+      ENDLOOP.
+
+      CLEAR ls_public_element.
+      ls_public_element-elementname = ls_elements_in_model-elementname.
+      ls_public_element-id = ls_elements_in_model-id.
+      ls_public_element-is_named_entity = ls_elements_in_model-is_named_entity.
+      ls_public_element-public_attributes = lt_public_attributes.
+
+      INSERT ls_public_element INTO TABLE public_elements.
+
+    ENDLOOP.
   ENDMETHOD.
 
 ENDCLASS.
@@ -1212,6 +1288,54 @@ CLASS cl_famix_custom_source_lang IMPLEMENTATION.
 
 ENDCLASS.
 
+CLASS cl_check_famix_model DEFINITION.
+  PUBLIC SECTION.
+    "! Checks a model regarding the FAMIX attributes
+    METHODS check IMPORTING model TYPE REF TO cl_model.
+ENDCLASS.
+
+CLASS cl_check_famix_model IMPLEMENTATION.
+
+  METHOD check.
+
+    DATA public_elements TYPE model->public_elements_type.
+
+    public_elements = model->get_model( ).
+    DATA ls_public_elements LIKE LINE OF public_elements.
+    DATA ls_public_attribute TYPE  model->public_attribute_type.
+    LOOP AT public_elements INTO ls_public_elements.
+
+      CASE ls_public_elements-elementname.
+        WHEN 'FAMIX.Package'.
+
+          DATA count_parent_packages TYPE i.
+          CLEAR count_parent_packages.
+          LOOP AT ls_public_elements-public_attributes INTO ls_public_attribute WHERE attribute_name = 'parentPackage'.
+
+            ADD 1 TO count_parent_packages.
+
+          ENDLOOP.
+
+          " SAP_2_FAMIX_48        Return a message if a package has more than one parent package
+
+          IF count_parent_packages > 1.
+
+            FORMAT COLOR COL_NEGATIVE.
+
+            WRITE: / 'Package ', ls_public_elements-id, ' has more than a single parent package'.
+
+            FORMAT COLOR COL_BACKGROUND.
+
+          ENDIF.
+
+      ENDCASE.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
 CLASS cl_make_demo_model DEFINITION.
   PUBLIC SECTION.
     CLASS-METHODS make
@@ -1237,11 +1361,19 @@ CLASS cl_make_demo_model IMPLEMENTATION.
     CREATE OBJECT famix_attribute EXPORTING model = model.
     DATA famix_inheritance  TYPE REF TO cl_famix_inheritance.
     CREATE OBJECT famix_inheritance EXPORTING model = model.
+    DATA check_famix_model TYPE REF TO cl_check_famix_model.
+    CREATE OBJECT check_famix_model.
 
     famix_namespace->add( name = 'aNamespace' ).
     famix_package->add( name = 'aPackage' ).
+    " Add error to test issue22
+    famix_package->add( name = 'bPackage' ).
+    " End of adding error to test issue 22
     famix_package->add( name = 'anotherPackage' ).
     famix_package->set_parent_package( parent_package = 'aPackage' ).
+    " Add error to test issue22
+    famix_package->set_parent_package( parent_package = 'bPackage' ).
+    " End of adding error to test issue 22
     famix_class->add( name = 'ClassA' ).
     famix_class->set_container( EXPORTING container_element = 'FAMIX.Namespace'
                                           parent_container  = 'aNamespace').
@@ -1266,6 +1398,8 @@ CLASS cl_make_demo_model IMPLEMENTATION.
                                                           superclass_element = 'FAMIX.Class'
                                                           superclass_name_group = ''
                                                           superclass_name    = 'ClassA' ).
+
+    check_famix_model->check( model = model ).
 
     model->make_mse( IMPORTING mse_model = mse_model ).
   ENDMETHOD.
@@ -2295,6 +2429,8 @@ CLASS cl_extract_sap IMPLEMENTATION.
     CREATE OBJECT sap_invocation EXPORTING model = model.
     DATA sap_access      TYPE REF TO cl_sap_access.
     CREATE OBJECT sap_access EXPORTING model = model.
+    DATA check_famix_model TYPE REF TO cl_check_famix_model.
+    CREATE OBJECT check_famix_model.
 
     " Set TADIR mapping
     DATA ls_mapping TYPE map_tadir_component_type. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
@@ -2467,6 +2603,8 @@ CLASS cl_extract_sap IMPLEMENTATION.
         ENDIF.
       ENDLOOP.
     ENDIF.
+
+    check_famix_model->check( model = model ).
 
     model->make_mse( IMPORTING mse_model = mse_model ).
 
