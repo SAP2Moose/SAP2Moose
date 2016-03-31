@@ -48,7 +48,7 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 31.03.2016 21:47 issue22 Rainer Winkler
+"! 31.03.2016 21:59 issue22 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -1316,7 +1316,7 @@ CLASS cl_check_famix_model IMPLEMENTATION.
 
           ENDLOOP.
 
-          " SAP_2_FAMIX_48        Return a message if a package has more than one parent package
+          " SAP_2_FAMIX_49        Return a message if a package has more than one parent package
 
           IF count_parent_packages > 1.
 

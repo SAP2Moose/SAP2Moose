@@ -15,7 +15,7 @@ Requirement ID;Caption Numbering;Requirement;Detail;Layer;Status;Status Requirem
 SAP_2_FAMIX_3;;Select all components in a package and the sub packages of this package;;Requirement;developed;Requirement Confirmed;;
 SAP_2_FAMIX_44;;Allow to select only specific objects and all using objects;;Requirement;to be developed;;;issue1
 SAP_2_FAMIX_46;;Allow to select only specific objects and all used objects;;Requirement;to be developed;;;issue1
-;;;;;;;;
+SAP_2_FAMIX_48;;Allow to select all using objects;;Requirement;developed;;;
 SAP_2_FAMIX_47;;If no dummy class is specified in case a using class is not in the initial selection, analyze this classes also;;Requirement;to be developed;Requirement Confirmed;;
 ;;;;;;;;
 ;;;;;;;;
@@ -89,7 +89,7 @@ SAP_2_FAMIX_38;;Map local inheritances of classes to FAMIX.Inheritance;;Requirem
 ;;;;;;;;
 ;;Checks;;Header Level 1;;;;
 ;;;;;;;;
-SAP_2_FAMIX_48;;Return a message if a package has more than one parent package;;Requirement;;;;
+SAP_2_FAMIX_49;;Return a message if a package has more than one parent package;;Requirement;Developer Test passed;Requirement Confirmed;;
 ;;;;;;;;
 ;;;;;;;;
 ;;;;;;;;
