@@ -89,10 +89,10 @@ SAP_2_FAMIX_38;;Map local inheritances of classes to FAMIX.Inheritance;;Requirem
 ;;;;;;;;
 ;;Checks;;Header Level 1;;;;
 ;;;;;;;;
-SAP_2_FAMIX_49;;Return a message if a package has more than one parent package;;Requirement;Developer Test passed;Requirement Confirmed;;
+SAP_2_FAMIX_49;;Return a message if the attribute parent package occurs more than once;;Requirement;Developer Test passed;Requirement Confirmed;;
 ;;;;;;;;
-;;;;;;;;
-;;;;;;;;
+SAP_2_FAMIX_50;;Return a message if the attribute name occurs more than once;;Requirement;developed;Requirement Confirmed;;
+SAP_2_FAMIX_51;;Return a message if the attribute name is empty;;Requirement;developed;Requirement Confirmed;;
 ;;;;;;;;
 ;;;;;;;;
 ;;;;;;;;

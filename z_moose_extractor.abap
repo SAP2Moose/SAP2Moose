@@ -48,7 +48,7 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 31.03.2016 21:59 issue22 Rainer Winkler
+"! 3.04.2016 09:14 issue24 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -1292,6 +1292,14 @@ CLASS cl_check_famix_model DEFINITION.
   PUBLIC SECTION.
     "! Checks a model regarding the FAMIX attributes
     METHODS check IMPORTING model TYPE REF TO cl_model.
+  PRIVATE SECTION.
+
+    METHODS _check_attribute_parentpackage
+      IMPORTING
+        is_public_elements TYPE cl_model=>public_element_type.
+    METHODS _check_attribute_name
+      IMPORTING
+        is_public_elements TYPE cl_model=>public_element_type.
 ENDCLASS.
 
 CLASS cl_check_famix_model IMPLEMENTATION.
@@ -1301,36 +1309,80 @@ CLASS cl_check_famix_model IMPLEMENTATION.
     DATA public_elements TYPE model->public_elements_type.
 
     public_elements = model->get_model( ).
-    DATA ls_public_elements LIKE LINE OF public_elements.
+    DATA ls_public_elements TYPE model->public_element_type.
     DATA ls_public_attribute TYPE  model->public_attribute_type.
     LOOP AT public_elements INTO ls_public_elements.
 
-      CASE ls_public_elements-elementname.
-        WHEN 'FAMIX.Package'.
+      _check_attribute_parentpackage( ls_public_elements ).
 
-          DATA count_parent_packages TYPE i.
-          CLEAR count_parent_packages.
-          LOOP AT ls_public_elements-public_attributes INTO ls_public_attribute WHERE attribute_name = 'parentPackage'.
-
-            ADD 1 TO count_parent_packages.
-
-          ENDLOOP.
-
-          " SAP_2_FAMIX_49        Return a message if a package has more than one parent package
-
-          IF count_parent_packages > 1.
-
-            FORMAT COLOR COL_NEGATIVE.
-
-            WRITE: / 'Package ', ls_public_elements-id, ' has more than a single parent package'.
-
-            FORMAT COLOR COL_BACKGROUND.
-
-          ENDIF.
-
-      ENDCASE.
+      _check_attribute_name( ls_public_elements ).
 
     ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD _check_attribute_parentpackage.
+
+    DATA ls_public_attribute TYPE cl_model=>public_attribute_type.
+
+    " Check attribute parentPackage
+    DATA count_parent_packages TYPE i.
+    CLEAR count_parent_packages.
+    LOOP AT is_public_elements-public_attributes INTO ls_public_attribute WHERE attribute_name = 'parentPackage'.
+
+      ADD 1 TO count_parent_packages.
+
+    ENDLOOP.
+
+    " SAP_2_FAMIX_49        Return a message if the attribute parent package occurs more than once
+
+    IF count_parent_packages > 1.
+
+      FORMAT COLOR COL_NEGATIVE.
+
+      WRITE: / 'Package ', is_public_elements-id, ' has more than a single parent package'.
+
+      FORMAT COLOR COL_BACKGROUND.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD _check_attribute_name.
+
+    DATA ls_public_attribute TYPE cl_model=>public_attribute_type.
+
+    " Check attribute parentPackage
+    DATA count_name TYPE i.
+    CLEAR count_name.
+    LOOP AT is_public_elements-public_attributes INTO ls_public_attribute WHERE attribute_name = 'name'.
+
+      ADD 1 TO count_name.
+
+      CONDENSE ls_public_attribute-string.
+      IF ls_public_attribute-string IS INITIAL.
+        FORMAT COLOR COL_NEGATIVE.
+
+        " SAP_2_FAMIX_51        Return a message if the attribute name is empty
+        WRITE: / 'Element ', is_public_elements-id, ' has an attribute name that is empty'.
+
+        FORMAT COLOR COL_BACKGROUND.
+      ENDIF.
+
+    ENDLOOP.
+
+    " SAP_2_FAMIX_50        Return a message if the attribute name occurs more than once
+
+    IF count_name > 1.
+
+      FORMAT COLOR COL_NEGATIVE.
+
+      WRITE: / 'Element ', is_public_elements-id, ' has more than a single attribute name'.
+
+      FORMAT COLOR COL_BACKGROUND.
+
+    ENDIF.
 
   ENDMETHOD.
 
@@ -1374,6 +1426,9 @@ CLASS cl_make_demo_model IMPLEMENTATION.
     " Add error to test issue22
     famix_package->set_parent_package( parent_package = 'bPackage' ).
     " End of adding error to test issue 22
+    " Add error to test issue24
+    famix_class->add( name = '' ).
+    " End of adding error to test issue 24
     famix_class->add( name = 'ClassA' ).
     famix_class->set_container( EXPORTING container_element = 'FAMIX.Namespace'
                                           parent_container  = 'aNamespace').
