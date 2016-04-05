@@ -48,7 +48,7 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 3.04.2016 09:14 issue24 Rainer Winkler
+"! 05.04.2016 21:04 issue27 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -309,6 +309,12 @@ CLASS cl_model DEFINITION.
     DATA g_last_added_or_checked_id TYPE i.
     "! The ID of any attribute. Unique together with mv_id
     DATA g_attribute_id TYPE i.
+    "! True if attribute is already identically assigned
+    METHODS _check_if_attr_already_there
+      IMPORTING
+        attribute            TYPE cl_model=>attribute_type
+      RETURNING
+        VALUE(already_there) TYPE bool.
 
 
 ENDCLASS.
@@ -441,56 +447,79 @@ CLASS cl_model IMPLEMENTATION.
                                                                                       name_group = name_group_of_reference
                                                                                       xname = name_of_reference.
     ASSERT sy-subrc EQ ok.
-    ADD 1 TO g_attribute_id.
+
     DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
     CLEAR ls_attribute.
     ls_attribute-id             = g_last_added_or_checked_id.
-    ls_attribute-attribute_id   = g_attribute_id.
     ls_attribute-attribute_name = attribute_name.
     ls_attribute-value_type     = reference_value.
     ls_attribute-reference      = <named_entity>-id.
-    INSERT ls_attribute INTO TABLE g_attributes.
+
+    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
+
+    IF _check_if_attr_already_there( ls_attribute ) EQ false.
+      ADD 1 TO g_attribute_id.
+      ls_attribute-attribute_id   = g_attribute_id.
+      INSERT ls_attribute INTO TABLE g_attributes.
+    ENDIF.
 
   ENDMETHOD.
 
   METHOD add_reference_by_id.
 
-    ADD 1 TO g_attribute_id.
-    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    DATA ls_attribute TYPE attribute_type. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
     CLEAR ls_attribute.
     ls_attribute-id             = g_last_added_or_checked_id.
-    ls_attribute-attribute_id   = g_attribute_id.
     ls_attribute-attribute_name = attribute_name.
     ls_attribute-value_type     = reference_value.
     ls_attribute-reference      = reference_id.
-    APPEND ls_attribute TO g_attributes.
+
+    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
+
+    IF _check_if_attr_already_there( ls_attribute ) EQ false.
+      ADD 1 TO g_attribute_id.
+      ls_attribute-attribute_id   = g_attribute_id.
+      APPEND ls_attribute TO g_attributes.
+    ENDIF.
 
   ENDMETHOD.
 
   METHOD add_string.
 
-    ADD 1 TO g_attribute_id.
     DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
     CLEAR ls_attribute.
     ls_attribute-id             = g_last_added_or_checked_id.
-    ls_attribute-attribute_id   = g_attribute_id.
     ls_attribute-attribute_name = attribute_name.
     ls_attribute-value_type     = string_value.
     ls_attribute-string         = string.
-    APPEND ls_attribute TO g_attributes.
+
+    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
+
+    IF _check_if_attr_already_there( ls_attribute ) EQ false.
+      ADD 1 TO g_attribute_id.
+      ls_attribute-attribute_id   = g_attribute_id.
+      APPEND ls_attribute TO g_attributes.
+    ENDIF.
 
   ENDMETHOD.
 
   METHOD add_boolean.
-    ADD 1 TO g_attribute_id.
+
     DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
     CLEAR ls_attribute.
     ls_attribute-id             = g_last_added_or_checked_id.
-    ls_attribute-attribute_id   = g_attribute_id.
     ls_attribute-attribute_name = attribute_name.
     ls_attribute-value_type     = boolean_value.
     ls_attribute-boolean        = is_true.
-    APPEND ls_attribute TO g_attributes.
+
+    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
+
+    IF _check_if_attr_already_there( ls_attribute ) EQ false.
+      ADD 1 TO g_attribute_id.
+      ls_attribute-attribute_id   = g_attribute_id.
+      APPEND ls_attribute TO g_attributes.
+    ENDIF.
+
   ENDMETHOD.
 
   METHOD get_model.
@@ -530,6 +559,28 @@ CLASS cl_model IMPLEMENTATION.
       INSERT ls_public_element INTO TABLE public_elements.
 
     ENDLOOP.
+  ENDMETHOD.
+
+
+  METHOD _check_if_attr_already_there.
+
+    " Check if attribute is already there
+    DATA ls_attribute_2 TYPE attribute_type.
+    DATA ls_attribute_3 TYPE attribute_type.
+
+    ls_attribute_3 = attribute.
+    CLEAR ls_attribute_3-attribute_id.
+
+    already_there = false.
+
+    LOOP AT g_attributes INTO ls_attribute_2 WHERE id = attribute-id.
+      CLEAR ls_attribute_2-attribute_id.
+      IF ls_attribute_2 EQ ls_attribute_3.
+        already_there = true.
+        EXIT.
+      ENDIF.
+    ENDLOOP.
+
   ENDMETHOD.
 
 ENDCLASS.
@@ -1422,6 +1473,9 @@ CLASS cl_make_demo_model IMPLEMENTATION.
     famix_package->add( name = 'bPackage' ).
     " End of adding error to test issue 22
     famix_package->add( name = 'anotherPackage' ).
+    famix_package->set_parent_package( parent_package = 'aPackage' ).
+    " Test SAP_2_FAMIX_52       Do not add attributes twice if they are added with identical attributes
+    " Add the same attribute twice
     famix_package->set_parent_package( parent_package = 'aPackage' ).
     " Add error to test issue22
     famix_package->set_parent_package( parent_package = 'bPackage' ).

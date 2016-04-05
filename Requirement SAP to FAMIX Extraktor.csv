@@ -87,7 +87,14 @@ SAP_2_FAMIX_43;;Fill the attribut signature of FAMIX.METHOD with the name of the
 SAP_2_FAMIX_37;;Determine local inheritances of classes;;Requirement;to be developed;Requirement Confirmed;;
 SAP_2_FAMIX_38;;Map local inheritances of classes to FAMIX.Inheritance;;Requirement;developed;Requirement Confirmed;;
 ;;;;;;;;
-;;Checks;;Header Level 1;;;;
+;2;Model;;Header Level 1;;;;
+SAP_2_FAMIX_52;;Do not add attributes twice if they are added with identical attributes;;Requirement;to be developed;Requirement Confirmed;;
+;;;;;;;;
+;;;;;;;;
+;;;;;;;;
+;;;;;;;;
+;;;;;;;;
+;3;Checks;;Header Level 1;;;;
 ;;;;;;;;
 SAP_2_FAMIX_49;;Return a message if the attribute parent package occurs more than once;;Requirement;Developer Test passed;Requirement Confirmed;;
 ;;;;;;;;
@@ -105,5 +112,5 @@ SAP_2_FAMIX_51;;Return a message if the attribute name is empty;;Requirement;dev
 ;;;;;;;;
 ;;;;;;;;
 ;;;;;;;;
-;;Export Model;;Header Level 1;;;;
+;4;Export Model;;Header Level 1;;;;
 SAP_2_FAMIX_34;;Allow to export the model in the .mse Moose format;;Requirement;developed;Requirement Confirmed;;yrw1_moose_extractor_2
