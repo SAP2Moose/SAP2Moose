@@ -48,7 +48,7 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 06.04.2016 22:57 issue26 Rainer Winkler
+"! 06.04.2016 23:14 issue26 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -202,7 +202,7 @@ CLASS cl_model DEFINITION.
     "! @parameter string | The value of the attribute
     METHODS add_string
       IMPORTING
-        element_id2         TYPE i
+        element_id2        TYPE i
         element_type       TYPE clike OPTIONAL
         element_name_group TYPE clike OPTIONAL
         element_name       TYPE clike OPTIONAL
@@ -220,7 +220,7 @@ CLASS cl_model DEFINITION.
     "! @parameter name_of_reference | the reference
     METHODS add_reference_by_name
       IMPORTING
-        element_id2              TYPE i
+        element_id2             TYPE i
         element_type            TYPE clike OPTIONAL
         element_name_group      TYPE clike OPTIONAL
         element_name            TYPE clike OPTIONAL
@@ -239,7 +239,7 @@ CLASS cl_model DEFINITION.
     "! @parameter reference_id | the id of the reference
     METHODS add_reference_by_id
       IMPORTING
-        element_id2         TYPE i
+        element_id2        TYPE i
         element_type       TYPE clike OPTIONAL
         element_name_group TYPE clike OPTIONAL
         element_name       TYPE clike OPTIONAL
@@ -253,7 +253,7 @@ CLASS cl_model DEFINITION.
     "! @parameter element_name | the name of the element
     METHODS add_boolean
       IMPORTING
-        element_id2         TYPE i
+        element_id2        TYPE i
         element_type       TYPE clike OPTIONAL
         element_name_group TYPE clike OPTIONAL
         element_name       TYPE clike OPTIONAL
@@ -346,8 +346,6 @@ CLASS cl_model DEFINITION.
 
     "! The ID of processed entity in the model
     DATA g_processed_id TYPE i.
-    "! The ID of the entity that was last added or checked whether to add
-    DATA g_last_added_or_checked_id TYPE i.
     "! The ID of any attribute. Unique together with mv_id
     DATA g_attribute_id TYPE i.
     "! True if attribute is already identically assigned
@@ -385,14 +383,12 @@ CLASS cl_model IMPLEMENTATION.
       IF sy-subrc EQ ok.
         exists_already_with_id = <ls_name>-element_id.
         processed_id = <ls_name>-element_id.
-        g_last_added_or_checked_id = processed_id.
         RETURN.
       ENDIF.
 
     ENDIF.
 
     ADD 1 TO g_processed_id.
-    g_last_added_or_checked_id = g_processed_id.
     g_attribute_id = 0.
 
     IF can_be_referenced_by_name EQ true.
@@ -764,10 +760,10 @@ CLASS cl_famix_sourced_entity DEFINITION ABSTRACT INHERITING FROM cl_famix_entit
     "! @parameter source_language_name | the name of the source language
     METHODS set_declared_source_language
       IMPORTING
-        element_id         TYPE i
-        element_type       type clike optional
-        element_name_group TYPE clike optional
-        element_name       TYPE clike optional
+        element_id              TYPE i
+        element_type            TYPE clike OPTIONAL
+        element_name_group      TYPE clike OPTIONAL
+        element_name            TYPE clike OPTIONAL
         source_language_element TYPE clike
         source_language_name    TYPE clike.
 ENDCLASS.
@@ -808,10 +804,10 @@ CLASS cl_famix_named_entity DEFINITION INHERITING FROM cl_famix_sourced_entity A
     "! @parameter element_name | the name of the element
     "! @parameter parent_package | the name of an element of type FAMIX.Package
     METHODS set_parent_package IMPORTING element_id         TYPE i
-                                         element_type       type clike optional
-                                         element_name_group TYPE clike optional
-                                         element_name       TYPE clike optional
-                                         parent_package TYPE clike.
+                                         element_type       TYPE clike OPTIONAL
+                                         element_name_group TYPE clike OPTIONAL
+                                         element_name       TYPE clike OPTIONAL
+                                         parent_package     TYPE clike.
 
   PROTECTED SECTION.
 
@@ -855,10 +851,10 @@ CLASS cl_famix_parameter DEFINITION INHERITING FROM cl_famix_named_entity.
     METHODS set_parent_behavioural_entity
       IMPORTING
         element_id         TYPE i
-        element_type       type clike optional
-        element_name_group TYPE clike optional
-        element_name       TYPE clike optional
-        parent_id TYPE i.
+        element_type       TYPE clike OPTIONAL
+        element_name_group TYPE clike OPTIONAL
+        element_name       TYPE clike OPTIONAL
+        parent_id          TYPE i.
 ENDCLASS.
 
 CLASS cl_famix_parameter IMPLEMENTATION.
@@ -923,11 +919,11 @@ CLASS cl_famix_attribute DEFINITION INHERITING FROM cl_famix_named_entity.
     METHODS set_parent_type
       IMPORTING
         element_id         TYPE i
-        element_type       type clike optional
-        element_name_group TYPE clike optional
-        element_name       TYPE clike optional
-        parent_element TYPE clike
-        parent_name    TYPE clike.
+        element_type       TYPE clike OPTIONAL
+        element_name_group TYPE clike OPTIONAL
+        element_name       TYPE clike OPTIONAL
+        parent_element     TYPE clike
+        parent_name        TYPE clike.
   PRIVATE SECTION.
     TYPES: BEGIN OF attribute_id_type,
              class     TYPE string,
@@ -994,10 +990,10 @@ CLASS cl_famix_container_entity DEFINITION INHERITING FROM cl_famix_named_entity
     "! @parameter container_element | the FAMIX element of the Container
     "! @parameter parent_container | the name of the Container
     METHODS set_container IMPORTING element_id         TYPE i
-                                    element_type       type clike optional
-                                    element_name_group TYPE clike optional
-                                    element_name       TYPE clike optional container_element TYPE clike
-                                    parent_container  TYPE clike.
+                                    element_type       TYPE clike OPTIONAL
+                                    element_name_group TYPE clike OPTIONAL
+                                    element_name       TYPE clike OPTIONAL container_element TYPE clike
+                                    parent_container   TYPE clike.
     "! Set the container an element is in using the reference
     "! Provide either ID or type and name of element
     "! @parameter element_id | the ID of the element where the ID shall be added
@@ -1006,10 +1002,10 @@ CLASS cl_famix_container_entity DEFINITION INHERITING FROM cl_famix_named_entity
     "! @parameter element_name | the name of the element
     "! @parameter container_element | the FAMIX element of the Container
     "! @parameter parent_container_id | the id of the Container
-    METHODS set_container_by_id IMPORTING element_id         TYPE i
-                                          element_type       type clike optional
-                                          element_name_group TYPE clike optional
-                                          element_name       TYPE clike optional container_element   TYPE clike
+    METHODS set_container_by_id IMPORTING element_id          TYPE i
+                                          element_type        TYPE clike OPTIONAL
+                                          element_name_group  TYPE clike OPTIONAL
+                                          element_name        TYPE clike OPTIONAL container_element   TYPE clike
                                           parent_container_id TYPE i.
   PROTECTED SECTION.
 
@@ -1050,11 +1046,11 @@ CLASS cl_famix_behavioural_entity DEFINITION INHERITING FROM cl_famix_container_
     "! @parameter element_name | the name of the element
     "! @parameter signature | The signature like myMethod( myParameters, ...)
     METHODS set_signature IMPORTING
-        element_id         TYPE i
-        element_type       type clike optional
-        element_name_group TYPE clike optional
-        element_name       TYPE clike optional
-        signature TYPE clike.
+                            element_id         TYPE i
+                            element_type       TYPE clike OPTIONAL
+                            element_name_group TYPE clike OPTIONAL
+                            element_name       TYPE clike OPTIONAL
+                            signature          TYPE clike.
 
 ENDCLASS.
 
@@ -1160,12 +1156,12 @@ CLASS cl_famix_method DEFINITION INHERITING FROM cl_famix_behavioural_entity.
     METHODS set_parent_type
       IMPORTING
         element_id         TYPE i
-        element_type       type clike optional
-        element_name_group TYPE clike optional
-        element_name       TYPE clike optional
-        parent_element TYPE clike
-        parent_name    TYPE clike OPTIONAL
-        parent_id      TYPE i OPTIONAL.
+        element_type       TYPE clike OPTIONAL
+        element_name_group TYPE clike OPTIONAL
+        element_name       TYPE clike OPTIONAL
+        parent_element     TYPE clike
+        parent_name        TYPE clike OPTIONAL
+        parent_id          TYPE i OPTIONAL.
     "! Store the relation between class, method name and id in internal table to enable associations
     "! Call before performing the next time the method add, because the ID is stored internally after creating an element
     "! @parameter class | the class of the method
@@ -1261,11 +1257,11 @@ CLASS cl_famix_class DEFINITION INHERITING FROM cl_famix_container_entity.
     "! @parameter element_name_group | the name group of the element where the ID shall be added
     "! @parameter element_name | the name of the element
     METHODS is_interface
-       importing
+      IMPORTING
         element_id         TYPE i
-        element_type       type clike optional
-        element_name_group TYPE clike optional
-        element_name       TYPE clike optional .
+        element_type       TYPE clike OPTIONAL
+        element_name_group TYPE clike OPTIONAL
+        element_name       TYPE clike OPTIONAL .
 ENDCLASS.
 
 CLASS cl_famix_class IMPLEMENTATION.
@@ -1326,11 +1322,11 @@ CLASS cl_famix_access DEFINITION INHERITING FROM cl_famix_association.
     METHODS set_accessor_variable_relation
       IMPORTING
         element_id         TYPE i
-        element_type       type clike optional
-        element_name_group TYPE clike optional
-        element_name       TYPE clike optional
-        accessor_id TYPE i
-        variable_id TYPE i.
+        element_type       TYPE clike OPTIONAL
+        element_name_group TYPE clike OPTIONAL
+        element_name       TYPE clike OPTIONAL
+        accessor_id        TYPE i
+        variable_id        TYPE i.
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_accessor_variable_id,
              accessor_id TYPE i,
@@ -1400,10 +1396,10 @@ CLASS cl_famix_invocation DEFINITION INHERITING FROM cl_famix_association.
     "! @parameter receiver_source_code | optional a receiver source code
     METHODS set_invocation_by_reference
       IMPORTING
-        element_id         TYPE i
-        element_type       type clike OPTIONAL
-        element_name_group TYPE clike OPTIONAL
-        element_name       TYPE clike OPTIONAL
+        element_id           TYPE i
+        element_type         TYPE clike OPTIONAL
+        element_name_group   TYPE clike OPTIONAL
+        element_name         TYPE clike OPTIONAL
         sender_id            TYPE i
         candidates_id        TYPE i OPTIONAL
         receiver_id          TYPE i OPTIONAL
@@ -1494,7 +1490,7 @@ CLASS cl_famix_inheritance DEFINITION INHERITING FROM cl_famix_association.
     "! @parameter superclass_name | the name of the subclass of the superclass
     METHODS set_sub_and_super_class
       IMPORTING
-        element_id         TYPE i
+        element_id            TYPE i
         subclass_element      TYPE clike
         subclass_name_group   TYPE clike
         subclass_name         TYPE clike
@@ -1534,9 +1530,9 @@ CLASS cl_famix_reference DEFINITION INHERITING FROM cl_famix_association.
     "! @parameter source_id | the FAMIX id of the source element
     METHODS set_target_source
       IMPORTING
-        element_id         TYPE i
-        target_id TYPE i
-        source_id TYPE i.
+        element_id TYPE i
+        target_id  TYPE i
+        source_id  TYPE i.
 ENDCLASS.
 
 CLASS cl_famix_reference IMPLEMENTATION.
@@ -1714,14 +1710,14 @@ CLASS cl_make_demo_model IMPLEMENTATION.
     DATA check_famix_model TYPE REF TO cl_check_famix_model.
     CREATE OBJECT check_famix_model.
 
-    data last_id TYPE i.
+    DATA last_id TYPE i.
 
     famix_namespace->add( name = 'aNamespace' ).
     famix_package->add( name = 'aPackage' ).
     " Add error to test issue22
     famix_package->add( name = 'bPackage' ).
     " End of adding error to test issue 22
-    famix_package->add( exporting name = 'anotherPackage' importing id = last_id ).
+    famix_package->add( EXPORTING name = 'anotherPackage' IMPORTING id = last_id ).
     famix_package->set_parent_package( element_id = last_id parent_package = 'aPackage' ).
     " Test SAP_2_FAMIX_52       Do not add attributes twice if they are added with identical attributes
     " Add the same attribute twice
@@ -1732,23 +1728,23 @@ CLASS cl_make_demo_model IMPLEMENTATION.
     " Add error to test issue24
     famix_class->add( name = '' ).
     " End of adding error to test issue 24
-    famix_class->add( exporting name = 'ClassA' importing id = last_id ).
+    famix_class->add( EXPORTING name = 'ClassA' IMPORTING id = last_id ).
     famix_class->set_container( EXPORTING element_id = last_id
                                           container_element = 'FAMIX.Namespace'
                                           parent_container  = 'aNamespace').
     famix_class->set_parent_package( element_id = last_id
                                      parent_package = 'aPackage' ).
 
-    famix_method->add( exporting name = 'methodA1' importing id = last_id ).
+    famix_method->add( EXPORTING name = 'methodA1' IMPORTING id = last_id ).
     famix_method->set_signature( element_id = last_id signature = 'methodA1()' ).
     famix_method->set_parent_type( element_id = last_id
                                    parent_element = 'FAMIX.Class'
                                    parent_name    = 'ClassA' ).
-    famix_attribute->add( exporting name = 'attributeA1' importing id = last_id ).
+    famix_attribute->add( EXPORTING name = 'attributeA1' IMPORTING id = last_id ).
     famix_attribute->set_parent_type( element_id = last_id
                                       parent_element = 'FAMIX.Class'
                                       parent_name    = 'ClassA' ).
-    famix_class->add( exporting name = 'ClassB' importing id = last_id ).
+    famix_class->add( EXPORTING name = 'ClassB' IMPORTING id = last_id ).
     famix_class->set_container( element_id = last_id
                                 container_element = 'FAMIX.Namespace'
                                 parent_container  = 'aNamespace' ).
@@ -1798,7 +1794,7 @@ CLASS cl_sap_package DEFINITION INHERITING FROM cl_sap.
     "! TBD Do this for all similar methods    "!
     METHODS set_parent_package
       IMPORTING
-        this_package type clike
+        this_package   TYPE clike
         parent_package TYPE clike.
     "! Returns all packages that are stored up to this time
     METHODS get_all_packages
@@ -1848,7 +1844,7 @@ CLASS cl_sap_class DEFINITION INHERITING FROM cl_sap.
     "! @parameter element_id | the ID of the element where the ID shall be added
     METHODS set_parent_program
       IMPORTING
-        element_id type i
+        element_id  TYPE i
         sap_program TYPE clike.
     "! Call directly after calling the method name of the same class
     "! TBD check that the last call of method name is done for the same class
@@ -1856,11 +1852,11 @@ CLASS cl_sap_class DEFINITION INHERITING FROM cl_sap.
     "! @parameter element_id | the ID of the element where the ID shall be added
     METHODS set_parent_package
       IMPORTING
-        element_id type i
+        element_id     TYPE i
         parent_package TYPE clike.
     METHODS is_interface
       IMPORTING
-        element_id type i.
+        element_id TYPE i.
     "! Add local class of a program
     "! @parameter element_id | the ID of the element where the ID shall be added
     "! @parameter program | the name of the program the local class is part of
@@ -1948,8 +1944,8 @@ CLASS cl_sap_attribute IMPLEMENTATION.
 
 
   METHOD add.
-    data last_id type i.
-    g_famix_attribute->add( exporting name = attribute importing id = last_id ).
+    DATA last_id TYPE i.
+    g_famix_attribute->add( EXPORTING name = attribute IMPORTING id = last_id ).
     g_famix_attribute->set_parent_type( EXPORTING element_id = last_id
                                                   parent_element = 'FAMIX.Class'
                                                   parent_name    = class ).
@@ -2049,20 +2045,20 @@ ENDCLASS.
 CLASS cl_sap_inheritance DEFINITION INHERITING FROM cl_sap.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
-    METHODS add RETURNING VALUE(id) type i.
+    METHODS add RETURNING VALUE(id) TYPE i.
     METHODS set_sub_and_super_class
       IMPORTING
-        element_id         TYPE i
+        element_id      TYPE i
         subclass_name   TYPE clike
         superclass_name TYPE clike.
     METHODS set_interface_for_class
       IMPORTING
-        element_id         TYPE i
+        element_id     TYPE i
         interface_name TYPE clike
         class_name     TYPE clike.
     METHODS set_local_sub_and_super_class
       IMPORTING
-        element_id         TYPE i
+        element_id      TYPE i
         program         TYPE clike
         subclass_name   TYPE any
         superclass_name TYPE any.
@@ -2149,7 +2145,7 @@ CLASS cl_sap_invocation IMPLEMENTATION.
                                                            candidates_id = used_method_id )
        EQ true.
 
-      data invocation_id TYPE i.
+      DATA invocation_id TYPE i.
       invocation_id = g_famix_invocation->add( ).
       g_famix_invocation->set_invocation_by_reference( EXPORTING element_id = invocation_id
                                                                  sender_id     = using_method_id
@@ -2186,7 +2182,7 @@ CLASS cl_sap_access IMPLEMENTATION.
     IF g_famix_access->is_new_access( accessor_id = using_method
                                       variable_id = used_attribute )
        EQ true.
-      data last_id type i.
+      DATA last_id TYPE i.
       last_id = g_famix_access->add( ).
       g_famix_access->set_accessor_variable_relation( EXPORTING element_id = last_id
                                                                 accessor_id = using_method
@@ -2212,7 +2208,7 @@ CLASS cl_sap_program DEFINITION INHERITING FROM cl_sap.
     "! @parameter element_id | the ID of the element where the ID shall be added
     METHODS set_parent_package
       IMPORTING
-        element_id         TYPE i
+        element_id     TYPE i
         parent_package TYPE clike.
   PRIVATE SECTION.
     DATA g_famix_module TYPE REF TO cl_famix_module.
@@ -2776,7 +2772,7 @@ CLASS cl_program_analyzer IMPLEMENTATION.
     CREATE OBJECT sap_inheritance EXPORTING model = model.
     DATA inheritance LIKE LINE OF inheritances.
     LOOP AT inheritances INTO inheritance.
-      data last_used_id TYPE i.
+      DATA last_used_id TYPE i.
       last_used_id = sap_inheritance->add( ).
       sap_inheritance->set_local_sub_and_super_class( EXPORTING element_id = last_used_id
                                                                 program = program
@@ -3318,7 +3314,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
       " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
-      data last_id TYPE i.
+      DATA last_id TYPE i.
       sap_class->add( EXPORTING name = existing_class-class IMPORTING id = last_id ).
       sap_class->set_parent_package( element_id = last_id
                                      parent_package = <component_infos>-package ).
@@ -3358,7 +3354,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
       CASE inheritance_2-reltype.
         WHEN 2.
           " Inheritance
-          data inheritance_id TYPE i.
+          DATA inheritance_id TYPE i.
           inheritance_id = sap_inheritance->add( ).
           sap_inheritance->set_sub_and_super_class( EXPORTING element_id = inheritance_id
                                                               subclass_name         = inheritance_2-clsname
