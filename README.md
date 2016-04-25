@@ -1,4 +1,4 @@
-A project to extract model data from a SAP system into the analysis platform Moose on Pharo Smalltalk. It uses FAMIX as a flexible enhancable meta model to draw for instance diagrams like this: 
+A project to extract model data from a SAP system into the analysis platform Moose on Pharo Smalltalk. It uses FAMIX as a flexible enhancable meta model to draw for instance diagrams like this ([Usage grouped by packages (Use Case)](https://github.com/RainerWinkler/Moose-FAMIX-SAP-Extractor/wiki/Usage-grouped-in-packages-(Use-Case))): 
 
 ![Packages with invocations of methods and accesses to attributes](https://github.com/RainerWinkler/Moose-FAMIX-SAP-Extractor/blob/master/wiki_pictures/Packages_with_classes_and_usages.png?raw=true)
 
