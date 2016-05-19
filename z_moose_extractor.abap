@@ -48,7 +48,7 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 19.05.2016 15:04 issue8 Rainer Winkler
+"! 19.05.2016 15:36 issue8 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -79,6 +79,7 @@ SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE TEXT-002.
 
 PARAMETERS: p_clas AS CHECKBOX DEFAULT 'X'.
 PARAMETERS: p_intf AS CHECKBOX DEFAULT 'X'.
+PARAMETERS: p_tables AS CHECKBOX DEFAULT 'X'. "Analyze database tables
 PARAMETERS: p_prog AS CHECKBOX DEFAULT 'X'.
 PARAMETERS: p_iprog AS CHECKBOX DEFAULT ' '. "Internal parts of reports
 
@@ -2310,6 +2311,10 @@ TYPES:BEGIN OF class_type,
         class TYPE seoclsname,
       END OF class_type.
 
+TYPES:BEGIN OF db_table_type,
+        db_table TYPE tabname,
+      END OF db_table_type.
+
 TYPES: BEGIN OF inheritance_type,
          clsname    TYPE seometarel-clsname,
          refclsname TYPE seometarel-refclsname,
@@ -2329,6 +2334,14 @@ CLASS cl_extract_sap DEFINITION.
 
     CONSTANTS comptype_attribute TYPE seocmptype VALUE '0'.
     CONSTANTS comptype_method TYPE seocmptype VALUE '1'.
+    CONSTANTS globclass_component_key TYPE string VALUE 'GlobClass' ##NO_TEXT.
+    CONSTANTS globintf_component_key TYPE string VALUE 'GlobIntf' ##NO_TEXT.
+    CONSTANTS abapprogram_component_key TYPE string VALUE 'ABAPProgram' ##NO_TEXT.
+    CONSTANTS databasetable_component_key TYPE string VALUE 'DataBaseTable' ##NO_TEXT.
+    CONSTANTS tadir_clas TYPE string VALUE 'CLAS' ##NO_TEXT.
+    CONSTANTS tadir_intf TYPE string VALUE 'INTF' ##NO_TEXT.
+    CONSTANTS tadir_prog TYPE string VALUE 'PROG' ##NO_TEXT.
+    CONSTANTS tadir_tabl TYPE string VALUE 'TABL' ##NO_TEXT.
 
 
 
@@ -2348,14 +2361,16 @@ CLASS cl_extract_sap DEFINITION.
       RETURNING
         VALUE(processed_packages) TYPE processed_packages_type.
     TYPES:
-      classes_type  TYPE STANDARD TABLE OF class_interface_type WITH DEFAULT KEY,
-      programs_type TYPE STANDARD TABLE OF program_type WITH DEFAULT KEY.
+      classes_type   TYPE STANDARD TABLE OF class_interface_type WITH DEFAULT KEY,
+      programs_type  TYPE STANDARD TABLE OF program_type WITH DEFAULT KEY,
+      db_tables_type TYPE STANDARD TABLE OF db_table_type WITH DEFAULT KEY.
     METHODS _analyze_components
       IMPORTING
         components_infos TYPE components_infos_type
       EXPORTING
         VALUE(classes)   TYPE classes_type
-        VALUE(programs)  TYPE programs_type.
+        VALUE(programs)  TYPE programs_type
+        VALUE(db_tables) TYPE db_tables_type.
     METHODS _read_all_programs
       IMPORTING
         sap_package      TYPE REF TO cl_sap_package
@@ -2576,7 +2591,8 @@ CLASS cl_ep_analyze_other_keyword IMPLEMENTATION.
 
 ENDCLASS.
 
-
+"! Analyzes local objects of ABAP programs
+"! Is not yet completely implemented
 CLASS cl_program_analyzer DEFINITION.
   PUBLIC SECTION.
     METHODS extract
@@ -2832,6 +2848,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
     DATA processed_components_infos TYPE components_infos_type.
     DATA classes TYPE STANDARD TABLE OF class_interface_type.
     DATA programs TYPE STANDARD TABLE OF program_type.
+    DATA db_tables TYPE STANDARD TABLE OF db_table_type.
     DATA existing_classes TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
 
     DATA class_components TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
@@ -2860,21 +2877,29 @@ CLASS cl_extract_sap IMPLEMENTATION.
     DATA check_famix_model TYPE REF TO cl_check_famix_model.
     CREATE OBJECT check_famix_model.
 
+    DATA sap_db_table TYPE REF TO cl_sap_db_table.
+    CREATE OBJECT sap_db_table EXPORTING model = model.
+
     " Set TADIR mapping
     DATA ls_mapping TYPE map_tadir_component_type. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
     CLEAR ls_mapping.
-    ls_mapping-object = 'CLAS'.
-    ls_mapping-component = 'GlobClass'.
+    ls_mapping-object = tadir_clas.
+    ls_mapping-component = globclass_component_key.
     INSERT ls_mapping INTO TABLE g_tadir_components_mapping.
 
     CLEAR ls_mapping.
-    ls_mapping-object = 'INTF'.
-    ls_mapping-component = 'GlobIntf'.
+    ls_mapping-object = tadir_intf.
+    ls_mapping-component = globintf_component_key.
     INSERT ls_mapping INTO TABLE g_tadir_components_mapping.
 
     CLEAR ls_mapping.
-    ls_mapping-object = 'PROG'.
-    ls_mapping-component = 'ABAPProgram'.
+    ls_mapping-object = tadir_prog.
+    ls_mapping-component = abapprogram_component_key.
+    INSERT ls_mapping INTO TABLE g_tadir_components_mapping.
+
+    CLEAR ls_mapping.
+    ls_mapping-object = tadir_tabl.
+    ls_mapping-component = databasetable_component_key.
     INSERT ls_mapping INTO TABLE g_tadir_components_mapping.
 
     _set_default_language( model ).
@@ -2912,7 +2937,10 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       _analyze_components( EXPORTING components_infos = components_infos
                            IMPORTING classes          = classes
-                                     programs         = programs ).
+                                     programs         = programs
+                                     db_tables        = db_tables ).
+
+      "TBD finalize issue8 add db tables to extractor
 
       _read_all_programs( EXPORTING sap_package    = sap_package
                                     sap_program      = sap_program
@@ -3103,7 +3131,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
               DATA ls_new_components_info LIKE LINE OF new_components_infos. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
 
               DATA ls_tadir_comp_map LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-              READ TABLE g_tadir_components_mapping INTO ls_tadir_comp_map WITH TABLE KEY object = 'CLAS'.
+              READ TABLE g_tadir_components_mapping INTO ls_tadir_comp_map WITH TABLE KEY object = tadir_clas.
               ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
               CLEAR ls_new_components_info.
               ls_new_components_info-component_name = ls_mtdkey-clsname.
@@ -3269,18 +3297,24 @@ CLASS cl_extract_sap IMPLEMENTATION.
       MOVE-CORRESPONDING <component_infos> TO class.
       INSERT class INTO TABLE classes.
 
-      IF <component_infos>-component EQ 'GlobClass'
-      OR <component_infos>-component EQ 'GlobIntf'.
+      IF <component_infos>-component EQ globclass_component_key
+      OR <component_infos>-component EQ globintf_component_key.
 
         class-obj_name = <component_infos>-component_name.
         INSERT class INTO TABLE classes.
 
-      ELSE.
+      ELSEIF <component_infos>-component EQ abapprogram_component_key.
         DATA ls_program LIKE LINE OF programs. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
         CLEAR ls_program.
         ls_program-program = <component_infos>-component_name.
         INSERT ls_program INTO TABLE programs.
-
+      ELSEIF <component_infos>-component EQ databasetable_component_key.
+        DATA ls_db_table LIKE LINE OF db_tables.
+        CLEAR ls_db_table.
+        ls_db_table-db_table = <component_infos>-component_name.
+        INSERT ls_db_table INTO TABLE db_tables.
+      ELSE.
+        ASSERT 1 = 2.
       ENDIF.
 
     ENDLOOP.
@@ -3299,7 +3333,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       FIELD-SYMBOLS <component_infos> LIKE LINE OF components_infos.
       READ TABLE components_infos ASSIGNING <component_infos>
-            WITH TABLE KEY component = 'ABAPProgram'
+            WITH TABLE KEY component = abapprogram_component_key
                            component_name = <program>-program.
       ASSERT sy-subrc EQ ok.
 
@@ -3336,10 +3370,10 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
 
       FIELD-SYMBOLS <component_infos> LIKE LINE OF components_infos.
-      READ TABLE components_infos ASSIGNING <component_infos> WITH TABLE KEY component = 'GlobClass' component_name = existing_class-class.
+      READ TABLE components_infos ASSIGNING <component_infos> WITH TABLE KEY component = globclass_component_key component_name = existing_class-class.
       IF sy-subrc <> ok.
         " It may be an interface
-        READ TABLE components_infos ASSIGNING <component_infos> WITH TABLE KEY component = 'GlobIntf' component_name = existing_class-class.
+        READ TABLE components_infos ASSIGNING <component_infos> WITH TABLE KEY component = globintf_component_key component_name = existing_class-class.
         ASSERT sy-subrc EQ ok.
 
       ENDIF.
@@ -3352,7 +3386,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
       sap_class->add( EXPORTING name = existing_class-class IMPORTING id = last_id ).
       sap_class->set_parent_package( element_id = last_id
                                      parent_package = <component_infos>-package ).
-      IF <component_infos>-component EQ 'GlobIntf'.
+      IF <component_infos>-component EQ globintf_component_key.
         " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
         sap_class->is_interface( element_id = last_id ).
       ENDIF.
@@ -3555,23 +3589,29 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     IF   select_by_top_package EQ false
       OR processed_packages IS NOT INITIAL.
-      DO 3 TIMES.
+      DO 4 TIMES.
         CASE sy-index.
           WHEN 1.
             IF p_clas EQ true.
-              object = 'CLAS'.
+              object = tadir_clas.
             ELSE.
               CONTINUE.
             ENDIF.
           WHEN 2.
             IF p_intf EQ true.
-              object = 'INTF'.
+              object = tadir_intf.
             ELSE.
               CONTINUE.
             ENDIF.
           WHEN 3.
             IF p_prog EQ true.
-              object = 'PROG'.
+              object = tadir_prog.
+            ELSE.
+              CONTINUE.
+            ENDIF.
+          WHEN 4.
+            IF p_tables EQ true.
+              object = tadir_tabl.
             ELSE.
               CONTINUE.
             ENDIF.
