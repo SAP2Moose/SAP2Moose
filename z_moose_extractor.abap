@@ -48,7 +48,7 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 06.04.2016 23:14 issue26 Rainer Winkler
+"! 19.05.2016 15:04 issue8 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -66,7 +66,7 @@ CONSTANTS:
   "! Redefines abap_false to simplify coding (Not always reading abap_...)
   false TYPE bool VALUE abap_false.
 
-SELECTION-SCREEN BEGIN OF BLOCK block_global_source WITH FRAME TITLE text-001.
+SELECTION-SCREEN BEGIN OF BLOCK block_global_source WITH FRAME TITLE TEXT-001.
 
 PARAMETERS: p_sap AS CHECKBOX DEFAULT 'X'.
 "! Extract from SAP
@@ -75,7 +75,7 @@ g_parameter_extract_from_sap = p_sap.
 
 SELECTION-SCREEN END OF BLOCK block_global_source.
 
-SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE text-002.
+SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE TEXT-002.
 
 PARAMETERS: p_clas AS CHECKBOX DEFAULT 'X'.
 PARAMETERS: p_intf AS CHECKBOX DEFAULT 'X'.
@@ -104,7 +104,7 @@ SELECT-OPTIONS s_compsn FOR tadir-obj_name.
 
 SELECTION-SCREEN END OF BLOCK block_selct_sap_comp.
 
-SELECTION-SCREEN BEGIN OF BLOCK block_using_comp WITH FRAME TITLE text-003.
+SELECTION-SCREEN BEGIN OF BLOCK block_using_comp WITH FRAME TITLE TEXT-003.
 
 PARAMETERS: p_dm AS CHECKBOX DEFAULT ' '.
 "! Usages outside package grouped
@@ -114,7 +114,7 @@ g_param_usage_outpack_groupd = p_dm.
 
 SELECTION-SCREEN END OF BLOCK block_using_comp.
 
-SELECTION-SCREEN BEGIN OF BLOCK block_infos WITH FRAME TITLE text-004.
+SELECTION-SCREEN BEGIN OF BLOCK block_infos WITH FRAME TITLE TEXT-004.
 
 PARAMETERS: p_list AS CHECKBOX DEFAULT ' '.
 "! List Tokens of selected programs
@@ -149,7 +149,7 @@ SELECTION-SCREEN END OF BLOCK block_infos.
 *OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 *SOFTWARE.
 
-SELECTION-SCREEN BEGIN OF BLOCK bl_model_settings WITH FRAME TITLE text-100.
+SELECTION-SCREEN BEGIN OF BLOCK bl_model_settings WITH FRAME TITLE TEXT-100.
 
 PARAMETERS p_down AS CHECKBOX DEFAULT 'X'.
 "! Download model to file
@@ -1846,7 +1846,6 @@ CLASS cl_sap_class DEFINITION INHERITING FROM cl_sap.
       IMPORTING
         element_id  TYPE i
         sap_program TYPE clike.
-    "! Call directly after calling the method name of the same class
     "! TBD check that the last call of method name is done for the same class
     "! TBD Do this for all similar methods
     "! @parameter element_id | the ID of the element where the ID shall be added
@@ -1908,6 +1907,41 @@ CLASS cl_sap_class IMPLEMENTATION.
                         IMPORTING id = id ).
   ENDMETHOD.
 
+ENDCLASS.
+
+CLASS cl_sap_db_table DEFINITION INHERITING FROM cl_sap.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING model TYPE REF TO cl_model.
+    "! Add global Database table
+    METHODS add
+      IMPORTING name                          TYPE clike
+      EXPORTING VALUE(exists_already_with_id) TYPE i
+                VALUE(id)                     TYPE i.
+    "! TBD check that the last call of method name is done for the same class
+    "! TBD Do this for all similar methods
+    "! @parameter element_id | the ID of the element where the ID shall be added
+    METHODS set_parent_package
+      IMPORTING
+        element_id     TYPE i
+        parent_package TYPE clike.
+  PRIVATE SECTION.
+    DATA: g_famix_class TYPE REF TO cl_famix_class.
+ENDCLASS.
+
+CLASS cl_sap_db_table IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( ).
+    CREATE OBJECT g_famix_class EXPORTING model = model.
+  ENDMETHOD.
+  METHOD add.
+    g_famix_class->add( EXPORTING name_group             = ''
+                                       name                   = name
+                             IMPORTING exists_already_with_id = exists_already_with_id
+                                  id = id ).
+  ENDMETHOD.
+  METHOD set_parent_package.
+    g_famix_class->set_parent_package( element_id = element_id parent_package = parent_package ).
+  ENDMETHOD.
 ENDCLASS.
 
 CLASS cl_sap_attribute DEFINITION INHERITING FROM cl_sap.
