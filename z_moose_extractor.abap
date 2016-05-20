@@ -48,7 +48,7 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 20.05.2016 14:04 issue8 Rainer Winkler
+"! 20.05.2016 14:44 issue8 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -1947,6 +1947,7 @@ CLASS cl_sap_db_table DEFINITION INHERITING FROM cl_sap.
         element_id     TYPE i
         parent_package TYPE clike.
   PRIVATE SECTION.
+    CONSTANTS modifier_dbtable TYPE string VALUE 'DBTable' ##NO_TEXT.
     DATA: g_famix_class     TYPE REF TO cl_famix_class,
           g_famix_attribute TYPE REF TO cl_famix_attribute.
 ENDCLASS.
@@ -1958,11 +1959,14 @@ CLASS cl_sap_db_table IMPLEMENTATION.
     CREATE OBJECT g_famix_attribute EXPORTING model = model.
   ENDMETHOD.
   METHOD add.
+    " SAP_2_FAMIX_54        Map database tables to FAMIX Class
+    " SAP_2_FAMIX_58        Mark the FAMIX Class with the attribute modifiers = 'DBTable'
     g_famix_class->add( EXPORTING name_group             = ''
                                   name                   = name
-                                  modifiers              = 'DBTable'
+                                  modifiers              = modifier_dbtable
                         IMPORTING exists_already_with_id = exists_already_with_id
                                   id = id ).
+    " SAP_2_FAMIX_56      Add a dummy attribute with the name of the table
     g_famix_attribute->add( EXPORTING name = name IMPORTING id = dummy_attribute_id ).
     g_famix_attribute->set_parent_type( EXPORTING element_id = dummy_attribute_id
                                                   parent_id  = id ).
@@ -2829,7 +2833,7 @@ CLASS cl_program_analyzer IMPLEMENTATION.
     FIELD-SYMBOLS <class> LIKE LINE OF classes_with_model_id.
     LOOP AT classes_with_model_id ASSIGNING <class>.
       " SAP_2_FAMIX_30        Map local classes of programs to FAMIX.Class
-
+      " SAP_2_FAMIX_61      Mark the FAMIX Class with the attribute modifiers = 'ABAPLocalClass'
       <class>-id_in_model = sap_class->add_local( program   = program
                                                   name      = <class>-classname
                                                   modifiers = modifiers_abaplocalclass ).
@@ -3029,6 +3033,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
                                                           sap_invocation   = sap_invocation
                                                           sap_access       = sap_access ).
 
+      " SAP_2_FAMIX_55      Determine Usages of database tables by class methods
       new_components_infos = _determine_usage_of_db_tables( sap_class        = sap_class
                                                             class_components = class_components
                                                             sap_method       = sap_method
@@ -3274,6 +3279,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
           ENDCASE.
         ELSEIF db_table IS SUPPLIED.
 
+          " SAP_2_FAMIX_57      Model usages of database tables by a an access to the dummy attribute of the modelled FAMIX Class
           sap_access->add_access( used_attribute  = used
                                   using_method = using_method_id ).
 
@@ -3469,6 +3475,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
       DATA last_id TYPE i.
 
       IF <component_infos>-component EQ globintf_component_key.
+        " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
         sap_class->add( EXPORTING name      = existing_class-class
                                   modifiers = modifier_abapglobalinterface
                         IMPORTING id        = last_id ).
@@ -3477,6 +3484,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
         " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
         sap_class->is_interface( element_id = last_id ).
       ELSE.
+        " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
         sap_class->add( EXPORTING name      = existing_class-class
                                   modifiers = modifier_abapglobalclass
                         IMPORTING id        = last_id ).
@@ -3739,6 +3747,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
             ENDIF.
           WHEN 4.
             IF p_tables EQ true.
+            " SAP_2_FAMIX_53        Extract database tables
               object = tadir_tabl.
             ELSE.
               CONTINUE.
