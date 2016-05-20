@@ -48,7 +48,7 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 20.05.2016 14:44 issue8 Rainer Winkler
+"! 20.05.2016 15:00 issue8 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -3034,13 +3034,13 @@ CLASS cl_extract_sap IMPLEMENTATION.
                                                           sap_access       = sap_access ).
 
       " SAP_2_FAMIX_55      Determine Usages of database tables by class methods
-      new_components_infos = _determine_usage_of_db_tables( sap_class        = sap_class
+       insert lines of _determine_usage_of_db_tables( sap_class        = sap_class
                                                             class_components = class_components
                                                             sap_method       = sap_method
                                                             sap_attribute    = sap_attribute
                                                             sap_invocation   = sap_invocation
                                                             sap_access       = sap_access
-                                                            db_tables        = db_tables ).
+                                                            db_tables        = db_tables ) into TABLE new_components_infos.
 
       " Determine package for new components
 
