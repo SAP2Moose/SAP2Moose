@@ -48,7 +48,7 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 20.05.2016 15:00 issue8 Rainer Winkler
+"! 20.05.2016 16:47 issue8 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -793,7 +793,7 @@ CLASS cl_famix_named_entity DEFINITION INHERITING FROM cl_famix_sourced_entity A
     METHODS add
       IMPORTING name_group                    TYPE clike OPTIONAL
                 name                          TYPE clike
-                modifiers                      TYPE clike OPTIONAL
+                modifiers                     TYPE clike OPTIONAL
       EXPORTING VALUE(exists_already_with_id) TYPE i
                 VALUE(id)                     TYPE i.
     "! Call once to set the parent package
@@ -1856,7 +1856,7 @@ CLASS cl_sap_class DEFINITION INHERITING FROM cl_sap.
     "! @parameters modifiers | will be available in FAMIX in the attribute modifiers
     METHODS add
       IMPORTING name                          TYPE clike
-                modifiers                     type clike
+                modifiers                     TYPE clike
       EXPORTING VALUE(exists_already_with_id) TYPE i
                 VALUE(id)                     TYPE i.
     "! Specify the parent program for a local class
@@ -3034,13 +3034,13 @@ CLASS cl_extract_sap IMPLEMENTATION.
                                                           sap_access       = sap_access ).
 
       " SAP_2_FAMIX_55      Determine Usages of database tables by class methods
-       insert lines of _determine_usage_of_db_tables( sap_class        = sap_class
-                                                            class_components = class_components
-                                                            sap_method       = sap_method
-                                                            sap_attribute    = sap_attribute
-                                                            sap_invocation   = sap_invocation
-                                                            sap_access       = sap_access
-                                                            db_tables        = db_tables ) into TABLE new_components_infos.
+      INSERT LINES OF _determine_usage_of_db_tables( sap_class        = sap_class
+                                                           class_components = class_components
+                                                           sap_method       = sap_method
+                                                           sap_attribute    = sap_attribute
+                                                           sap_invocation   = sap_invocation
+                                                           sap_access       = sap_access
+                                                           db_tables        = db_tables ) INTO TABLE new_components_infos.
 
       " Determine package for new components
 
@@ -3747,7 +3747,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
             ENDIF.
           WHEN 4.
             IF p_tables EQ true.
-            " SAP_2_FAMIX_53        Extract database tables
+              " SAP_2_FAMIX_53        Extract database tables
               object = tadir_tabl.
             ELSE.
               CONTINUE.
@@ -3800,6 +3800,23 @@ CLASS cl_extract_sap IMPLEMENTATION.
         ENDIF.
       ENDDO.
     ENDIF.
+
+    " Select only real tables
+    DATA: tabclass TYPE dd02l-tabclass.
+    LOOP AT components_infos INTO ls_component_info WHERE component = databasetable_component_key.
+
+      SELECT SINGLE tabclass FROM dd02l INTO tabclass WHERE tabname = ls_component_info-component_name
+                                                        AND as4local = 'A'
+                                                        AND as4vers = ''.
+      IF sy-subrc <> 0.
+        "TBD report error
+      ELSE.
+        IF tabclass EQ 'INTTAB' OR tabclass EQ 'VIEW'.
+          DELETE components_infos WHERE component = ls_component_info-component AND component_name = ls_component_info-component_name.
+        ENDIF.
+      ENDIF.
+
+    ENDLOOP.
 
     IF lines( components_infos ) EQ 0.
       WRITE: 'Nothing selected '.
