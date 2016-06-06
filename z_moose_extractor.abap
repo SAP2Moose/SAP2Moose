@@ -48,7 +48,7 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 20.05.2016 16:47 issue8 Rainer Winkler
+"! 06.06.2016 21:34 issue32 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -1661,6 +1661,19 @@ CLASS cl_check_famix_model IMPLEMENTATION.
 
     ENDIF.
 
+    " SAP_2_FAMIX_62        Return a message if a class has no parent package assigned
+    IF is_public_elements-element_type EQ 'FAMIX.Class'.
+      IF count_parent_packages EQ 0.
+
+        FORMAT COLOR COL_NEGATIVE.
+
+        WRITE: / 'Class ', is_public_elements-element_id, ' has no parent package'.
+
+        FORMAT COLOR COL_BACKGROUND.
+
+      ENDIF.
+    ENDIF.
+
   ENDMETHOD.
 
   METHOD _check_attribute_name.
@@ -3076,6 +3089,34 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       CLEAR components_infos.
 
+      " Add parent package for new global classes
+
+      LOOP AT new_components_infos ASSIGNING <component_infos>.
+
+        IF <component_infos>-component EQ globclass_component_key.
+          " GlobClass
+          DATA: id_of_new_component TYPE i.
+
+          sap_class->add(
+            EXPORTING
+              name                   = <component_infos>-component_name
+              modifiers              = modifier_abapglobalclass
+            IMPORTING
+              id                     = id_of_new_component ).
+
+          sap_package->add( name = <component_infos>-package ).
+
+          sap_class->set_parent_package( EXPORTING element_id     = id_of_new_component
+                                                   parent_package = <component_infos>-package ).
+        ELSE.
+          FORMAT COLOR COL_NEGATIVE.
+
+          WRITE: / 'For new element of type ', <component_infos>-component, 'no determination of parent package specified'.
+
+          FORMAT COLOR COL_BACKGROUND.
+        ENDIF.
+
+      ENDLOOP.
 
       " SAP_2_FAMIX_48      Allow to select all using objects
       " Fullfilled by adding new_components_infos to components_infos and repeating the analysis in the while loop
@@ -3095,7 +3136,9 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     ENDWHILE.
 
-    " Add parent packages
+
+
+    " Add parent packages for packages
 
     DATA packages TYPE sap_package->packages_type.
     packages = sap_package->get_all_packages( ).
