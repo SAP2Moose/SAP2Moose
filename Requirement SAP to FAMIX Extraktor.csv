@@ -111,7 +111,7 @@ SAP_2_FAMIX_49;;Return a message if the attribute parent package occurs more tha
 ;;;;;;;;
 SAP_2_FAMIX_50;;Return a message if the attribute name occurs more than once;;Requirement;developed;Requirement Confirmed;;
 SAP_2_FAMIX_51;;Return a message if the attribute name is empty;;Requirement;developed;Requirement Confirmed;;
-SAP_2_FAMIX_62;;Return a message if a class has no parent package assigned;;Requirement;to be developed;Requirement Confirmed;;
+SAP_2_FAMIX_62;;Return a message if a class has no parent package assigned;;Requirement;developed;Requirement Confirmed;;
 ;;;;;;;;
 ;;;;;;;;
 ;;;;;;;;
