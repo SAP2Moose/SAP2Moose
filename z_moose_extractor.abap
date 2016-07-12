@@ -48,7 +48,7 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 06.06.2016 21:34 issue32 Rainer Winkler
+"! 12.07.2016 23:13 issue31 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -78,6 +78,7 @@ SELECTION-SCREEN END OF BLOCK block_global_source.
 SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE TEXT-002.
 
 PARAMETERS: p_clas AS CHECKBOX DEFAULT 'X'.
+PARAMETERS: p_wdyn AS CHECKBOX DEFAULT 'X'.
 PARAMETERS: p_intf AS CHECKBOX DEFAULT 'X'.
 PARAMETERS: p_tables AS CHECKBOX DEFAULT 'X'. "Analyze database tables
 PARAMETERS: p_prog AS CHECKBOX DEFAULT 'X'.
@@ -2380,15 +2381,21 @@ CLASS cl_extract_sap DEFINITION.
     CONSTANTS comptype_attribute TYPE seocmptype VALUE '0'.
     CONSTANTS comptype_method TYPE seocmptype VALUE '1'.
     CONSTANTS globclass_component_key TYPE string VALUE 'GlobClass' ##NO_TEXT.
+    CONSTANTS webdynpro_component_comp_key TYPE string VALUE 'WebDynproComponent' ##NO_TEXT.
     CONSTANTS globintf_component_key TYPE string VALUE 'GlobIntf' ##NO_TEXT.
     CONSTANTS abapprogram_component_key TYPE string VALUE 'ABAPProgram' ##NO_TEXT.
     CONSTANTS databasetable_component_key TYPE string VALUE 'DataBaseTable' ##NO_TEXT.
     CONSTANTS tadir_clas TYPE string VALUE 'CLAS' ##NO_TEXT.
+    "! WebDynpro component
+    CONSTANTS tadir_wdyn TYPE string VALUE 'WDYN' ##NO_TEXT.
     CONSTANTS tadir_intf TYPE string VALUE 'INTF' ##NO_TEXT.
     CONSTANTS tadir_prog TYPE string VALUE 'PROG' ##NO_TEXT.
     CONSTANTS tadir_tabl TYPE string VALUE 'TABL' ##NO_TEXT.
     CONSTANTS modifier_abapglobalclass TYPE string VALUE 'ABAPGlobalClass' ##NO_TEXT.
     CONSTANTS modifier_abapglobalinterface TYPE string VALUE 'ABAPGlobalInterface' ##NO_TEXT.
+    CONSTANTS modifier_webdynpro_component TYPE string VALUE 'ABAPWebDynproComponent'.
+
+
 
 
 
@@ -2505,6 +2512,21 @@ CLASS cl_extract_sap DEFINITION.
       EXPORTING
         components_infos      TYPE components_infos_type
         nothing_selected      TYPE bool.
+    METHODS _handle_used_by_class
+      IMPORTING
+        i_sap_class                   TYPE REF TO cl_sap_class
+        i_class_component             TYPE class_component_type
+        i_sap_method                  TYPE REF TO cl_sap_method
+        i_sap_invocation              TYPE REF TO cl_sap_invocation
+        i_sap_access                  TYPE REF TO cl_sap_access
+        i_used                        TYPE i
+        i_class_component_is_supplied TYPE abap_bool
+        ib_table_is_supplied          TYPE abap_bool
+        i_using_class                 TYPE string
+        i_using_method                TYPE string
+        i_modifier_of_using_class     TYPE string
+      RETURNING
+        VALUE(r_new_components_infos) TYPE components_infos_type.
 
 ENDCLASS.
 
@@ -2958,6 +2980,11 @@ CLASS cl_extract_sap IMPLEMENTATION.
     INSERT ls_mapping INTO TABLE g_tadir_components_mapping.
 
     CLEAR ls_mapping.
+    ls_mapping-object = tadir_wdyn.
+    ls_mapping-component = webdynpro_component_comp_key.
+    INSERT ls_mapping INTO TABLE g_tadir_components_mapping.
+
+    CLEAR ls_mapping.
     ls_mapping-object = tadir_intf.
     ls_mapping-component = globintf_component_key.
     INSERT ls_mapping INTO TABLE g_tadir_components_mapping.
@@ -3184,7 +3211,10 @@ CLASS cl_extract_sap IMPLEMENTATION.
   METHOD _determine_usages.
 
     DATA where_used_name TYPE eu_lname.
+    DATA class_component_is_supplied TYPE abap_bool.
+    DATA db_table_is_supplied TYPE abap_bool.
     IF class_component IS SUPPLIED.
+      class_component_is_supplied = abap_true.
       CASE class_component-cmptype.
         WHEN comptype_method.
 
@@ -3205,7 +3235,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
           ASSERT 1 = 2.
       ENDCASE.
     ELSEIF db_table IS SUPPLIED.
-
+      db_table_is_supplied = abap_true.
       where_used_name = db_table-db_table.
       SELECT * FROM wbcrossgt INTO TABLE where_used_components WHERE otype = 'TY' AND name = where_used_name.
 
@@ -3215,6 +3245,11 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     FIELD-SYMBOLS <where_used_component> LIKE LINE OF where_used_components.
     LOOP AT where_used_components ASSIGNING <where_used_component>.
+
+      DATA: using_class TYPE string.
+      DATA: using_method TYPE string.
+      DATA: modifier_of_using_class TYPE string.
+
       DATA ls_mtdkey TYPE seocpdkey.
       CALL FUNCTION 'SEO_METHOD_GET_NAME_BY_INCLUDE'
         EXPORTING
@@ -3223,114 +3258,62 @@ CLASS cl_extract_sap IMPLEMENTATION.
           mtdkey   = ls_mtdkey.
       IF ls_mtdkey IS NOT INITIAL.
 
+
+        using_class = ls_mtdkey-clsname.
+
         " Used by method
-        DATA: using_method TYPE string.
+
         IF ls_mtdkey-cpdname IS INITIAL.
           using_method = 'DUMMY'.
         ELSE.
           using_method = ls_mtdkey-cpdname.
         ENDIF.
 
+        " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
 
-        DATA using_method_id TYPE i.
-        using_method_id = sap_method->get_id( class  = ls_mtdkey-clsname
-                                              method = using_method ).
-        IF using_method_id EQ 0.
-
-          IF g_param_usage_outpack_groupd EQ false.
-
-            " Method does not exist, create the class
-            " SAP_2_FAMIX_21      If a component is used by a class that is not selected, add this class to the model
-            " SAP_2_FAMIX_22      Do not assign classes that included due to usage to a package
-            " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
-
-            DATA exists_already_with_id TYPE i.
-            sap_class->add( EXPORTING name      = ls_mtdkey-clsname
-                                      modifiers = modifier_abapglobalclass
-                            IMPORTING exists_already_with_id = exists_already_with_id ).
-
-            IF exists_already_with_id IS INITIAL.
-
-              " SAP_2_FAMIX_47      If no dummy class is specified in case a using class is not in the initial selection, analyze this classes also
-
-              DATA ls_new_components_info LIKE LINE OF new_components_infos. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-
-              DATA ls_tadir_comp_map LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-              READ TABLE g_tadir_components_mapping INTO ls_tadir_comp_map WITH TABLE KEY object = tadir_clas.
-              ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
-              CLEAR ls_new_components_info.
-              ls_new_components_info-component_name = ls_mtdkey-clsname.
-              ls_new_components_info-component   = ls_tadir_comp_map-component .
-              INSERT ls_new_components_info INTO TABLE new_components_infos.
-
-            ENDIF.
-
-          ELSE.
-            " SAP_2_FAMIX_35        Add usage to a single dummy class "OTHER_SAP_CLASS" if required by a parameter
-            " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
-            sap_class->add( EXPORTING name                   = 'OTHER_SAP_CLASS'
-                                      modifiers              = modifier_abapglobalclass
-                            IMPORTING exists_already_with_id = exists_already_with_id ).
-
-          ENDIF.
-
-          " Now there is a class, but no duplicate class
-
-          IF g_param_usage_outpack_groupd EQ false.
-            using_method_id = sap_method->get_id( class  = ls_mtdkey-clsname
-                                                  method = using_method ).
-          ELSE.
-            using_method_id = sap_method->get_id( class  = 'OTHER_SAP_CLASS'
-                                                  method = 'OTHER_SAP_METHOD' ).
-          ENDIF.
+        modifier_of_using_class = modifier_abapglobalclass.
 
 
-          IF using_method_id EQ 0.
-            IF g_param_usage_outpack_groupd EQ false.
-              " Now also the method is to be created
-              " SAP_2_FAMIX_23       If a component is used by a class that is not selected, add the using methods to the model
+        new_components_infos = _handle_used_by_class(
+              i_sap_class                   = sap_class
+              i_class_component             = class_component
+              i_sap_method                  = sap_method
+              i_sap_invocation              = sap_invocation
+              i_sap_access                  = sap_access
+              i_used                        = used
+              i_class_component_is_supplied = class_component_is_supplied
+              ib_table_is_supplied          = db_table_is_supplied
+              i_using_class                 = using_class
+              i_using_method                = using_method
+              i_modifier_of_using_class     = modifier_of_using_class ).
 
-              using_method_id = sap_method->add( class  = ls_mtdkey-clsname
-                                                 method = using_method ).
+      ELSE.
+        "Check for usage in Web Dynpro ABAP
+        DATA ls_wd_sourcemap TYPE wdy_wb_sourcemap.
+        SELECT SINGLE * FROM wdy_wb_sourcemap INTO ls_wd_sourcemap WHERE relid = 'LI' AND inclname = <where_used_component>-include AND srtf2 = 0.
+        IF sy-subrc EQ 0.
 
-            ELSE.
+          using_class = ls_wd_sourcemap-component_name.
+          using_method = ls_wd_sourcemap-controller_name.
+          modifier_of_using_class = modifier_webdynpro_component.
 
-              " SAP_2_FAMIX_36        Add a usage to a single dummy method "OTHER_SAP_METHOD" if required by a parameter
-
-              using_method_id = sap_method->add( class  = 'OTHER_SAP_CLASS'
-                                                 method = 'OTHER_SAP_METHOD'  ).
-
-            ENDIF.
-          ENDIF.
-
-        ENDIF.
-
-        IF class_component IS SUPPLIED.
-          CASE class_component-cmptype.
-            WHEN comptype_method.
-
-              sap_invocation->add_invocation( used_method  = used
-                                              using_method = using_method_id ).
-
-            WHEN comptype_attribute.
-
-              sap_access->add_access( used_attribute = used
-                                      using_method   = using_method_id ).
-
-            WHEN OTHERS.
-              ASSERT 1 = 2.
-          ENDCASE.
-        ELSEIF db_table IS SUPPLIED.
-
-          " SAP_2_FAMIX_57      Model usages of database tables by a an access to the dummy attribute of the modelled FAMIX Class
-          sap_access->add_access( used_attribute  = used
-                                  using_method = using_method_id ).
+          new_components_infos = _handle_used_by_class(
+                i_sap_class                   = sap_class
+                i_class_component             = class_component
+                i_sap_method                  = sap_method
+                i_sap_invocation              = sap_invocation
+                i_sap_access                  = sap_access
+                i_used                        = used
+                i_class_component_is_supplied = class_component_is_supplied
+                ib_table_is_supplied          = db_table_is_supplied
+                i_using_class                 = using_class
+                i_using_method                = using_method
+                i_modifier_of_using_class     = modifier_of_using_class ).
 
         ELSE.
-          ASSERT 1 = 2.
-        ENDIF.
 
-        " TBD Implement other usages
+          " TBD Implement other usages
+        ENDIF.
       ENDIF.
 
     ENDLOOP.
@@ -3433,7 +3416,8 @@ CLASS cl_extract_sap IMPLEMENTATION.
       INSERT class INTO TABLE classes.
 
       IF <component_infos>-component EQ globclass_component_key
-      OR <component_infos>-component EQ globintf_component_key.
+      OR <component_infos>-component EQ globintf_component_key
+      OR <component_infos>-component EQ webdynpro_component_comp_key.
 
         class-obj_name = <component_infos>-component_name.
         INSERT class INTO TABLE classes.
@@ -3509,8 +3493,12 @@ CLASS cl_extract_sap IMPLEMENTATION.
       IF sy-subrc <> ok.
         " It may be an interface
         READ TABLE components_infos ASSIGNING <component_infos> WITH TABLE KEY component = globintf_component_key component_name = existing_class-class.
-        ASSERT sy-subrc EQ ok.
 
+        IF sy-subrc <> ok.
+          " It may be a Web Dynpro component
+          READ TABLE components_infos ASSIGNING <component_infos> WITH TABLE KEY component = webdynpro_component_comp_key component_name = existing_class-class.
+          ASSERT sy-subrc EQ ok.
+        ENDIF.
       ENDIF.
 
       sap_package->add( EXPORTING name = <component_infos>-package ).
@@ -3526,13 +3514,21 @@ CLASS cl_extract_sap IMPLEMENTATION.
                                        parent_package = <component_infos>-package ).
         " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
         sap_class->is_interface( element_id = last_id ).
-      ELSE.
+      ELSEIF <component_infos>-component EQ globclass_component_key.
         " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
         sap_class->add( EXPORTING name      = existing_class-class
                                   modifiers = modifier_abapglobalclass
                         IMPORTING id        = last_id ).
         sap_class->set_parent_package( element_id     = last_id
                                        parent_package = <component_infos>-package ).
+      ELSEIF <component_infos>-component EQ webdynpro_component_comp_key.
+        sap_class->add( EXPORTING name      = existing_class-class
+                                  modifiers = modifier_webdynpro_component
+                        IMPORTING id        = last_id ).
+        sap_class->set_parent_package( element_id     = last_id
+                                       parent_package = <component_infos>-package ).
+      ELSE.
+        ASSERT 1 = 2.
       ENDIF.
 
     ENDLOOP.
@@ -3740,6 +3736,12 @@ CLASS cl_extract_sap IMPLEMENTATION.
       SELECT clsname AS class FROM seoclass INTO TABLE existing_classes FOR ALL ENTRIES IN classes
         WHERE
           clsname = classes-obj_name.
+
+      SELECT component_name AS class FROM wdy_component APPENDING TABLE existing_classes FOR ALL ENTRIES IN classes
+        WHERE
+          component_name = classes-obj_name
+          AND version = 'A'.
+
     ENDIF.
 
   ENDMETHOD.
@@ -3768,7 +3770,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     IF   select_by_top_package EQ false
       OR processed_packages IS NOT INITIAL.
-      DO 4 TIMES.
+      DO 5 TIMES.
         CASE sy-index.
           WHEN 1.
             IF p_clas EQ true.
@@ -3777,18 +3779,24 @@ CLASS cl_extract_sap IMPLEMENTATION.
               CONTINUE.
             ENDIF.
           WHEN 2.
+            IF p_wdyn EQ true.
+              object = tadir_wdyn.
+            ELSE.
+              CONTINUE.
+            ENDIF.
+          WHEN 3.
             IF p_intf EQ true.
               object = tadir_intf.
             ELSE.
               CONTINUE.
             ENDIF.
-          WHEN 3.
+          WHEN 4.
             IF p_prog EQ true.
               object = tadir_prog.
             ELSE.
               CONTINUE.
             ENDIF.
-          WHEN 4.
+          WHEN 5.
             IF p_tables EQ true.
               " SAP_2_FAMIX_53        Extract database tables
               object = tadir_tabl.
@@ -3864,6 +3872,120 @@ CLASS cl_extract_sap IMPLEMENTATION.
     IF lines( components_infos ) EQ 0.
       WRITE: 'Nothing selected '.
       nothing_selected  = true.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD _handle_used_by_class.
+
+    DATA tadir_object TYPE string.
+    CASE i_modifier_of_using_class.
+      WHEN modifier_abapglobalclass.
+        tadir_object = tadir_clas.
+      WHEN modifier_webdynpro_component.
+        tadir_object = tadir_wdyn.
+      WHEN OTHERS.
+        ASSERT 1 = 2.
+    ENDCASE.
+
+    " Handle used by class
+    DATA using_method_id TYPE i.
+    using_method_id = i_sap_method->get_id( class  = i_using_class
+                                          method = i_using_method ).
+    IF using_method_id EQ 0.
+
+      IF g_param_usage_outpack_groupd EQ false.
+
+        " Method does not exist, create the class
+        " SAP_2_FAMIX_21      If a component is used by a class that is not selected, add this class to the model
+        " SAP_2_FAMIX_22      Do not assign classes that included due to usage to a package
+
+
+        DATA exists_already_with_id TYPE i.
+        i_sap_class->add( EXPORTING name      = i_using_class
+                                  modifiers = i_modifier_of_using_class
+                        IMPORTING exists_already_with_id = exists_already_with_id ).
+
+        IF exists_already_with_id IS INITIAL.
+
+          " SAP_2_FAMIX_47      If no dummy class is specified in case a using class is not in the initial selection, analyze this classes also
+
+          DATA ls_new_components_info LIKE LINE OF r_new_components_infos. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+
+          DATA ls_tadir_comp_map LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+          READ TABLE g_tadir_components_mapping INTO ls_tadir_comp_map WITH TABLE KEY object = tadir_object.
+          ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
+          CLEAR ls_new_components_info.
+          ls_new_components_info-component_name = i_using_class.
+          ls_new_components_info-component   = ls_tadir_comp_map-component .
+          INSERT ls_new_components_info INTO TABLE r_new_components_infos.
+
+        ENDIF.
+
+      ELSE.
+        " SAP_2_FAMIX_35        Add usage to a single dummy class "OTHER_SAP_CLASS" if required by a parameter
+
+        i_sap_class->add( EXPORTING name                   = 'OTHER_SAP_CLASS'
+                                  modifiers              = i_modifier_of_using_class
+                        IMPORTING exists_already_with_id = exists_already_with_id ).
+
+      ENDIF.
+
+      " Now there is a class, but no duplicate class
+
+      IF g_param_usage_outpack_groupd EQ false.
+        using_method_id = i_sap_method->get_id( class  = i_using_class
+                                              method = i_using_method ).
+      ELSE.
+        using_method_id = i_sap_method->get_id( class  = 'OTHER_SAP_CLASS'
+                                              method = 'OTHER_SAP_METHOD' ).
+      ENDIF.
+
+
+      IF using_method_id EQ 0.
+        IF g_param_usage_outpack_groupd EQ false.
+          " Now also the method is to be created
+          " SAP_2_FAMIX_23       If a component is used by a class that is not selected, add the using methods to the model
+
+          using_method_id = i_sap_method->add( class  = i_using_class
+                                             method = i_using_method ).
+
+        ELSE.
+
+          " SAP_2_FAMIX_36        Add a usage to a single dummy method "OTHER_SAP_METHOD" if required by a parameter
+
+          using_method_id = i_sap_method->add( class  = 'OTHER_SAP_CLASS'
+                                             method = 'OTHER_SAP_METHOD'  ).
+
+        ENDIF.
+      ENDIF.
+
+    ENDIF.
+
+    IF i_class_component_is_supplied EQ true.
+      CASE i_class_component-cmptype.
+        WHEN comptype_method.
+
+          i_sap_invocation->add_invocation( used_method  = i_used
+                                          using_method = using_method_id ).
+
+        WHEN comptype_attribute.
+
+          i_sap_access->add_access( used_attribute = i_used
+                                  using_method   = using_method_id ).
+
+        WHEN OTHERS.
+          ASSERT 1 = 2.
+      ENDCASE.
+    ELSEIF ib_table_is_supplied EQ abap_true.
+
+      " SAP_2_FAMIX_57      Model usages of database tables by a an access to the dummy attribute of the modelled FAMIX Class
+      i_sap_access->add_access( used_attribute  = i_used
+                              using_method = using_method_id ).
+
+    ELSE.
+      ASSERT 1 = 2.
     ENDIF.
 
   ENDMETHOD.

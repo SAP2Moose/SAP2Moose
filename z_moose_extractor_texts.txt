@@ -10,6 +10,7 @@ P_PACK	Package to be analyzed
 P_PROG	Select programs
 P_SAP	Extract from SAP
 P_TABLES	Select database tables
+P_WDYN	Select Web Dynpro Components
 RB_FNAME	Filter using component name
 RB_FPACK	Filter using top package
 S_COMPSN	Component names
