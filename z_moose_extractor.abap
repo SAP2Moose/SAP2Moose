@@ -48,7 +48,7 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 29.07.2016 11:44 issue31 Rainer Winkler
+"! 29.07.2016 15:11 issue31 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -1843,8 +1843,10 @@ CLASS cl_sap_package IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD add.
+    DATA name_typed TYPE devclass.
     g_famix_package->add( name = name ).
-    INSERT name INTO TABLE g_added_packages.
+    name_typed = name.
+    INSERT name_typed INTO TABLE g_added_packages.
   ENDMETHOD.
 
   METHOD set_parent_package.
@@ -2465,6 +2467,7 @@ CLASS cl_extract_sap DEFINITION.
       IMPORTING
                 sap_class                   TYPE REF TO cl_sap_class
                 class_components            TYPE class_components_type
+                sap_package                 TYPE REF TO cl_sap_package
                 sap_method                  TYPE REF TO cl_sap_method
                 sap_attribute               TYPE REF TO cl_sap_attribute
                 sap_invocation              TYPE REF TO cl_sap_invocation
@@ -2475,6 +2478,7 @@ CLASS cl_extract_sap DEFINITION.
       IMPORTING
                 sap_class                   TYPE REF TO cl_sap_class
                 class_components            TYPE class_components_type
+                sap_package                 TYPE REF TO cl_sap_package
                 sap_method                  TYPE REF TO cl_sap_method
                 sap_attribute               TYPE REF TO cl_sap_attribute
                 sap_invocation              TYPE REF TO cl_sap_invocation
@@ -2490,6 +2494,7 @@ CLASS cl_extract_sap DEFINITION.
                 sap_class                   TYPE REF TO cl_sap_class
                 class_component             TYPE class_component_type OPTIONAL
                 db_table                    TYPE db_table_type OPTIONAL
+                sap_package                 TYPE REF TO cl_sap_package
                 sap_method                  TYPE REF TO cl_sap_method
                 sap_invocation              TYPE REF TO cl_sap_invocation
                 sap_access                  TYPE REF TO cl_sap_access
@@ -2516,6 +2521,7 @@ CLASS cl_extract_sap DEFINITION.
       IMPORTING
         i_sap_class                   TYPE REF TO cl_sap_class
         i_class_component             TYPE class_component_type
+        i_sap_package                 TYPE REF TO cl_sap_package
         i_sap_method                  TYPE REF TO cl_sap_method
         i_sap_invocation              TYPE REF TO cl_sap_invocation
         i_sap_access                  TYPE REF TO cl_sap_access
@@ -2527,6 +2533,11 @@ CLASS cl_extract_sap DEFINITION.
         i_modifier_of_using_class     TYPE string
       RETURNING
         VALUE(r_new_components_infos) TYPE components_infos_type.
+    METHODS _convert_compnt_to_famix_model
+      IMPORTING
+        component       TYPE string
+      RETURNING
+        VALUE(modifier) TYPE string.
 
 ENDCLASS.
 
@@ -3068,6 +3079,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       new_components_infos = _determine_usage_of_methods( sap_class        = sap_class
                                                           class_components = class_components
+                                                          sap_package      = sap_package
                                                           sap_method       = sap_method
                                                           sap_attribute    = sap_attribute
                                                           sap_invocation   = sap_invocation
@@ -3076,6 +3088,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
       " SAP_2_FAMIX_55      Determine Usages of database tables by class methods
       INSERT LINES OF _determine_usage_of_db_tables( sap_class        = sap_class
                                                            class_components = class_components
+                                                           sap_package      = sap_package
                                                            sap_method       = sap_method
                                                            sap_attribute    = sap_attribute
                                                            sap_invocation   = sap_invocation
@@ -3120,14 +3133,16 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       LOOP AT new_components_infos ASSIGNING <component_infos>.
 
-        IF <component_infos>-component EQ globclass_component_key.
+        IF <component_infos>-component EQ globclass_component_key
+         OR <component_infos>-component EQ globintf_component_key
+         OR <component_infos>-component EQ webdynpro_component_comp_key.
           " GlobClass
           DATA: id_of_new_component TYPE i.
 
           sap_class->add(
             EXPORTING
               name                   = <component_infos>-component_name
-              modifiers              = modifier_abapglobalclass
+              modifiers              = _convert_compnt_to_famix_model( <component_infos>-component )
             IMPORTING
               id                     = id_of_new_component ).
 
@@ -3277,6 +3292,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
         INSERT LINES OF _handle_used_by_class(
              i_sap_class                   = sap_class
              i_class_component             = class_component
+             i_sap_package                 = sap_package
              i_sap_method                  = sap_method
              i_sap_invocation              = sap_invocation
              i_sap_access                  = sap_access
@@ -3300,6 +3316,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
           INSERT LINES OF _handle_used_by_class(
                 i_sap_class                   = sap_class
                 i_class_component             = class_component
+                i_sap_package                 = sap_package
                 i_sap_method                  = sap_method
                 i_sap_invocation              = sap_invocation
                 i_sap_access                  = sap_access
@@ -3702,6 +3719,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       INSERT LINES OF _determine_usages( sap_class        = sap_class
                                          class_component  = class_component
+                                         sap_package      = sap_package
                                          sap_method       = sap_method
                                          sap_invocation   = sap_invocation
                                          sap_access       = sap_access
@@ -3718,6 +3736,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       INSERT LINES OF _determine_usages( sap_class        = sap_class
                                          db_table         = db_table
+                                         sap_package      = sap_package
                                          sap_method       = sap_method
                                          sap_invocation   = sap_invocation
                                          sap_access       = sap_access
@@ -3925,10 +3944,14 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
       ELSE.
         " SAP_2_FAMIX_35        Add usage to a single dummy class "OTHER_SAP_CLASS" if required by a parameter
-
+        DATA id TYPE i.
         i_sap_class->add( EXPORTING name                   = 'OTHER_SAP_CLASS'
-                                  modifiers              = i_modifier_of_using_class
-                        IMPORTING exists_already_with_id = exists_already_with_id ).
+                                  modifiers              = modifier_abapglobalclass
+                        IMPORTING exists_already_with_id = exists_already_with_id
+                                  id                     = id ).
+        i_sap_package->add( name = 'OTHER_SAP_PACKAGE' ).
+        i_sap_class->set_parent_package( element_id     = id
+                                       parent_package = 'OTHER_SAP_PACKAGE' ).
 
       ENDIF.
 
@@ -3987,6 +4010,24 @@ CLASS cl_extract_sap IMPLEMENTATION.
     ELSE.
       ASSERT 1 = 2.
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD _convert_compnt_to_famix_model.
+
+    " convert component to FAMIX modifier
+
+    CASE component.
+      WHEN globclass_component_key.
+        modifier = modifier_abapglobalclass.
+      WHEN globintf_component_key.
+        modifier = modifier_abapglobalinterface.
+      WHEN webdynpro_component_comp_key.
+        modifier = modifier_webdynpro_component.
+      WHEN OTHERS.
+        ASSERT 1 = 2.
+    ENDCASE.
 
   ENDMETHOD.
 
