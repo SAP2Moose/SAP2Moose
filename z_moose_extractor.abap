@@ -48,7 +48,7 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 12.07.2016 23:13 issue31 Rainer Winkler
+"! 29.07.2016 11:44 issue31 Rainer Winkler
 "!
 REPORT z_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -3274,18 +3274,18 @@ CLASS cl_extract_sap IMPLEMENTATION.
         modifier_of_using_class = modifier_abapglobalclass.
 
 
-        new_components_infos = _handle_used_by_class(
-              i_sap_class                   = sap_class
-              i_class_component             = class_component
-              i_sap_method                  = sap_method
-              i_sap_invocation              = sap_invocation
-              i_sap_access                  = sap_access
-              i_used                        = used
-              i_class_component_is_supplied = class_component_is_supplied
-              ib_table_is_supplied          = db_table_is_supplied
-              i_using_class                 = using_class
-              i_using_method                = using_method
-              i_modifier_of_using_class     = modifier_of_using_class ).
+        INSERT LINES OF _handle_used_by_class(
+             i_sap_class                   = sap_class
+             i_class_component             = class_component
+             i_sap_method                  = sap_method
+             i_sap_invocation              = sap_invocation
+             i_sap_access                  = sap_access
+             i_used                        = used
+             i_class_component_is_supplied = class_component_is_supplied
+             ib_table_is_supplied          = db_table_is_supplied
+             i_using_class                 = using_class
+             i_using_method                = using_method
+             i_modifier_of_using_class     = modifier_of_using_class ) INTO TABLE new_components_infos.
 
       ELSE.
         "Check for usage in Web Dynpro ABAP
@@ -3297,7 +3297,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
           using_method = ls_wd_sourcemap-controller_name.
           modifier_of_using_class = modifier_webdynpro_component.
 
-          new_components_infos = _handle_used_by_class(
+          INSERT LINES OF _handle_used_by_class(
                 i_sap_class                   = sap_class
                 i_class_component             = class_component
                 i_sap_method                  = sap_method
@@ -3308,7 +3308,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
                 ib_table_is_supplied          = db_table_is_supplied
                 i_using_class                 = using_class
                 i_using_method                = using_method
-                i_modifier_of_using_class     = modifier_of_using_class ).
+                i_modifier_of_using_class     = modifier_of_using_class ) INTO TABLE new_components_infos.
 
         ELSE.
 
