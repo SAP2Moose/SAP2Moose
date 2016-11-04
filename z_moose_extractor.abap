@@ -48,30 +48,15 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 29.07.2016 15:11 issue31 Rainer Winkler
+"! 04.11.2016 12:24 issue35 Rainer Winkler
 "!
-REPORT z_moose_extractor.
+REPORT yrw1_mc_moose_extractor.
 TABLES tadir. "So that select-options work
-
-"! To not compare sy-subrc to zero, but more readable to ok
-CONSTANTS ok TYPE i VALUE 0.
-
-"! To compare with ID that are returned from methods where the value 0 denotes not found
-CONSTANTS not_found TYPE i VALUE 0.
-"! Redefines abap_bool to simplify coding (Not always reading abap_...)
-TYPES bool TYPE abap_bool.
-CONSTANTS:
-  "! Redefines abap_true to simplify coding (Not always reading abap_...)
-  true  TYPE bool VALUE abap_true,
-  "! Redefines abap_false to simplify coding (Not always reading abap_...)
-  false TYPE bool VALUE abap_false.
 
 SELECTION-SCREEN BEGIN OF BLOCK block_global_source WITH FRAME TITLE TEXT-001.
 
 PARAMETERS: p_sap AS CHECKBOX DEFAULT 'X'.
-"! Extract from SAP
-DATA g_parameter_extract_from_sap TYPE bool.
-g_parameter_extract_from_sap = p_sap.
+
 
 SELECTION-SCREEN END OF BLOCK block_global_source.
 
@@ -87,7 +72,7 @@ PARAMETERS: p_iprog AS CHECKBOX DEFAULT ' '. "Internal parts of reports
 
 PARAMETERS: rb_fpack RADIOBUTTON GROUP rbsl DEFAULT 'X'.
 "! Filter using package
-DATA g_filter_using_package TYPE bool.
+DATA g_filter_using_package TYPE abap_bool.
 g_filter_using_package = rb_fpack.
 
 PARAMETERS: p_pack TYPE parentcl DEFAULT ''.
@@ -97,7 +82,7 @@ g_parameter_package_to_analyze = p_pack.
 
 PARAMETERS: rb_fname RADIOBUTTON GROUP rbsl.
 "! Filter using name
-DATA g_filter_using_name TYPE bool.
+DATA g_filter_using_name TYPE abap_bool.
 g_filter_using_name = rb_fname.
 
 SELECT-OPTIONS s_pack FOR tadir-devclass.
@@ -111,7 +96,7 @@ SELECTION-SCREEN BEGIN OF BLOCK block_using_comp WITH FRAME TITLE TEXT-003.
 PARAMETERS: p_dm AS CHECKBOX DEFAULT ' '.
 "! Usages outside package grouped
 "! If false, a recursive search for using components is performed until no further using components are found
-DATA g_param_usage_outpack_groupd TYPE bool.
+DATA g_param_usage_outpack_groupd TYPE abap_bool.
 g_param_usage_outpack_groupd = p_dm.
 
 SELECTION-SCREEN END OF BLOCK block_using_comp.
@@ -120,12 +105,10 @@ SELECTION-SCREEN BEGIN OF BLOCK block_infos WITH FRAME TITLE TEXT-004.
 
 PARAMETERS: p_list AS CHECKBOX DEFAULT ' '.
 "! List Tokens of selected programs
-DATA g_parameter_list_tokens TYPE bool.
+DATA g_parameter_list_tokens TYPE abap_bool.
 g_parameter_list_tokens = p_list.
 
 SELECTION-SCREEN END OF BLOCK block_infos.
-
-
 
 " include z_mse.
 ******************************************** Begin Include Z_MSE_ABAP *****************************
@@ -154,15 +137,18 @@ SELECTION-SCREEN END OF BLOCK block_infos.
 SELECTION-SCREEN BEGIN OF BLOCK bl_model_settings WITH FRAME TITLE TEXT-100.
 
 PARAMETERS p_down AS CHECKBOX DEFAULT 'X'.
-"! Download model to file
-DATA g_parameter_download_file TYPE bool.
-g_parameter_download_file = p_down.
+*"! Download model to file
+*DATA g_parameter_download_file TYPE abap_bool.
+*g_parameter_download_file = p_down.
 SELECTION-SCREEN END OF BLOCK bl_model_settings.
+
+
 
 " Begin Model
 "! Specifies a model.
 "! Create an instance only once, otherwise there will be multiple models each containing only part of the informations.
-CLASS cl_model DEFINITION.
+CLASS cl_model DEFINITION
+.
   PUBLIC SECTION.
 
     TYPES: BEGIN OF line_type,
@@ -183,8 +169,8 @@ CLASS cl_model DEFINITION.
     METHODS add_entity
       IMPORTING elementname                   TYPE clike
                 name_group                    TYPE clike DEFAULT ''
-                is_named_entity               TYPE bool
-                can_be_referenced_by_name     TYPE bool
+                is_named_entity               TYPE abap_bool
+                can_be_referenced_by_name     TYPE abap_bool
                 name                          TYPE clike OPTIONAL
       EXPORTING VALUE(exists_already_with_id) TYPE i
                 VALUE(processed_id)           TYPE i.
@@ -260,7 +246,7 @@ CLASS cl_model DEFINITION.
         element_name_group TYPE clike OPTIONAL
         element_name       TYPE clike OPTIONAL
         attribute_name     TYPE clike
-        is_true            TYPE bool.
+        is_true            TYPE abap_bool.
 
     " Public type so that the caller is able to test the model
 
@@ -276,7 +262,7 @@ CLASS cl_model DEFINITION.
         attribute_type TYPE string,
         string         TYPE string,
         reference      TYPE i,
-        boolean        TYPE bool,
+        boolean        TYPE abap_bool,
       END OF public_attribute_type.
 
 
@@ -290,7 +276,7 @@ CLASS cl_model DEFINITION.
       BEGIN OF public_element_type,
         element_id        TYPE i,
         element_type      TYPE string,
-        is_named_entity   TYPE bool,
+        is_named_entity   TYPE abap_bool,
         public_attributes TYPE public_attributes_type,
       END OF public_element_type.
     TYPES:
@@ -304,10 +290,11 @@ CLASS cl_model DEFINITION.
       RETURNING VALUE(public_elements) TYPE public_elements_type.
 
 
+
   PRIVATE SECTION.
     TYPES: BEGIN OF element_in_model_type,
              element_id      TYPE i,
-             is_named_entity TYPE bool,
+             is_named_entity TYPE abap_bool,
              element_type    TYPE string,
            END OF element_in_model_type.
     "! A table with all Elements in the model
@@ -340,7 +327,7 @@ CLASS cl_model DEFINITION.
              value_type     TYPE value_type,
              name           TYPE string,
              reference      TYPE i,
-             boolean        TYPE bool,
+             boolean        TYPE abap_bool,
            END OF attribute_type.
 
     "! A table with all the attributes of an entity
@@ -355,7 +342,7 @@ CLASS cl_model DEFINITION.
       IMPORTING
         attribute            TYPE cl_model=>attribute_type
       RETURNING
-        VALUE(already_there) TYPE bool.
+        VALUE(already_there) TYPE abap_bool.
     METHODS _get_element_id
       IMPORTING
         element_id           TYPE i
@@ -367,22 +354,37 @@ CLASS cl_model DEFINITION.
 
 
 ENDCLASS.
+CLASS CL_MODEL IMPLEMENTATION.
+  METHOD add_boolean.
 
-CLASS cl_model IMPLEMENTATION.
+    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_attribute.
+    ls_attribute-element_id             =  _get_element_id( element_id         = element_id
+                                                   element_type       = element_type
+                                                   element_name_group = element_name_group
+                                                   element_name       = element_name ).
+    ls_attribute-attribute_type = attribute_name.
+    ls_attribute-value_type     = boolean_value.
+    ls_attribute-boolean        = is_true.
 
-  METHOD constructor.
-    g_processed_id = 0.
+    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
+
+    IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
+      ADD 1 TO g_attribute_id.
+      ls_attribute-attribute_id   = g_attribute_id.
+      APPEND ls_attribute TO g_attributes.
+    ENDIF.
+
   ENDMETHOD.
-
   METHOD add_entity.
 
     FIELD-SYMBOLS <ls_name> LIKE LINE OF g_named_entities.
 
-    IF can_be_referenced_by_name EQ true.
+    IF can_be_referenced_by_name EQ abap_true.
 
       READ TABLE g_named_entities ASSIGNING <ls_name>
             WITH TABLE KEY element_type = elementname element_name_group = name_group element_name = name.
-      IF sy-subrc EQ ok.
+      IF sy-subrc EQ 0. "OK
         exists_already_with_id = <ls_name>-element_id.
         processed_id = <ls_name>-element_id.
         RETURN.
@@ -393,7 +395,7 @@ CLASS cl_model IMPLEMENTATION.
     ADD 1 TO g_processed_id.
     g_attribute_id = 0.
 
-    IF can_be_referenced_by_name EQ true.
+    IF can_be_referenced_by_name EQ abap_true.
       DATA ls_named_entity    LIKE LINE OF g_named_entities.  " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
       CLEAR ls_named_entity.
       ls_named_entity-element_type = elementname.
@@ -410,111 +412,13 @@ CLASS cl_model IMPLEMENTATION.
     ls_elements_in_model-element_type = elementname.
     INSERT ls_elements_in_model INTO TABLE g_elements_in_model.
 
-    IF is_named_entity EQ true.
+    IF is_named_entity EQ abap_true.
       me->add_string( EXPORTING element_id = g_processed_id attribute_name = 'name' string = name ).
     ENDIF.
 
     processed_id = g_processed_id.
 
   ENDMETHOD.
-
-  METHOD make_mse.
-
-    " SAP_2_FAMIX_34      Allow to export the model in the .mse Moose format
-
-    DATA: mse_model_line TYPE line_type.
-
-    mse_model_line-line = |( |.
-
-    SORT g_elements_in_model BY element_id.
-
-    DATA is_first TYPE boolean VALUE true.
-
-    FIELD-SYMBOLS <element_in_model> LIKE LINE OF g_elements_in_model.
-
-    LOOP AT g_elements_in_model ASSIGNING <element_in_model>.
-      IF is_first EQ false.
-
-        APPEND mse_model_line TO mse_model.
-        CLEAR mse_model_line.
-      ENDIF.
-
-      mse_model_line-line = mse_model_line-line && |(| && <element_in_model>-element_type.
-      IF <element_in_model>-is_named_entity EQ true.
-
-        mse_model_line-line = mse_model_line-line && | (id: | && <element_in_model>-element_id && | )|.
-      ENDIF.
-
-      FIELD-SYMBOLS <attribute> LIKE LINE OF g_attributes.
-      LOOP AT g_attributes ASSIGNING <attribute> WHERE element_id = <element_in_model>-element_id.
-
-        APPEND mse_model_line TO mse_model.
-        mse_model_line-line = |  (| && <attribute>-attribute_type.
-        CASE <attribute>-value_type.
-          WHEN string_value.
-
-            mse_model_line-line = mse_model_line-line && | '| && <attribute>-name && |')|.
-
-          WHEN reference_value.
-
-            mse_model_line-line = mse_model_line-line && | (ref: | && <attribute>-reference && |))|.
-
-          WHEN boolean_value.
-
-            CASE <attribute>-boolean.
-              WHEN true.
-                mse_model_line-line = mse_model_line-line && | true)|.
-              WHEN false.
-                mse_model_line-line = mse_model_line-line && | false)|.
-              WHEN OTHERS.
-                ASSERT 1 = 2.
-            ENDCASE.
-
-          WHEN OTHERS.
-            ASSERT 1 = 2.
-        ENDCASE.
-
-      ENDLOOP.
-
-      mse_model_line-line = mse_model_line-line && |)|.
-
-      is_first = false.
-    ENDLOOP.
-
-    mse_model_line-line = mse_model_line-line && |)|.
-    APPEND mse_model_line TO mse_model.
-
-  ENDMETHOD.
-
-  METHOD add_reference_by_name.
-
-    FIELD-SYMBOLS <named_entity> LIKE LINE OF g_named_entities.
-
-    READ TABLE g_named_entities ASSIGNING <named_entity> WITH TABLE KEY element_type = type_of_reference
-                                                                        element_name_group = name_group_of_reference
-                                                                        element_name = name_of_reference.
-    ASSERT sy-subrc EQ ok.
-
-    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-    CLEAR ls_attribute.
-    ls_attribute-element_id     = _get_element_id( element_id         = element_id
-                                                   element_type       = element_type
-                                                   element_name_group = element_name_group
-                                                   element_name       = element_name ).
-    ls_attribute-attribute_type = attribute_name.
-    ls_attribute-value_type     = reference_value.
-    ls_attribute-reference      = <named_entity>-element_id.
-
-    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
-
-    IF _check_if_attr_already_there( ls_attribute ) EQ false.
-      ADD 1 TO g_attribute_id.
-      ls_attribute-attribute_id   = g_attribute_id.
-      INSERT ls_attribute INTO TABLE g_attributes.
-    ENDIF.
-
-  ENDMETHOD.
-
   METHOD add_reference_by_id.
 
     DATA ls_attribute TYPE attribute_type. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
@@ -529,14 +433,41 @@ CLASS cl_model IMPLEMENTATION.
 
     " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
 
-    IF _check_if_attr_already_there( ls_attribute ) EQ false.
+    IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
       ADD 1 TO g_attribute_id.
       ls_attribute-attribute_id   = g_attribute_id.
       APPEND ls_attribute TO g_attributes.
     ENDIF.
 
   ENDMETHOD.
+  METHOD add_reference_by_name.
 
+    FIELD-SYMBOLS <named_entity> LIKE LINE OF g_named_entities.
+
+    READ TABLE g_named_entities ASSIGNING <named_entity> WITH TABLE KEY element_type = type_of_reference
+                                                                        element_name_group = name_group_of_reference
+                                                                        element_name = name_of_reference.
+    ASSERT sy-subrc EQ 0. "OK
+
+    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_attribute.
+    ls_attribute-element_id     = _get_element_id( element_id         = element_id
+                                                   element_type       = element_type
+                                                   element_name_group = element_name_group
+                                                   element_name       = element_name ).
+    ls_attribute-attribute_type = attribute_name.
+    ls_attribute-value_type     = reference_value.
+    ls_attribute-reference      = <named_entity>-element_id.
+
+    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
+
+    IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
+      ADD 1 TO g_attribute_id.
+      ls_attribute-attribute_id   = g_attribute_id.
+      INSERT ls_attribute INTO TABLE g_attributes.
+    ENDIF.
+
+  ENDMETHOD.
   METHOD add_string.
 
     DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
@@ -551,36 +482,16 @@ CLASS cl_model IMPLEMENTATION.
 
     " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
 
-    IF _check_if_attr_already_there( ls_attribute ) EQ false.
+    IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
       ADD 1 TO g_attribute_id.
       ls_attribute-attribute_id   = g_attribute_id.
       APPEND ls_attribute TO g_attributes.
     ENDIF.
 
   ENDMETHOD.
-
-  METHOD add_boolean.
-
-    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-    CLEAR ls_attribute.
-    ls_attribute-element_id             =  _get_element_id( element_id         = element_id
-                                                   element_type       = element_type
-                                                   element_name_group = element_name_group
-                                                   element_name       = element_name ).
-    ls_attribute-attribute_type = attribute_name.
-    ls_attribute-value_type     = boolean_value.
-    ls_attribute-boolean        = is_true.
-
-    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
-
-    IF _check_if_attr_already_there( ls_attribute ) EQ false.
-      ADD 1 TO g_attribute_id.
-      ls_attribute-attribute_id   = g_attribute_id.
-      APPEND ls_attribute TO g_attributes.
-    ENDIF.
-
+  METHOD constructor.
+    g_processed_id = 0.
   ENDMETHOD.
-
   METHOD get_model.
 
     DATA ls_public_element TYPE public_element_type.
@@ -619,8 +530,73 @@ CLASS cl_model IMPLEMENTATION.
 
     ENDLOOP.
   ENDMETHOD.
+  METHOD make_mse.
 
+    " SAP_2_FAMIX_34      Allow to export the model in the .mse Moose format
 
+    DATA: mse_model_line TYPE line_type.
+
+    mse_model_line-line = |( |.
+
+    SORT g_elements_in_model BY element_id.
+
+    DATA is_first TYPE boolean VALUE abap_true.
+
+    FIELD-SYMBOLS <element_in_model> LIKE LINE OF g_elements_in_model.
+
+    LOOP AT g_elements_in_model ASSIGNING <element_in_model>.
+      IF is_first EQ abap_false.
+
+        APPEND mse_model_line TO mse_model.
+        CLEAR mse_model_line.
+      ENDIF.
+
+      mse_model_line-line = mse_model_line-line && |(| && <element_in_model>-element_type.
+      IF <element_in_model>-is_named_entity EQ abap_true.
+
+        mse_model_line-line = mse_model_line-line && | (id: | && <element_in_model>-element_id && | )|.
+      ENDIF.
+
+      FIELD-SYMBOLS <attribute> LIKE LINE OF g_attributes.
+      LOOP AT g_attributes ASSIGNING <attribute> WHERE element_id = <element_in_model>-element_id.
+
+        APPEND mse_model_line TO mse_model.
+        mse_model_line-line = |  (| && <attribute>-attribute_type.
+        CASE <attribute>-value_type.
+          WHEN string_value.
+
+            mse_model_line-line = mse_model_line-line && | '| && <attribute>-name && |')|.
+
+          WHEN reference_value.
+
+            mse_model_line-line = mse_model_line-line && | (ref: | && <attribute>-reference && |))|.
+
+          WHEN boolean_value.
+
+            CASE <attribute>-boolean.
+              WHEN abap_true.
+                mse_model_line-line = mse_model_line-line && | true)|.
+              WHEN abap_false.
+                mse_model_line-line = mse_model_line-line && | false)|.
+              WHEN OTHERS.
+                ASSERT 1 = 2.
+            ENDCASE.
+
+          WHEN OTHERS.
+            ASSERT 1 = 2.
+        ENDCASE.
+
+      ENDLOOP.
+
+      mse_model_line-line = mse_model_line-line && |)|.
+
+      is_first = abap_false.
+    ENDLOOP.
+
+    mse_model_line-line = mse_model_line-line && |)|.
+    APPEND mse_model_line TO mse_model.
+
+  ENDMETHOD.
   METHOD _check_if_attr_already_there.
 
     " Check if attribute is already there
@@ -630,19 +606,17 @@ CLASS cl_model IMPLEMENTATION.
     ls_attribute_3 = attribute.
     CLEAR ls_attribute_3-attribute_id.
 
-    already_there = false.
+    already_there = abap_false.
 
     LOOP AT g_attributes INTO ls_attribute_2 WHERE element_id = attribute-element_id.
       CLEAR ls_attribute_2-attribute_id.
       IF ls_attribute_2 EQ ls_attribute_3.
-        already_there = true.
+        already_there = abap_true.
         EXIT.
       ENDIF.
     ENDLOOP.
 
   ENDMETHOD.
-
-
   METHOD _get_element_id.
 
     " Get element ID
@@ -653,23 +627,24 @@ CLASS cl_model IMPLEMENTATION.
       READ TABLE g_named_entities ASSIGNING <element_named_entity> WITH TABLE KEY element_type = element_type
                                                                           element_name_group = element_name_group
                                                                           element_name = element_name.
-      ASSERT sy-subrc EQ ok.
+      ASSERT sy-subrc EQ 0. "OK
       my_element_id = <element_named_entity>-element_id.
     ENDIF.
 
   ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_output_model DEFINITION.
+CLASS cl_output_model DEFINITION
+.
   PUBLIC SECTION.
     METHODS make
       IMPORTING
-        mse_model TYPE cl_model=>lines_type.
+        mse_model TYPE cl_model=>lines_type
+        g_parameter_download_file TYPE abap_bool.
+
+
 ENDCLASS.
-
-CLASS cl_output_model IMPLEMENTATION.
-
+CLASS CL_OUTPUT_MODEL IMPLEMENTATION.
   METHOD make.
     " Download the file
 
@@ -678,7 +653,7 @@ CLASS cl_output_model IMPLEMENTATION.
           fullpath    TYPE string,
           user_action TYPE i.
 
-    IF g_parameter_download_file EQ true.
+    IF g_parameter_download_file EQ abap_true.
 
       cl_gui_frontend_services=>file_save_dialog( EXPORTING default_extension = 'mse'
                                                   CHANGING  filename    = filename       " File Name to Save
@@ -705,8 +680,8 @@ CLASS cl_output_model IMPLEMENTATION.
       WRITE: / <mse_model_line>-line.
     ENDLOOP.
   ENDMETHOD.
-
 ENDCLASS.
+
 ******************************************** End Include Z_MSE_ABAP *******************************
 
 " include z_famix.
@@ -733,24 +708,27 @@ ENDCLASS.
 *OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 *SOFTWARE.
 
-CLASS cl_famix_entity DEFINITION ABSTRACT.
+
+
+CLASS cl_famix_entity DEFINITION ABSTRACT
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
   PROTECTED SECTION.
     DATA g_elementname TYPE string.
     DATA g_model TYPE REF TO cl_model.
     DATA g_last_used_id TYPE i.
+
 ENDCLASS.
-
-CLASS cl_famix_entity IMPLEMENTATION.
-
+CLASS CL_FAMIX_ENTITY IMPLEMENTATION.
   METHOD constructor.
     g_model = model.
   ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_sourced_entity DEFINITION ABSTRACT INHERITING FROM cl_famix_entity.
+
+CLASS cl_famix_sourced_entity DEFINITION ABSTRACT INHERITING FROM cl_famix_entity
+.
   PUBLIC SECTION.
     "! Declare source language
     "! Provide either ID or type and name of element
@@ -768,10 +746,10 @@ CLASS cl_famix_sourced_entity DEFINITION ABSTRACT INHERITING FROM cl_famix_entit
         element_name            TYPE clike OPTIONAL
         source_language_element TYPE clike
         source_language_name    TYPE clike.
+
+
 ENDCLASS.
-
-CLASS cl_famix_sourced_entity IMPLEMENTATION.
-
+CLASS CL_FAMIX_SOURCED_ENTITY IMPLEMENTATION.
   METHOD set_declared_source_language.
     g_model->add_reference_by_name( EXPORTING element_id = element_id
                                               element_type = element_type
@@ -781,10 +759,12 @@ CLASS cl_famix_sourced_entity IMPLEMENTATION.
                                               type_of_reference       = source_language_element
                                               name_of_reference = source_language_name ).
   ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_named_entity DEFINITION INHERITING FROM cl_famix_sourced_entity ABSTRACT.
+
+
+CLASS cl_famix_named_entity DEFINITION INHERITING FROM cl_famix_sourced_entity ABSTRACT
+.
   PUBLIC SECTION.
 
     "! Call once to create a new named entity
@@ -812,14 +792,13 @@ CLASS cl_famix_named_entity DEFINITION INHERITING FROM cl_famix_sourced_entity A
 
   PROTECTED SECTION.
 
+
 ENDCLASS.
-
-CLASS cl_famix_named_entity IMPLEMENTATION.
-
+CLASS CL_FAMIX_NAMED_ENTITY IMPLEMENTATION.
   METHOD add.
     g_model->add_entity( EXPORTING elementname = g_elementname
-                                        is_named_entity = true
-                                        can_be_referenced_by_name = true
+                                        is_named_entity = abap_true
+                                        can_be_referenced_by_name = abap_true
                                         name_group = name_group
                                         name = name
                               IMPORTING exists_already_with_id = exists_already_with_id
@@ -831,7 +810,6 @@ CLASS cl_famix_named_entity IMPLEMENTATION.
     ENDIF.
     g_last_used_id = id.
   ENDMETHOD.
-
   METHOD set_parent_package.
     g_model->add_reference_by_name( element_id = element_id
                                     element_type = element_type
@@ -840,10 +818,11 @@ CLASS cl_famix_named_entity IMPLEMENTATION.
                                     name_of_reference = parent_package
                                     attribute_name    = 'parentPackage' ).
   ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_parameter DEFINITION INHERITING FROM cl_famix_named_entity.
+
+CLASS cl_famix_parameter DEFINITION INHERITING FROM cl_famix_named_entity
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS add REDEFINITION.
@@ -861,15 +840,23 @@ CLASS cl_famix_parameter DEFINITION INHERITING FROM cl_famix_named_entity.
         element_name_group TYPE clike OPTIONAL
         element_name       TYPE clike OPTIONAL
         parent_id          TYPE i.
+
+
 ENDCLASS.
-
-CLASS cl_famix_parameter IMPLEMENTATION.
-
+CLASS CL_FAMIX_PARAMETER IMPLEMENTATION.
+  METHOD add.
+    g_model->add_entity( EXPORTING elementname = g_elementname
+                                        is_named_entity = abap_true
+                                        can_be_referenced_by_name = abap_false
+                                        name = name
+                              IMPORTING exists_already_with_id = exists_already_with_id
+                                        processed_id = id ).
+    g_last_used_id = id.
+  ENDMETHOD.
   METHOD constructor.
     CALL METHOD super->constructor( model ).
     g_elementname = 'FAMIX.Parameter'.
   ENDMETHOD.
-
   METHOD set_parent_behavioural_entity.
     g_model->add_reference_by_id( EXPORTING element_id = element_id
                                             element_type = element_type
@@ -878,20 +865,12 @@ CLASS cl_famix_parameter IMPLEMENTATION.
                                             attribute_name = 'parentBehaviouralEntity'
                                             reference_id   = parent_id ).
   ENDMETHOD.
-
-  METHOD add.
-    g_model->add_entity( EXPORTING elementname = g_elementname
-                                        is_named_entity = true
-                                        can_be_referenced_by_name = false
-                                        name = name
-                              IMPORTING exists_already_with_id = exists_already_with_id
-                                        processed_id = id ).
-    g_last_used_id = id.
-  ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_attribute DEFINITION INHERITING FROM cl_famix_named_entity.
+
+
+CLASS cl_famix_attribute DEFINITION INHERITING FROM cl_famix_named_entity
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     "! Store the relation between class, attribute name and id in internal table to enable associations
@@ -933,6 +912,7 @@ CLASS cl_famix_attribute DEFINITION INHERITING FROM cl_famix_named_entity.
         parent_element     TYPE clike OPTIONAL
         parent_name        TYPE clike OPTIONAL
         parent_id          TYPE i     OPTIONAL.
+
   PRIVATE SECTION.
     TYPES: BEGIN OF attribute_id_type,
              class     TYPE string,
@@ -941,11 +921,29 @@ CLASS cl_famix_attribute DEFINITION INHERITING FROM cl_famix_named_entity.
            END OF attribute_id_type.
     DATA: g_attribute_ids TYPE HASHED TABLE OF attribute_id_type WITH UNIQUE KEY class attribute.
 ENDCLASS.
-
-CLASS cl_famix_attribute IMPLEMENTATION.
+CLASS CL_FAMIX_ATTRIBUTE IMPLEMENTATION.
+  METHOD add.
+    g_model->add_entity(
+               EXPORTING elementname = g_elementname
+                         is_named_entity = abap_true
+                         can_be_referenced_by_name = abap_false
+                         name = name
+               IMPORTING processed_id = id ).
+    g_last_used_id = id.
+  ENDMETHOD.
   METHOD constructor.
     CALL METHOD super->constructor( model ).
     g_elementname = 'FAMIX.Attribute'.
+  ENDMETHOD.
+  METHOD get_id.
+    FIELD-SYMBOLS <attribute_id> LIKE LINE OF g_attribute_ids.
+
+    READ TABLE g_attribute_ids ASSIGNING <attribute_id> WITH TABLE KEY class = class attribute = attribute.
+    IF sy-subrc EQ 0. "OK
+      id = <attribute_id>-id.
+    ELSE.
+      id = 0.
+    ENDIF.
   ENDMETHOD.
   METHOD set_parent_type.
     IF parent_element IS SUPPLIED AND parent_name IS SUPPLIED.
@@ -967,17 +965,6 @@ CLASS cl_famix_attribute IMPLEMENTATION.
       ASSERT 1 = 2.
     ENDIF.
   ENDMETHOD.
-  METHOD add.
-    g_model->add_entity(
-               EXPORTING elementname = g_elementname
-                         is_named_entity = true
-                         can_be_referenced_by_name = false
-                         name = name
-               IMPORTING processed_id = id ).
-    g_last_used_id = id.
-  ENDMETHOD.
-
-
   METHOD store_id.
     DATA ls_attribute_id LIKE LINE OF g_attribute_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
     CLEAR ls_attribute_id.
@@ -986,21 +973,12 @@ CLASS cl_famix_attribute IMPLEMENTATION.
     ls_attribute_id-attribute = attribute.
     INSERT ls_attribute_id INTO TABLE g_attribute_ids.
   ENDMETHOD.
-
-  METHOD get_id.
-    FIELD-SYMBOLS <attribute_id> LIKE LINE OF g_attribute_ids.
-
-    READ TABLE g_attribute_ids ASSIGNING <attribute_id> WITH TABLE KEY class = class attribute = attribute.
-    IF sy-subrc EQ ok.
-      id = <attribute_id>-id.
-    ELSE.
-      id = 0.
-    ENDIF.
-  ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_container_entity DEFINITION INHERITING FROM cl_famix_named_entity ABSTRACT.
+
+
+CLASS cl_famix_container_entity DEFINITION INHERITING FROM cl_famix_named_entity ABSTRACT
+.
   PUBLIC SECTION.
     "! Set the container an element is in
     "! Provide either ID or type and name of element
@@ -1030,10 +1008,9 @@ CLASS cl_famix_container_entity DEFINITION INHERITING FROM cl_famix_named_entity
                                           parent_container_id TYPE i.
   PROTECTED SECTION.
 
+
 ENDCLASS.
-
-CLASS cl_famix_container_entity IMPLEMENTATION.
-
+CLASS CL_FAMIX_CONTAINER_ENTITY IMPLEMENTATION.
   METHOD set_container.
     g_model->add_reference_by_name( EXPORTING element_id = element_id
                                               element_type = element_type
@@ -1043,7 +1020,6 @@ CLASS cl_famix_container_entity IMPLEMENTATION.
                                               name_of_reference = parent_container
                                               attribute_name    = 'container' ).
   ENDMETHOD.
-
   METHOD set_container_by_id.
     g_model->add_reference_by_id( EXPORTING element_id = element_id
                                             element_type = element_type
@@ -1053,10 +1029,12 @@ CLASS cl_famix_container_entity IMPLEMENTATION.
                                             reference_id   = parent_container_id ).
 
   ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_behavioural_entity DEFINITION INHERITING FROM cl_famix_container_entity ABSTRACT.
+
+
+CLASS cl_famix_behavioural_entty DEFINITION INHERITING FROM cl_famix_container_entity ABSTRACT
+.
   PUBLIC SECTION.
     "! Set the signature of a method
     "! This might not be relevant for ABAP, but is contained here for completeness
@@ -1073,10 +1051,10 @@ CLASS cl_famix_behavioural_entity DEFINITION INHERITING FROM cl_famix_container_
                             element_name       TYPE clike OPTIONAL
                             signature          TYPE clike.
 
+
+
 ENDCLASS.
-
-CLASS cl_famix_behavioural_entity IMPLEMENTATION.
-
+CLASS CL_FAMIX_BEHAVIOURAL_ENTTY IMPLEMENTATION.
   METHOD set_signature.
     g_model->add_string( EXPORTING element_id = element_id
                                    element_type = element_type
@@ -1085,82 +1063,88 @@ CLASS cl_famix_behavioural_entity IMPLEMENTATION.
                                    attribute_name = 'signature'
                                    string         = signature ).
   ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_namespace DEFINITION INHERITING FROM cl_famix_container_entity.
+
+
+CLASS cl_famix_namespace DEFINITION INHERITING FROM cl_famix_container_entity
+.
 
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
 
+
+
 ENDCLASS.
-
-CLASS cl_famix_namespace IMPLEMENTATION.
-
+CLASS CL_FAMIX_NAMESPACE IMPLEMENTATION.
   METHOD constructor.
     CALL METHOD super->constructor( model ).
     g_elementname = 'FAMIX.Namespace'.
   ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_package DEFINITION INHERITING FROM cl_famix_named_entity.
+
+
+CLASS cl_famix_package DEFINITION INHERITING FROM cl_famix_named_entity
+.
 
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
 
     METHODS add REDEFINITION.
 
+
+
 ENDCLASS.
-
-CLASS cl_famix_package IMPLEMENTATION.
-
+CLASS CL_FAMIX_PACKAGE IMPLEMENTATION.
+  METHOD add.
+    g_model->add_entity( EXPORTING elementname = g_elementname
+                                        is_named_entity = abap_true
+                                        can_be_referenced_by_name = abap_true
+                                        name = name
+                              IMPORTING exists_already_with_id = exists_already_with_id
+                                        processed_id = id ).
+    g_last_used_id = id.
+  ENDMETHOD.
   METHOD constructor.
     CALL METHOD super->constructor( model ).
     g_elementname = 'FAMIX.Package'.
   ENDMETHOD.
-
-  METHOD add.
-    g_model->add_entity( EXPORTING elementname = g_elementname
-                                        is_named_entity = true
-                                        can_be_referenced_by_name = true
-                                        name = name
-                              IMPORTING exists_already_with_id = exists_already_with_id
-                                        processed_id = id ).
-    g_last_used_id = id.
-  ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_module DEFINITION INHERITING FROM cl_famix_named_entity.
+
+
+CLASS cl_famix_module DEFINITION INHERITING FROM cl_famix_named_entity
+.
 
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
 
     METHODS add REDEFINITION.
 
+
+
 ENDCLASS.
-
-CLASS cl_famix_module IMPLEMENTATION.
-
-  METHOD constructor.
-    CALL METHOD super->constructor( model ).
-    g_elementname = 'FAMIX.Module'.
-  ENDMETHOD.
-
+CLASS CL_FAMIX_MODULE IMPLEMENTATION.
   METHOD add.
     g_model->add_entity( EXPORTING elementname = g_elementname
-                                        is_named_entity = true
-                                        can_be_referenced_by_name = true
+                                        is_named_entity = abap_true
+                                        can_be_referenced_by_name = abap_true
                                         name = name
                               IMPORTING exists_already_with_id = exists_already_with_id
                                         processed_id = id ).
     g_last_used_id = id.
   ENDMETHOD.
-
+  METHOD constructor.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'FAMIX.Module'.
+  ENDMETHOD.
 ENDCLASS.
 
-CLASS cl_famix_method DEFINITION INHERITING FROM cl_famix_behavioural_entity.
+
+
+CLASS cl_famix_method DEFINITION INHERITING FROM cl_famix_behavioural_entty
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS add REDEFINITION.
@@ -1201,6 +1185,7 @@ CLASS cl_famix_method DEFINITION INHERITING FROM cl_famix_behavioural_entity.
                 class     TYPE clike
                 method    TYPE clike
       RETURNING VALUE(id) TYPE i.
+
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_method_id,
              class  TYPE string,
@@ -1209,13 +1194,31 @@ CLASS cl_famix_method DEFINITION INHERITING FROM cl_famix_behavioural_entity.
            END OF ty_method_id.
     DATA: g_method_ids TYPE HASHED TABLE OF ty_method_id WITH UNIQUE KEY class method.
 ENDCLASS.
-
-CLASS cl_famix_method IMPLEMENTATION.
+CLASS CL_FAMIX_METHOD IMPLEMENTATION.
+  METHOD add.
+    g_model->add_entity(
+               EXPORTING elementname = g_elementname
+                         is_named_entity = abap_true
+                         can_be_referenced_by_name = abap_false
+                         name = name
+               IMPORTING processed_id = id ).
+    g_last_used_id = id.
+  ENDMETHOD.
   METHOD constructor.
     CALL METHOD super->constructor( model ).
     g_elementname = 'FAMIX.Method'.
   ENDMETHOD.
+  METHOD get_id.
+    FIELD-SYMBOLS <method_id> LIKE LINE OF g_method_ids.
 
+    READ TABLE g_method_ids ASSIGNING <method_id> WITH TABLE KEY class = class
+                                                               method = method.
+    IF sy-subrc EQ 0. "OK
+      id = <method_id>-id.
+    ELSE.
+      id = 0.
+    ENDIF.
+  ENDMETHOD.
   METHOD set_parent_type.
     IF parent_name IS SUPPLIED.
       g_model->add_reference_by_name( EXPORTING element_id = element_id
@@ -1234,17 +1237,6 @@ CLASS cl_famix_method IMPLEMENTATION.
       ASSERT 1 = 2.
     ENDIF.
   ENDMETHOD.
-
-  METHOD add.
-    g_model->add_entity(
-               EXPORTING elementname = g_elementname
-                         is_named_entity = true
-                         can_be_referenced_by_name = false
-                         name = name
-               IMPORTING processed_id = id ).
-    g_last_used_id = id.
-  ENDMETHOD.
-
   METHOD store_id.
     DATA ls_method_id LIKE LINE OF g_method_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
     CLEAR ls_method_id.
@@ -1253,22 +1245,12 @@ CLASS cl_famix_method IMPLEMENTATION.
     ls_method_id-method = method.
     INSERT ls_method_id INTO TABLE g_method_ids.
   ENDMETHOD.
-
-  METHOD get_id.
-    FIELD-SYMBOLS <method_id> LIKE LINE OF g_method_ids.
-
-    READ TABLE g_method_ids ASSIGNING <method_id> WITH TABLE KEY class = class
-                                                               method = method.
-    IF sy-subrc EQ ok.
-      id = <method_id>-id.
-    ELSE.
-      id = 0.
-    ENDIF.
-  ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_class DEFINITION INHERITING FROM cl_famix_container_entity.
+
+
+CLASS cl_famix_class DEFINITION INHERITING FROM cl_famix_container_entity
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     "! Set if it is an interface
@@ -1283,45 +1265,48 @@ CLASS cl_famix_class DEFINITION INHERITING FROM cl_famix_container_entity.
         element_type       TYPE clike OPTIONAL
         element_name_group TYPE clike OPTIONAL
         element_name       TYPE clike OPTIONAL .
+
+
 ENDCLASS.
-
-CLASS cl_famix_class IMPLEMENTATION.
-
+CLASS CL_FAMIX_CLASS IMPLEMENTATION.
   METHOD constructor.
     CALL METHOD super->constructor( model ).
     g_elementname = 'FAMIX.Class'.
   ENDMETHOD.
-
   METHOD is_interface.
     g_model->add_boolean( EXPORTING element_id = element_id
                                     element_type = element_type
                                     element_name_group = element_name_group
                                     element_name = element_name
                                     attribute_name = 'isInterface'
-                                    is_true        = true ).
+                                    is_true        = abap_true ).
   ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_association DEFINITION INHERITING FROM cl_famix_sourced_entity ABSTRACT.
+
+
+CLASS cl_famix_association DEFINITION INHERITING FROM cl_famix_sourced_entity ABSTRACT
+.
   PUBLIC SECTION.
     METHODS add
       RETURNING VALUE(id) TYPE i.
+
+
 ENDCLASS.
-
-CLASS cl_famix_association IMPLEMENTATION.
-
+CLASS CL_FAMIX_ASSOCIATION IMPLEMENTATION.
   METHOD add.
     g_model->add_entity( EXPORTING elementname               = g_elementname
-                                        is_named_entity           = false
-                                        can_be_referenced_by_name = false
+                                        is_named_entity           = abap_false
+                                        can_be_referenced_by_name = abap_false
                                         IMPORTING processed_id = id ).
     g_last_used_id = id.
   ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_access DEFINITION INHERITING FROM cl_famix_association.
+
+
+CLASS cl_famix_access DEFINITION INHERITING FROM cl_famix_association
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     "! Checks that accessor and variable of an access are a new access
@@ -1331,7 +1316,7 @@ CLASS cl_famix_access DEFINITION INHERITING FROM cl_famix_association.
       IMPORTING
                 accessor_id   TYPE i
                 variable_id   TYPE i
-      RETURNING VALUE(is_new) TYPE bool.
+      RETURNING VALUE(is_new) TYPE abap_bool.
     "! defines accessor and variable of an access
     "! Provide either ID or type and name of element
     "! @parameter element_id | the ID of the element where the ID shall be added
@@ -1348,6 +1333,7 @@ CLASS cl_famix_access DEFINITION INHERITING FROM cl_famix_association.
         element_name       TYPE clike OPTIONAL
         accessor_id        TYPE i
         variable_id        TYPE i.
+
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_accessor_variable_id,
              accessor_id TYPE i,
@@ -1355,14 +1341,17 @@ CLASS cl_famix_access DEFINITION INHERITING FROM cl_famix_association.
            END OF  ty_accessor_variable_id.
     DATA: g_accessor_variable_ids TYPE HASHED TABLE OF ty_accessor_variable_id WITH UNIQUE KEY accessor_id variable_id.
 ENDCLASS.
-
-CLASS cl_famix_access IMPLEMENTATION.
-
+CLASS CL_FAMIX_ACCESS IMPLEMENTATION.
   METHOD constructor.
     CALL METHOD super->constructor( model ).
     g_elementname = 'FAMIX.Access'.
   ENDMETHOD.
-
+  METHOD is_new_access.
+    READ TABLE g_accessor_variable_ids TRANSPORTING NO FIELDS WITH TABLE KEY accessor_id = accessor_id variable_id = variable_id.
+    IF sy-subrc <> 0. "OK
+      is_new = abap_true.
+    ENDIF.
+  ENDMETHOD.
   METHOD set_accessor_variable_relation.
     DATA ls_accessor_id LIKE LINE OF g_accessor_variable_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
     CLEAR ls_accessor_id.
@@ -1382,17 +1371,12 @@ CLASS cl_famix_access IMPLEMENTATION.
                                             attribute_name = 'variable'
                                             reference_id   = variable_id ).
   ENDMETHOD.
-
-  METHOD is_new_access.
-    READ TABLE g_accessor_variable_ids TRANSPORTING NO FIELDS WITH TABLE KEY accessor_id = accessor_id variable_id = variable_id.
-    IF sy-subrc <> ok.
-      is_new = true.
-    ENDIF.
-  ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_invocation DEFINITION INHERITING FROM cl_famix_association.
+
+
+CLASS cl_famix_invocation DEFINITION INHERITING FROM cl_famix_association
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
 
@@ -1400,7 +1384,7 @@ CLASS cl_famix_invocation DEFINITION INHERITING FROM cl_famix_association.
       IMPORTING
                 sender_id     TYPE i
                 candidates_id TYPE i
-      RETURNING VALUE(is_new) TYPE bool.
+      RETURNING VALUE(is_new) TYPE abap_bool.
 
     "! defines an invocation
     "! this also models standard call by functions or methods to components other than attributes
@@ -1427,6 +1411,7 @@ CLASS cl_famix_invocation DEFINITION INHERITING FROM cl_famix_association.
         signature            TYPE clike OPTIONAL
         receiver_source_code TYPE clike OPTIONAL.
 
+
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_sender_candidate,
              sender_id     TYPE i,
@@ -1436,21 +1421,17 @@ CLASS cl_famix_invocation DEFINITION INHERITING FROM cl_famix_association.
     DATA g_sender_candidates TYPE HASHED TABLE OF ty_sender_candidate WITH UNIQUE KEY sender_id candidates_id.
 
 ENDCLASS.
-
-CLASS cl_famix_invocation IMPLEMENTATION.
-
+CLASS CL_FAMIX_INVOCATION IMPLEMENTATION.
   METHOD constructor.
     CALL METHOD super->constructor( model ).
     g_elementname = 'FAMIX.Invocation'.
   ENDMETHOD.
-
   METHOD is_new_invocation_to_candidate.
     READ TABLE g_sender_candidates TRANSPORTING NO FIELDS WITH TABLE KEY sender_id = sender_id candidates_id = candidates_id.
-    IF sy-subrc <> ok.
-      is_new = true.
+    IF sy-subrc <> 0. "OK
+      is_new = abap_true.
     ENDIF.
   ENDMETHOD.
-
   METHOD set_invocation_by_reference.
     g_model->add_reference_by_id( EXPORTING element_id = element_id
                                             element_type = element_type
@@ -1495,10 +1476,12 @@ CLASS cl_famix_invocation IMPLEMENTATION.
                                      string         = receiver_source_code ).
     ENDIF.
   ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_inheritance DEFINITION INHERITING FROM cl_famix_association.
+
+
+CLASS cl_famix_inheritance DEFINITION INHERITING FROM cl_famix_association
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     "! defines an inheritance
@@ -1519,9 +1502,10 @@ CLASS cl_famix_inheritance DEFINITION INHERITING FROM cl_famix_association.
         superclass_name_group TYPE clike
         superclass_name       TYPE clike.
 
-ENDCLASS.
 
-CLASS cl_famix_inheritance IMPLEMENTATION.
+
+ENDCLASS.
+CLASS CL_FAMIX_INHERITANCE IMPLEMENTATION.
   METHOD constructor.
     CALL METHOD super->constructor( model ).
     g_elementname = 'FAMIX.Inheritance'.
@@ -1539,10 +1523,12 @@ CLASS cl_famix_inheritance IMPLEMENTATION.
                                       name_of_reference       = superclass_name ).
 
   ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_reference DEFINITION INHERITING FROM cl_famix_association.
+
+
+CLASS cl_famix_reference DEFINITION INHERITING FROM cl_famix_association
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     "! defines an inheritance
@@ -1554,15 +1540,14 @@ CLASS cl_famix_reference DEFINITION INHERITING FROM cl_famix_association.
         element_id TYPE i
         target_id  TYPE i
         source_id  TYPE i.
+
+
 ENDCLASS.
-
-CLASS cl_famix_reference IMPLEMENTATION.
-
+CLASS CL_FAMIX_REFERENCE IMPLEMENTATION.
   METHOD constructor.
     CALL METHOD super->constructor( model ).
     g_elementname = 'FAMIX.Reference'.
   ENDMETHOD.
-
   METHOD set_target_source.
 
     g_model->add_reference_by_id( EXPORTING element_id = element_id
@@ -1572,41 +1557,45 @@ CLASS cl_famix_reference IMPLEMENTATION.
                                             attribute_name    = 'source'
                                             reference_id       = source_id ).
   ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_famix_custom_source_lang DEFINITION INHERITING FROM cl_famix_entity.
+
+
+CLASS cl_famix_custom_source_lng DEFINITION INHERITING FROM cl_famix_entity
+.
   PUBLIC SECTION.
     "! @parameter exists_already_with_id | contains the id if entry already existed
     METHODS add IMPORTING name                          TYPE clike
                 EXPORTING VALUE(exists_already_with_id) TYPE i
                           VALUE(id)                     TYPE i.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
+
+
 ENDCLASS.
-
-CLASS cl_famix_custom_source_lang IMPLEMENTATION.
-
-  METHOD constructor.
-    CALL METHOD super->constructor( model ).
-    g_elementname = 'FAMIX.CustomSourceLanguage'.
-  ENDMETHOD.
-
+CLASS CL_FAMIX_CUSTOM_SOURCE_LNG IMPLEMENTATION.
   METHOD add.
     g_model->add_entity( EXPORTING elementname = g_elementname
-                                        is_named_entity = true
-                                        can_be_referenced_by_name = true
+                                        is_named_entity = abap_true
+                                        can_be_referenced_by_name = abap_true
                                         name = name
                               IMPORTING exists_already_with_id = exists_already_with_id
                                         processed_id = id ).
     g_last_used_id = id.
   ENDMETHOD.
-
+  METHOD constructor.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'FAMIX.CustomSourceLanguage'.
+  ENDMETHOD.
 ENDCLASS.
 
-CLASS cl_check_famix_model DEFINITION.
+
+
+CLASS cl_check_famix_model DEFINITION
+.
   PUBLIC SECTION.
     "! Checks a model regarding the FAMIX attributes
     METHODS check IMPORTING model TYPE REF TO cl_model.
+
   PRIVATE SECTION.
 
     METHODS _check_attribute_parentpackage
@@ -1616,9 +1605,7 @@ CLASS cl_check_famix_model DEFINITION.
       IMPORTING
         is_public_elements TYPE cl_model=>public_element_type.
 ENDCLASS.
-
-CLASS cl_check_famix_model IMPLEMENTATION.
-
+CLASS CL_CHECK_FAMIX_MODEL IMPLEMENTATION.
   METHOD check.
 
     DATA public_elements TYPE model->public_elements_type.
@@ -1635,8 +1622,42 @@ CLASS cl_check_famix_model IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+  METHOD _check_attribute_name.
 
+    DATA ls_public_attribute TYPE cl_model=>public_attribute_type.
 
+    " Check attribute parentPackage
+    DATA count_name TYPE i.
+    CLEAR count_name.
+    LOOP AT is_public_elements-public_attributes INTO ls_public_attribute WHERE attribute_type = 'name'.
+
+      ADD 1 TO count_name.
+
+      CONDENSE ls_public_attribute-string.
+      IF ls_public_attribute-string IS INITIAL.
+        FORMAT COLOR COL_NEGATIVE.
+
+        " SAP_2_FAMIX_51        Return a message if the attribute name is empty
+        WRITE: / 'Element ', is_public_elements-element_id, ' has an attribute name that is empty'.
+
+        FORMAT COLOR COL_BACKGROUND.
+      ENDIF.
+
+    ENDLOOP.
+
+    " SAP_2_FAMIX_50        Return a message if the attribute name occurs more than once
+
+    IF count_name > 1.
+
+      FORMAT COLOR COL_NEGATIVE.
+
+      WRITE: / 'Element ', is_public_elements-element_id, ' has more than a single attribute name'.
+
+      FORMAT COLOR COL_BACKGROUND.
+
+    ENDIF.
+
+  ENDMETHOD.
   METHOD _check_attribute_parentpackage.
 
     DATA ls_public_attribute TYPE cl_model=>public_attribute_type.
@@ -1676,55 +1697,20 @@ CLASS cl_check_famix_model IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-
-  METHOD _check_attribute_name.
-
-    DATA ls_public_attribute TYPE cl_model=>public_attribute_type.
-
-    " Check attribute parentPackage
-    DATA count_name TYPE i.
-    CLEAR count_name.
-    LOOP AT is_public_elements-public_attributes INTO ls_public_attribute WHERE attribute_type = 'name'.
-
-      ADD 1 TO count_name.
-
-      CONDENSE ls_public_attribute-string.
-      IF ls_public_attribute-string IS INITIAL.
-        FORMAT COLOR COL_NEGATIVE.
-
-        " SAP_2_FAMIX_51        Return a message if the attribute name is empty
-        WRITE: / 'Element ', is_public_elements-element_id, ' has an attribute name that is empty'.
-
-        FORMAT COLOR COL_BACKGROUND.
-      ENDIF.
-
-    ENDLOOP.
-
-    " SAP_2_FAMIX_50        Return a message if the attribute name occurs more than once
-
-    IF count_name > 1.
-
-      FORMAT COLOR COL_NEGATIVE.
-
-      WRITE: / 'Element ', is_public_elements-element_id, ' has more than a single attribute name'.
-
-      FORMAT COLOR COL_BACKGROUND.
-
-    ENDIF.
-
-  ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_make_demo_model DEFINITION.
+
+
+CLASS cl_make_demo_model DEFINITION
+.
   PUBLIC SECTION.
     CLASS-METHODS make
       EXPORTING
         mse_model TYPE cl_model=>lines_type.
+
+
 ENDCLASS.
-
-CLASS cl_make_demo_model IMPLEMENTATION.
-
+CLASS CL_MAKE_DEMO_MODEL IMPLEMENTATION.
   METHOD make.
     DATA model            TYPE REF TO cl_model.
     CREATE OBJECT model.
@@ -1798,8 +1784,8 @@ CLASS cl_make_demo_model IMPLEMENTATION.
 
     model->make_mse( IMPORTING mse_model = mse_model ).
   ENDMETHOD.
-
 ENDCLASS.
+
 ******************************************** End Include Z_FAMIX_ABAP *****************************
 
 " include z_sap_2_famix
@@ -1808,14 +1794,20 @@ ENDCLASS.
 "! This is the master class for all classes that build a model for the SAP system.
 "! Its main usage is in the moment to display the connection of the classes to extract SAP model data in the extracted model.
 "! It may later be replaced by cl_sap_abap, cl_sap_bw, ...
-CLASS cl_sap DEFINITION.
+CLASS cl_sap DEFINITION
+.
+
+  PUBLIC SECTION.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+CLASS CL_SAP IMPLEMENTATION.
 ENDCLASS.
 
-CLASS cl_sap IMPLEMENTATION.
 
-ENDCLASS.
 
-CLASS cl_sap_package DEFINITION INHERITING FROM cl_sap.
+CLASS cl_sap_package DEFINITION INHERITING FROM cl_sap
+.
   PUBLIC SECTION.
     TYPES packages_type TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
@@ -1830,25 +1822,27 @@ CLASS cl_sap_package DEFINITION INHERITING FROM cl_sap.
     "! Returns all packages that are stored up to this time
     METHODS get_all_packages
       RETURNING VALUE(packages) TYPE packages_type.
+
   PRIVATE SECTION.
     DATA: g_famix_package TYPE REF TO cl_famix_package.
     DATA: g_added_packages TYPE STANDARD TABLE OF devclass.
 ENDCLASS.
-
-CLASS cl_sap_package IMPLEMENTATION.
-
-  METHOD constructor.
-    super->constructor( ).
-    CREATE OBJECT g_famix_package EXPORTING model = model.
-  ENDMETHOD.
-
+CLASS CL_SAP_PACKAGE IMPLEMENTATION.
   METHOD add.
     DATA name_typed TYPE devclass.
     g_famix_package->add( name = name ).
     name_typed = name.
     INSERT name_typed INTO TABLE g_added_packages.
   ENDMETHOD.
-
+  METHOD constructor.
+    super->constructor( ).
+    CREATE OBJECT g_famix_package EXPORTING model = model.
+  ENDMETHOD.
+  METHOD get_all_packages.
+    SORT g_added_packages.
+    DELETE ADJACENT DUPLICATES FROM g_added_packages.
+    packages = g_added_packages.
+  ENDMETHOD.
   METHOD set_parent_package.
     g_famix_package->set_parent_package( element_id = 0
                                          element_type = 'FAMIX.Package'
@@ -1856,16 +1850,12 @@ CLASS cl_sap_package IMPLEMENTATION.
                                          element_name = this_package
                                          parent_package = parent_package ).
   ENDMETHOD.
-
-  METHOD get_all_packages.
-    SORT g_added_packages.
-    DELETE ADJACENT DUPLICATES FROM g_added_packages.
-    packages = g_added_packages.
-  ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_sap_class DEFINITION INHERITING FROM cl_sap.
+
+
+CLASS cl_sap_class DEFINITION INHERITING FROM cl_sap
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     "! Add global class
@@ -1900,16 +1890,11 @@ CLASS cl_sap_class DEFINITION INHERITING FROM cl_sap.
         modifiers TYPE clike
       RETURNING
         VALUE(id) TYPE i.
+
   PRIVATE SECTION.
     DATA: g_famix_class TYPE REF TO cl_famix_class.
 ENDCLASS.
-
-CLASS cl_sap_class IMPLEMENTATION.
-  METHOD constructor.
-    super->constructor( ).
-    CREATE OBJECT g_famix_class EXPORTING model = model.
-  ENDMETHOD.
-
+CLASS CL_SAP_CLASS IMPLEMENTATION.
   METHOD add.
     " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
     " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
@@ -1919,7 +1904,22 @@ CLASS cl_sap_class IMPLEMENTATION.
                         IMPORTING exists_already_with_id = exists_already_with_id
                                   id                     = id ).
   ENDMETHOD.
-
+  METHOD add_local.
+    g_famix_class->add( EXPORTING name_group = program
+                                  name       = name
+                                  modifiers  = modifiers
+                        IMPORTING id = id ).
+  ENDMETHOD.
+  METHOD constructor.
+    super->constructor( ).
+    CREATE OBJECT g_famix_class EXPORTING model = model.
+  ENDMETHOD.
+  METHOD is_interface.
+    g_famix_class->is_interface( element_id = element_id ).
+  ENDMETHOD.
+  METHOD set_parent_package.
+    g_famix_class->set_parent_package( element_id = element_id parent_package = parent_package ).
+  ENDMETHOD.
   METHOD set_parent_program.
 
     " SAP_2_FAMIX_31     Assign local classes to a container of type FAMIX.Module with the name of the program
@@ -1928,27 +1928,12 @@ CLASS cl_sap_class IMPLEMENTATION.
                                             container_element = 'FAMIX.Module'
                                             parent_container  = sap_program ).
   ENDMETHOD.
-
-  METHOD set_parent_package.
-    g_famix_class->set_parent_package( element_id = element_id parent_package = parent_package ).
-  ENDMETHOD.
-
-
-  METHOD is_interface.
-    g_famix_class->is_interface( element_id = element_id ).
-  ENDMETHOD.
-
-
-  METHOD add_local.
-    g_famix_class->add( EXPORTING name_group = program
-                                  name       = name
-                                  modifiers  = modifiers
-                        IMPORTING id = id ).
-  ENDMETHOD.
-
 ENDCLASS.
 
-CLASS cl_sap_db_table DEFINITION INHERITING FROM cl_sap.
+
+
+CLASS cl_sap_db_table DEFINITION INHERITING FROM cl_sap
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     "! Add global Database table
@@ -1962,18 +1947,13 @@ CLASS cl_sap_db_table DEFINITION INHERITING FROM cl_sap.
       IMPORTING
         element_id     TYPE i
         parent_package TYPE clike.
+
   PRIVATE SECTION.
     CONSTANTS modifier_dbtable TYPE string VALUE 'DBTable' ##NO_TEXT.
     DATA: g_famix_class     TYPE REF TO cl_famix_class,
           g_famix_attribute TYPE REF TO cl_famix_attribute.
 ENDCLASS.
-
-CLASS cl_sap_db_table IMPLEMENTATION.
-  METHOD constructor.
-    super->constructor( ).
-    CREATE OBJECT g_famix_class EXPORTING model = model.
-    CREATE OBJECT g_famix_attribute EXPORTING model = model.
-  ENDMETHOD.
+CLASS CL_SAP_DB_TABLE IMPLEMENTATION.
   METHOD add.
     " SAP_2_FAMIX_54        Map database tables to FAMIX Class
     " SAP_2_FAMIX_58        Mark the FAMIX Class with the attribute modifiers = 'DBTable'
@@ -1987,12 +1967,20 @@ CLASS cl_sap_db_table IMPLEMENTATION.
     g_famix_attribute->set_parent_type( EXPORTING element_id = dummy_attribute_id
                                                   parent_id  = id ).
   ENDMETHOD.
+  METHOD constructor.
+    super->constructor( ).
+    CREATE OBJECT g_famix_class EXPORTING model = model.
+    CREATE OBJECT g_famix_attribute EXPORTING model = model.
+  ENDMETHOD.
   METHOD set_parent_package.
     g_famix_class->set_parent_package( element_id = element_id parent_package = parent_package ).
   ENDMETHOD.
 ENDCLASS.
 
-CLASS cl_sap_attribute DEFINITION INHERITING FROM cl_sap.
+
+
+CLASS cl_sap_attribute DEFINITION INHERITING FROM cl_sap
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS get_id
@@ -2005,26 +1993,11 @@ CLASS cl_sap_attribute DEFINITION INHERITING FROM cl_sap.
       IMPORTING
         class     TYPE clike
         attribute TYPE clike.
+
   PRIVATE SECTION.
     DATA: g_famix_attribute TYPE REF TO cl_famix_attribute.
 ENDCLASS.
-
-CLASS cl_sap_attribute IMPLEMENTATION.
-
-  METHOD constructor.
-    super->constructor( ).
-    CREATE OBJECT g_famix_attribute EXPORTING model = model.
-  ENDMETHOD.
-
-
-  METHOD get_id.
-    " SAP_2_FAMIX_13        Mapp attributes of classes to FAMIX.Attribute
-    " SAP_2_FAMIX_14        Mapp attributes of interfaces to FAMIX.Attribute
-    id = g_famix_attribute->get_id( class     = class
-                                    attribute = attribute ).
-  ENDMETHOD.
-
-
+CLASS CL_SAP_ATTRIBUTE IMPLEMENTATION.
   METHOD add.
     DATA last_id TYPE i.
     g_famix_attribute->add( EXPORTING name = attribute IMPORTING id = last_id ).
@@ -2035,11 +2008,21 @@ CLASS cl_sap_attribute IMPLEMENTATION.
                                            attribute = attribute ).
 
   ENDMETHOD.
-
+  METHOD constructor.
+    super->constructor( ).
+    CREATE OBJECT g_famix_attribute EXPORTING model = model.
+  ENDMETHOD.
+  METHOD get_id.
+    " SAP_2_FAMIX_13        Mapp attributes of classes to FAMIX.Attribute
+    " SAP_2_FAMIX_14        Mapp attributes of interfaces to FAMIX.Attribute
+    id = g_famix_attribute->get_id( class     = class
+                                    attribute = attribute ).
+  ENDMETHOD.
 ENDCLASS.
 
 "! Specifies a SAP method
-CLASS cl_sap_method DEFINITION INHERITING FROM cl_sap.
+CLASS cl_sap_method DEFINITION INHERITING FROM cl_sap
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     "! Returns the ID for a given method of a global class
@@ -2067,25 +2050,12 @@ CLASS cl_sap_method DEFINITION INHERITING FROM cl_sap.
         method_name TYPE clike
       RETURNING
         VALUE(id)   TYPE i.
+
   PRIVATE SECTION.
     DATA: g_famix_method TYPE REF TO cl_famix_method.
 
 ENDCLASS.
-
-CLASS cl_sap_method IMPLEMENTATION.
-
-  METHOD constructor.
-    super->constructor( ).
-    CREATE OBJECT g_famix_method EXPORTING model = model.
-  ENDMETHOD.
-
-
-  METHOD get_id.
-    id = g_famix_method->get_id( class  = class
-                                 method = method ).
-  ENDMETHOD.
-
-
+CLASS CL_SAP_METHOD IMPLEMENTATION.
   METHOD add.
     " SAP_2_FAMIX_15        Map methods of classes to FAMIX.Method
     " SAP_2_FAMIX_16        Map methods of interfaces to FAMIX.Method
@@ -2104,8 +2074,6 @@ CLASS cl_sap_method IMPLEMENTATION.
                                         method = method ).
 
   ENDMETHOD.
-
-
   METHOD add_local_method.
 
     " SAP_2_FAMIX_32      Map local methods to the FAMIX.Method
@@ -2121,10 +2089,19 @@ CLASS cl_sap_method IMPLEMENTATION.
                                                parent_element = 'FAMIX.Class'
                                                parent_id      =  class_id ).
   ENDMETHOD.
-
+  METHOD constructor.
+    super->constructor( ).
+    CREATE OBJECT g_famix_method EXPORTING model = model.
+  ENDMETHOD.
+  METHOD get_id.
+    id = g_famix_method->get_id( class  = class
+                                 method = method ).
+  ENDMETHOD.
 ENDCLASS.
 
-CLASS cl_sap_inheritance DEFINITION INHERITING FROM cl_sap.
+
+CLASS cl_sap_inheritance DEFINITION INHERITING FROM cl_sap
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS add RETURNING VALUE(id) TYPE i.
@@ -2144,36 +2121,18 @@ CLASS cl_sap_inheritance DEFINITION INHERITING FROM cl_sap.
         program         TYPE clike
         subclass_name   TYPE any
         superclass_name TYPE any.
+
   PRIVATE SECTION.
     DATA: g_famix_inheritance TYPE REF TO cl_famix_inheritance.
 ENDCLASS.
-
-CLASS cl_sap_inheritance IMPLEMENTATION.
-
+CLASS CL_SAP_INHERITANCE IMPLEMENTATION.
+  METHOD add.
+    id = g_famix_inheritance->add( ).
+  ENDMETHOD.
   METHOD constructor.
     super->constructor( ).
     CREATE OBJECT g_famix_inheritance EXPORTING model = model.
   ENDMETHOD.
-
-
-  METHOD add.
-    id = g_famix_inheritance->add( ).
-  ENDMETHOD.
-
-
-  METHOD set_sub_and_super_class.
-
-    " SAP_2_FAMIX_39     Map all inheritances between classes in selected packages to FAMIX.Inheritance
-    g_famix_inheritance->set_sub_and_super_class( EXPORTING element_id = element_id
-                                                            subclass_element      = 'FAMIX.Class'
-                                                            subclass_name_group   = ''
-                                                            subclass_name         = subclass_name
-                                                            superclass_element    = 'FAMIX.Class'
-                                                            superclass_name_group = ''
-                                                            superclass_name       = superclass_name ).
-  ENDMETHOD.
-
-
   METHOD set_interface_for_class.
 
     " SAP_2_FAMIX_40        Map all interface implementations of interfaces in selected packages by classes of selected packages by FAMIX.Inheritance
@@ -2185,8 +2144,6 @@ CLASS cl_sap_inheritance IMPLEMENTATION.
                                                             superclass_name_group = ''
                                                             superclass_name       = class_name ).
   ENDMETHOD.
-
-
   METHOD set_local_sub_and_super_class.
 
     " SAP_2_FAMIX_38        Map local inheritances of classes to FAMIX.Inheritance
@@ -2198,34 +2155,39 @@ CLASS cl_sap_inheritance IMPLEMENTATION.
                                                             superclass_name_group = program
                                                             superclass_name       = superclass_name ).
   ENDMETHOD.
+  METHOD set_sub_and_super_class.
 
+    " SAP_2_FAMIX_39     Map all inheritances between classes in selected packages to FAMIX.Inheritance
+    g_famix_inheritance->set_sub_and_super_class( EXPORTING element_id = element_id
+                                                            subclass_element      = 'FAMIX.Class'
+                                                            subclass_name_group   = ''
+                                                            subclass_name         = subclass_name
+                                                            superclass_element    = 'FAMIX.Class'
+                                                            superclass_name_group = ''
+                                                            superclass_name       = superclass_name ).
+  ENDMETHOD.
 ENDCLASS.
 
-CLASS cl_sap_invocation DEFINITION INHERITING FROM cl_sap.
+
+CLASS cl_sap_invocation DEFINITION INHERITING FROM cl_sap
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS add_invocation
       IMPORTING
         used_method  TYPE i
         using_method TYPE i.
+
   PRIVATE SECTION.
     DATA: g_famix_invocation TYPE REF TO cl_famix_invocation.
 ENDCLASS.
-
-CLASS cl_sap_invocation IMPLEMENTATION.
-
-  METHOD constructor.
-    super->constructor( ).
-    CREATE OBJECT g_famix_invocation EXPORTING model = model.
-  ENDMETHOD.
-
-
+CLASS CL_SAP_INVOCATION IMPLEMENTATION.
   METHOD add_invocation.
     " SAP_2_FAMIX_24      Map usage of ABAP class methods by methods of classes to FAMIX.Invocation
     " SAP_2_FAMIX_25      Map usage of ABAP interface methods by methods of classes to FAMIX.Invocation
     IF g_famix_invocation->is_new_invocation_to_candidate( sender_id     = using_method
                                                            candidates_id = used_method )
-       EQ true.
+       EQ abap_true.
 
       DATA invocation_id TYPE i.
       invocation_id = g_famix_invocation->add( ).
@@ -2235,35 +2197,32 @@ CLASS cl_sap_invocation IMPLEMENTATION.
                                                                  signature     = 'DUMMY' ).
     ENDIF.
   ENDMETHOD.
-
+  METHOD constructor.
+    super->constructor( ).
+    CREATE OBJECT g_famix_invocation EXPORTING model = model.
+  ENDMETHOD.
 ENDCLASS.
 
-CLASS cl_sap_access DEFINITION INHERITING FROM cl_sap.
+CLASS cl_sap_access DEFINITION INHERITING FROM cl_sap
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS add_access
       IMPORTING
         used_attribute TYPE i
         using_method   TYPE i.
+
   PRIVATE SECTION.
     DATA: g_famix_access TYPE REF TO cl_famix_access.
 ENDCLASS.
-
-CLASS cl_sap_access IMPLEMENTATION.
-
-  METHOD constructor.
-    super->constructor( ).
-    CREATE OBJECT g_famix_access EXPORTING model = model.
-  ENDMETHOD.
-
-
+CLASS CL_SAP_ACCESS IMPLEMENTATION.
   METHOD add_access.
     " SAP_2_FAMIX_26      Map usage of ABAP class attributes by methods of classes to FAMIX.Invocation
     " SAP_2_FAMIX_27      Map usage of ABAP interface attributes by methods of classes to FAMIX.Invocation
 
     IF g_famix_access->is_new_access( accessor_id = using_method
                                       variable_id = used_attribute )
-       EQ true.
+       EQ abap_true.
       DATA last_id TYPE i.
       last_id = g_famix_access->add( ).
       g_famix_access->set_accessor_variable_relation( EXPORTING element_id = last_id
@@ -2271,11 +2230,14 @@ CLASS cl_sap_access IMPLEMENTATION.
                                                                 variable_id = used_attribute ).
     ENDIF.
   ENDMETHOD.
-
+  METHOD constructor.
+    super->constructor( ).
+    CREATE OBJECT g_famix_access EXPORTING model = model.
+  ENDMETHOD.
 ENDCLASS.
 
-
-CLASS cl_sap_program DEFINITION INHERITING FROM cl_sap.
+CLASS cl_sap_program DEFINITION INHERITING FROM cl_sap
+.
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
     METHODS add
@@ -2289,96 +2251,184 @@ CLASS cl_sap_program DEFINITION INHERITING FROM cl_sap.
       IMPORTING
         element_id     TYPE i
         parent_package TYPE clike.
+
   PRIVATE SECTION.
     DATA g_famix_module TYPE REF TO cl_famix_module.
 ENDCLASS.
-
-CLASS cl_sap_program IMPLEMENTATION.
-
-  METHOD constructor.
-    super->constructor( ).
-    CREATE OBJECT g_famix_module EXPORTING model = model.
-  ENDMETHOD.
-
-
+CLASS CL_SAP_PROGRAM IMPLEMENTATION.
   METHOD add.
 
     " SAP_2_FAMIX_5     Map program to FAMIX.Module
     g_famix_module->add( EXPORTING name = name IMPORTING id = id ).
 
   ENDMETHOD.
-
-
+  METHOD constructor.
+    super->constructor( ).
+    CREATE OBJECT g_famix_module EXPORTING model = model.
+  ENDMETHOD.
   METHOD set_parent_package.
     g_famix_module->set_parent_package( element_id = element_id parent_package = parent_package ).
   ENDMETHOD.
-
 ENDCLASS.
-
-
 
 ******************************************** End Include Z_SAP_2_FAMIX ******************************
 
-TYPES: BEGIN OF class_component_type,
-         clsname TYPE seocompo-clsname,
-         cmpname TYPE seocompo-cmpname,
-         cmptype TYPE seocompo-cmptype,
-       END OF class_component_type.
-
-TYPES component_type TYPE string.
-
-TYPES: BEGIN OF component_infos_type,
-         component      TYPE component_type,
-         component_name TYPE string,
-         package        TYPE devclass,
-       END OF component_infos_type.
-
-TYPES components_infos_type TYPE HASHED TABLE OF component_infos_type WITH UNIQUE KEY component component_name.
-
-TYPES: BEGIN OF map_tadir_component_type,
-         object    TYPE trobjtype, " The SAP TADIR Name
-         component TYPE component_type, " As called here
-       END OF map_tadir_component_type.
-
-TYPES tadir_components_mapping_type TYPE HASHED TABLE OF map_tadir_component_type WITH UNIQUE KEY object
-                                                                            WITH UNIQUE HASHED KEY comp COMPONENTS component.
-
-TYPES: BEGIN OF class_interface_type,
-         obj_name TYPE seoclsname,
-       END OF class_interface_type.
-
-TYPES: BEGIN OF program_type,
-         program TYPE string,
-       END OF program_type.
-
-TYPES:BEGIN OF class_type,
-        class TYPE seoclsname,
-      END OF class_type.
-
-TYPES:BEGIN OF db_table_type,
-        db_table                       TYPE tabname,
-        id_in_model                    TYPE i,
-        id_of_dummy_attribute_in_model TYPE i,
-      END OF db_table_type.
-
-TYPES: BEGIN OF inheritance_type,
-         clsname    TYPE seometarel-clsname,
-         refclsname TYPE seometarel-refclsname,
-         reltype    TYPE seometarel-reltype,
-       END OF inheritance_type.
-
-CLASS cl_extract_sap DEFINITION.
+"! Analyze ABAP Statement of type K (Other ABAP key word)
+CLASS cl_ep_analyze_other_keywrd DEFINITION
+.
   PUBLIC SECTION.
-    TYPES: db_tables_type TYPE HASHED TABLE OF db_table_type WITH UNIQUE KEY db_table.
+    TYPES: BEGIN OF indexed_token_type,
+         index TYPE i,
+         str   TYPE string,
+         row   TYPE token_row,
+         col   TYPE token_col,
+         type  TYPE token_type,
+       END OF indexed_token_type.
 
+TYPES sorted_tokens_type TYPE SORTED TABLE OF indexed_token_type WITH UNIQUE KEY index.
+    METHODS constructor
+      IMPORTING
+        sorted_tokens TYPE sorted_tokens_type.
+    METHODS analyze
+      IMPORTING
+        statement TYPE sstmnt.
+    TYPES statement_type TYPE c LENGTH 2.
+    CONSTANTS:
+
+      start_class_definition      TYPE statement_type VALUE 'CD',
+      start_class_implementation  TYPE statement_type VALUE 'CI',
+      end_class                   TYPE statement_type VALUE 'CE',
+      method_definition           TYPE statement_type VALUE 'MD',
+      start_method_implementation TYPE statement_type VALUE 'MI',
+      end_method_implementation   TYPE statement_type VALUE 'ME',
+      attribute_definition        TYPE statement_type VALUE 'AD',
+      start_public                TYPE statement_type VALUE 'PU',
+      start_protected             TYPE statement_type VALUE 'PO',
+      start_private               TYPE statement_type VALUE 'PR'.
+
+
+    TYPES: BEGIN OF info_type,
+             statement_type      TYPE statement_type,
+             is_class_stmnt_info TYPE abap_bool,
+             class_is_inheriting TYPE abap_bool,
+             class_inherits_from TYPE string,
+             is_static           TYPE abap_bool,
+             name                TYPE string,
+           END OF info_type.
+    DATA: g_info TYPE info_type READ-ONLY.
+
+  PRIVATE SECTION.
+    DATA g_sorted_tokens TYPE sorted_tokens_type.
+ENDCLASS.
+
+"! Analyzes local objects of ABAP programs
+"! Is not yet completely implemented
+CLASS cl_program_analyzer DEFINITION
+.
+  PUBLIC SECTION.
+    METHODS extract
+      IMPORTING
+        module_reference TYPE i
+        program          TYPE char30
+      CHANGING
+        model            TYPE REF TO cl_model.
+
+  PRIVATE SECTION.
+    CONSTANTS modifiers_abaplocalclass TYPE string VALUE 'ABAPLocalClass' ##NO_TEXT.
+    DATA g_parameter_list_tokens TYPE abap_bool.
+
+ENDCLASS.
+
+CLASS cl_extract_sap DEFINITION
+.
+  PUBLIC SECTION.
+    TYPES:BEGIN OF db_table_type,
+            db_table                       TYPE tabname,
+            id_in_model                    TYPE i,
+            id_of_dummy_attribute_in_model TYPE i,
+          END OF db_table_type.
+    TYPES: db_tables_type TYPE HASHED TABLE OF db_table_type WITH UNIQUE KEY db_table.
+    TYPES:         ty_s_compsn                       TYPE RANGE OF tadir-obj_name.
+    TYPES:         ty_s_pack                         TYPE RANGE OF tadir-devclass.
+    METHODS constructor
+      IMPORTING
+        i_g_filter_using_package       TYPE abap_bool
+        i_g_filter_using_name          TYPE abap_bool
+        i_g_parameter_package_to_analz TYPE parentcl
+        i_p_iprog                      TYPE abap_bool
+        i_p_clas                       TYPE abap_bool
+        i_p_wdyn                       TYPE abap_bool
+        i_p_intf                       TYPE abap_bool
+        i_p_prog                       TYPE abap_bool
+        i_p_tables                     TYPE abap_bool
+        i_s_compsn                     TYPE ty_s_compsn
+        i_s_pack                       TYPE ty_s_pack
+        i_g_param_usage_outpack_groupd TYPE abap_bool.
     METHODS extract
       EXPORTING
         mse_model           TYPE cl_model=>lines_type
-        VALUE(nothing_done) TYPE bool.
+        VALUE(nothing_done) TYPE abap_bool.
+
   PRIVATE SECTION.
+
+    TYPES: BEGIN OF class_component_type,
+             clsname TYPE seocompo-clsname,
+             cmpname TYPE seocompo-cmpname,
+             cmptype TYPE seocompo-cmptype,
+           END OF class_component_type.
+
+    TYPES component_type TYPE string.
+
+    TYPES: BEGIN OF component_infos_type,
+             component      TYPE component_type,
+             component_name TYPE string,
+             package        TYPE devclass,
+           END OF component_infos_type.
+
+    TYPES components_infos_type TYPE HASHED TABLE OF component_infos_type WITH UNIQUE KEY component component_name.
+
+    TYPES: BEGIN OF map_tadir_component_type,
+             object    TYPE trobjtype, " The SAP TADIR Name
+             component TYPE component_type, " As called here
+           END OF map_tadir_component_type.
+
+    TYPES tadir_components_mapping_type TYPE HASHED TABLE OF map_tadir_component_type WITH UNIQUE KEY object
+                                                                                WITH UNIQUE HASHED KEY comp COMPONENTS component.
+
+    TYPES: BEGIN OF class_interface_type,
+             obj_name TYPE seoclsname,
+           END OF class_interface_type.
+
+    TYPES: BEGIN OF program_type,
+             program TYPE char30,
+           END OF program_type.
+
+    TYPES:BEGIN OF class_type,
+            class TYPE seoclsname,
+          END OF class_type.
+
+
+
+    TYPES: BEGIN OF inheritance_type,
+             clsname    TYPE seometarel-clsname,
+             refclsname TYPE seometarel-refclsname,
+             reltype    TYPE seometarel-reltype,
+           END OF inheritance_type.
 
     "! Maps the component lists from SAP (table TADIR) to the component list used in this program
     DATA g_tadir_components_mapping TYPE tadir_components_mapping_type.
+    DATA g_filter_using_package TYPE abap_bool."TBD fill
+    DATA g_filter_using_name TYPE abap_bool."TBD fill
+    DATA g_parameter_package_to_analyze TYPE parentcl.
+    DATA p_iprog TYPE abap_bool.
+    DATA p_clas TYPE abap_bool.
+    DATA p_wdyn TYPE abap_bool.
+    DATA p_intf TYPE abap_bool.
+    DATA p_prog TYPE abap_bool.
+    DATA p_tables TYPE abap_bool.
+    DATA s_compsn TYPE RANGE OF tadir-obj_name.
+    DATA s_pack TYPE RANGE OF tadir-devclass.
+    DATA g_param_usage_outpack_groupd TYPE abap_bool."TBD fill
 
     CONSTANTS comptype_attribute TYPE seocmptype VALUE '0'.
     CONSTANTS comptype_method TYPE seocmptype VALUE '1'.
@@ -2513,10 +2563,10 @@ CLASS cl_extract_sap DEFINITION.
       IMPORTING
         sap_package           TYPE REF TO cl_sap_package
         package_to_analyze    TYPE parentcl
-        select_by_top_package TYPE bool
+        select_by_top_package TYPE abap_bool
       EXPORTING
         components_infos      TYPE components_infos_type
-        nothing_selected      TYPE bool.
+        nothing_selected      TYPE abap_bool.
     METHODS _handle_used_by_class
       IMPORTING
         i_sap_class                   TYPE REF TO cl_sap_class
@@ -2540,406 +2590,21 @@ CLASS cl_extract_sap DEFINITION.
         VALUE(modifier) TYPE string.
 
 ENDCLASS.
-
-TYPES: BEGIN OF indexed_token_type,
-         index TYPE i,
-         str   TYPE string,
-         row   TYPE token_row,
-         col   TYPE token_col,
-         type  TYPE token_type,
-       END OF indexed_token_type.
-
-TYPES sorted_tokens_type TYPE SORTED TABLE OF indexed_token_type WITH UNIQUE KEY index.
-
-"! Analyze ABAP Statement of type K (Other ABAP key word)
-CLASS cl_ep_analyze_other_keyword DEFINITION.
-  PUBLIC SECTION.
-    METHODS constructor
-      IMPORTING
-        sorted_tokens TYPE sorted_tokens_type.
-    METHODS analyze
-      IMPORTING
-        statement TYPE sstmnt.
-    TYPES statement_type TYPE c LENGTH 2.
-    CONSTANTS:
-
-      start_class_definition      TYPE statement_type VALUE 'CD',
-      start_class_implementation  TYPE statement_type VALUE 'CI',
-      end_class                   TYPE statement_type VALUE 'CE',
-      method_definition           TYPE statement_type VALUE 'MD',
-      start_method_implementation TYPE statement_type VALUE 'MI',
-      end_method_implementation   TYPE statement_type VALUE 'ME',
-      attribute_definition        TYPE statement_type VALUE 'AD',
-      start_public                TYPE statement_type VALUE 'PU',
-      start_protected             TYPE statement_type VALUE 'PO',
-      start_private               TYPE statement_type VALUE 'PR'.
-
-
-    TYPES: BEGIN OF info_type,
-             statement_type      TYPE statement_type,
-             is_class_stmnt_info TYPE bool,
-             class_is_inheriting TYPE bool,
-             class_inherits_from TYPE string,
-             is_static           TYPE bool,
-             name                TYPE string,
-           END OF info_type.
-    DATA: g_info TYPE info_type READ-ONLY.
-  PRIVATE SECTION.
-    DATA g_sorted_tokens TYPE sorted_tokens_type.
-ENDCLASS.
-
-CLASS cl_ep_analyze_other_keyword IMPLEMENTATION.
-
+CLASS CL_EXTRACT_SAP IMPLEMENTATION.
   METHOD constructor.
-    g_sorted_tokens = sorted_tokens.
-
+    g_filter_using_package = i_g_filter_using_package.
+    g_filter_using_name = i_g_filter_using_name.
+    g_parameter_package_to_analyze = i_g_parameter_package_to_analz.
+    p_iprog = i_p_iprog.
+    p_clas = i_p_clas.
+    p_wdyn = i_p_wdyn.
+    p_intf = i_p_intf.
+    p_prog = i_p_prog.
+    p_tables = i_p_tables.
+    s_compsn = i_s_compsn.
+    s_pack = i_s_pack.
+    g_param_usage_outpack_groupd = i_g_param_usage_outpack_groupd.
   ENDMETHOD.
-
-  METHOD analyze.
-    ASSERT statement-type EQ 'K'.
-    CLEAR g_info.
-
-    " First Run, what is the keyword
-    FIELD-SYMBOLS <token> LIKE LINE OF g_sorted_tokens.
-    READ TABLE g_sorted_tokens ASSIGNING <token> WITH TABLE KEY index = statement-from.
-    IF sy-subrc <> ok.
-      " TBD Error handling
-      " In the moment ignore
-      RETURN.
-    ENDIF.
-
-    CASE <token>-str.
-      WHEN 'CLASS'.
-        g_info-is_class_stmnt_info = true.
-
-      WHEN 'ENDCLASS'.
-        g_info-statement_type = end_class.
-      WHEN 'PUBLIC'.
-        g_info-statement_type = start_public.
-      WHEN 'PROTECTED'.
-        g_info-statement_type = start_protected.
-      WHEN 'PRIVATE'.
-        g_info-statement_type = start_private.
-      WHEN 'METHODS'.
-        " info-is_method_stmnt = true.
-        g_info-statement_type = method_definition.
-      WHEN 'CLASS-METHODS'.
-        g_info-statement_type = method_definition.
-        g_info-is_static = true.
-      WHEN 'METHOD'.
-        g_info-statement_type = start_method_implementation.
-      WHEN 'ENDMETHOD'.
-        g_info-statement_type = end_method_implementation.
-
-      WHEN 'DATA'.
-        g_info-statement_type = attribute_definition.
-      WHEN 'CLASS-DATA'.
-        g_info-statement_type = attribute_definition.
-        g_info-is_static = true.
-      WHEN OTHERS.
-        " TBD
-        " Add further, in the moment ignore
-        RETURN.
-    ENDCASE.
-
-    " Second Run, what is the name
-    IF g_info-is_class_stmnt_info EQ true
-    OR g_info-statement_type EQ method_definition
-    OR g_info-statement_type EQ start_method_implementation
-    OR g_info-statement_type EQ attribute_definition.
-
-      DATA position_of_name TYPE i.
-      position_of_name =  statement-from + 1.
-      READ TABLE g_sorted_tokens ASSIGNING <token> WITH TABLE KEY index = position_of_name.
-      IF sy-subrc <> ok.
-        " TBD Error handling
-        " In the moment ignore
-        RETURN.
-      ENDIF.
-
-      g_info-name = <token>-str.
-
-      " Third run, further keywords
-      IF g_info-is_class_stmnt_info EQ true.
-        LOOP AT g_sorted_tokens ASSIGNING <token> WHERE index > position_of_name
-                                                       AND index <= statement-to.
-          CASE <token>-str.
-            WHEN 'DEFINITION'.
-              g_info-statement_type = start_class_definition.
-            WHEN 'IMPLEMENTATION'.
-              g_info-statement_type = start_class_implementation.
-            WHEN 'INHERITING'.
-              g_info-class_is_inheriting = true.
-              DATA superclass_is_at TYPE i.
-              superclass_is_at  = sy-tabix + 2.
-              FIELD-SYMBOLS <ls_superclass_token> LIKE LINE OF g_sorted_tokens.
-              READ TABLE g_sorted_tokens ASSIGNING <ls_superclass_token> WITH TABLE KEY index = superclass_is_at.
-              IF sy-subrc EQ ok.
-                g_info-class_inherits_from = <ls_superclass_token>-str.
-              ELSE.
-                " TBD Error handling
-                " In the moment ignore
-                RETURN.
-              ENDIF.
-          ENDCASE.
-        ENDLOOP.
-      ENDIF.
-
-    ENDIF.
-
-  ENDMETHOD.
-
-ENDCLASS.
-
-"! Analyzes local objects of ABAP programs
-"! Is not yet completely implemented
-CLASS cl_program_analyzer DEFINITION.
-  PUBLIC SECTION.
-    METHODS extract
-      IMPORTING
-        module_reference TYPE i
-        program          TYPE clike
-      CHANGING
-        model            TYPE REF TO cl_model.
-  PRIVATE SECTION.
-    CONSTANTS modifiers_abaplocalclass TYPE string VALUE 'ABAPLocalClass' ##NO_TEXT.
-
-ENDCLASS.
-
-CLASS cl_program_analyzer IMPLEMENTATION.
-
-  METHOD extract.
-    DATA source TYPE TABLE OF string.
-    READ REPORT program INTO source.
-
-    DATA: tokens TYPE STANDARD TABLE OF stokes.
-
-    DATA: sorted_tokens TYPE sorted_tokens_type.
-
-    DATA statements TYPE STANDARD TABLE OF sstmnt.
-
-    SCAN ABAP-SOURCE source TOKENS INTO tokens STATEMENTS INTO statements.
-
-    FIELD-SYMBOLS <ls_token_2> LIKE LINE OF tokens.
-    LOOP AT tokens ASSIGNING <ls_token_2>.
-      DATA ls_token LIKE LINE OF sorted_tokens. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-      CLEAR ls_token.
-      ls_token-index = sy-tabix.
-      ls_token-str   = <ls_token_2>-str.
-      ls_token-row   = <ls_token_2>-row.
-      ls_token-col   = <ls_token_2>-col.
-      ls_token-type  = <ls_token_2>-type.
-      INSERT ls_token INTO TABLE sorted_tokens.
-    ENDLOOP.
-
-    SORT statements BY from.
-
-    IF g_parameter_list_tokens EQ true.
-      WRITE: /.
-      WRITE: / program.
-
-    ENDIF.
-
-    TYPES section_type TYPE c LENGTH 1.
-
-    CONSTANTS: "! Is in public section
-      public    TYPE section_type VALUE '1',
-      "! Is in protected section
-      protected TYPE section_type VALUE '2',
-      "! Is in private section
-      private   TYPE section_type VALUE '3',
-      "! Not in a section
-      none      TYPE section_type VALUE ' '.
-
-    TYPES: BEGIN OF codecontext_type,
-             in_section               TYPE section_type,
-             in_class_definition      TYPE bool,
-             implementation_of_class  TYPE string,
-             implementation_of_method TYPE string,
-           END OF codecontext_type.
-
-    "! Context of statement in the code
-    DATA context TYPE codecontext_type.
-
-    TYPES: BEGIN OF class_with_model_id_type,
-             classname   TYPE string,
-             id_in_model TYPE i,
-           END OF class_with_model_id_type.
-
-    DATA: classes_with_model_id      TYPE HASHED TABLE OF class_with_model_id_type WITH UNIQUE KEY classname,
-          actual_class_with_model_id TYPE class_with_model_id_type.
-
-    TYPES: BEGIN OF method_type,
-             classname          TYPE string,
-             class_id_in_model  TYPE i,
-             methodname         TYPE string,
-             method_id_in_model TYPE i,
-             in_section         TYPE section_type,
-             instanciable       TYPE bool,
-           END OF method_type.
-
-    DATA: methods       TYPE STANDARD TABLE OF method_type,
-          actual_method TYPE method_type.
-
-    TYPES: BEGIN OF inheritance_type,
-             subclass   TYPE string,
-             superclass TYPE string,
-           END OF inheritance_type.
-
-    DATA: inheritances TYPE STANDARD TABLE OF inheritance_type.
-
-    DATA token_number TYPE i.
-
-    "! Instance that analyzes other ABAP Keywords
-    DATA aok TYPE REF TO cl_ep_analyze_other_keyword. " So that ABAP Doc Comment is possible
-    CREATE OBJECT aok EXPORTING sorted_tokens = sorted_tokens.
-
-    FIELD-SYMBOLS <statement> LIKE LINE OF statements.
-    LOOP AT statements ASSIGNING <statement>.
-
-      token_number = 0.
-      CASE <statement>-type.
-        WHEN 'K'.
-
-          aok->analyze( statement = <statement> ).
-          CASE aok->g_info-statement_type.
-            WHEN aok->start_class_definition.
-              " SAP_2_FAMIX_28        Determine local classes in programs
-              context-in_class_definition = true.
-              actual_class_with_model_id-classname = aok->g_info-name.
-              INSERT actual_class_with_model_id INTO TABLE classes_with_model_id.
-              IF aok->g_info-class_is_inheriting EQ true.
-                " SAP_2_FAMIX_37        Determine local inheritances of classes
-                DATA ls_inheritance_2 LIKE LINE OF inheritances. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-                CLEAR ls_inheritance_2.
-                ls_inheritance_2-subclass = actual_class_with_model_id-classname.
-                ls_inheritance_2-superclass = aok->g_info-class_inherits_from.
-                INSERT ls_inheritance_2 INTO TABLE inheritances.
-              ENDIF.
-            WHEN aok->start_public.
-              context-in_section = public.
-            WHEN aok->start_protected.
-              context-in_section = protected.
-            WHEN aok->start_private.
-              context-in_section = private.
-            WHEN aok->end_class.
-              context-in_section = none.
-              context-in_class_definition = false.
-              CLEAR context-implementation_of_class.
-            WHEN aok->method_definition.
-              " SAP_2_FAMIX_29      Determine local class methods in programs
-              IF aok->g_info-is_static EQ true.
-                CLEAR actual_method.
-                actual_method-classname = actual_class_with_model_id-classname.
-                actual_method-in_section = context-in_section.
-              ELSE.
-                CLEAR actual_method.
-                actual_method-classname = actual_class_with_model_id-classname.
-                actual_method-in_section = context-in_section.
-                actual_method-instanciable = true.
-              ENDIF.
-              actual_method-methodname = aok->g_info-name.
-            WHEN aok->start_class_implementation.
-              context-implementation_of_class = aok->g_info-name.
-            WHEN aok->start_method_implementation.
-              context-implementation_of_method = aok->g_info-name.
-              IF g_parameter_list_tokens EQ true.
-                FORMAT COLOR COL_GROUP.
-              ENDIF.
-            WHEN aok->end_method_implementation.
-              CLEAR context-implementation_of_method.
-              IF g_parameter_list_tokens EQ true.
-                FORMAT COLOR COL_BACKGROUND.
-              ENDIF.
-            WHEN OTHERS.
-
-          ENDCASE.
-
-        WHEN OTHERS.
-
-      ENDCASE.
-
-      IF g_parameter_list_tokens EQ true.
-        WRITE: / <statement>-type.
-        FIELD-SYMBOLS <token> LIKE LINE OF sorted_tokens.
-        LOOP AT sorted_tokens ASSIGNING <token> WHERE
-            index >= <statement>-from
-        AND index <= <statement>-to.
-          WRITE: '|', <token>-type, <token>-str.
-        ENDLOOP.
-      ENDIF.
-
-    ENDLOOP.
-
-    " Add local classes to model
-
-    DATA sap_class TYPE REF TO cl_sap_class.
-    CREATE OBJECT sap_class EXPORTING model = model.
-
-    FIELD-SYMBOLS <class> LIKE LINE OF classes_with_model_id.
-    LOOP AT classes_with_model_id ASSIGNING <class>.
-      " SAP_2_FAMIX_30        Map local classes of programs to FAMIX.Class
-      " SAP_2_FAMIX_61      Mark the FAMIX Class with the attribute modifiers = 'ABAPLocalClass'
-      <class>-id_in_model = sap_class->add_local( program   = program
-                                                  name      = <class>-classname
-                                                  modifiers = modifiers_abaplocalclass ).
-
-      sap_class->set_parent_program( element_id = <class>-id_in_model
-                                     sap_program = program ).
-
-
-    ENDLOOP.
-
-    " Add local methods to model
-
-    DATA sap_method TYPE REF TO cl_sap_method.
-    CREATE OBJECT sap_method EXPORTING model = model.
-
-    FIELD-SYMBOLS <method> LIKE LINE OF methods.
-    LOOP AT methods ASSIGNING <method>.
-      FIELD-SYMBOLS <class_2> LIKE LINE OF classes_with_model_id.
-      READ TABLE classes_with_model_id ASSIGNING <class_2> WITH TABLE KEY classname = <method>-classname.
-      <method>-class_id_in_model = <class_2>-id_in_model.
-
-      <method>-method_id_in_model = sap_method->add_local_method( class_name  = <class_2>-classname
-                                                                  class_id    = <class_2>-id_in_model
-                                                                  method_name = <method>-methodname ).
-
-*      " SAP_2_FAMIX_32      Map local methods to the FAMIX.Method
-*
-*      <method>-method_id_in_model = famix_method->add( EXPORTING name_group = <class_2>-classname " Why classname in name_group?
-*                                                                 name       = <method>-methodname ).
-*      " SAP_2_FAMIX_43        Fill the attribute signature of FAMIX.METHOD with the name of the method
-*      famix_method->set_signature( signature = <method>-methodname ).
-*
-*      " SAP_2_FAMIX_33      Set the attribute parentType of FAMIX.Method for local methods to the name of the local class
-*
-*
-*      famix_method->set_parent_type( EXPORTING parent_element = 'FAMIX.Class'
-*                                               parent_id      =  <class_2>-id_in_model ).
-    ENDLOOP.
-
-    " Add local inheritances to model
-
-    DATA sap_inheritance TYPE REF TO cl_sap_inheritance.
-    CREATE OBJECT sap_inheritance EXPORTING model = model.
-    DATA inheritance LIKE LINE OF inheritances.
-    LOOP AT inheritances INTO inheritance.
-      DATA last_used_id TYPE i.
-      last_used_id = sap_inheritance->add( ).
-      sap_inheritance->set_local_sub_and_super_class( EXPORTING element_id = last_used_id
-                                                                program = program
-                                                                subclass_name   = inheritance-subclass
-                                                                superclass_name = inheritance-superclass ).
-
-    ENDLOOP.
-
-  ENDMETHOD.
-
-ENDCLASS.
-
-CLASS cl_extract_sap IMPLEMENTATION.
-
   METHOD extract.
 
     TYPES:BEGIN OF package_type,
@@ -3012,13 +2677,13 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     _set_default_language( model ).
 
-    DATA nothing_selected TYPE bool.
+    DATA nothing_selected TYPE abap_bool.
 
-    IF g_filter_using_package EQ true.
+    IF g_filter_using_package EQ abap_true.
       DATA select_by_top_package TYPE boolean.
-      select_by_top_package = true.
-    ELSEIF g_filter_using_name EQ true.
-      select_by_top_package = false.
+      select_by_top_package = abap_true.
+    ELSEIF g_filter_using_name EQ abap_true.
+      select_by_top_package = abap_false.
     ELSE.
       ASSERT 1 = 2.
     ENDIF.
@@ -3036,8 +2701,8 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
 
 
-    IF nothing_selected EQ true.
-      nothing_done = true.
+    IF nothing_selected EQ abap_true.
+      nothing_done = abap_true.
       RETURN.
     ENDIF.
 
@@ -3116,7 +2781,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
            AND object = object
            AND obj_name = <component_infos>-component_name.
 
-        IF sy-subrc <> ok.
+        IF sy-subrc <> 0. "OK
           " TBD
           " Report errors
           DELETE new_components_infos WHERE component = <component_infos>-component
@@ -3168,7 +2833,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
         READ TABLE processed_components_infos TRANSPORTING NO FIELDS WITH TABLE KEY component = <component_infos_2>-component component_name = <component_infos_2>-component_name.
 
-        IF sy-subrc <> ok.
+        IF sy-subrc <> 0. "OK
 
           INSERT <component_infos_2> INTO TABLE components_infos.
 
@@ -3222,7 +2887,310 @@ CLASS cl_extract_sap IMPLEMENTATION.
     model->make_mse( IMPORTING mse_model = mse_model ).
 
   ENDMETHOD.
+  METHOD _add_classes_to_model.
 
+    " Add to model
+    DATA existing_class LIKE LINE OF existing_classes.
+    LOOP AT existing_classes INTO existing_class.
+
+
+
+      FIELD-SYMBOLS <component_infos> LIKE LINE OF components_infos.
+      READ TABLE components_infos ASSIGNING <component_infos> WITH TABLE KEY component = globclass_component_key component_name = existing_class-class.
+      IF sy-subrc <> 0. "OK
+        " It may be an interface
+        READ TABLE components_infos ASSIGNING <component_infos> WITH TABLE KEY component = globintf_component_key component_name = existing_class-class.
+
+        IF sy-subrc <> 0. "OK
+          " It may be a Web Dynpro component
+          READ TABLE components_infos ASSIGNING <component_infos> WITH TABLE KEY component = webdynpro_component_comp_key component_name = existing_class-class.
+          ASSERT sy-subrc EQ 0. "OK
+        ENDIF.
+      ENDIF.
+
+      sap_package->add( EXPORTING name = <component_infos>-package ).
+
+      DATA last_id TYPE i.
+
+      IF <component_infos>-component EQ globintf_component_key.
+        " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
+        sap_class->add( EXPORTING name      = existing_class-class
+                                  modifiers = modifier_abapglobalinterface
+                        IMPORTING id        = last_id ).
+        sap_class->set_parent_package( element_id     = last_id
+                                       parent_package = <component_infos>-package ).
+        " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
+        sap_class->is_interface( element_id = last_id ).
+      ELSEIF <component_infos>-component EQ globclass_component_key.
+        " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
+        sap_class->add( EXPORTING name      = existing_class-class
+                                  modifiers = modifier_abapglobalclass
+                        IMPORTING id        = last_id ).
+        sap_class->set_parent_package( element_id     = last_id
+                                       parent_package = <component_infos>-package ).
+      ELSEIF <component_infos>-component EQ webdynpro_component_comp_key.
+        sap_class->add( EXPORTING name      = existing_class-class
+                                  modifiers = modifier_webdynpro_component
+                        IMPORTING id        = last_id ).
+        sap_class->set_parent_package( element_id     = last_id
+                                       parent_package = <component_infos>-package ).
+      ELSE.
+        ASSERT 1 = 2.
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+  METHOD _add_tables_to_model.
+
+    FIELD-SYMBOLS: <db_table> LIKE LINE OF db_tables.
+    LOOP AT db_tables ASSIGNING <db_table>.
+
+      FIELD-SYMBOLS <component_infos> LIKE LINE OF components_infos.
+      READ TABLE components_infos ASSIGNING <component_infos> WITH TABLE KEY component = databasetable_component_key component_name = <db_table>-db_table.
+      ASSERT sy-subrc EQ 0.
+      sap_package->add( EXPORTING name = <component_infos>-package ).
+
+      sap_db_table->add( EXPORTING name = <db_table>-db_table IMPORTING id                 = <db_table>-id_in_model
+                                                                        dummy_attribute_id = <db_table>-id_of_dummy_attribute_in_model ).
+
+      sap_db_table->set_parent_package( element_id     = <db_table>-id_in_model
+                                        parent_package = <component_infos>-package ).
+
+    ENDLOOP.
+
+  ENDMETHOD.
+  METHOD _add_to_class_components_to_mo.
+
+    " Add to class components to model
+
+    DATA class_component LIKE LINE OF class_components.
+    LOOP AT class_components INTO class_component.
+
+      CASE class_component-cmptype.
+        WHEN comptype_attribute. "Attribute
+
+          DATA existing_id TYPE i.
+          existing_id =  sap_attribute->get_id( class     = class_component-clsname
+                                                attribute = class_component-cmpname ).
+          IF existing_id EQ 0. " not found
+
+            sap_attribute->add( EXPORTING class     = class_component-clsname
+                                          attribute = class_component-cmpname ).
+*            famix_attribute->set_parent_type(
+*              EXPORTING
+*                parent_element = 'FAMIX.Class'
+*                parent_name    = CONV string( class_component-clsname ) ).
+*            famix_attribute->store_id( EXPORTING class     = CONV string( class_component-clsname )
+*                                                 attribute = CONV string( class_component-cmpname ) ).
+
+          ENDIF.
+
+        WHEN comptype_method. "Method
+
+          existing_id = sap_method->get_id( class  = class_component-clsname
+                                            method = class_component-cmpname ).
+
+          IF existing_id EQ 0. " not found
+
+            sap_method->add( class  = class_component-clsname
+                             method = class_component-cmpname ).
+
+          ENDIF.
+        WHEN 2. "Event
+        WHEN 3. "Type
+        WHEN OTHERS.
+          " TBD Warn
+
+      ENDCASE.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+  METHOD _analyze_components.
+
+    " Loop over all packages to find classes and programms
+
+    " SAP_2_FAMIX_1     Extract classes from Dictionary
+    " SAP_2_FAMIX_2     Extract interfaces as FAMIX.Class with attribute isinterface
+
+    DATA class LIKE LINE OF classes.
+
+    FIELD-SYMBOLS <component_infos> LIKE LINE OF components_infos.
+
+    LOOP AT components_infos ASSIGNING <component_infos>.
+      MOVE-CORRESPONDING <component_infos> TO class.
+      INSERT class INTO TABLE classes.
+
+      IF <component_infos>-component EQ globclass_component_key
+      OR <component_infos>-component EQ globintf_component_key
+      OR <component_infos>-component EQ webdynpro_component_comp_key.
+
+        class-obj_name = <component_infos>-component_name.
+        INSERT class INTO TABLE classes.
+
+      ELSEIF <component_infos>-component EQ abapprogram_component_key.
+        DATA ls_program LIKE LINE OF programs. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+        CLEAR ls_program.
+        ls_program-program = <component_infos>-component_name.
+        INSERT ls_program INTO TABLE programs.
+      ELSEIF <component_infos>-component EQ databasetable_component_key.
+        DATA ls_db_table LIKE LINE OF db_tables.
+        CLEAR ls_db_table.
+        ls_db_table-db_table = <component_infos>-component_name.
+        INSERT ls_db_table INTO TABLE db_tables.
+      ELSE.
+        ASSERT 1 = 2.
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+  METHOD _convert_compnt_to_famix_model.
+
+    " convert component to FAMIX modifier
+
+    CASE component.
+      WHEN globclass_component_key.
+        modifier = modifier_abapglobalclass.
+      WHEN globintf_component_key.
+        modifier = modifier_abapglobalinterface.
+      WHEN webdynpro_component_comp_key.
+        modifier = modifier_webdynpro_component.
+      WHEN OTHERS.
+        ASSERT 1 = 2.
+    ENDCASE.
+
+  ENDMETHOD.
+  METHOD _determine_class_components.
+
+    " Determine class components
+
+    " SAP_2_FAMIX_9         Extract methods of classes
+    " SAP_2_FAMIX_10        Extract methods of interfaces
+    " SAP_2_FAMIX_11        Extract attributes of classes
+    " SAP_2_FAMIX_12        Extract attributes of interfaces
+
+    IF existing_classes IS NOT INITIAL.
+      "
+      SELECT clsname cmpname cmptype FROM seocompo INTO TABLE class_components
+        FOR ALL ENTRIES IN existing_classes
+        WHERE
+          clsname = existing_classes-class.
+
+    ENDIF.
+
+  ENDMETHOD.
+  METHOD _determine_inheritances_betwee.
+
+    " Determine inheritances between selected classes
+
+    DATA: inheritances TYPE STANDARD TABLE OF  inheritance_type.
+
+    IF existing_classes IS NOT INITIAL.
+      SELECT clsname refclsname reltype FROM seometarel INTO CORRESPONDING FIELDS OF TABLE inheritances
+        FOR ALL ENTRIES IN existing_classes WHERE clsname = existing_classes-class
+                                               AND version = 1.
+    ENDIF.
+
+    " Delete all inheritances where superclass is not in selected packages
+    DATA inheritance LIKE LINE OF inheritances.
+    LOOP AT inheritances INTO inheritance.
+      READ TABLE existing_classes TRANSPORTING NO FIELDS WITH TABLE KEY class = inheritance-refclsname.
+      IF sy-subrc <> 0. "OK
+        DELETE inheritances.
+      ENDIF.
+    ENDLOOP.
+
+    " Add inheritances to model
+    DATA inheritance_2 LIKE LINE OF inheritances.
+    LOOP AT inheritances INTO inheritance_2.
+      CASE inheritance_2-reltype.
+        WHEN 2.
+          " Inheritance
+          DATA inheritance_id TYPE i.
+          inheritance_id = sap_inheritance->add( ).
+          sap_inheritance->set_sub_and_super_class( EXPORTING element_id = inheritance_id
+                                                              subclass_name         = inheritance_2-clsname
+                                                              superclass_name       = inheritance_2-refclsname ).
+        WHEN 1.
+          " Interface implementation
+
+          inheritance_id = sap_inheritance->add( ).
+          sap_inheritance->set_interface_for_class( EXPORTING element_id = inheritance_id
+                                                              interface_name         = inheritance_2-clsname
+                                                              class_name       = inheritance_2-refclsname ).
+
+        WHEN 0.
+          " Interface composition     (i COMPRISING i_ref)
+          " TBD
+        WHEN 5.
+          " Enhancement            ( c enhances c_ref)
+          " TBD
+      ENDCASE.
+    ENDLOOP.
+
+  ENDMETHOD.
+  METHOD _determine_packages_to_analyze.
+
+    " Determine packages to analyze
+
+    "! A temporal helper table used to find all packages (development classes) in the selection
+    DATA temp_packages_to_search TYPE STANDARD TABLE OF package_type.
+
+    sap_package->add( name = package_first-devclass ).
+
+    DATA ls_processed_package LIKE LINE OF processed_packages. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_processed_package.
+    ls_processed_package-devclass = package_first-devclass.
+    INSERT ls_processed_package INTO TABLE processed_packages.
+
+    DATA ls_temp_package_to_search LIKE LINE OF temp_packages_to_search. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_temp_package_to_search.
+    ls_temp_package_to_search-devclass = g_parameter_package_to_analyze.
+    INSERT ls_temp_package_to_search INTO TABLE temp_packages_to_search.
+    WHILE temp_packages_to_search IS NOT INITIAL.
+      IF temp_packages_to_search IS NOT INITIAL.
+        TYPES: BEGIN OF abap_731_package_type,
+                 devclass TYPE tdevc-devclass,
+                 parentcl TYPE tdevc-parentcl,
+               END OF abap_731_package_type.
+        DATA: packages TYPE STANDARD TABLE OF abap_731_package_type WITH DEFAULT KEY.
+        SELECT devclass  parentcl FROM tdevc INTO TABLE packages
+         FOR ALL ENTRIES IN temp_packages_to_search
+          WHERE parentcl = temp_packages_to_search-devclass.
+      ENDIF.
+
+      CLEAR temp_packages_to_search.
+
+      DATA package LIKE LINE OF packages.
+      LOOP AT packages INTO package.
+
+        CLEAR ls_processed_package.
+        ls_processed_package-devclass = package-devclass.
+        INSERT ls_processed_package INTO TABLE processed_packages.
+        IF sy-subrc EQ 0. "OK
+          " New package
+          " Search again
+          CLEAR ls_temp_package_to_search.
+          ls_temp_package_to_search-devclass = package-devclass.
+          INSERT ls_temp_package_to_search INTO TABLE temp_packages_to_search.
+          sap_package->add( name = package-devclass ).
+          IF package-parentcl IS NOT INITIAL.
+            " Assume that this is not a top package but that there exists a parent package
+            sap_package->set_parent_package( this_package = package-devclass
+                                             parent_package = package-parentcl ).
+          ENDIF.
+        ENDIF.
+
+      ENDLOOP.
+
+      SORT temp_packages_to_search.
+      DELETE ADJACENT DUPLICATES FROM temp_packages_to_search.
+
+    ENDWHILE.
+
+  ENDMETHOD.
   METHOD _determine_usages.
 
     DATA where_used_name TYPE eu_lname.
@@ -3272,8 +3240,13 @@ CLASS cl_extract_sap IMPLEMENTATION.
         IMPORTING
           mtdkey   = ls_mtdkey.
       IF ls_mtdkey IS NOT INITIAL.
+*        FIND FIRST OCCURRENCE OF '~' IN ls_mtdkey-cpdname.
+*        if sy-subrc eq 0.
+        " This is an interface. Reverse the usage direction
+        " SAP_2_FAMIX_64      Methods that implement an interface are used by the interface method
 
 
+*        else.
         using_class = ls_mtdkey-clsname.
 
         " Used by method
@@ -3288,6 +3261,7 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
         modifier_of_using_class = modifier_abapglobalclass.
 
+*        ENDIF.
 
         INSERT LINES OF _handle_used_by_class(
              i_sap_class                   = sap_class
@@ -3336,364 +3310,22 @@ CLASS cl_extract_sap IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+  METHOD _determine_usage_of_db_tables.
+    DATA db_table LIKE LINE OF db_tables.
 
+    LOOP AT db_tables INTO db_table.
 
-  METHOD _set_default_language.
-
-    " Set default language
-
-    DATA famix_custom_source_language TYPE REF TO cl_famix_custom_source_lang.
-    CREATE OBJECT famix_custom_source_language EXPORTING model = model.
-
-    famix_custom_source_language->add( name = 'ABAP' ).
-
-    " Do not assign any entities to ABAP, because otherwise this will not be the default language anymore
-    " So do not do this for ABAP, but maybe for another language
-    " famix_package->set_declared_source_language( EXPORTING source_language_element = 'FAMIX.CustomSourceLanguage'
-    "                                                        source_language_name    = 'ABAP' ).
-
-  ENDMETHOD.
-
-
-  METHOD _determine_packages_to_analyze.
-
-    " Determine packages to analyze
-
-    "! A temporal helper table used to find all packages (development classes) in the selection
-    DATA temp_packages_to_search TYPE STANDARD TABLE OF package_type.
-
-    sap_package->add( name = package_first-devclass ).
-
-    DATA ls_processed_package LIKE LINE OF processed_packages. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-    CLEAR ls_processed_package.
-    ls_processed_package-devclass = package_first-devclass.
-    INSERT ls_processed_package INTO TABLE processed_packages.
-
-    DATA ls_temp_package_to_search LIKE LINE OF temp_packages_to_search. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-    CLEAR ls_temp_package_to_search.
-    ls_temp_package_to_search-devclass = g_parameter_package_to_analyze.
-    INSERT ls_temp_package_to_search INTO TABLE temp_packages_to_search.
-    WHILE temp_packages_to_search IS NOT INITIAL.
-      IF temp_packages_to_search IS NOT INITIAL.
-        TYPES: BEGIN OF abap_731_package_type,
-                 devclass TYPE tdevc-devclass,
-                 parentcl TYPE tdevc-parentcl,
-               END OF abap_731_package_type.
-        DATA: packages TYPE STANDARD TABLE OF abap_731_package_type WITH DEFAULT KEY.
-        SELECT devclass  parentcl FROM tdevc INTO TABLE packages
-         FOR ALL ENTRIES IN temp_packages_to_search
-          WHERE parentcl = temp_packages_to_search-devclass.
-      ENDIF.
-
-      CLEAR temp_packages_to_search.
-
-      DATA package LIKE LINE OF packages.
-      LOOP AT packages INTO package.
-
-        CLEAR ls_processed_package.
-        ls_processed_package-devclass = package-devclass.
-        INSERT ls_processed_package INTO TABLE processed_packages.
-        IF sy-subrc EQ ok.
-          " New package
-          " Search again
-          CLEAR ls_temp_package_to_search.
-          ls_temp_package_to_search-devclass = package-devclass.
-          INSERT ls_temp_package_to_search INTO TABLE temp_packages_to_search.
-          sap_package->add( name = package-devclass ).
-          IF package-parentcl IS NOT INITIAL.
-            " Assume that this is not a top package but that there exists a parent package
-            sap_package->set_parent_package( this_package = package-devclass
-                                             parent_package = package-parentcl ).
-          ENDIF.
-        ENDIF.
-
-      ENDLOOP.
-
-      SORT temp_packages_to_search.
-      DELETE ADJACENT DUPLICATES FROM temp_packages_to_search.
-
-    ENDWHILE.
-
-  ENDMETHOD.
-
-
-  METHOD _analyze_components.
-
-    " Loop over all packages to find classes and programms
-
-    " SAP_2_FAMIX_1     Extract classes from Dictionary
-    " SAP_2_FAMIX_2     Extract interfaces as FAMIX.Class with attribute isinterface
-
-    DATA class LIKE LINE OF classes.
-
-    FIELD-SYMBOLS <component_infos> LIKE LINE OF components_infos.
-
-    LOOP AT components_infos ASSIGNING <component_infos>.
-      MOVE-CORRESPONDING <component_infos> TO class.
-      INSERT class INTO TABLE classes.
-
-      IF <component_infos>-component EQ globclass_component_key
-      OR <component_infos>-component EQ globintf_component_key
-      OR <component_infos>-component EQ webdynpro_component_comp_key.
-
-        class-obj_name = <component_infos>-component_name.
-        INSERT class INTO TABLE classes.
-
-      ELSEIF <component_infos>-component EQ abapprogram_component_key.
-        DATA ls_program LIKE LINE OF programs. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-        CLEAR ls_program.
-        ls_program-program = <component_infos>-component_name.
-        INSERT ls_program INTO TABLE programs.
-      ELSEIF <component_infos>-component EQ databasetable_component_key.
-        DATA ls_db_table LIKE LINE OF db_tables.
-        CLEAR ls_db_table.
-        ls_db_table-db_table = <component_infos>-component_name.
-        INSERT ls_db_table INTO TABLE db_tables.
-      ELSE.
-        ASSERT 1 = 2.
-      ENDIF.
+      INSERT LINES OF _determine_usages( sap_class        = sap_class
+                                         db_table         = db_table
+                                         sap_package      = sap_package
+                                         sap_method       = sap_method
+                                         sap_invocation   = sap_invocation
+                                         sap_access       = sap_access
+                                         used          = db_table-id_of_dummy_attribute_in_model ) INTO TABLE new_components_infos.
 
     ENDLOOP.
 
   ENDMETHOD.
-
-
-  METHOD _read_all_programs.
-
-    " Read all programs
-
-    " SAP_2_FAMIX_4     Extract programs
-
-    FIELD-SYMBOLS <program> LIKE LINE OF programs.
-    LOOP AT programs ASSIGNING <program>.
-
-      FIELD-SYMBOLS <component_infos> LIKE LINE OF components_infos.
-      READ TABLE components_infos ASSIGNING <component_infos>
-            WITH TABLE KEY component = abapprogram_component_key
-                           component_name = <program>-program.
-      ASSERT sy-subrc EQ ok.
-
-      sap_package->add( name  = <component_infos>-package ).
-
-      DATA module_reference TYPE i.
-      module_reference = sap_program->add( name = <program>-program ).
-
-      sap_program->set_parent_package( element_id = module_reference
-                                       parent_package = <component_infos>-package ).
-
-      IF p_iprog EQ true.
-
-        DATA program_analyzer TYPE REF TO cl_program_analyzer.
-        CREATE OBJECT program_analyzer.
-
-        program_analyzer->extract( EXPORTING module_reference = module_reference
-                                             program          = <program>-program
-                                    CHANGING model            = model ).
-
-      ENDIF.
-
-    ENDLOOP.
-
-  ENDMETHOD.
-
-
-  METHOD _add_classes_to_model.
-
-    " Add to model
-    DATA existing_class LIKE LINE OF existing_classes.
-    LOOP AT existing_classes INTO existing_class.
-
-
-
-      FIELD-SYMBOLS <component_infos> LIKE LINE OF components_infos.
-      READ TABLE components_infos ASSIGNING <component_infos> WITH TABLE KEY component = globclass_component_key component_name = existing_class-class.
-      IF sy-subrc <> ok.
-        " It may be an interface
-        READ TABLE components_infos ASSIGNING <component_infos> WITH TABLE KEY component = globintf_component_key component_name = existing_class-class.
-
-        IF sy-subrc <> ok.
-          " It may be a Web Dynpro component
-          READ TABLE components_infos ASSIGNING <component_infos> WITH TABLE KEY component = webdynpro_component_comp_key component_name = existing_class-class.
-          ASSERT sy-subrc EQ ok.
-        ENDIF.
-      ENDIF.
-
-      sap_package->add( EXPORTING name = <component_infos>-package ).
-
-      DATA last_id TYPE i.
-
-      IF <component_infos>-component EQ globintf_component_key.
-        " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
-        sap_class->add( EXPORTING name      = existing_class-class
-                                  modifiers = modifier_abapglobalinterface
-                        IMPORTING id        = last_id ).
-        sap_class->set_parent_package( element_id     = last_id
-                                       parent_package = <component_infos>-package ).
-        " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
-        sap_class->is_interface( element_id = last_id ).
-      ELSEIF <component_infos>-component EQ globclass_component_key.
-        " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
-        sap_class->add( EXPORTING name      = existing_class-class
-                                  modifiers = modifier_abapglobalclass
-                        IMPORTING id        = last_id ).
-        sap_class->set_parent_package( element_id     = last_id
-                                       parent_package = <component_infos>-package ).
-      ELSEIF <component_infos>-component EQ webdynpro_component_comp_key.
-        sap_class->add( EXPORTING name      = existing_class-class
-                                  modifiers = modifier_webdynpro_component
-                        IMPORTING id        = last_id ).
-        sap_class->set_parent_package( element_id     = last_id
-                                       parent_package = <component_infos>-package ).
-      ELSE.
-        ASSERT 1 = 2.
-      ENDIF.
-
-    ENDLOOP.
-
-  ENDMETHOD.
-
-  METHOD _add_tables_to_model.
-
-    FIELD-SYMBOLS: <db_table> LIKE LINE OF db_tables.
-    LOOP AT db_tables ASSIGNING <db_table>.
-
-      FIELD-SYMBOLS <component_infos> LIKE LINE OF components_infos.
-      READ TABLE components_infos ASSIGNING <component_infos> WITH TABLE KEY component = databasetable_component_key component_name = <db_table>-db_table.
-      ASSERT sy-subrc EQ 0.
-      sap_package->add( EXPORTING name = <component_infos>-package ).
-
-      sap_db_table->add( EXPORTING name = <db_table>-db_table IMPORTING id                 = <db_table>-id_in_model
-                                                                        dummy_attribute_id = <db_table>-id_of_dummy_attribute_in_model ).
-
-      sap_db_table->set_parent_package( element_id     = <db_table>-id_in_model
-                                        parent_package = <component_infos>-package ).
-
-    ENDLOOP.
-
-  ENDMETHOD.
-
-  METHOD _determine_inheritances_betwee.
-
-    " Determine inheritances between selected classes
-
-    DATA: inheritances TYPE STANDARD TABLE OF  inheritance_type.
-
-    IF existing_classes IS NOT INITIAL.
-      SELECT clsname refclsname reltype FROM seometarel INTO CORRESPONDING FIELDS OF TABLE inheritances
-        FOR ALL ENTRIES IN existing_classes WHERE clsname = existing_classes-class
-                                               AND version = 1.
-    ENDIF.
-
-    " Delete all inheritances where superclass is not in selected packages
-    DATA inheritance LIKE LINE OF inheritances.
-    LOOP AT inheritances INTO inheritance.
-      READ TABLE existing_classes TRANSPORTING NO FIELDS WITH TABLE KEY class = inheritance-refclsname.
-      IF sy-subrc <> ok.
-        DELETE inheritances.
-      ENDIF.
-    ENDLOOP.
-
-    " Add inheritances to model
-    DATA inheritance_2 LIKE LINE OF inheritances.
-    LOOP AT inheritances INTO inheritance_2.
-      CASE inheritance_2-reltype.
-        WHEN 2.
-          " Inheritance
-          DATA inheritance_id TYPE i.
-          inheritance_id = sap_inheritance->add( ).
-          sap_inheritance->set_sub_and_super_class( EXPORTING element_id = inheritance_id
-                                                              subclass_name         = inheritance_2-clsname
-                                                              superclass_name       = inheritance_2-refclsname ).
-        WHEN 1.
-          " Interface implementation
-
-          inheritance_id = sap_inheritance->add( ).
-          sap_inheritance->set_interface_for_class( EXPORTING element_id = inheritance_id
-                                                              interface_name         = inheritance_2-clsname
-                                                              class_name       = inheritance_2-refclsname ).
-
-        WHEN 0.
-          " Interface composition     (i COMPRISING i_ref)
-          " TBD
-        WHEN 5.
-          " Enhancement            ( c enhances c_ref)
-          " TBD
-      ENDCASE.
-    ENDLOOP.
-
-  ENDMETHOD.
-
-
-  METHOD _determine_class_components.
-
-    " Determine class components
-
-    " SAP_2_FAMIX_9         Extract methods of classes
-    " SAP_2_FAMIX_10        Extract methods of interfaces
-    " SAP_2_FAMIX_11        Extract attributes of classes
-    " SAP_2_FAMIX_12        Extract attributes of interfaces
-
-    IF existing_classes IS NOT INITIAL.
-      "
-      SELECT clsname cmpname cmptype FROM seocompo INTO TABLE class_components
-        FOR ALL ENTRIES IN existing_classes
-        WHERE
-          clsname = existing_classes-class.
-
-    ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD _add_to_class_components_to_mo.
-
-    " Add to class components to model
-
-    DATA class_component LIKE LINE OF class_components.
-    LOOP AT class_components INTO class_component.
-
-      CASE class_component-cmptype.
-        WHEN comptype_attribute. "Attribute
-
-          DATA existing_id TYPE i.
-          existing_id =  sap_attribute->get_id( class     = class_component-clsname
-                                                attribute = class_component-cmpname ).
-          IF existing_id EQ not_found.
-
-            sap_attribute->add( EXPORTING class     = class_component-clsname
-                                          attribute = class_component-cmpname ).
-*            famix_attribute->set_parent_type(
-*              EXPORTING
-*                parent_element = 'FAMIX.Class'
-*                parent_name    = CONV string( class_component-clsname ) ).
-*            famix_attribute->store_id( EXPORTING class     = CONV string( class_component-clsname )
-*                                                 attribute = CONV string( class_component-cmpname ) ).
-
-          ENDIF.
-
-        WHEN comptype_method. "Method
-
-          existing_id = sap_method->get_id( class  = class_component-clsname
-                                            method = class_component-cmpname ).
-
-          IF existing_id EQ not_found.
-
-            sap_method->add( class  = class_component-clsname
-                             method = class_component-cmpname ).
-
-          ENDIF.
-        WHEN 2. "Event
-        WHEN 3. "Type
-        WHEN OTHERS.
-          " TBD Warn
-
-      ENDCASE.
-
-    ENDLOOP.
-
-  ENDMETHOD.
-
-
   METHOD _determine_usage_of_methods.
 
     DATA class_component TYPE class_component_type.
@@ -3728,24 +3360,122 @@ CLASS cl_extract_sap IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+  METHOD _handle_used_by_class.
 
-  METHOD _determine_usage_of_db_tables.
-    DATA db_table LIKE LINE OF db_tables.
+    DATA tadir_object TYPE string.
+    CASE i_modifier_of_using_class.
+      WHEN modifier_abapglobalclass.
+        tadir_object = tadir_clas.
+      WHEN modifier_webdynpro_component.
+        tadir_object = tadir_wdyn.
+      WHEN OTHERS.
+        ASSERT 1 = 2.
+    ENDCASE.
 
-    LOOP AT db_tables INTO db_table.
+    " Handle used by class
+    DATA using_method_id TYPE i.
+    using_method_id = i_sap_method->get_id( class  = i_using_class
+                                          method = i_using_method ).
+    IF using_method_id EQ 0.
 
-      INSERT LINES OF _determine_usages( sap_class        = sap_class
-                                         db_table         = db_table
-                                         sap_package      = sap_package
-                                         sap_method       = sap_method
-                                         sap_invocation   = sap_invocation
-                                         sap_access       = sap_access
-                                         used          = db_table-id_of_dummy_attribute_in_model ) INTO TABLE new_components_infos.
+      IF g_param_usage_outpack_groupd EQ abap_false.
 
-    ENDLOOP.
+        " Method does not exist, create the class
+        " SAP_2_FAMIX_21      If a component is used by a class that is not selected, add this class to the model
+        " SAP_2_FAMIX_22      Do not assign classes that included due to usage to a package
+
+
+        DATA exists_already_with_id TYPE i.
+        i_sap_class->add( EXPORTING name      = i_using_class
+                                  modifiers = i_modifier_of_using_class
+                        IMPORTING exists_already_with_id = exists_already_with_id ).
+
+        IF exists_already_with_id IS INITIAL.
+
+          " SAP_2_FAMIX_47      If no dummy class is specified in case a using class is not in the initial selection, analyze this classes also
+
+          DATA ls_new_components_info LIKE LINE OF r_new_components_infos. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+
+          DATA ls_tadir_comp_map LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+          READ TABLE g_tadir_components_mapping INTO ls_tadir_comp_map WITH TABLE KEY object = tadir_object.
+          ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
+          CLEAR ls_new_components_info.
+          ls_new_components_info-component_name = i_using_class.
+          ls_new_components_info-component   = ls_tadir_comp_map-component .
+          INSERT ls_new_components_info INTO TABLE r_new_components_infos.
+
+        ENDIF.
+
+      ELSE.
+        " SAP_2_FAMIX_35        Add usage to a single dummy class "OTHER_SAP_CLASS" if required by a parameter
+        DATA id TYPE i.
+        i_sap_class->add( EXPORTING name                   = 'OTHER_SAP_CLASS'
+                                  modifiers              = modifier_abapglobalclass
+                        IMPORTING exists_already_with_id = exists_already_with_id
+                                  id                     = id ).
+        i_sap_package->add( name = 'OTHER_SAP_PACKAGE' ).
+        i_sap_class->set_parent_package( element_id     = id
+                                       parent_package = 'OTHER_SAP_PACKAGE' ).
+
+      ENDIF.
+
+      " Now there is a class, but no duplicate class
+
+      IF g_param_usage_outpack_groupd EQ abap_false.
+        using_method_id = i_sap_method->get_id( class  = i_using_class
+                                              method = i_using_method ).
+      ELSE.
+        using_method_id = i_sap_method->get_id( class  = 'OTHER_SAP_CLASS'
+                                              method = 'OTHER_SAP_METHOD' ).
+      ENDIF.
+
+
+      IF using_method_id EQ 0.
+        IF g_param_usage_outpack_groupd EQ abap_false.
+          " Now also the method is to be created
+          " SAP_2_FAMIX_23       If a component is used by a class that is not selected, add the using methods to the model
+
+          using_method_id = i_sap_method->add( class  = i_using_class
+                                             method = i_using_method ).
+
+        ELSE.
+
+          " SAP_2_FAMIX_36        Add a usage to a single dummy method "OTHER_SAP_METHOD" if required by a parameter
+
+          using_method_id = i_sap_method->add( class  = 'OTHER_SAP_CLASS'
+                                             method = 'OTHER_SAP_METHOD'  ).
+
+        ENDIF.
+      ENDIF.
+
+    ENDIF.
+
+    IF i_class_component_is_supplied EQ abap_true.
+      CASE i_class_component-cmptype.
+        WHEN comptype_method.
+
+          i_sap_invocation->add_invocation( used_method  = i_used
+                                          using_method = using_method_id ).
+
+        WHEN comptype_attribute.
+
+          i_sap_access->add_access( used_attribute = i_used
+                                  using_method   = using_method_id ).
+
+        WHEN OTHERS.
+          ASSERT 1 = 2.
+      ENDCASE.
+    ELSEIF ib_table_is_supplied EQ abap_true.
+
+      " SAP_2_FAMIX_57      Model usages of database tables by a an access to the dummy attribute of the modelled FAMIX Class
+      i_sap_access->add_access( used_attribute  = i_used
+                              using_method = using_method_id ).
+
+    ELSE.
+      ASSERT 1 = 2.
+    ENDIF.
 
   ENDMETHOD.
-
   METHOD _read_all_classes.
 
     " Read all classes
@@ -3764,22 +3494,58 @@ CLASS cl_extract_sap IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+  METHOD _read_all_programs.
 
+    " Read all programs
+
+    " SAP_2_FAMIX_4     Extract programs
+
+    FIELD-SYMBOLS <program> LIKE LINE OF programs.
+    LOOP AT programs ASSIGNING <program>.
+
+      FIELD-SYMBOLS <component_infos> LIKE LINE OF components_infos.
+      READ TABLE components_infos ASSIGNING <component_infos>
+            WITH TABLE KEY component = abapprogram_component_key
+                           component_name = <program>-program.
+      ASSERT sy-subrc EQ 0. "OK
+
+      sap_package->add( name  = <component_infos>-package ).
+
+      DATA module_reference TYPE i.
+      module_reference = sap_program->add( name = <program>-program ).
+
+      sap_program->set_parent_package( element_id = module_reference
+                                       parent_package = <component_infos>-package ).
+
+      IF p_iprog EQ abap_true.
+
+        DATA program_analyzer TYPE REF TO cl_program_analyzer.
+        CREATE OBJECT program_analyzer.
+
+        program_analyzer->extract( EXPORTING module_reference = module_reference
+                                             program          = <program>-program
+                                    CHANGING model            = model ).
+
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
   METHOD _select_requested_components.
 
     DATA first_package TYPE tdevc.
     DATA processed_packages TYPE cl_extract_sap=>processed_packages_type.
     DATA object TYPE trobjtype.
 
-    IF select_by_top_package EQ true.
+    IF select_by_top_package EQ abap_true.
 
       " Select components in package and sub package
       " SAP_2_FAMIX_3     Select all components in a package and the sub packages of this package
 
       SELECT SINGLE devclass parentcl FROM tdevc INTO first_package WHERE devclass = package_to_analyze.
-      IF sy-subrc <> ok.
+      IF sy-subrc <> 0. "OK
         WRITE: 'Package does not exist: ', package_to_analyze.
-        nothing_selected  = true.
+        nothing_selected  = abap_true.
       ENDIF.
 
       processed_packages = _determine_packages_to_analyze( sap_package = sap_package
@@ -3787,36 +3553,36 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     ENDIF.
 
-    IF   select_by_top_package EQ false
+    IF   select_by_top_package EQ abap_false
       OR processed_packages IS NOT INITIAL.
       DO 5 TIMES.
         CASE sy-index.
           WHEN 1.
-            IF p_clas EQ true.
+            IF p_clas EQ abap_true.
               object = tadir_clas.
             ELSE.
               CONTINUE.
             ENDIF.
           WHEN 2.
-            IF p_wdyn EQ true.
+            IF p_wdyn EQ abap_true.
               object = tadir_wdyn.
             ELSE.
               CONTINUE.
             ENDIF.
           WHEN 3.
-            IF p_intf EQ true.
+            IF p_intf EQ abap_true.
               object = tadir_intf.
             ELSE.
               CONTINUE.
             ENDIF.
           WHEN 4.
-            IF p_prog EQ true.
+            IF p_prog EQ abap_true.
               object = tadir_prog.
             ELSE.
               CONTINUE.
             ENDIF.
           WHEN 5.
-            IF p_tables EQ true.
+            IF p_tables EQ abap_true.
               " SAP_2_FAMIX_53        Extract database tables
               object = tadir_tabl.
             ELSE.
@@ -3825,11 +3591,11 @@ CLASS cl_extract_sap IMPLEMENTATION.
           WHEN OTHERS.
             ASSERT 1 = 2.
         ENDCASE.
-        IF select_by_top_package EQ true.
+        IF select_by_top_package EQ abap_true.
           DATA: BEGIN OF tadir_component,
-                  obj_name LIKE tadir-obj_name,
-                  object   LIKE tadir-object,
-                  devclass LIKE tadir-devclass,
+                  obj_name TYPE tadir-obj_name,
+                  object   TYPE tadir-object,
+                  devclass TYPE tadir-devclass,
                 END OF tadir_component.
           SELECT obj_name object devclass FROM tadir INTO tadir_component FOR ALL ENTRIES IN processed_packages
             WHERE pgmid = 'R3TR'
@@ -3890,166 +3656,404 @@ CLASS cl_extract_sap IMPLEMENTATION.
 
     IF lines( components_infos ) EQ 0.
       WRITE: 'Nothing selected '.
-      nothing_selected  = true.
+      nothing_selected  = abap_true.
     ENDIF.
 
   ENDMETHOD.
+  METHOD _set_default_language.
 
+    " Set default language
 
-  METHOD _handle_used_by_class.
+    DATA famix_custom_source_language TYPE REF TO cl_famix_custom_source_lng.
+    CREATE OBJECT famix_custom_source_language EXPORTING model = model.
 
-    DATA tadir_object TYPE string.
-    CASE i_modifier_of_using_class.
-      WHEN modifier_abapglobalclass.
-        tadir_object = tadir_clas.
-      WHEN modifier_webdynpro_component.
-        tadir_object = tadir_wdyn.
+    famix_custom_source_language->add( name = 'ABAP' ).
+
+    " Do not assign any entities to ABAP, because otherwise this will not be the default language anymore
+    " So do not do this for ABAP, but maybe for another language
+    " famix_package->set_declared_source_language( EXPORTING source_language_element = 'FAMIX.CustomSourceLanguage'
+    "                                                        source_language_name    = 'ABAP' ).
+
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS CL_EP_ANALYZE_OTHER_KEYWRD IMPLEMENTATION.
+  METHOD analyze.
+    ASSERT statement-type EQ 'K'.
+    CLEAR g_info.
+
+    " First Run, what is the keyword
+    FIELD-SYMBOLS <token> LIKE LINE OF g_sorted_tokens.
+    READ TABLE g_sorted_tokens ASSIGNING <token> WITH TABLE KEY index = statement-from.
+    IF sy-subrc <> 0. "OK
+      " TBD Error handling
+      " In the moment ignore
+      RETURN.
+    ENDIF.
+
+    CASE <token>-str.
+      WHEN 'CLASS'.
+        g_info-is_class_stmnt_info = abap_true.
+
+      WHEN 'ENDCLASS'.
+        g_info-statement_type = end_class.
+      WHEN 'PUBLIC'.
+        g_info-statement_type = start_public.
+      WHEN 'PROTECTED'.
+        g_info-statement_type = start_protected.
+      WHEN 'PRIVATE'.
+        g_info-statement_type = start_private.
+      WHEN 'METHODS'.
+        " info-is_method_stmnt = abap_true.
+        g_info-statement_type = method_definition.
+      WHEN 'CLASS-METHODS'.
+        g_info-statement_type = method_definition.
+        g_info-is_static = abap_true.
+      WHEN 'METHOD'.
+        g_info-statement_type = start_method_implementation.
+      WHEN 'ENDMETHOD'.
+        g_info-statement_type = end_method_implementation.
+
+      WHEN 'DATA'.
+        g_info-statement_type = attribute_definition.
+      WHEN 'CLASS-DATA'.
+        g_info-statement_type = attribute_definition.
+        g_info-is_static = abap_true.
       WHEN OTHERS.
-        ASSERT 1 = 2.
+        " TBD
+        " Add further, in the moment ignore
+        RETURN.
     ENDCASE.
 
-    " Handle used by class
-    DATA using_method_id TYPE i.
-    using_method_id = i_sap_method->get_id( class  = i_using_class
-                                          method = i_using_method ).
-    IF using_method_id EQ 0.
+    " Second Run, what is the name
+    IF g_info-is_class_stmnt_info EQ abap_true
+    OR g_info-statement_type EQ method_definition
+    OR g_info-statement_type EQ start_method_implementation
+    OR g_info-statement_type EQ attribute_definition.
 
-      IF g_param_usage_outpack_groupd EQ false.
-
-        " Method does not exist, create the class
-        " SAP_2_FAMIX_21      If a component is used by a class that is not selected, add this class to the model
-        " SAP_2_FAMIX_22      Do not assign classes that included due to usage to a package
-
-
-        DATA exists_already_with_id TYPE i.
-        i_sap_class->add( EXPORTING name      = i_using_class
-                                  modifiers = i_modifier_of_using_class
-                        IMPORTING exists_already_with_id = exists_already_with_id ).
-
-        IF exists_already_with_id IS INITIAL.
-
-          " SAP_2_FAMIX_47      If no dummy class is specified in case a using class is not in the initial selection, analyze this classes also
-
-          DATA ls_new_components_info LIKE LINE OF r_new_components_infos. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-
-          DATA ls_tadir_comp_map LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-          READ TABLE g_tadir_components_mapping INTO ls_tadir_comp_map WITH TABLE KEY object = tadir_object.
-          ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
-          CLEAR ls_new_components_info.
-          ls_new_components_info-component_name = i_using_class.
-          ls_new_components_info-component   = ls_tadir_comp_map-component .
-          INSERT ls_new_components_info INTO TABLE r_new_components_infos.
-
-        ENDIF.
-
-      ELSE.
-        " SAP_2_FAMIX_35        Add usage to a single dummy class "OTHER_SAP_CLASS" if required by a parameter
-        DATA id TYPE i.
-        i_sap_class->add( EXPORTING name                   = 'OTHER_SAP_CLASS'
-                                  modifiers              = modifier_abapglobalclass
-                        IMPORTING exists_already_with_id = exists_already_with_id
-                                  id                     = id ).
-        i_sap_package->add( name = 'OTHER_SAP_PACKAGE' ).
-        i_sap_class->set_parent_package( element_id     = id
-                                       parent_package = 'OTHER_SAP_PACKAGE' ).
-
+      DATA position_of_name TYPE i.
+      position_of_name =  statement-from + 1.
+      READ TABLE g_sorted_tokens ASSIGNING <token> WITH TABLE KEY index = position_of_name.
+      IF sy-subrc <> 0. "OK
+        " TBD Error handling
+        " In the moment ignore
+        RETURN.
       ENDIF.
 
-      " Now there is a class, but no duplicate class
+      g_info-name = <token>-str.
 
-      IF g_param_usage_outpack_groupd EQ false.
-        using_method_id = i_sap_method->get_id( class  = i_using_class
-                                              method = i_using_method ).
-      ELSE.
-        using_method_id = i_sap_method->get_id( class  = 'OTHER_SAP_CLASS'
-                                              method = 'OTHER_SAP_METHOD' ).
-      ENDIF.
-
-
-      IF using_method_id EQ 0.
-        IF g_param_usage_outpack_groupd EQ false.
-          " Now also the method is to be created
-          " SAP_2_FAMIX_23       If a component is used by a class that is not selected, add the using methods to the model
-
-          using_method_id = i_sap_method->add( class  = i_using_class
-                                             method = i_using_method ).
-
-        ELSE.
-
-          " SAP_2_FAMIX_36        Add a usage to a single dummy method "OTHER_SAP_METHOD" if required by a parameter
-
-          using_method_id = i_sap_method->add( class  = 'OTHER_SAP_CLASS'
-                                             method = 'OTHER_SAP_METHOD'  ).
-
-        ENDIF.
+      " Third run, further keywords
+      IF g_info-is_class_stmnt_info EQ abap_true.
+        LOOP AT g_sorted_tokens ASSIGNING <token> WHERE index > position_of_name
+                                                       AND index <= statement-to.
+          CASE <token>-str.
+            WHEN 'DEFINITION'.
+              g_info-statement_type = start_class_definition.
+            WHEN 'IMPLEMENTATION'.
+              g_info-statement_type = start_class_implementation.
+            WHEN 'INHERITING'.
+              g_info-class_is_inheriting = abap_true.
+              DATA superclass_is_at TYPE i.
+              superclass_is_at  = sy-tabix + 2.
+              FIELD-SYMBOLS <ls_superclass_token> LIKE LINE OF g_sorted_tokens.
+              READ TABLE g_sorted_tokens ASSIGNING <ls_superclass_token> WITH TABLE KEY index = superclass_is_at.
+              IF sy-subrc EQ 0. "OK
+                g_info-class_inherits_from = <ls_superclass_token>-str.
+              ELSE.
+                " TBD Error handling
+                " In the moment ignore
+                RETURN.
+              ENDIF.
+          ENDCASE.
+        ENDLOOP.
       ENDIF.
 
     ENDIF.
 
-    IF i_class_component_is_supplied EQ true.
-      CASE i_class_component-cmptype.
-        WHEN comptype_method.
+  ENDMETHOD.
+  METHOD constructor.
+    g_sorted_tokens = sorted_tokens.
 
-          i_sap_invocation->add_invocation( used_method  = i_used
-                                          using_method = using_method_id ).
+  ENDMETHOD.
+ENDCLASS.
 
-        WHEN comptype_attribute.
+CLASS CL_PROGRAM_ANALYZER IMPLEMENTATION.
+  METHOD extract.
+    DATA source TYPE TABLE OF string.
+    READ REPORT program INTO source.
 
-          i_sap_access->add_access( used_attribute = i_used
-                                  using_method   = using_method_id ).
+    DATA: tokens TYPE STANDARD TABLE OF stokes.
+
+    DATA: sorted_tokens TYPE cl_ep_analyze_other_keywrd=>sorted_tokens_type.
+
+    DATA statements TYPE STANDARD TABLE OF sstmnt.
+
+    SCAN ABAP-SOURCE source TOKENS INTO tokens STATEMENTS INTO statements.
+
+    FIELD-SYMBOLS <ls_token_2> LIKE LINE OF tokens.
+    LOOP AT tokens ASSIGNING <ls_token_2>.
+      DATA ls_token LIKE LINE OF sorted_tokens. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+      CLEAR ls_token.
+      ls_token-index = sy-tabix.
+      ls_token-str   = <ls_token_2>-str.
+      ls_token-row   = <ls_token_2>-row.
+      ls_token-col   = <ls_token_2>-col.
+      ls_token-type  = <ls_token_2>-type.
+      INSERT ls_token INTO TABLE sorted_tokens.
+    ENDLOOP.
+
+    SORT statements BY from.
+
+    IF g_parameter_list_tokens EQ abap_true.
+      WRITE: /.
+      WRITE: / program.
+
+    ENDIF.
+
+    TYPES section_type TYPE c LENGTH 1.
+
+    CONSTANTS: "! Is in public section
+      public    TYPE section_type VALUE '1',
+      "! Is in protected section
+      protected TYPE section_type VALUE '2',
+      "! Is in private section
+      private   TYPE section_type VALUE '3',
+      "! Not in a section
+      none      TYPE section_type VALUE ' '.
+
+    TYPES: BEGIN OF codecontext_type,
+             in_section               TYPE section_type,
+             in_class_definition      TYPE abap_bool,
+             implementation_of_class  TYPE string,
+             implementation_of_method TYPE string,
+           END OF codecontext_type.
+
+    "! Context of statement in the code
+    DATA context TYPE codecontext_type.
+
+    TYPES: BEGIN OF class_with_model_id_type,
+             classname   TYPE string,
+             id_in_model TYPE i,
+           END OF class_with_model_id_type.
+
+    DATA: classes_with_model_id      TYPE HASHED TABLE OF class_with_model_id_type WITH UNIQUE KEY classname,
+          actual_class_with_model_id TYPE class_with_model_id_type.
+
+    TYPES: BEGIN OF method_type,
+             classname          TYPE string,
+             class_id_in_model  TYPE i,
+             methodname         TYPE string,
+             method_id_in_model TYPE i,
+             in_section         TYPE section_type,
+             instanciable       TYPE abap_bool,
+           END OF method_type.
+
+    DATA: methods       TYPE STANDARD TABLE OF method_type,
+          actual_method TYPE method_type.
+
+    TYPES: BEGIN OF inheritance_type,
+             subclass   TYPE string,
+             superclass TYPE string,
+           END OF inheritance_type.
+
+    DATA: inheritances TYPE STANDARD TABLE OF inheritance_type.
+
+    DATA token_number TYPE i.
+
+    "! Instance that analyzes other ABAP Keywords
+    DATA aok TYPE REF TO cl_ep_analyze_other_keywrd. " So that ABAP Doc Comment is possible
+    CREATE OBJECT aok EXPORTING sorted_tokens = sorted_tokens.
+
+    FIELD-SYMBOLS <statement> LIKE LINE OF statements.
+    LOOP AT statements ASSIGNING <statement>.
+
+      token_number = 0.
+      CASE <statement>-type.
+        WHEN 'K'.
+
+          aok->analyze( statement = <statement> ).
+          CASE aok->g_info-statement_type.
+            WHEN aok->start_class_definition.
+              " SAP_2_FAMIX_28        Determine local classes in programs
+              context-in_class_definition = abap_true.
+              actual_class_with_model_id-classname = aok->g_info-name.
+              INSERT actual_class_with_model_id INTO TABLE classes_with_model_id.
+              IF aok->g_info-class_is_inheriting EQ abap_true.
+                " SAP_2_FAMIX_37        Determine local inheritances of classes
+                DATA ls_inheritance_2 LIKE LINE OF inheritances. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+                CLEAR ls_inheritance_2.
+                ls_inheritance_2-subclass = actual_class_with_model_id-classname.
+                ls_inheritance_2-superclass = aok->g_info-class_inherits_from.
+                INSERT ls_inheritance_2 INTO TABLE inheritances.
+              ENDIF.
+            WHEN aok->start_public.
+              context-in_section = public.
+            WHEN aok->start_protected.
+              context-in_section = protected.
+            WHEN aok->start_private.
+              context-in_section = private.
+            WHEN aok->end_class.
+              context-in_section = none.
+              context-in_class_definition = abap_false.
+              CLEAR context-implementation_of_class.
+            WHEN aok->method_definition.
+              " SAP_2_FAMIX_29      Determine local class methods in programs
+              IF aok->g_info-is_static EQ abap_true.
+                CLEAR actual_method.
+                actual_method-classname = actual_class_with_model_id-classname.
+                actual_method-in_section = context-in_section.
+              ELSE.
+                CLEAR actual_method.
+                actual_method-classname = actual_class_with_model_id-classname.
+                actual_method-in_section = context-in_section.
+                actual_method-instanciable = abap_true.
+              ENDIF.
+              actual_method-methodname = aok->g_info-name.
+            WHEN aok->start_class_implementation.
+              context-implementation_of_class = aok->g_info-name.
+            WHEN aok->start_method_implementation.
+              context-implementation_of_method = aok->g_info-name.
+              IF g_parameter_list_tokens EQ abap_true.
+                FORMAT COLOR COL_GROUP.
+              ENDIF.
+            WHEN aok->end_method_implementation.
+              CLEAR context-implementation_of_method.
+              IF g_parameter_list_tokens EQ abap_true.
+                FORMAT COLOR COL_BACKGROUND.
+              ENDIF.
+            WHEN OTHERS.
+
+          ENDCASE.
 
         WHEN OTHERS.
-          ASSERT 1 = 2.
+
       ENDCASE.
-    ELSEIF ib_table_is_supplied EQ abap_true.
 
-      " SAP_2_FAMIX_57      Model usages of database tables by a an access to the dummy attribute of the modelled FAMIX Class
-      i_sap_access->add_access( used_attribute  = i_used
-                              using_method = using_method_id ).
+      IF g_parameter_list_tokens EQ abap_true.
+        WRITE: / <statement>-type.
+        FIELD-SYMBOLS <token> LIKE LINE OF sorted_tokens.
+        LOOP AT sorted_tokens ASSIGNING <token> WHERE
+            index >= <statement>-from
+        AND index <= <statement>-to.
+          WRITE: '|', <token>-type, <token>-str.
+        ENDLOOP.
+      ENDIF.
 
-    ELSE.
-      ASSERT 1 = 2.
-    ENDIF.
+    ENDLOOP.
+
+    " Add local classes to model
+
+    DATA sap_class TYPE REF TO cl_sap_class.
+    CREATE OBJECT sap_class EXPORTING model = model.
+
+    FIELD-SYMBOLS <class> LIKE LINE OF classes_with_model_id.
+    LOOP AT classes_with_model_id ASSIGNING <class>.
+      " SAP_2_FAMIX_30        Map local classes of programs to FAMIX.Class
+      " SAP_2_FAMIX_61      Mark the FAMIX Class with the attribute modifiers = 'ABAPLocalClass'
+      <class>-id_in_model = sap_class->add_local( program   = program
+                                                  name      = <class>-classname
+                                                  modifiers = modifiers_abaplocalclass ).
+
+      sap_class->set_parent_program( element_id = <class>-id_in_model
+                                     sap_program = program ).
+
+
+    ENDLOOP.
+
+    " Add local methods to model
+
+    DATA sap_method TYPE REF TO cl_sap_method.
+    CREATE OBJECT sap_method EXPORTING model = model.
+
+    FIELD-SYMBOLS <method> LIKE LINE OF methods.
+    LOOP AT methods ASSIGNING <method>.
+      FIELD-SYMBOLS <class_2> LIKE LINE OF classes_with_model_id.
+      READ TABLE classes_with_model_id ASSIGNING <class_2> WITH TABLE KEY classname = <method>-classname.
+      <method>-class_id_in_model = <class_2>-id_in_model.
+
+      <method>-method_id_in_model = sap_method->add_local_method( class_name  = <class_2>-classname
+                                                                  class_id    = <class_2>-id_in_model
+                                                                  method_name = <method>-methodname ).
+
+*      " SAP_2_FAMIX_32      Map local methods to the FAMIX.Method
+*
+*      <method>-method_id_in_model = famix_method->add( EXPORTING name_group = <class_2>-classname " Why classname in name_group?
+*                                                                 name       = <method>-methodname ).
+*      " SAP_2_FAMIX_43        Fill the attribute signature of FAMIX.METHOD with the name of the method
+*      famix_method->set_signature( signature = <method>-methodname ).
+*
+*      " SAP_2_FAMIX_33      Set the attribute parentType of FAMIX.Method for local methods to the name of the local class
+*
+*
+*      famix_method->set_parent_type( EXPORTING parent_element = 'FAMIX.Class'
+*                                               parent_id      =  <class_2>-id_in_model ).
+    ENDLOOP.
+
+    " Add local inheritances to model
+
+    DATA sap_inheritance TYPE REF TO cl_sap_inheritance.
+    CREATE OBJECT sap_inheritance EXPORTING model = model.
+    DATA inheritance LIKE LINE OF inheritances.
+    LOOP AT inheritances INTO inheritance.
+      DATA last_used_id TYPE i.
+      last_used_id = sap_inheritance->add( ).
+      sap_inheritance->set_local_sub_and_super_class( EXPORTING element_id = last_used_id
+                                                                program = program
+                                                                subclass_name   = inheritance-subclass
+                                                                superclass_name = inheritance-superclass ).
+
+    ENDLOOP.
 
   ENDMETHOD.
-
-
-  METHOD _convert_compnt_to_famix_model.
-
-    " convert component to FAMIX modifier
-
-    CASE component.
-      WHEN globclass_component_key.
-        modifier = modifier_abapglobalclass.
-      WHEN globintf_component_key.
-        modifier = modifier_abapglobalinterface.
-      WHEN webdynpro_component_comp_key.
-        modifier = modifier_webdynpro_component.
-      WHEN OTHERS.
-        ASSERT 1 = 2.
-    ENDCASE.
-
-  ENDMETHOD.
-
 ENDCLASS.
 
 START-OF-SELECTION.
 
   DATA: mse_model TYPE cl_model=>lines_type.
-  IF g_parameter_extract_from_sap EQ false.
+*"! Extract from SAP
+  DATA g_parameter_extract_from_sap TYPE abap_bool.
+  g_parameter_extract_from_sap = p_sap.
+  IF g_parameter_extract_from_sap EQ abap_false.
     cl_make_demo_model=>make( IMPORTING mse_model = mse_model ).
   ELSE.
     DATA sap_extractor TYPE REF TO cl_extract_sap.
-    CREATE OBJECT sap_extractor.
+
+    DATA: ls_compson_line LIKE LINE OF s_compsn.
+    DATA: ls_compsn TYPE sap_extractor->ty_s_compsn.
+    LOOP AT s_compsn INTO ls_compson_line.
+      APPEND ls_compson_line TO ls_compsn.
+    ENDLOOP.
+
+    DATA: ls_pack_line LIKE LINE OF s_pack.
+    DATA: ls_pack TYPE sap_extractor->ty_s_pack.
+    LOOP AT s_pack INTO ls_pack_line.
+      APPEND ls_pack_line TO ls_pack.
+    ENDLOOP.
+
+    CREATE OBJECT sap_extractor
+      EXPORTING
+        i_g_filter_using_package       = g_filter_using_package
+        i_g_filter_using_name          = g_filter_using_name
+        i_g_parameter_package_to_analz = g_parameter_package_to_analyze
+        i_p_iprog                      = p_iprog
+        i_p_clas                       = p_clas
+        i_p_wdyn                       = p_wdyn
+        i_p_intf                       = p_intf
+        i_p_prog                       = p_prog
+        i_p_tables                     = p_tables
+        i_s_compsn                     = ls_compsn
+        i_s_pack                       = ls_pack
+        i_g_param_usage_outpack_groupd = g_param_usage_outpack_groupd.
+
     DATA nothing_done TYPE boolean.
     sap_extractor->extract( IMPORTING mse_model    = mse_model
                                       nothing_done = nothing_done ).
   ENDIF.
 
-  IF nothing_done EQ true.
+  IF nothing_done EQ abap_true.
     RETURN.
   ENDIF.
 
   DATA model_outputer TYPE REF TO cl_output_model.
   CREATE OBJECT model_outputer.
-  model_outputer->make( mse_model = mse_model ).
+  model_outputer->make( mse_model = mse_model g_parameter_download_file = p_down ).
