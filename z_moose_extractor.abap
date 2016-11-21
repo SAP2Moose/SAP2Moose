@@ -48,7 +48,7 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! 04.11.2016 12:24 issue35 Rainer Winkler
+"! Generated 21.11.2016 17:49
 "!
 REPORT yrw1_mc_moose_extractor.
 TABLES tadir. "So that select-options work
@@ -372,7 +372,7 @@ CLASS CL_MODEL IMPLEMENTATION.
     IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
       ADD 1 TO g_attribute_id.
       ls_attribute-attribute_id   = g_attribute_id.
-      APPEND ls_attribute TO g_attributes.
+      INSERT ls_attribute INTO TABLE g_attributes.
     ENDIF.
 
   ENDMETHOD.
@@ -436,7 +436,7 @@ CLASS CL_MODEL IMPLEMENTATION.
     IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
       ADD 1 TO g_attribute_id.
       ls_attribute-attribute_id   = g_attribute_id.
-      APPEND ls_attribute TO g_attributes.
+      INSERT ls_attribute INTO TABLE g_attributes.
     ENDIF.
 
   ENDMETHOD.
@@ -473,9 +473,9 @@ CLASS CL_MODEL IMPLEMENTATION.
     DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
     CLEAR ls_attribute.
     ls_attribute-element_id             =  _get_element_id( element_id         = element_id
-                                                   element_type       = element_type
-                                                   element_name_group = element_name_group
-                                                   element_name       = element_name ).
+                                                            element_type       = element_type
+                                                            element_name_group = element_name_group
+                                                            element_name       = element_name ).
     ls_attribute-attribute_type = attribute_name.
     ls_attribute-value_type     = string_value.
     ls_attribute-name         = string.
@@ -485,7 +485,7 @@ CLASS CL_MODEL IMPLEMENTATION.
     IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
       ADD 1 TO g_attribute_id.
       ls_attribute-attribute_id   = g_attribute_id.
-      APPEND ls_attribute TO g_attributes.
+      INSERT ls_attribute INTO TABLE g_attributes.
     ENDIF.
 
   ENDMETHOD.
@@ -562,6 +562,7 @@ CLASS CL_MODEL IMPLEMENTATION.
 
         APPEND mse_model_line TO mse_model.
         mse_model_line-line = |  (| && <attribute>-attribute_type.
+        assert ( <attribute>-value_type eq string_value ) or ( <attribute>-value_type eq reference_value ) or ( <attribute>-value_type eq boolean_value ).
         CASE <attribute>-value_type.
           WHEN string_value.
 
@@ -572,18 +573,13 @@ CLASS CL_MODEL IMPLEMENTATION.
             mse_model_line-line = mse_model_line-line && | (ref: | && <attribute>-reference && |))|.
 
           WHEN boolean_value.
-
+            ASSERT ( <attribute>-boolean EQ abap_true ) OR ( <attribute>-boolean EQ abap_false ).
             CASE <attribute>-boolean.
               WHEN abap_true.
                 mse_model_line-line = mse_model_line-line && | true)|.
               WHEN abap_false.
                 mse_model_line-line = mse_model_line-line && | false)|.
-              WHEN OTHERS.
-                ASSERT 1 = 2.
             ENDCASE.
-
-          WHEN OTHERS.
-            ASSERT 1 = 2.
         ENDCASE.
 
       ENDLOOP.
@@ -901,6 +897,7 @@ CLASS cl_famix_attribute DEFINITION INHERITING FROM cl_famix_named_entity
     "! @parameter element_name_group | the name group of the element where the ID shall be added
     "! @parameter element_name | the name of the element
     "! @parameter parent_element | the FAMIX element of the parent Type
+    "! @parameter parent_name_group | the name group of the parent element
     "! @parameter parent_name | the name of the parent element
     "! @parameter parent_id | the id of the parent element
     METHODS set_parent_type
@@ -910,6 +907,7 @@ CLASS cl_famix_attribute DEFINITION INHERITING FROM cl_famix_named_entity
         element_name_group TYPE clike OPTIONAL
         element_name       TYPE clike OPTIONAL
         parent_element     TYPE clike OPTIONAL
+        parent_name_group  TYPE clike OPTIONAL
         parent_name        TYPE clike OPTIONAL
         parent_id          TYPE i     OPTIONAL.
 
@@ -946,6 +944,8 @@ CLASS CL_FAMIX_ATTRIBUTE IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
   METHOD set_parent_type.
+    ASSERT ( parent_element IS SUPPLIED AND parent_name IS SUPPLIED )
+        OR parent_id IS SUPPLIED.
     IF parent_element IS SUPPLIED AND parent_name IS SUPPLIED.
       g_model->add_reference_by_name( EXPORTING element_id        = element_id
                                                 element_type       = element_type
@@ -953,6 +953,7 @@ CLASS CL_FAMIX_ATTRIBUTE IMPLEMENTATION.
                                                 element_name       = element_name
                                                 attribute_name     = 'parentType'
                                                 type_of_reference  = parent_element
+                                                name_group_of_reference = parent_name_group
                                                 name_of_reference  = parent_name ).
     ELSEIF parent_id IS SUPPLIED.
       g_model->add_reference_by_id( EXPORTING element_id        = element_id
@@ -961,8 +962,6 @@ CLASS CL_FAMIX_ATTRIBUTE IMPLEMENTATION.
                                                 element_name       = element_name
                                                 attribute_name     = 'parentType'
                                                 reference_id       = parent_id ).
-    ELSE.
-      ASSERT 1 = 2.
     ENDIF.
   ENDMETHOD.
   METHOD store_id.
@@ -1156,6 +1155,7 @@ CLASS cl_famix_method DEFINITION INHERITING FROM cl_famix_behavioural_entty
     "! @parameter element_name_group | the name group of the element where the ID shall be added
     "! @parameter element_name | the name of the element
     "! @parameter parent_element | the FAMIX element of the parent Type
+    "! @parameter parent_name_group | optional the name group of the parent element
     "! @parameter parent_name | optional the name of the parent element
     "! @parameter parent_id | optional the id of the parent element
     METHODS set_parent_type
@@ -1165,34 +1165,43 @@ CLASS cl_famix_method DEFINITION INHERITING FROM cl_famix_behavioural_entty
         element_name_group TYPE clike OPTIONAL
         element_name       TYPE clike OPTIONAL
         parent_element     TYPE clike
+        parent_name_group  TYPE clike OPTIONAL
         parent_name        TYPE clike OPTIONAL
         parent_id          TYPE i OPTIONAL.
     "! Store the relation between class, method name and id in internal table to enable associations
     "! Call before performing the next time the method add, because the ID is stored internally after creating an element
+    "! @parameter class_name_group | the name group of the class of the method
     "! @parameter class | the class of the method
+    "! @parameter method_name_group | the name group of the method name
     "! @parameter method | the method name
     METHODS store_id
-      IMPORTING
-        class  TYPE clike
-        method TYPE clike.
+      IMPORTING class_name_group  TYPE clike OPTIONAL
+                class             TYPE clike
+                method_name_group TYPE clike OPTIONAL
+                method            TYPE clike.
     "! Returns the ID for a given method of a class
     "! Returns 0 if the class is not known
+    "! @parameter class_name_group | the name group of the class of the method
     "! @parameter class | the class of the method
+    "! @parameter method_name_group | the name group of the method name
     "! @parameter method | the method name
     "! @parameter id | the ID of the element
     METHODS get_id
-      IMPORTING
-                class     TYPE clike
-                method    TYPE clike
-      RETURNING VALUE(id) TYPE i.
+      IMPORTING class_name_group  TYPE clike OPTIONAL
+                class             TYPE clike
+                method_name_group TYPE clike OPTIONAL
+                method            TYPE clike
+      RETURNING VALUE(id)         TYPE i.
 
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_method_id,
-             class  TYPE string,
-             method TYPE string,
-             id     TYPE i,
+             class_name_group  TYPE string,
+             class             TYPE string,
+             method_name_group TYPE string,
+             method            TYPE string,
+             id                TYPE i,
            END OF ty_method_id.
-    DATA: g_method_ids TYPE HASHED TABLE OF ty_method_id WITH UNIQUE KEY class method.
+    DATA: g_method_ids TYPE HASHED TABLE OF ty_method_id WITH UNIQUE KEY class_name_group class method_name_group method.
 ENDCLASS.
 CLASS CL_FAMIX_METHOD IMPLEMENTATION.
   METHOD add.
@@ -1211,8 +1220,10 @@ CLASS CL_FAMIX_METHOD IMPLEMENTATION.
   METHOD get_id.
     FIELD-SYMBOLS <method_id> LIKE LINE OF g_method_ids.
 
-    READ TABLE g_method_ids ASSIGNING <method_id> WITH TABLE KEY class = class
-                                                               method = method.
+    READ TABLE g_method_ids ASSIGNING <method_id> WITH TABLE KEY class_name_group = class_name_group
+                                                                 class = class
+                                                                 method_name_group = method_name_group
+                                                                 method = method.
     IF sy-subrc EQ 0. "OK
       id = <method_id>-id.
     ELSE.
@@ -1220,28 +1231,32 @@ CLASS CL_FAMIX_METHOD IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
   METHOD set_parent_type.
+    ASSERT parent_name IS SUPPLIED OR parent_id IS SUPPLIED.
     IF parent_name IS SUPPLIED.
       g_model->add_reference_by_name( EXPORTING element_id = element_id
                                                 element_type = element_type
                                                 element_name_group = element_name_group
-                                                element_name = element_name attribute_name    = 'parentType'
+                                                element_name = element_name
+                                                attribute_name    = 'parentType'
                                                 type_of_reference       = parent_element
+                                                name_group_of_reference = parent_name_group
                                                 name_of_reference = parent_name ).
     ELSEIF parent_id IS SUPPLIED.
       g_model->add_reference_by_id( EXPORTING element_id = element_id
                                               element_type = element_type
                                               element_name_group = element_name_group
-                                              element_name = element_name attribute_name = 'parentType'
+                                              element_name = element_name
+                                              attribute_name = 'parentType'
                                               reference_id   = parent_id ).
-    ELSE.
-      ASSERT 1 = 2.
     ENDIF.
   ENDMETHOD.
   METHOD store_id.
     DATA ls_method_id LIKE LINE OF g_method_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
     CLEAR ls_method_id.
     ls_method_id-id = g_last_used_id.
+    ls_method_id-class_name_group = class_name_group.
     ls_method_id-class = class.
+    ls_method_id-method_name_group = method_name_group.
     ls_method_id-method = method.
     INSERT ls_method_id INTO TABLE g_method_ids.
   ENDMETHOD.
@@ -1634,13 +1649,18 @@ CLASS CL_CHECK_FAMIX_MODEL IMPLEMENTATION.
       ADD 1 TO count_name.
 
       CONDENSE ls_public_attribute-string.
+      TEST-SEAM check_name.
+      END-TEST-SEAM.
+
       IF ls_public_attribute-string IS INITIAL.
-        FORMAT COLOR COL_NEGATIVE.
+        TEST-SEAM name1.
+          FORMAT COLOR COL_NEGATIVE.
 
-        " SAP_2_FAMIX_51        Return a message if the attribute name is empty
-        WRITE: / 'Element ', is_public_elements-element_id, ' has an attribute name that is empty'.
+          " SAP_2_FAMIX_51        Return a message if the attribute name is empty
+          WRITE: / 'Element ', is_public_elements-element_id, ' has an attribute name that is empty'.
 
-        FORMAT COLOR COL_BACKGROUND.
+          FORMAT COLOR COL_BACKGROUND.
+        END-TEST-SEAM.
       ENDIF.
 
     ENDLOOP.
@@ -1649,12 +1669,13 @@ CLASS CL_CHECK_FAMIX_MODEL IMPLEMENTATION.
 
     IF count_name > 1.
 
-      FORMAT COLOR COL_NEGATIVE.
+      TEST-SEAM name2.
+        FORMAT COLOR COL_NEGATIVE.
 
-      WRITE: / 'Element ', is_public_elements-element_id, ' has more than a single attribute name'.
+        WRITE: / 'Element ', is_public_elements-element_id, ' has more than a single attribute name'.
 
-      FORMAT COLOR COL_BACKGROUND.
-
+        FORMAT COLOR COL_BACKGROUND.
+      END-TEST-SEAM.
     ENDIF.
 
   ENDMETHOD.
@@ -1672,27 +1693,29 @@ CLASS CL_CHECK_FAMIX_MODEL IMPLEMENTATION.
     ENDLOOP.
 
     " SAP_2_FAMIX_49        Return a message if the attribute parent package occurs more than once
+    TEST-SEAM check_parent_package.
+    END-TEST-SEAM.
 
     IF count_parent_packages > 1.
+      TEST-SEAM parent_package.
+        FORMAT COLOR COL_NEGATIVE.
 
-      FORMAT COLOR COL_NEGATIVE.
+        WRITE: / 'Package ', is_public_elements-element_id, ' has more than a single parent package'.
 
-      WRITE: / 'Package ', is_public_elements-element_id, ' has more than a single parent package'.
-
-      FORMAT COLOR COL_BACKGROUND.
-
+        FORMAT COLOR COL_BACKGROUND.
+      END-TEST-SEAM.
     ENDIF.
 
     " SAP_2_FAMIX_62        Return a message if a class has no parent package assigned
     IF is_public_elements-element_type EQ 'FAMIX.Class'.
       IF count_parent_packages EQ 0.
+        TEST-SEAM parent_package2.
+          FORMAT COLOR COL_NEGATIVE.
 
-        FORMAT COLOR COL_NEGATIVE.
+          WRITE: / 'Class ', is_public_elements-element_id, ' has no parent package'.
 
-        WRITE: / 'Class ', is_public_elements-element_id, ' has no parent package'.
-
-        FORMAT COLOR COL_BACKGROUND.
-
+          FORMAT COLOR COL_BACKGROUND.
+        END-TEST-SEAM.
       ENDIF.
     ENDIF.
 
@@ -1779,8 +1802,9 @@ CLASS CL_MAKE_DEMO_MODEL IMPLEMENTATION.
                                                           superclass_element = 'FAMIX.Class'
                                                           superclass_name_group = ''
                                                           superclass_name    = 'ClassA' ).
-
-    check_famix_model->check( model = model ).
+    TEST-SEAM check.
+      check_famix_model->check( model = model ).
+    END-TEST-SEAM.
 
     model->make_mse( IMPORTING mse_model = mse_model ).
   ENDMETHOD.
@@ -2404,6 +2428,7 @@ CLASS cl_extract_sap DEFINITION
            END OF program_type.
 
     TYPES:BEGIN OF class_type,
+            type  TYPE c LENGTH 1, " C Class, W WebDynpro
             class TYPE seoclsname,
           END OF class_type.
 
@@ -2484,7 +2509,7 @@ CLASS cl_extract_sap DEFINITION
         programs         TYPE programs_type
       CHANGING
         model            TYPE REF TO cl_model.
-    TYPES:existing_classes_type TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
+    TYPES:existing_classes_type TYPE HASHED TABLE OF class_type WITH UNIQUE KEY type class.
     METHODS _add_classes_to_model
       IMPORTING
         sap_package      TYPE REF TO cl_sap_package
@@ -2617,7 +2642,7 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
     DATA classes TYPE STANDARD TABLE OF class_interface_type.
     DATA programs TYPE STANDARD TABLE OF program_type.
     DATA db_tables TYPE cl_extract_sap=>db_tables_type.
-    DATA existing_classes TYPE HASHED TABLE OF class_type WITH UNIQUE KEY class.
+    DATA existing_classes TYPE HASHED TABLE OF class_type WITH UNIQUE KEY type class.
 
     DATA class_components TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
 
@@ -3096,7 +3121,7 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
     " Delete all inheritances where superclass is not in selected packages
     DATA inheritance LIKE LINE OF inheritances.
     LOOP AT inheritances INTO inheritance.
-      READ TABLE existing_classes TRANSPORTING NO FIELDS WITH TABLE KEY class = inheritance-refclsname.
+      READ TABLE existing_classes TRANSPORTING NO FIELDS WITH TABLE KEY type = 'C' class = inheritance-refclsname.
       IF sy-subrc <> 0. "OK
         DELETE inheritances.
       ENDIF.
@@ -3478,18 +3503,36 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
   ENDMETHOD.
   METHOD _read_all_classes.
 
+    DATA classname TYPE seoclsname.
+    DATA webdynpro_component TYPE wdy_component_name.
+    DATA new_line TYPE cl_extract_sap=>class_type.
+
     " Read all classes
 
     " Determine existing classes
     IF classes IS NOT INITIAL.
-      SELECT clsname AS class FROM seoclass INTO TABLE existing_classes FOR ALL ENTRIES IN classes
+      SELECT clsname AS class FROM seoclass INTO classname FOR ALL ENTRIES IN classes
         WHERE
           clsname = classes-obj_name.
 
-      SELECT component_name AS class FROM wdy_component APPENDING TABLE existing_classes FOR ALL ENTRIES IN classes
+        CLEAR new_line.
+        new_line-type = 'C'.
+        new_line-class = classname.
+        INSERT new_line INTO TABLE existing_classes.
+
+      ENDSELECT.
+
+      SELECT component_name AS class FROM wdy_component INTO webdynpro_component FOR ALL ENTRIES IN classes
         WHERE
           component_name = classes-obj_name
           AND version = 'A'.
+
+        CLEAR new_line.
+        new_line-type = 'W'.
+        new_line-class = webdynpro_component.
+        INSERT new_line INTO TABLE existing_classes.
+
+      ENDSELECT.
 
     ENDIF.
 
