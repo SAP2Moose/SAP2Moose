@@ -12,6 +12,10 @@ Another diagram with all currently supported diagram elements: ![All currently s
 
 Positions of elements can be changed and stored to file. Comments to elements can be added. Connected elements can be highlighted. See specification for further logic. Further types of elements are planned to be added.
 
+There is a new context menu available for groups of classes: ![Where to find the diagram](https://raw.githubusercontent.com/RainerWinkler/Moose-FAMIX-SAP-Extractor/master/wiki_pictures/WhereToFindInMenu.png)
+
+See [Moose](http://www.moosetechnology.org/) for further informations on the analysis platform that is used.
+
 # Extract informations to Moose
 
 The SAP extractor for this project is hosted in this repository.
@@ -40,6 +44,6 @@ I would like to thank especially:
 
 *Enno Wulff* for making a 7.31 version available and many discussions to improve the extractor and to give hints on what can be done
 
-My company CubeServ for supporting this project.
+My company CubeServ for encouraging and supporting this project.
 
 And all *colleagues* that made this tool possible!
