@@ -1,5 +1,7 @@
 # Dependency graphs
 
+See ![YouTube video on how to install this application](https://www.youtube.com/watch?v=_RMeqd5-ZQ4&t=95s) for a complete 14 minute description on how to install and run.
+
 Make diagrams for real world applications build from classes, methods, attributes, database tables, files, domain specific objects (for instance SAP BW DSO, MultiProvider, transformations, ...). Currently diagrams are oft made manually. This is costly, time consuming and error prone. The goal is to generate diagrams like this automatically:
 ![An example of a manually created diagram](https://github.com/RainerWinkler/Moose-FAMIX-SAP-Extractor/blob/master/wiki_pictures/DemoApplication2.png)
 
@@ -19,6 +21,8 @@ This repository provides a program to extract model data from a SAP system into 
 # Adaptable dependency graphs
 
 The logic to display dependency graphs is hosted on Smalltalk Hub [RainerWinkler/RW-Moose-Diagram](http://www.smalltalkhub.com/#!/~RainerWinkler/RW-Moose-Diagram)
+
+It can be used for all suitable Moose models, not only models generated from SAP.
 
 # Further
 
