@@ -4,7 +4,7 @@ Make diagrams for real world applications build from classes, methods, attribute
 ![An example of a manually created diagram](https://github.com/RainerWinkler/Moose-FAMIX-SAP-Extractor/blob/master/wiki_pictures/DemoApplication2.png)
 
 Currently diagrams like this can be generated (With methods, attributes, classes, packages, Web Dynpro ABAP and database tables:
-![An example for a dependency graph](https://github.com/RainerWinkler/Moose-Diagram/raw/master/ExampleDiagram.png)
+![An example for a dependency graph](https://raw.githubusercontent.com/RainerWinkler/Moose-FAMIX-SAP-Extractor/master/wiki_pictures/SAP_Extractor_dependency_all.png)
 
 It is possible to specify that only some of the objects are displayed, so that diagrams are smaller.
 
