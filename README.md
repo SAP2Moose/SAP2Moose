@@ -6,7 +6,7 @@ Make diagrams for real world applications build from classes, methods, attribute
 Currently diagrams like this can be generated (With methods, attributes, classes, packages, Web Dynpro ABAP and database tables:
 ![An example for a dependency graph](https://raw.githubusercontent.com/RainerWinkler/Moose-FAMIX-SAP-Extractor/master/wiki_pictures/SAP_Extractor_dependency_all.png)
 
-It is possible to specify that only some of the objects are displayed, so that diagrams are smaller.
+Another diagram with all currently supported diagram elements: ![All currently supported diagram elements](https://raw.githubusercontent.com/RainerWinkler/Moose-FAMIX-SAP-Extractor/master/wiki_pictures/All%20features%2018%20December%202016.png)
 
 Positions of elements can be changed and stored to file. Comments to elements can be added. Connected elements can be highlighted. See specification for further logic. Further types of elements are planned to be added.
 
