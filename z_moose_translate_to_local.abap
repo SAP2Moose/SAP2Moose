@@ -20,6 +20,8 @@
 *OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 *SOFTWARE.
 
+" Generated 21.11.2016 17:49
+
 REPORT z_moose_translate_to_local.
 
 " The template
@@ -99,8 +101,8 @@ CLASS cl_read_class IMPLEMENTATION.
     CASE cifref->clstype.
       WHEN seoc_clstype_class.
         clsref ?= cifref.
-          READ REPORT clsref->class_pool
-            INTO pool_source.
+        READ REPORT clsref->class_pool
+          INTO pool_source.
         IF read_definition EQ abap_true.
           LOOP AT pool_source INTO source_line.
             IF source_line CS 'CLASS-POOL'
@@ -166,7 +168,7 @@ CLASS cl_read_class IMPLEMENTATION.
               r_source = VALUE #( BASE r_source ( source_line ) ).
             ENDIF.
           ENDLOOP.
-              r_source = VALUE #( BASE r_source ( CONV #( 'ENDCLASS.' ) ) ).
+          r_source = VALUE #( BASE r_source ( CONV #( 'ENDCLASS.' ) ) ).
         ENDIF.
         IF read_implementation EQ abap_true.
           CONCATENATE 'CLASS' cifkey 'IMPLEMENTATION.' INTO l_string SEPARATED BY space.
@@ -182,7 +184,7 @@ CLASS cl_read_class IMPLEMENTATION.
               r_source = VALUE #( BASE r_source ( source_line ) ).
             ENDLOOP.
           ENDLOOP.
-              r_source = VALUE #( BASE r_source ( CONV #( 'ENDCLASS.' ) ) ).
+          r_source = VALUE #( BASE r_source ( CONV #( 'ENDCLASS.' ) ) ).
         ENDIF.
 
       WHEN seoc_clstype_interface.
@@ -360,6 +362,45 @@ CLASS cl_remove_global_only IMPLEMENTATION.
 
 ENDCLASS.
 
+"! Remove statement TEST-SEAM. It is not needed in local classes and would lead to syntax errors in older releases
+CLASS cl_remove_test_seam DEFINITION.
+  PUBLIC SECTION.
+    METHODS do
+      CHANGING source TYPE stringtable.
+
+ENDCLASS.
+
+CLASS cl_remove_test_seam IMPLEMENTATION.
+
+  METHOD do.
+
+    DATA: left_justified_line TYPE string.
+
+    LOOP AT source ASSIGNING FIELD-SYMBOL(<line>).
+      left_justified_line = <line>.
+      CONDENSE left_justified_line.
+      SPLIT left_justified_line AT ' ' INTO DATA(part_1) DATA(part_2).
+
+      " Begin of CLASS DEFINITION found.
+      TRANSLATE part_1 TO UPPER CASE.
+
+      IF part_1 EQ 'TEST-SEAM'.
+        DELETE source.
+        CONTINUE.
+      ENDIF.
+
+      FIND 'END-TEST-SEAM' IN part_1.
+      IF sy-subrc EQ 0.
+        DELETE source.
+        CONTINUE.
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
 CLASS cl_download DEFINITION.
   PUBLIC SECTION.
     METHODS do
@@ -409,6 +450,9 @@ START-OF-SELECTION.
 
   DATA(remove_global_only) = NEW cl_remove_global_only( ).
   remove_global_only->do( CHANGING source = target_source ).
+
+  DATA(remove_test_seam) = NEW cl_remove_test_seam( ).
+  remove_test_seam->do( CHANGING source = target_source ).
 
   DATA(replace_prefix) = NEW cl_replace_prefix( ).
   replace_prefix->do( CHANGING source = target_source ).
