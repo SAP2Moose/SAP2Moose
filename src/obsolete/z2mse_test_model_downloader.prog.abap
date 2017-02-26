@@ -1,9 +1,9 @@
 *&---------------------------------------------------------------------*
-*& Report yrw1_mc_test_model_downloader
+*& Report z2mse_test_model_downloader
 *&---------------------------------------------------------------------*
 *&
 *&---------------------------------------------------------------------*
-REPORT yrw1_mc_test_model_downloader.
+REPORT z2mse_test_model_downloader.
 
 PARAMETERS: p_down  AS CHECKBOX DEFAULT 'X',
             p_testc TYPE z2mse_chartest-testcase.

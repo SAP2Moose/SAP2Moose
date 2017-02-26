@@ -50,7 +50,7 @@
 "! Last activation:
 "! Generated 21.11.2016 17:49
 "!
-REPORT Z2MSE__moose_extractor.
+REPORT Z2MSE_moose_extractor.
 TABLES tadir. "So that select-options work
 
 SELECTION-SCREEN BEGIN OF BLOCK block_global_source WITH FRAME TITLE TEXT-001.
