@@ -2,11 +2,13 @@
 
 See [YouTube video on how to install this application](https://www.youtube.com/watch?v=_RMeqd5-ZQ4&t=95s) for a complete 14 minute description on how to install and run.
 
-Make diagrams for real world applications build from classes, methods, attributes, database tables, files, domain specific objects (for instance SAP BW DSO, MultiProvider, transformations, ...). Currently diagrams are oft made manually. This is costly, time consuming and error prone. The goal is to generate diagrams like this automatically:
+Make diagrams for real world applications build from classes, methods, attributes, database tables, files, domain specific objects (for instance SAP BW DSO, MultiProvider, transformations, ...). Currently diagrams are often made manually. This is costly, time consuming and error prone. The goal is to generate diagrams like this automatically:
 ![An example of a manually created diagram](https://github.com/RainerWinkler/Moose-FAMIX-SAP-Extractor/blob/master/wiki_pictures/DemoApplication2.png)
 
-Currently diagrams like this can be generated (With methods, attributes, classes, packages, Web Dynpro ABAP and database tables:
+Currently diagrams like this can be generated (With methods, attributes, classes, packages, Web Dynpro ABAP and database tables):
 ![An example for a dependency graph](https://raw.githubusercontent.com/RainerWinkler/Moose-FAMIX-SAP-Extractor/master/wiki_pictures/SAP_Extractor_dependency_all.png)
+
+This diagrams use model informations extracted with this tool. But they are generated with a second tool, see the point "Adaptable dependency graphs" a few lines below for this.
 
 Another diagram with all currently supported diagram elements: ![All currently supported diagram elements](https://raw.githubusercontent.com/RainerWinkler/Moose-FAMIX-SAP-Extractor/master/wiki_pictures/All%20features%2018%20December%202016.png)
 
