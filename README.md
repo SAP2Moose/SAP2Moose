@@ -38,8 +38,6 @@ The generating of the extraction program is done with the report Z2MSE_TRANSLATE
 
 There are (26.02.2017) two templates: Z2MSE_MOOSE_EXTRACTOR2 will contain the refactored and improved logic. Z2MSE_MOOSE_EXTRACTOR is used to contain the current extraction program and shall be replaced in the near future.
 
-git 
-
 # Further
 
 The local classes of the extractor are now generated using global classes. This allows ABAP Unit to be used to improve the quality and reduce the time needed for implementation. There is now also a new program z_moose_translate_to_local for this conversion. This program can also be used for other projects.
