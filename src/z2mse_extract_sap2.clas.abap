@@ -5,8 +5,7 @@ CLASS z2mse_extract_sap2 DEFINITION
 
   PUBLIC SECTION.
 
-    TYPES:
-      ty_s_pack                         TYPE RANGE OF tadir-devclass .
+    TYPES: ty_s_pack TYPE RANGE OF tadir-devclass .
     CONSTANTS modifier_abapglobalclass TYPE string VALUE 'ABAPGlobalClass' ##NO_TEXT.
     CONSTANTS modifier_abapglobalinterface TYPE string VALUE 'ABAPGlobalInterface' ##NO_TEXT.
     CONSTANTS modifier_webdynpro_component TYPE string VALUE 'ABAPWebDynproComponent'.
@@ -34,7 +33,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extract_sap2 IMPLEMENTATION.
+CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -94,6 +93,4 @@ CLASS z2mse_extract_sap2 IMPLEMENTATION.
     model->make_mse( IMPORTING mse_model = mse_model ).
 
   ENDMETHOD.
-
-
 ENDCLASS.
