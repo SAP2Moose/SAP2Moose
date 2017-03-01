@@ -38,15 +38,16 @@ CLASS z2mse_extr_where_used_sap DEFINITION
       IMPORTING
         wbcrossgt_test         TYPE ty_t_wbcrossgt_test OPTIONAL
         includes_to_components TYPE ty_includes_to_components OPTIONAL.
+    "! Is this name correct?
     METHODS used_by_class_component
       IMPORTING
         class_components TYPE z2mse_extr_classes=>ty_class_components.
     METHODS add_usage_to_model
       IMPORTING
         famix_method     TYPE REF TO z2mse_famix_method
-        famix_attribute  TYPE REF TO Z2MSE_famix_attribute
+        famix_attribute  TYPE REF TO z2mse_famix_attribute
         famix_invocation TYPE REF TO z2mse_famix_invocation
-        famix_access     TYPE REF TO Z2MSE_famix_access.
+        famix_access     TYPE REF TO z2mse_famix_access.
     METHODS get_components_where_used
       RETURNING VALUE(components) TYPE z2mse_extr_classes=>ty_class_components_hashed.
   PROTECTED SECTION.
@@ -92,7 +93,134 @@ CLASS z2mse_extr_where_used_sap DEFINITION
         VALUE(r_names_to_components) TYPE z2mse_extr_where_used_sap=>ty_names_to_components.
 ENDCLASS.
 
-CLASS z2mse_extr_where_used_sap IMPLEMENTATION.
+
+
+CLASS Z2MSE_EXTR_WHERE_USED_SAP IMPLEMENTATION.
+
+
+  METHOD add_usage_to_model.
+
+    DATA comp_used_by_comp TYPE ty_comp_used_by_comp.
+
+    LOOP AT g_comps_used_by_comps INTO comp_used_by_comp WHERE used_by_cmptype <> z2mse_extr_classes=>attribute_type.
+
+      ASSERT comp_used_by_comp-used_by_cmptype EQ z2mse_extr_classes=>method_type OR
+             comp_used_by_comp-used_by_cmptype EQ z2mse_extr_classes=>event_type.
+
+      DATA using_method_id TYPE i.
+      using_method_id = famix_method->get_id( class  = comp_used_by_comp-used_by_clsname
+                                              method = comp_used_by_comp-used_by_cmpname ).
+
+      IF using_method_id IS INITIAL.
+        "! TBD report or handle this better.
+        " This happened because interface methods are not in table SEOCOMPO
+        " The information is in table SEOMETAREL
+
+        "! TBD THis is duplicate coding!
+        "!
+
+        " SAP_2_FAMIX_15        Map methods of classes to FAMIX.Method
+        " SAP_2_FAMIX_16        Map methods of interfaces to FAMIX.Method
+        famix_method->add( EXPORTING name = comp_used_by_comp-used_by_cmpname IMPORTING id = using_method_id ).
+
+        " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
+        " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
+        famix_method->set_signature( element_id = using_method_id
+                                       signature = comp_used_by_comp-used_by_cmpname ).
+
+        famix_method->set_parent_type( EXPORTING element_id = using_method_id
+                                                   parent_element = 'FAMIX.Class'
+                                                   parent_name_group = 'ABAP_CLASS'
+                                                   parent_name    = comp_used_by_comp-used_by_clsname ).
+
+
+        famix_method->store_id( EXPORTING class  = comp_used_by_comp-used_by_clsname
+                                            method = comp_used_by_comp-used_by_cmpname ).
+
+
+*        using_method_id = sap_method->add( class  = comp_used_by_comp-used_by_clsname
+*                                           method = comp_used_by_comp-used_by_cmpname ).
+      ENDIF.
+
+      DATA used_id TYPE i.
+      CASE comp_used_by_comp-cmptype.
+        WHEN z2mse_extr_classes=>attribute_type.
+
+          used_id = famix_attribute->get_id( class     = comp_used_by_comp-clsname
+                                           attribute = comp_used_by_comp-cmpname ).
+
+
+          " SAP_2_FAMIX_26      Map usage of ABAP class attributes by methods of classes to FAMIX.Invocation
+          " SAP_2_FAMIX_27      Map usage of ABAP interface attributes by methods of classes to FAMIX.Invocation
+
+          IF famix_access->is_new_access( accessor_id = using_method_id
+                                            variable_id = used_id )
+             EQ abap_true.
+            DATA last_id2 TYPE i.
+            last_id2 = famix_access->add( ).
+            famix_access->set_accessor_variable_relation( EXPORTING element_id = last_id2
+                                                                      accessor_id = using_method_id
+                                                                      variable_id = used_id ).
+          ENDIF.
+
+*          sap_access->add_access( used_attribute = used_id
+*                                  using_method   = using_method_id ).
+
+
+        WHEN z2mse_extr_classes=>method_type OR z2mse_extr_classes=>event_type.
+
+          used_id = famix_method->get_id( class  = comp_used_by_comp-clsname
+                                        method = comp_used_by_comp-cmpname ).
+
+          " This is an interface. Reverse the usage direction
+          " SAP_2_FAMIX_64      Methods that implement an interface are used by the interface method
+
+          DATA: temp TYPE seocmpname.
+          temp = comp_used_by_comp-clsname && |~| && comp_used_by_comp-cmpname.
+
+          IF comp_used_by_comp-used_by_cmpname EQ temp.
+            DATA: inv_used_id  TYPE i,
+                  inv_using_id TYPE i.
+            " Reverse direction
+            inv_used_id = using_method_id.
+            inv_using_id = used_id.
+*            sap_invocation->add_invocation( used_method  = using_method_id
+*                                            using_method = used_id ).
+
+          ELSE.
+            inv_used_id = used_id.
+            inv_using_id = using_method_id.
+
+          ENDIF.
+          " SAP_2_FAMIX_24      Map usage of ABAP class methods by methods of classes to FAMIX.Invocation
+          " SAP_2_FAMIX_25      Map usage of ABAP interface methods by methods of classes to FAMIX.Invocation
+          IF famix_invocation->is_new_invocation_to_candidate( sender_id     = inv_using_id
+                                                                 candidates_id = inv_used_id )
+             EQ abap_true.
+
+            DATA invocation_id TYPE i.
+            invocation_id = famix_invocation->add( ).
+            famix_invocation->set_invocation_by_reference( EXPORTING element_id = invocation_id
+                                                                       sender_id     = inv_using_id
+                                                                       candidates_id = inv_used_id
+                                                                       signature     = 'DUMMY' ).
+          ENDIF.
+
+
+*            sap_invocation->add_invocation( used_method  = inv_used_id
+*                                            using_method = inv_using_id ).
+
+
+        WHEN OTHERS.
+          ASSERT 1 = 2.
+
+      ENDCASE.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
   METHOD constructor.
     IF wbcrossgt_test IS SUPPLIED OR
        includes_to_components IS SUPPLIED.
@@ -101,6 +229,12 @@ CLASS z2mse_extr_where_used_sap IMPLEMENTATION.
       g_is_test = abap_true.
     ENDIF.
   ENDMETHOD.
+
+
+  METHOD get_components_where_used.
+    components = g_class_components_where_used.
+  ENDMETHOD.
+
 
   METHOD used_by_class_component.
 
@@ -129,172 +263,6 @@ CLASS z2mse_extr_where_used_sap IMPLEMENTATION.
           i_includes_2_components = includes_2_components ).
 
     SORT g_comps_used_by_comps.
-
-  ENDMETHOD.
-
-  METHOD add_usage_to_model.
-
-    DATA comp_used_by_comp TYPE ty_comp_used_by_comp.
-
-    LOOP AT g_comps_used_by_comps INTO comp_used_by_comp WHERE used_by_cmptype <> z2mse_extr_classes=>attribute_type.
-
-      ASSERT comp_used_by_comp-used_by_cmptype EQ z2mse_extr_classes=>method_type OR
-             comp_used_by_comp-used_by_cmptype EQ z2mse_extr_classes=>event_type.
-
-      DATA using_method_id TYPE i.
-      using_method_id = famix_method->get_id( class  = comp_used_by_comp-used_by_clsname
-                                              method = comp_used_by_comp-used_by_cmpname ).
-
-      IF using_method_id IS INITIAL.
-        "! TBD report or handle this better.
-        " This happened because interface methods are not in table SEOCOMPO
-        " The information is in table SEOMETAREL
-
-        "! TBD THis is duplicate coding!
-        "!
-
-    " SAP_2_FAMIX_15        Map methods of classes to FAMIX.Method
-    " SAP_2_FAMIX_16        Map methods of interfaces to FAMIX.Method
-    famix_method->add( EXPORTING name = comp_used_by_comp-used_by_cmpname IMPORTING id = using_method_id ).
-
-    " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
-    " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
-    famix_method->set_signature( element_id = using_method_id
-                                   signature = comp_used_by_comp-used_by_cmpname ).
-
-    famix_method->set_parent_type( EXPORTING element_id = using_method_id
-                                               parent_element = 'FAMIX.Class'
-                                               parent_name_group = 'ABAP_CLASS'
-                                               parent_name    = comp_used_by_comp-used_by_clsname ).
-
-
-    famix_method->store_id( EXPORTING class  = comp_used_by_comp-used_by_clsname
-                                        method = comp_used_by_comp-used_by_cmpname ).
-
-
-*        using_method_id = sap_method->add( class  = comp_used_by_comp-used_by_clsname
-*                                           method = comp_used_by_comp-used_by_cmpname ).
-      ENDIF.
-
-      DATA used_id TYPE i.
-      CASE comp_used_by_comp-cmptype.
-        WHEN z2mse_extr_classes=>attribute_type.
-
-          used_id = famix_attribute->get_id( class     = comp_used_by_comp-clsname
-                                           attribute = comp_used_by_comp-cmpname ).
-
-
-    " SAP_2_FAMIX_26      Map usage of ABAP class attributes by methods of classes to FAMIX.Invocation
-    " SAP_2_FAMIX_27      Map usage of ABAP interface attributes by methods of classes to FAMIX.Invocation
-
-    IF famix_access->is_new_access( accessor_id = using_method_id
-                                      variable_id = used_id )
-       EQ abap_true.
-      DATA last_id2 TYPE i.
-      last_id2 = famix_access->add( ).
-      famix_access->set_accessor_variable_relation( EXPORTING element_id = last_id2
-                                                                accessor_id = using_method_id
-                                                                variable_id = used_id ).
-    ENDIF.
-
-*          sap_access->add_access( used_attribute = used_id
-*                                  using_method   = using_method_id ).
-
-
-        WHEN z2mse_extr_classes=>method_type OR z2mse_extr_classes=>event_type.
-
-          used_id = famix_method->get_id( class  = comp_used_by_comp-clsname
-                                        method = comp_used_by_comp-cmpname ).
-
-          " This is an interface. Reverse the usage direction
-          " SAP_2_FAMIX_64      Methods that implement an interface are used by the interface method
-
-          DATA: temp TYPE seocmpname.
-          temp = comp_used_by_comp-clsname && |~| && comp_used_by_comp-cmpname.
-
-          IF comp_used_by_comp-used_by_cmpname EQ temp.
-            data: inv_used_id TYPE i,
-                  inv_using_id type i.
-            " Reverse direction
-            inv_used_id = using_method_id.
-            inv_using_id = used_id.
-*            sap_invocation->add_invocation( used_method  = using_method_id
-*                                            using_method = used_id ).
-
-          ELSE.
-            inv_used_id = used_id.
-            inv_using_id = using_method_id.
-
-          ENDIF.
-    " SAP_2_FAMIX_24      Map usage of ABAP class methods by methods of classes to FAMIX.Invocation
-    " SAP_2_FAMIX_25      Map usage of ABAP interface methods by methods of classes to FAMIX.Invocation
-    IF famix_invocation->is_new_invocation_to_candidate( sender_id     = inv_using_id
-                                                           candidates_id = inv_used_id )
-       EQ abap_true.
-
-      DATA invocation_id TYPE i.
-      invocation_id = famix_invocation->add( ).
-      famix_invocation->set_invocation_by_reference( EXPORTING element_id = invocation_id
-                                                                 sender_id     = inv_using_id
-                                                                 candidates_id = inv_used_id
-                                                                 signature     = 'DUMMY' ).
-    ENDIF.
-
-
-*            sap_invocation->add_invocation( used_method  = inv_used_id
-*                                            using_method = inv_using_id ).
-
-
-        WHEN OTHERS.
-          ASSERT 1 = 2.
-
-      ENDCASE.
-
-    ENDLOOP.
-
-  ENDMETHOD.
-
-
-  METHOD _fill_comps_used_by_comps.
-
-    DATA ntc TYPE z2mse_extr_where_used_sap=>ty_name_to_component.
-    DATA found_wbcrossgt_line TYPE z2mse_extr_where_used_sap=>ty_wbcrossgt_test.
-    DATA include_2_component TYPE z2mse_extr_where_used_sap=>ty_include_to_component.
-
-    " fill comps used by comps
-
-    LOOP AT i_found_wbcrossgt INTO found_wbcrossgt_line.
-
-      DATA cubc TYPE ty_comp_used_by_comp.
-
-      CLEAR cubc.
-      READ TABLE i_names_to_components INTO ntc WITH TABLE KEY otype           = found_wbcrossgt_line-otype
-                                                                           where_used_name = found_wbcrossgt_line-name.
-      cubc-clsname = ntc-clsname.
-      cubc-cmpname = ntc-cmpname.
-      cubc-cmptype = ntc-cmptype.
-
-      READ TABLE i_includes_2_components INTO include_2_component WITH TABLE KEY include = found_wbcrossgt_line-include.
-      IF include_2_component-is_class_component EQ abap_true.
-        cubc-used_by_clsname = include_2_component-clsname.
-        cubc-used_by_cmpname = include_2_component-cmpname.
-        cubc-used_by_cmptype = include_2_component-cmptype.
-
-        INSERT cubc INTO TABLE g_comps_used_by_comps.
-
-        READ TABLE g_class_components_initial TRANSPORTING NO FIELDS WITH TABLE KEY clsname = cubc-used_by_clsname
-                                                                                    cmpname = cubc-used_by_cmpname.
-        IF sy-subrc <> 0.
-          DATA cwu LIKE LINE OF g_class_components_initial.
-          cwu-clsname = cubc-used_by_clsname.
-          cwu-cmpname = cubc-used_by_cmpname.
-          cwu-cmptype = cubc-used_by_cmptype.
-          INSERT cwu INTO TABLE g_class_components_where_used.
-        ENDIF.
-
-      ENDIF.
-
-    ENDLOOP.
 
   ENDMETHOD.
 
@@ -372,34 +340,46 @@ CLASS z2mse_extr_where_used_sap IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD _select_where_used_table.
+  METHOD _fill_comps_used_by_comps.
 
-    DATA name_to_component TYPE z2mse_extr_where_used_sap=>ty_name_to_component.
+    DATA ntc TYPE z2mse_extr_where_used_sap=>ty_name_to_component.
+    DATA found_wbcrossgt_line TYPE z2mse_extr_where_used_sap=>ty_wbcrossgt_test.
+    DATA include_2_component TYPE z2mse_extr_where_used_sap=>ty_include_to_component.
 
-    " Select where used table
-    IF g_is_test EQ abap_false.
-      IF i_names_to_components IS NOT INITIAL.
-        SELECT otype name include direct indirect
-          FROM wbcrossgt
-          INTO TABLE r_found_wbcrossgt
-          FOR ALL ENTRIES IN i_names_to_components
-          WHERE otype = i_names_to_components-otype
-            AND name = i_names_to_components-where_used_name.
+    " fill comps used by comps
+
+    LOOP AT i_found_wbcrossgt INTO found_wbcrossgt_line.
+
+      DATA cubc TYPE ty_comp_used_by_comp.
+
+      CLEAR cubc.
+      READ TABLE i_names_to_components INTO ntc WITH TABLE KEY otype           = found_wbcrossgt_line-otype
+                                                                           where_used_name = found_wbcrossgt_line-name.
+      cubc-clsname = ntc-clsname.
+      cubc-cmpname = ntc-cmpname.
+      cubc-cmptype = ntc-cmptype.
+
+      READ TABLE i_includes_2_components INTO include_2_component WITH TABLE KEY include = found_wbcrossgt_line-include.
+      IF include_2_component-is_class_component EQ abap_true.
+        cubc-used_by_clsname = include_2_component-clsname.
+        cubc-used_by_cmpname = include_2_component-cmpname.
+        cubc-used_by_cmptype = include_2_component-cmptype.
+
+        INSERT cubc INTO TABLE g_comps_used_by_comps.
+
+        READ TABLE g_class_components_initial TRANSPORTING NO FIELDS WITH TABLE KEY clsname = cubc-used_by_clsname
+                                                                                    cmpname = cubc-used_by_cmpname.
+        IF sy-subrc <> 0.
+          DATA cwu LIKE LINE OF g_class_components_initial.
+          cwu-clsname = cubc-used_by_clsname.
+          cwu-cmpname = cubc-used_by_cmpname.
+          cwu-cmptype = cubc-used_by_cmptype.
+          INSERT cwu INTO TABLE g_class_components_where_used.
+        ENDIF.
+
       ENDIF.
-    ELSE.
 
-      DATA found_wbcrossgt_line TYPE ty_wbcrossgt_test.
-
-      LOOP AT i_names_to_components INTO name_to_component.
-        LOOP AT g_wbcrossgt_test INTO found_wbcrossgt_line WHERE otype = name_to_component-otype
-                                                             AND name = name_to_component-where_used_name.
-
-          INSERT found_wbcrossgt_line INTO TABLE r_found_wbcrossgt.
-
-        ENDLOOP.
-      ENDLOOP.
-
-    ENDIF.
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -431,8 +411,35 @@ CLASS z2mse_extr_where_used_sap IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD get_components_where_used.
-    components = g_class_components_where_used.
-  ENDMETHOD.
 
+  METHOD _select_where_used_table.
+
+    DATA name_to_component TYPE z2mse_extr_where_used_sap=>ty_name_to_component.
+
+    " Select where used table
+    IF g_is_test EQ abap_false.
+      IF i_names_to_components IS NOT INITIAL.
+        SELECT otype name include direct indirect
+          FROM wbcrossgt
+          INTO TABLE r_found_wbcrossgt
+          FOR ALL ENTRIES IN i_names_to_components
+          WHERE otype = i_names_to_components-otype
+            AND name = i_names_to_components-where_used_name.
+      ENDIF.
+    ELSE.
+
+      DATA found_wbcrossgt_line TYPE ty_wbcrossgt_test.
+
+      LOOP AT i_names_to_components INTO name_to_component.
+        LOOP AT g_wbcrossgt_test INTO found_wbcrossgt_line WHERE otype = name_to_component-otype
+                                                             AND name = name_to_component-where_used_name.
+
+          INSERT found_wbcrossgt_line INTO TABLE r_found_wbcrossgt.
+
+        ENDLOOP.
+      ENDLOOP.
+
+    ENDIF.
+
+  ENDMETHOD.
 ENDCLASS.

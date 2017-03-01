@@ -29,7 +29,7 @@ CLASS z2mse_extr_packages DEFINITION
       IMPORTING
         !tdevc_test TYPE ty_t_tdevc_test OPTIONAL.
 
-    "! Select packages
+    "! Select packages according to filter transfered by report
     "! @parameter top_packages | Select packages
     "! @parameter sub_packages_filter | Optional: Include sub packages only if they are filtered by this filter
     "! @parameter including_sub_packages | Default false: Search sub packages
@@ -74,7 +74,50 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr_packages IMPLEMENTATION.
+CLASS Z2MSE_EXTR_PACKAGES IMPLEMENTATION.
+
+
+  METHOD add_selected_packages_to_mode2.
+
+    DATA: selected_package  TYPE z2mse_extr_packages=>ty_package.
+
+    LOOP AT g_selected_packages INTO selected_package.
+
+      famix_package->add( name = selected_package-package ).
+
+      IF selected_package-parentpackage IS NOT INITIAL.
+
+        famix_package->add( name = selected_package-parentpackage ).
+        famix_package->set_parent_package( element_id = 0
+                                     element_type = 'FAMIX.Package'
+                                     element_name_group = ''
+                                     element_name = selected_package-package
+                                     parent_package = selected_package-parentpackage ).
+      ENDIF.
+
+    ENDLOOP.
+  ENDMETHOD.
+
+
+  METHOD add_selected_packages_to_model.
+
+    DATA: selected_package  TYPE z2mse_extr_packages=>ty_package.
+
+    LOOP AT g_selected_packages INTO selected_package.
+
+      sap_package->add( name = selected_package-package ).
+
+      IF selected_package-parentpackage IS NOT INITIAL.
+
+        sap_package->add( name = selected_package-parentpackage ).
+        sap_package->set_parent_package( EXPORTING this_package   = selected_package-package
+                                                   parent_package = selected_package-parentpackage ).
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
 
   METHOD constructor.
     IF tdevc_test IS SUPPLIED.
@@ -82,6 +125,7 @@ CLASS z2mse_extr_packages IMPLEMENTATION.
       g_is_test = abap_true.
     ENDIF.
   ENDMETHOD.
+
 
   METHOD select_packages.
 
@@ -155,23 +199,6 @@ CLASS z2mse_extr_packages IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD _select_top_packages.
-
-    CLEAR r_packages.
-
-    IF g_is_test EQ abap_false.
-      SELECT devclass AS package parentcl AS parentpackage FROM tdevc INTO TABLE r_packages WHERE devclass IN i_top_packages
-        ORDER BY devclass.
-    ELSE.
-      DATA package TYPE ty_package.
-      LOOP AT g_tdevc_test INTO package WHERE devclass IN i_top_packages.
-        INSERT package INTO TABLE r_packages.
-      ENDLOOP.
-      SORT r_packages BY package.
-    ENDIF.
-
-  ENDMETHOD.
-
 
   METHOD _select_sub_packages.
 
@@ -201,44 +228,21 @@ CLASS z2mse_extr_packages IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD add_selected_packages_to_model.
 
-    DATA: selected_package  TYPE z2mse_extr_packages=>ty_package.
+  METHOD _select_top_packages.
 
-    LOOP AT g_selected_packages INTO selected_package.
+    CLEAR r_packages.
 
-      sap_package->add( name = selected_package-package ).
-
-      IF selected_package-parentpackage IS NOT INITIAL.
-
-        sap_package->add( name = selected_package-parentpackage ).
-        sap_package->set_parent_package( EXPORTING this_package   = selected_package-package
-                                                   parent_package = selected_package-parentpackage ).
-      ENDIF.
-
-    ENDLOOP.
+    IF g_is_test EQ abap_false.
+      SELECT devclass AS package parentcl AS parentpackage FROM tdevc INTO TABLE r_packages WHERE devclass IN i_top_packages
+        ORDER BY devclass.
+    ELSE.
+      DATA package TYPE ty_package.
+      LOOP AT g_tdevc_test INTO package WHERE devclass IN i_top_packages.
+        INSERT package INTO TABLE r_packages.
+      ENDLOOP.
+      SORT r_packages BY package.
+    ENDIF.
 
   ENDMETHOD.
-
-  METHOD add_selected_packages_to_mode2.
-
-    DATA: selected_package  TYPE z2mse_extr_packages=>ty_package.
-
-    LOOP AT g_selected_packages INTO selected_package.
-
-      famix_package->add( name = selected_package-package ).
-
-      IF selected_package-parentpackage IS NOT INITIAL.
-
-        famix_package->add( name = selected_package-parentpackage ).
-        famix_package->set_parent_package( element_id = 0
-                                     element_type = 'FAMIX.Package'
-                                     element_name_group = ''
-                                     element_name = selected_package-package
-                                     parent_package = selected_package-parentpackage ).
-      ENDIF.
-
-    ENDLOOP.
-  ENDMETHOD.
-
 ENDCLASS.

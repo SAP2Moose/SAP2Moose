@@ -22,7 +22,7 @@ CLASS ltcl_end_to_end_packages IMPLEMENTATION.
       tdevc_test = VALUE #( ( devclass = 'A' parentcl = '' )
                             ( devclass = 'A_A' parentcl = 'A' )
                             ( devclass = 'A_A_A' parentcl = 'A_A' ) ).
-      g_extract_packages = NEW #( tdevc_test = tdevc_test ).
+      extract_packages = NEW #( tdevc_test = tdevc_test ).
     END-TEST-INJECTION.
 
     TEST-INJECTION creator_classes.
@@ -70,7 +70,7 @@ CLASS ltcl_end_to_end_packages IMPLEMENTATION.
       "DATA: tdevc_test TYPE yrw1_mcextr_packages=>ty_t_tdevc_test.
 
       tdevc_test = VALUE #( ( devclass = 'A' parentcl = '' ) ).
-      g_extract_packages = NEW #( tdevc_test = tdevc_test ).
+      extract_packages = NEW #( tdevc_test = tdevc_test ).
     END-TEST-INJECTION.
 
     TEST-INJECTION creator_classes.

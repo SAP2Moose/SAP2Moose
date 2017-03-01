@@ -28,7 +28,24 @@ CLASS z2mse_extract_sap2 DEFINITION
     DATA famix_attribute     TYPE REF TO Z2MSE_famix_attribute.
     DATA famix_invocation     TYPE REF TO z2mse_famix_invocation.
     DATA famix_access     TYPE REF TO Z2MSE_famix_access.
-    DATA g_extract_packages TYPE REF TO z2mse_extr_packages.
+    METHODS _add_all_to_model_and_make_mse
+      IMPORTING
+        i_extract_packages       TYPE REF TO z2mse_extr_packages
+        i_extract_classes        TYPE REF TO z2mse_extr_classes
+        i_extract_where_used_sap TYPE REF TO z2mse_extr_where_used_sap
+      RETURNING
+        VALUE(r_mse_model) TYPE z2mse_model=>lines_type.
+    METHODS _initial_selections_by_filter
+      IMPORTING
+        i_top_packages        TYPE z2mse_extract_sap2=>ty_s_pack
+        i_sub_packages_filter TYPE z2mse_extract_sap2=>ty_s_pack
+        i_search_sub_packages TYPE abap_bool
+        i_extract_packages    TYPE REF TO z2mse_extr_packages
+        i_extract_classes     TYPE REF TO z2mse_extr_classes.
+    METHODS _get_using_elements
+      IMPORTING
+        i_extract_classes        TYPE REF TO z2mse_extr_classes
+        i_extract_where_used_sap TYPE REF TO z2mse_extr_where_used_sap.
 ENDCLASS.
 
 
@@ -51,15 +68,11 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
 
 
   METHOD extract.
+    DATA: extract_packages TYPE REF TO z2mse_extr_packages.
 
     TEST-SEAM creator_packages.
-      CREATE OBJECT g_extract_packages.
+      CREATE OBJECT extract_packages.
     END-TEST-SEAM.
-
-    g_extract_packages->select_packages( EXPORTING top_packages           = i_top_packages
-                                                 sub_packages_filter    = i_sub_packages_filter
-                                                 including_sub_packages = i_search_sub_packages  ).
-
 
     DATA extract_classes TYPE REF TO z2mse_extr_classes.
 
@@ -67,30 +80,69 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
       CREATE OBJECT extract_classes.
     END-TEST-SEAM.
 
-    extract_classes->select_classes_by_packages( packages = g_extract_packages->g_selected_packages ).
-
     DATA extract_where_used_sap TYPE REF TO z2mse_extr_where_used_sap.
 
     TEST-SEAM creator_where_used_sap.
       CREATE OBJECT extract_where_used_sap.
     END-TEST-SEAM.
 
-    extract_where_used_sap->used_by_class_component( class_components = extract_classes->get_comp_to_do_where_used( ) ).
+    _initial_selections_by_filter( i_top_packages        = i_top_packages
+                                   i_sub_packages_filter = i_sub_packages_filter
+                                   i_search_sub_packages = i_search_sub_packages
+                                   i_extract_packages    = extract_packages
+                                   i_extract_classes     = extract_classes ).
 
-    extract_classes->select_classes_by_components( components = extract_where_used_sap->get_components_where_used( ) ).
+    _get_using_elements( i_extract_classes        = extract_classes
+                         i_extract_where_used_sap = extract_where_used_sap ).
 
-    g_extract_packages->add_selected_packages_to_mode2( famix_package = famix_package ).
-    extract_classes->add_to_model2( EXPORTING famix_package   = famix_package
+    mse_model = _add_all_to_model_and_make_mse( i_extract_packages       = extract_packages
+                                                i_extract_classes        = extract_classes
+                                                i_extract_where_used_sap = extract_where_used_sap ).
+
+  ENDMETHOD.
+
+  METHOD _add_all_to_model_and_make_mse.
+
+    " Add all to model and make mse
+
+    i_extract_packages->add_selected_packages_to_mode2( famix_package = famix_package ).
+
+    i_extract_classes->add_to_model2( EXPORTING famix_package   = famix_package
                                                               famix_class     = famix_class
                                                               famix_method    = famix_method
                                                               famix_attribute = famix_attribute ).
 
-    extract_where_used_sap->add_usage_to_model( EXPORTING famix_method    = famix_method
+    i_extract_where_used_sap->add_usage_to_model( EXPORTING famix_method    = famix_method
                                                           famix_attribute = famix_attribute
                                                           famix_invocation = famix_invocation
                                                           famix_access     = famix_access ).
 
-    model->make_mse( IMPORTING mse_model = mse_model ).
+    model->make_mse( IMPORTING mse_model = r_mse_model ).
 
   ENDMETHOD.
+
+
+  METHOD _initial_selections_by_filter.
+
+    " Initial selections due to filter of report
+
+    i_extract_packages->select_packages( EXPORTING top_packages           = i_top_packages
+                                                 sub_packages_filter    = i_sub_packages_filter
+                                                 including_sub_packages = i_search_sub_packages  ).
+
+    i_extract_classes->select_classes_by_packages( packages = i_extract_packages->g_selected_packages ).
+
+  ENDMETHOD.
+
+
+  METHOD _get_using_elements.
+
+    " Get using elements
+
+    i_extract_where_used_sap->used_by_class_component( class_components = i_extract_classes->get_comp_to_do_where_used( ) ).
+
+    i_extract_classes->select_classes_by_components( components = i_extract_where_used_sap->get_components_where_used( ) ).
+
+  ENDMETHOD.
+
 ENDCLASS.

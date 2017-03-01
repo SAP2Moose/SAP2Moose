@@ -52,6 +52,7 @@ CLASS z2mse_extr_classes DEFINITION
         !tadir_test   TYPE ty_t_tadir_test OPTIONAL
         seoclass_test TYPE ty_t_seoclass_test OPTIONAL
         seocompo_test TYPE ty_t_seocompo_test OPTIONAL.
+    "! Call once to select all classes that are in a list of packages
     METHODS select_classes_by_packages
       IMPORTING
         packages TYPE z2mse_extr_packages=>ty_packages.
@@ -137,7 +138,79 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr_classes IMPLEMENTATION.
+CLASS Z2MSE_EXTR_CLASSES IMPLEMENTATION.
+
+
+  METHOD add_and_sort_to_classes_table.
+
+    DATA tadirline TYPE z2mse_extr_classes=>ty_tadir_test.
+
+    "Add and sort to classes table
+    DATA class TYPE ty_class.
+
+    LOOP AT i_tadirvalues INTO tadirline.
+
+      CLEAR class.
+
+      class-clsname = tadirline-obj_name.
+      CASE tadirline-object.
+        WHEN tadir_clas.
+          class-clstype = class_type.
+        WHEN tadir_intf.
+          class-clstype = interface_type.
+        WHEN OTHERS.
+          ASSERT 1 = 2.
+      ENDCASE.
+
+      class-devclass = tadirline-devclass.
+
+      INSERT class INTO TABLE c_selected_classes.
+
+    ENDLOOP.
+
+    SORT c_selected_classes BY clsname.
+
+  ENDMETHOD.
+
+
+  METHOD add_to_model.
+
+    me->_add_classes_to_model( EXPORTING sap_package   = sap_package
+                                        sap_class     = sap_class
+                                        sap_method    = sap_method
+                                        sap_attribute = sap_attribute
+                                        classes       = g_selected_classes
+                                        components    = g_selected_components ).
+
+    me->_add_classes_to_model( EXPORTING sap_package   = sap_package
+                                        sap_class     = sap_class
+                                        sap_method    = sap_method
+                                        sap_attribute = sap_attribute
+                                        classes       = g_add_classes
+                                        components    = g_add_components ).
+
+  ENDMETHOD.
+
+
+  METHOD add_to_model2.
+
+    me->_add_classes_to_model2( EXPORTING famix_package    = famix_package
+                                          famix_class      = famix_class
+                                          famix_method    = famix_method
+                                          famix_attribute  = famix_attribute
+                                          classes       = g_selected_classes
+                                          components    = g_selected_components ).
+
+    me->_add_classes_to_model2( EXPORTING famix_package    = famix_package
+                                          famix_class      = famix_class
+                                          famix_method    = famix_method
+                                          famix_attribute  = famix_attribute
+                                          classes       = g_add_classes
+                                          components    = g_add_components ).
+
+  ENDMETHOD.
+
+
   METHOD constructor.
     IF tadir_test IS SUPPLIED
     OR seoclass_test IS SUPPLIED
@@ -149,13 +222,11 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-  METHOD select_classes_by_packages.
 
-    g_selected_classes = _select_from_tadir( packages ).
-    _check_existence( CHANGING classes = g_selected_classes ).
-    g_selected_components = _read_class_details(  g_selected_classes ).
-
+  METHOD get_comp_to_do_where_used.
+    components = g_selected_components.
   ENDMETHOD.
+
 
   METHOD select_classes_by_components.
 
@@ -178,107 +249,15 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD _check_existence.
 
-    TYPES: BEGIN OF ty_existing,
-             clsname TYPE seoclsname,
-           END OF ty_existing.
-    TYPES ty_t_existing TYPE STANDARD TABLE OF ty_existing WITH DEFAULT KEY.
-    DATA: line  TYPE ty_existing,
-          table TYPE ty_t_existing.
+  METHOD select_classes_by_packages.
 
-    FIELD-SYMBOLS: <class> LIKE LINE OF classes.
-
-*    " Build helper table with correct type for select
-*    LOOP AT g_selected_tadir INTO selected_tadir.
-*      line-clsname = selected_tadir-obj_name.
-*      INSERT line INTO TABLE check_table.
-*    ENDLOOP.
-
-    " Select from database
-    IF g_is_test EQ abap_false.
-
-      IF classes IS NOT INITIAL.
-        SELECT clsname FROM seoclass INTO TABLE table FOR ALL ENTRIES IN classes WHERE clsname = classes-clsname.
-      ENDIF.
-
-    ELSE.
-
-      DATA seoclass_line TYPE ty_seoclass_test.
-
-      LOOP AT g_seoclass_test INTO seoclass_line.
-        READ TABLE classes TRANSPORTING NO FIELDS WITH KEY clsname = seoclass_line-clsname.
-        IF sy-subrc EQ 0.
-          line-clsname = seoclass_line-clsname.
-          INSERT line INTO TABLE table.
-        ENDIF.
-      ENDLOOP.
-
-    ENDIF.
-
-    " Mark as existing
-    LOOP AT table INTO line.
-
-      READ TABLE classes ASSIGNING <class> WITH KEY clsname = line-clsname.
-      IF sy-subrc EQ 0.
-        <class>-exists = abap_true.
-      ENDIF.
-
-    ENDLOOP.
-
-    DELETE classes WHERE exists = abap_false.
+    g_selected_classes = _select_from_tadir( packages ).
+    _check_existence( CHANGING classes = g_selected_classes ).
+    g_selected_components = _read_class_details(  g_selected_classes ).
 
   ENDMETHOD.
 
-  METHOD _read_class_details.
-
-    IF g_is_test EQ abap_false.
-
-      IF classes IS NOT INITIAL.
-
-        SELECT clsname cmpname cmptype
-          FROM seocompo
-          INTO CORRESPONDING FIELDS OF TABLE components
-          FOR ALL ENTRIES IN classes
-          WHERE cmptype <> 3 AND clsname = classes-clsname.
-
-      ENDIF.
-    ELSE.
-      DATA: seocompo           TYPE ty_seocompo_test,
-            selected_component TYPE ty_class_component.
-      LOOP AT g_seocompo_test INTO seocompo.
-
-        READ TABLE classes TRANSPORTING NO FIELDS WITH KEY clsname = seocompo-clsname.
-        IF sy-subrc EQ 0.
-          CLEAR selected_component.
-          selected_component-clsname = seocompo-clsname.
-          selected_component-cmpname = seocompo-cmpname.
-          selected_component-cmptype = seocompo-cmptype.
-          INSERT selected_component INTO TABLE components.
-        ENDIF.
-
-      ENDLOOP.
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD add_to_model.
-
-    me->_add_classes_to_model( EXPORTING sap_package   = sap_package
-                                        sap_class     = sap_class
-                                        sap_method    = sap_method
-                                        sap_attribute = sap_attribute
-                                        classes       = g_selected_classes
-                                        components    = g_selected_components ).
-
-    me->_add_classes_to_model( EXPORTING sap_package   = sap_package
-                                        sap_class     = sap_class
-                                        sap_method    = sap_method
-                                        sap_attribute = sap_attribute
-                                        classes       = g_add_classes
-                                        components    = g_add_components ).
-
-  ENDMETHOD.
 
   METHOD _add_classes_to_model.
 
@@ -330,136 +309,6 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
 
   ENDMETHOD.
 
-
-  METHOD _select_from_tadir.
-
-    " Select from TADIR
-    CLEAR selected_classes.
-
-    DATA: tadirline   TYPE ty_tadir_test,
-          tadirvalues TYPE ty_t_tadir_test.
-
-    IF g_is_test EQ abap_false.
-      IF i_packages IS NOT INITIAL.
-        SELECT object obj_name devclass FROM tadir INTO CORRESPONDING FIELDS OF TABLE tadirvalues FOR ALL ENTRIES IN i_packages  WHERE
-          pgmid = 'R3TR' AND
-          devclass = i_packages-package AND
-          ( object = tadir_clas OR
-            object = tadir_intf ).
-
-      ENDIF.
-    ELSE.
-      DATA package LIKE LINE OF i_packages.
-      DATA tadir_test LIKE LINE OF g_tadir_test.
-      LOOP AT i_packages INTO package.
-        LOOP AT g_tadir_test INTO tadir_test WHERE
-          ( object = tadir_clas OR object = tadir_intf ) AND
-          devclass = package-package.
-
-          tadirline-object = tadir_test-object.
-          tadirline-obj_name = tadir_test-obj_name.
-          tadirline-devclass = tadir_test-devclass.
-          INSERT tadirline INTO TABLE tadirvalues.
-        ENDLOOP.
-      ENDLOOP.
-    ENDIF.
-
-    add_and_sort_to_classes_table( EXPORTING i_tadirvalues = tadirvalues
-                                    CHANGING c_selected_classes = selected_classes ).
-
-  ENDMETHOD.
-
-  METHOD _select_from_tadir_by_comp.
-
-    " Select from TADIR
-    CLEAR selected_classes.
-
-    DATA: tadirline   TYPE ty_tadir_test,
-          tadirvalues TYPE ty_t_tadir_test.
-
-    IF g_is_test EQ abap_false.
-      IF obj_names  IS NOT INITIAL.
-        SELECT object obj_name devclass FROM tadir INTO CORRESPONDING FIELDS OF TABLE tadirvalues FOR ALL ENTRIES IN obj_names   WHERE
-          pgmid = 'R3TR' AND
-          obj_name = obj_names-obj_name AND
-          ( object = tadir_clas OR
-            object = tadir_intf ).
-
-      ENDIF.
-    ELSE.
-      DATA obj_name LIKE LINE OF obj_names.
-      DATA tadir_test LIKE LINE OF g_tadir_test.
-      LOOP AT obj_names INTO obj_name.
-        LOOP AT g_tadir_test INTO tadir_test WHERE
-          ( object = tadir_clas OR object = tadir_intf ) AND
-          obj_name = obj_name-obj_name.
-
-          tadirline-object = tadir_test-object.
-          tadirline-obj_name = tadir_test-obj_name.
-          tadirline-devclass = tadir_test-devclass.
-          INSERT tadirline INTO TABLE tadirvalues.
-        ENDLOOP.
-      ENDLOOP.
-    ENDIF.
-
-    add_and_sort_to_classes_table( EXPORTING i_tadirvalues = tadirvalues
-                                    CHANGING c_selected_classes = selected_classes ).
-
-  ENDMETHOD.
-
-  METHOD get_comp_to_do_where_used.
-    components = g_selected_components.
-  ENDMETHOD.
-
-
-  METHOD add_and_sort_to_classes_table.
-
-    DATA tadirline TYPE z2mse_extr_classes=>ty_tadir_test.
-
-    "Add and sort to classes table
-    DATA class TYPE ty_class.
-
-    LOOP AT i_tadirvalues INTO tadirline.
-
-      CLEAR class.
-
-      class-clsname = tadirline-obj_name.
-      CASE tadirline-object.
-        WHEN tadir_clas.
-          class-clstype = class_type.
-        WHEN tadir_intf.
-          class-clstype = interface_type.
-        WHEN OTHERS.
-          ASSERT 1 = 2.
-      ENDCASE.
-
-      class-devclass = tadirline-devclass.
-
-      INSERT class INTO TABLE c_selected_classes.
-
-    ENDLOOP.
-
-    SORT c_selected_classes BY clsname.
-
-  ENDMETHOD.
-
-  METHOD add_to_model2.
-
-    me->_add_classes_to_model2( EXPORTING famix_package    = famix_package
-                                          famix_class      = famix_class
-                                          famix_method    = famix_method
-                                          famix_attribute  = famix_attribute
-                                          classes       = g_selected_classes
-                                          components    = g_selected_components ).
-
-    me->_add_classes_to_model2( EXPORTING famix_package    = famix_package
-                                          famix_class      = famix_class
-                                          famix_method    = famix_method
-                                          famix_attribute  = famix_attribute
-                                          classes       = g_add_classes
-                                          components    = g_add_components ).
-
-  ENDMETHOD.
 
   METHOD _add_classes_to_model2.
 
@@ -552,4 +401,167 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD _check_existence.
+
+    TYPES: BEGIN OF ty_existing,
+             clsname TYPE seoclsname,
+           END OF ty_existing.
+    TYPES ty_t_existing TYPE STANDARD TABLE OF ty_existing WITH DEFAULT KEY.
+    DATA: line  TYPE ty_existing,
+          table TYPE ty_t_existing.
+
+    FIELD-SYMBOLS: <class> LIKE LINE OF classes.
+
+*    " Build helper table with correct type for select
+*    LOOP AT g_selected_tadir INTO selected_tadir.
+*      line-clsname = selected_tadir-obj_name.
+*      INSERT line INTO TABLE check_table.
+*    ENDLOOP.
+
+    " Select from database
+    IF g_is_test EQ abap_false.
+
+      IF classes IS NOT INITIAL.
+        SELECT clsname FROM seoclass INTO TABLE table FOR ALL ENTRIES IN classes WHERE clsname = classes-clsname.
+      ENDIF.
+
+    ELSE.
+
+      DATA seoclass_line TYPE ty_seoclass_test.
+
+      LOOP AT g_seoclass_test INTO seoclass_line.
+        READ TABLE classes TRANSPORTING NO FIELDS WITH KEY clsname = seoclass_line-clsname.
+        IF sy-subrc EQ 0.
+          line-clsname = seoclass_line-clsname.
+          INSERT line INTO TABLE table.
+        ENDIF.
+      ENDLOOP.
+
+    ENDIF.
+
+    " Mark as existing
+    LOOP AT table INTO line.
+
+      READ TABLE classes ASSIGNING <class> WITH KEY clsname = line-clsname.
+      IF sy-subrc EQ 0.
+        <class>-exists = abap_true.
+      ENDIF.
+
+    ENDLOOP.
+
+    DELETE classes WHERE exists = abap_false.
+
+  ENDMETHOD.
+
+
+  METHOD _read_class_details.
+
+    IF g_is_test EQ abap_false.
+
+      IF classes IS NOT INITIAL.
+
+        SELECT clsname cmpname cmptype
+          FROM seocompo
+          INTO CORRESPONDING FIELDS OF TABLE components
+          FOR ALL ENTRIES IN classes
+          WHERE cmptype <> 3 AND clsname = classes-clsname.
+
+      ENDIF.
+    ELSE.
+      DATA: seocompo           TYPE ty_seocompo_test,
+            selected_component TYPE ty_class_component.
+      LOOP AT g_seocompo_test INTO seocompo.
+
+        READ TABLE classes TRANSPORTING NO FIELDS WITH KEY clsname = seocompo-clsname.
+        IF sy-subrc EQ 0.
+          CLEAR selected_component.
+          selected_component-clsname = seocompo-clsname.
+          selected_component-cmpname = seocompo-cmpname.
+          selected_component-cmptype = seocompo-cmptype.
+          INSERT selected_component INTO TABLE components.
+        ENDIF.
+
+      ENDLOOP.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD _select_from_tadir.
+
+    " Select from TADIR
+    CLEAR selected_classes.
+
+    DATA: tadirline   TYPE ty_tadir_test,
+          tadirvalues TYPE ty_t_tadir_test.
+
+    IF g_is_test EQ abap_false.
+      IF i_packages IS NOT INITIAL.
+        SELECT object obj_name devclass FROM tadir INTO CORRESPONDING FIELDS OF TABLE tadirvalues FOR ALL ENTRIES IN i_packages  WHERE
+          pgmid = 'R3TR' AND
+          devclass = i_packages-package AND
+          ( object = tadir_clas OR
+            object = tadir_intf ).
+
+      ENDIF.
+    ELSE.
+      DATA package LIKE LINE OF i_packages.
+      DATA tadir_test LIKE LINE OF g_tadir_test.
+      LOOP AT i_packages INTO package.
+        LOOP AT g_tadir_test INTO tadir_test WHERE
+          ( object = tadir_clas OR object = tadir_intf ) AND
+          devclass = package-package.
+
+          tadirline-object = tadir_test-object.
+          tadirline-obj_name = tadir_test-obj_name.
+          tadirline-devclass = tadir_test-devclass.
+          INSERT tadirline INTO TABLE tadirvalues.
+        ENDLOOP.
+      ENDLOOP.
+    ENDIF.
+
+    add_and_sort_to_classes_table( EXPORTING i_tadirvalues = tadirvalues
+                                    CHANGING c_selected_classes = selected_classes ).
+
+  ENDMETHOD.
+
+
+  METHOD _select_from_tadir_by_comp.
+
+    " Select from TADIR
+    CLEAR selected_classes.
+
+    DATA: tadirline   TYPE ty_tadir_test,
+          tadirvalues TYPE ty_t_tadir_test.
+
+    IF g_is_test EQ abap_false.
+      IF obj_names  IS NOT INITIAL.
+        SELECT object obj_name devclass FROM tadir INTO CORRESPONDING FIELDS OF TABLE tadirvalues FOR ALL ENTRIES IN obj_names   WHERE
+          pgmid = 'R3TR' AND
+          obj_name = obj_names-obj_name AND
+          ( object = tadir_clas OR
+            object = tadir_intf ).
+
+      ENDIF.
+    ELSE.
+      DATA obj_name LIKE LINE OF obj_names.
+      DATA tadir_test LIKE LINE OF g_tadir_test.
+      LOOP AT obj_names INTO obj_name.
+        LOOP AT g_tadir_test INTO tadir_test WHERE
+          ( object = tadir_clas OR object = tadir_intf ) AND
+          obj_name = obj_name-obj_name.
+
+          tadirline-object = tadir_test-object.
+          tadirline-obj_name = tadir_test-obj_name.
+          tadirline-devclass = tadir_test-devclass.
+          INSERT tadirline INTO TABLE tadirvalues.
+        ENDLOOP.
+      ENDLOOP.
+    ENDIF.
+
+    add_and_sort_to_classes_table( EXPORTING i_tadirvalues = tadirvalues
+                                    CHANGING c_selected_classes = selected_classes ).
+
+  ENDMETHOD.
 ENDCLASS.
