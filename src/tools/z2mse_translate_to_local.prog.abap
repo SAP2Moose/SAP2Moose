@@ -33,11 +33,11 @@ REPORT z2mse_translate_to_local.
 * REPLACE_DEFINITION NameOfGlobalClass
 * REPLACE_IMPLEMENTATION NameOfGlobalClass
 
-PARAMETERS: p_templ TYPE c LENGTH 30 DEFAULT 'YRW1_MC_MOOSE_EXTRACTOR2'.
+PARAMETERS: p_templ TYPE c LENGTH 30 DEFAULT 'Z2MSE_MOOSE_EXTRACTOR2'.
 
 " Only to have a "more beautiful" program after conversion.
 " If not empty replace all occurences of prefix with cl_ in the target program
-PARAMETERS: p_prefix TYPE c LENGTH 30 DEFAULT 'YRW1_MC'.
+PARAMETERS: p_prefix TYPE c LENGTH 30 DEFAULT 'Z2MSE'.
 
 TYPES: stringtable TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
 

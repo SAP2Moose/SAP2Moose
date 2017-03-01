@@ -3,17 +3,23 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <PROGDIR>
-    <NAME>Z2MSE_RELEASE_TRANSLATOR</NAME>
+    <NAME>YRW1_MC_TEST_MODEL_DOWNLOADER</NAME>
     <STATE>A</STATE>
     <VARCL>X</VARCL>
+    <DBAPL>S</DBAPL>
     <SUBC>1</SUBC>
-    <RSTAT>K</RSTAT>
-    <RLOAD>D</RLOAD>
     <FIXPT>X</FIXPT>
+    <LDBNAME>D$S</LDBNAME>
     <UCCHECK>X</UCCHECK>
    </PROGDIR>
    <DYNPROS/>
-   <TPOOL/>
+   <TPOOL>
+    <item>
+     <ID>R</ID>
+     <ENTRY>Download the mse data used in the integration tests</ENTRY>
+     <LENGTH>51</LENGTH>
+    </item>
+   </TPOOL>
   </asx:values>
  </asx:abap>
 </abapGit>
