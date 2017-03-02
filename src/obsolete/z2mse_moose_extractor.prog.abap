@@ -20,6 +20,11 @@
 *OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 *SOFTWARE.
 
+"! Last activation:
+"! Generated 21.11.2016 17:49
+"!
+"! Release 0.1.0
+"!
 "! This is an experimental prototype, that has errors
 "!
 "! The latest version are available on https://github.com/RainerWinkler/Moose-FAMIX-SAP-Extractor
@@ -47,9 +52,7 @@
 "!
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
-"! Last activation:
-"! Generated 21.11.2016 17:49
-"!
+
 REPORT Z2MSE_moose_extractor.
 TABLES tadir. "So that select-options work
 

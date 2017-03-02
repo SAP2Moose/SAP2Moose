@@ -37,7 +37,7 @@ PARAMETERS: p_templ TYPE c LENGTH 30 DEFAULT 'Z2MSE_MOOSE_EXTRACTOR2'.
 
 " Only to have a "more beautiful" program after conversion.
 " If not empty replace all occurences of prefix with cl_ in the target program
-PARAMETERS: p_prefix TYPE c LENGTH 30 DEFAULT 'Z2MSE'.
+PARAMETERS: p_prefix TYPE c LENGTH 30 DEFAULT 'Z2MSE_'.
 
 TYPES: stringtable TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
 
