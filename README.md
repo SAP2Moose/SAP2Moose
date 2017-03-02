@@ -21,7 +21,7 @@ See [Moose](http://www.moosetechnology.org/) for further informations on the ana
 
 # Extract informations to Moose
 
-The SAP extractor for this project is hosted in this repository.
+The SAP extractor for this project is hosted in this repository. It is currently `z_moose_extractor.abap`. The content of this file can be copied into a report and executed.
 
 This repository provides a program to extract model data from a SAP system into the analysis platform Moose on Pharo Smalltalk. It uses FAMIX as a flexible enhancable meta model.
 
@@ -33,11 +33,7 @@ It can be used for all suitable Moose models, not only models generated from SAP
 
 # ABAPGit for development
 
-This repository will use ABAPGit for all objects relevant to the development. The extractor itself is a simple program and can be installed with copy and paste. All classes and programs needed for the development are contained in the folder src. It is needed to use ABAPGit to replicate this files to a SAP System with at least ABAP 7.50. The main logic has to contain statements that run in ABAP 7.30. TEST-SEAM and END-TEST-SEAM is allowed and will be replaced while generating the extraction programm. The unit tests should be written with actual ABAP statemements.
-
-The generating of the extraction program is done with the report Z2MSE_TRANSLATE_TO_LOCAL in package Z2MSE_TOOLS. 
-
-There are (26.02.2017) two templates: Z2MSE_MOOSE_EXTRACTOR2 will contain the refactored and improved logic. Z2MSE_MOOSE_EXTRACTOR is used to contain the current extraction program and shall be replaced in the near future.
+This repository will use ABAPGit for all objects relevant to the development. The extractor itself is a simple program and can be installed with copy and paste. See wiki for details.
 
 # Further
 
