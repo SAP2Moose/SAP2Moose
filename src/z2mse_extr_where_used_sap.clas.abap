@@ -38,16 +38,18 @@ CLASS z2mse_extr_where_used_sap DEFINITION
       IMPORTING
         wbcrossgt_test         TYPE ty_t_wbcrossgt_test OPTIONAL
         includes_to_components TYPE ty_includes_to_components OPTIONAL.
-    "! Is this name correct?
+    "! Receives a list of components. Does a where-used analysis. Stores components that are using the received components internally
     METHODS used_by_class_component
       IMPORTING
         class_components TYPE z2mse_extr_classes=>ty_class_components.
+    "! Add all selected components to the model. Should be called only once
     METHODS add_usage_to_model
       IMPORTING
         famix_method     TYPE REF TO z2mse_famix_method
         famix_attribute  TYPE REF TO z2mse_famix_attribute
         famix_invocation TYPE REF TO z2mse_famix_invocation
         famix_access     TYPE REF TO z2mse_famix_access.
+    "! Returns all components that are found in the last where-used analysis. Returns this components only once
     METHODS get_components_where_used
       RETURNING VALUE(components) TYPE z2mse_extr_classes=>ty_class_components_hashed.
   PROTECTED SECTION.

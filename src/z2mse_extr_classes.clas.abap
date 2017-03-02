@@ -56,23 +56,24 @@ CLASS z2mse_extr_classes DEFINITION
     METHODS select_classes_by_packages
       IMPORTING
         packages TYPE z2mse_extr_packages=>ty_packages.
-    "! Select classes by a list of components.
-    "! That is required because due to a where used analysis classes and class components have to the model.
+    "! Add classes by a list of components
     METHODS select_classes_by_components
       IMPORTING
         components TYPE ty_class_components_hashed.
     METHODS add_to_model
       IMPORTING
         sap_package   TYPE REF TO z2mse_sap_package
-        sap_class     TYPE REF TO Z2MSE_sap_class
+        sap_class     TYPE REF TO z2mse_sap_class
         sap_method    TYPE REF TO z2mse_sap_method
-        sap_attribute TYPE REF TO Z2MSE_sap_attribute.
+        sap_attribute TYPE REF TO z2mse_sap_attribute.
+    "! Add all selected components to the model. Should be called only once
     METHODS add_to_model2
       IMPORTING
         famix_package   TYPE REF TO z2mse_famix_package
-        famix_class     TYPE REF TO Z2MSE_famix_class
+        famix_class     TYPE REF TO z2mse_famix_class
         famix_method    TYPE REF TO z2mse_famix_method
-        famix_attribute TYPE REF TO Z2MSE_famix_attribute.
+        famix_attribute TYPE REF TO z2mse_famix_attribute.
+    "! Returns components. Returns these Components only once
     METHODS get_comp_to_do_where_used
       RETURNING VALUE(components) TYPE z2mse_extr_classes=>ty_class_components.
   PROTECTED SECTION.
@@ -116,17 +117,17 @@ CLASS z2mse_extr_classes DEFINITION
     METHODS _add_classes_to_model
       IMPORTING
         sap_package   TYPE REF TO z2mse_sap_package
-        sap_class     TYPE REF TO Z2MSE_sap_class
+        sap_class     TYPE REF TO z2mse_sap_class
         sap_method    TYPE REF TO z2mse_sap_method
-        sap_attribute TYPE REF TO Z2MSE_sap_attribute
+        sap_attribute TYPE REF TO z2mse_sap_attribute
         classes       TYPE z2mse_extr_classes=>ty_classes
         components    TYPE z2mse_extr_classes=>ty_class_components.
     METHODS _add_classes_to_model2
       IMPORTING
         famix_package   TYPE REF TO z2mse_famix_package
-        famix_class     TYPE REF TO Z2MSE_famix_class
+        famix_class     TYPE REF TO z2mse_famix_class
         famix_method    TYPE REF TO z2mse_famix_method
-        famix_attribute TYPE REF TO Z2MSE_famix_attribute
+        famix_attribute TYPE REF TO z2mse_famix_attribute
         classes         TYPE z2mse_extr_classes=>ty_classes
         components      TYPE z2mse_extr_classes=>ty_class_components.
     METHODS add_and_sort_to_classes_table
@@ -364,29 +365,29 @@ CLASS Z2MSE_EXTR_CLASSES IMPLEMENTATION.
                                                           parent_name_group = 'ABAP_CLASS'
                                                           parent_name    = class-clsname ).
 
-    famix_attribute->store_id( EXPORTING class     = class-clsname
-                                         attribute = component-cmpname ).
+            famix_attribute->store_id( EXPORTING class     = class-clsname
+                                                 attribute = component-cmpname ).
 
 *            sap_attribute->add( EXPORTING class     = class-clsname
 *                                          attribute = component-cmpname ).
           WHEN method_type OR event_type.
-    " SAP_2_FAMIX_15        Map methods of classes to FAMIX.Method
-    " SAP_2_FAMIX_16        Map methods of interfaces to FAMIX.Method
-    famix_method->add( EXPORTING name = component-cmpname IMPORTING id = last_id ).
+            " SAP_2_FAMIX_15        Map methods of classes to FAMIX.Method
+            " SAP_2_FAMIX_16        Map methods of interfaces to FAMIX.Method
+            famix_method->add( EXPORTING name = component-cmpname IMPORTING id = last_id ).
 
-    " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
-    " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
-    famix_method->set_signature( element_id = last_id
-                                   signature = component-cmpname ).
+            " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
+            " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
+            famix_method->set_signature( element_id = last_id
+                                           signature = component-cmpname ).
 
-    famix_method->set_parent_type( EXPORTING element_id = last_id
-                                               parent_element = 'FAMIX.Class'
-                                               parent_name_group = 'ABAP_CLASS'
-                                               parent_name    = class-clsname ).
+            famix_method->set_parent_type( EXPORTING element_id = last_id
+                                                       parent_element = 'FAMIX.Class'
+                                                       parent_name_group = 'ABAP_CLASS'
+                                                       parent_name    = class-clsname ).
 
 
-    famix_method->store_id( EXPORTING class  = class-clsname
-                                        method = component-cmpname ).
+            famix_method->store_id( EXPORTING class  = class-clsname
+                                                method = component-cmpname ).
 
 
 *            sap_method->add( EXPORTING class  = class-clsname

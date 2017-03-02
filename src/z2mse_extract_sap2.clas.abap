@@ -101,9 +101,27 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD _add_all_to_model_and_make_mse.
+  METHOD _initial_selections_by_filter.
 
-    " Add all to model and make mse
+    " Initial selections due to filter of report
+
+    i_extract_packages->select_packages( EXPORTING top_packages           = i_top_packages
+                                                 sub_packages_filter    = i_sub_packages_filter
+                                                 including_sub_packages = i_search_sub_packages  ).
+
+    i_extract_classes->select_classes_by_packages( packages = i_extract_packages->g_selected_packages ).
+
+  ENDMETHOD.
+
+  METHOD _get_using_elements.
+
+    i_extract_where_used_sap->used_by_class_component( class_components = i_extract_classes->get_comp_to_do_where_used( ) ).
+
+    i_extract_classes->select_classes_by_components( components = i_extract_where_used_sap->get_components_where_used( ) ).
+
+  ENDMETHOD.
+
+  METHOD _add_all_to_model_and_make_mse.
 
     i_extract_packages->add_selected_packages_to_mode2( famix_package = famix_package ).
 
@@ -118,30 +136,6 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
                                                           famix_access     = famix_access ).
 
     model->make_mse( IMPORTING mse_model = r_mse_model ).
-
-  ENDMETHOD.
-
-
-  METHOD _initial_selections_by_filter.
-
-    " Initial selections due to filter of report
-
-    i_extract_packages->select_packages( EXPORTING top_packages           = i_top_packages
-                                                 sub_packages_filter    = i_sub_packages_filter
-                                                 including_sub_packages = i_search_sub_packages  ).
-
-    i_extract_classes->select_classes_by_packages( packages = i_extract_packages->g_selected_packages ).
-
-  ENDMETHOD.
-
-
-  METHOD _get_using_elements.
-
-    " Get using elements
-
-    i_extract_where_used_sap->used_by_class_component( class_components = i_extract_classes->get_comp_to_do_where_used( ) ).
-
-    i_extract_classes->select_classes_by_components( components = i_extract_where_used_sap->get_components_where_used( ) ).
 
   ENDMETHOD.
 

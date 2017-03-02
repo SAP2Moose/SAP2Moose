@@ -42,11 +42,12 @@ CLASS z2mse_extr_packages DEFINITION
     METHODS add_selected_packages_to_model
       IMPORTING
         sap_package TYPE REF TO z2mse_sap_package.
+    "! Add all selected components to the model. Should be called only once
     METHODS add_selected_packages_to_mode2
       IMPORTING
         famix_package TYPE REF TO z2mse_famix_package.
 
-  PROTECTED SECTION.
+PROTECTED SECTION.
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_package_store,
              package           TYPE devclass,
