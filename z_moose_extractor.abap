@@ -20,6 +20,11 @@
 *OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 *SOFTWARE.
 
+"! Last activation:
+"! Generated 21.11.2016 17:49
+"!
+"! Release 0.1.0
+"!
 "! This is an experimental prototype, that has errors
 "!
 "! The latest version are available on https://github.com/RainerWinkler/Moose-FAMIX-SAP-Extractor
@@ -47,10 +52,8 @@
 "!
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
-"! Last activation:
-"! Generated 21.11.2016 17:49
-"!
-REPORT yrw1_mc_moose_extractor.
+
+REPORT Z2MSE_moose_extractor.
 TABLES tadir. "So that select-options work
 
 SELECTION-SCREEN BEGIN OF BLOCK block_global_source WITH FRAME TITLE TEXT-001.
@@ -154,7 +157,7 @@ CLASS cl_model DEFINITION
     TYPES: BEGIN OF line_type,
              line TYPE string,
            END OF line_type.
-    TYPES: lines_type TYPE STANDARD TABLE OF line_type.
+    TYPES: lines_type TYPE STANDARD TABLE OF line_type WITH DEFAULT KEY.
 
     METHODS constructor.
 
@@ -723,7 +726,7 @@ CLASS CL_FAMIX_ENTITY IMPLEMENTATION.
 ENDCLASS.
 
 
-CLASS cl_famix_sourced_entity DEFINITION ABSTRACT INHERITING FROM cl_famix_entity
+CLASS cl_famix_sourced_entity DEFINITION ABSTRACT INHERITING FROM CL_famix_entity
 .
   PUBLIC SECTION.
     "! Declare source language
@@ -1032,7 +1035,7 @@ ENDCLASS.
 
 
 
-CLASS cl_famix_behavioural_entty DEFINITION INHERITING FROM cl_famix_container_entity ABSTRACT
+CLASS cl_famix_behavioural_entty DEFINITION INHERITING FROM CL_famix_container_entity ABSTRACT
 .
   PUBLIC SECTION.
     "! Set the signature of a method
@@ -1066,7 +1069,7 @@ ENDCLASS.
 
 
 
-CLASS cl_famix_namespace DEFINITION INHERITING FROM cl_famix_container_entity
+CLASS cl_famix_namespace DEFINITION INHERITING FROM CL_famix_container_entity
 .
 
   PUBLIC SECTION.
@@ -1142,7 +1145,7 @@ ENDCLASS.
 
 
 
-CLASS cl_famix_method DEFINITION INHERITING FROM cl_famix_behavioural_entty
+CLASS cl_famix_method DEFINITION INHERITING FROM CL_famix_behavioural_entty
 .
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
@@ -1264,7 +1267,7 @@ ENDCLASS.
 
 
 
-CLASS cl_famix_class DEFINITION INHERITING FROM cl_famix_container_entity
+CLASS cl_famix_class DEFINITION INHERITING FROM CL_famix_container_entity
 .
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
@@ -1320,7 +1323,7 @@ ENDCLASS.
 
 
 
-CLASS cl_famix_access DEFINITION INHERITING FROM cl_famix_association
+CLASS cl_famix_access DEFINITION INHERITING FROM CL_famix_association
 .
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
@@ -1390,7 +1393,7 @@ ENDCLASS.
 
 
 
-CLASS cl_famix_invocation DEFINITION INHERITING FROM cl_famix_association
+CLASS cl_famix_invocation DEFINITION INHERITING FROM CL_famix_association
 .
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
@@ -1495,7 +1498,7 @@ ENDCLASS.
 
 
 
-CLASS cl_famix_inheritance DEFINITION INHERITING FROM cl_famix_association
+CLASS cl_famix_inheritance DEFINITION INHERITING FROM CL_famix_association
 .
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
@@ -1542,7 +1545,7 @@ ENDCLASS.
 
 
 
-CLASS cl_famix_reference DEFINITION INHERITING FROM cl_famix_association
+CLASS cl_famix_reference DEFINITION INHERITING FROM CL_famix_association
 .
   PUBLIC SECTION.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
@@ -1649,18 +1652,14 @@ CLASS CL_CHECK_FAMIX_MODEL IMPLEMENTATION.
       ADD 1 TO count_name.
 
       CONDENSE ls_public_attribute-string.
-      TEST-SEAM check_name.
-      END-TEST-SEAM.
 
       IF ls_public_attribute-string IS INITIAL.
-        TEST-SEAM name1.
           FORMAT COLOR COL_NEGATIVE.
 
           " SAP_2_FAMIX_51        Return a message if the attribute name is empty
           WRITE: / 'Element ', is_public_elements-element_id, ' has an attribute name that is empty'.
 
           FORMAT COLOR COL_BACKGROUND.
-        END-TEST-SEAM.
       ENDIF.
 
     ENDLOOP.
@@ -1669,13 +1668,11 @@ CLASS CL_CHECK_FAMIX_MODEL IMPLEMENTATION.
 
     IF count_name > 1.
 
-      TEST-SEAM name2.
         FORMAT COLOR COL_NEGATIVE.
 
         WRITE: / 'Element ', is_public_elements-element_id, ' has more than a single attribute name'.
 
         FORMAT COLOR COL_BACKGROUND.
-      END-TEST-SEAM.
     ENDIF.
 
   ENDMETHOD.
@@ -1693,29 +1690,23 @@ CLASS CL_CHECK_FAMIX_MODEL IMPLEMENTATION.
     ENDLOOP.
 
     " SAP_2_FAMIX_49        Return a message if the attribute parent package occurs more than once
-    TEST-SEAM check_parent_package.
-    END-TEST-SEAM.
 
     IF count_parent_packages > 1.
-      TEST-SEAM parent_package.
         FORMAT COLOR COL_NEGATIVE.
 
         WRITE: / 'Package ', is_public_elements-element_id, ' has more than a single parent package'.
 
         FORMAT COLOR COL_BACKGROUND.
-      END-TEST-SEAM.
     ENDIF.
 
     " SAP_2_FAMIX_62        Return a message if a class has no parent package assigned
     IF is_public_elements-element_type EQ 'FAMIX.Class'.
       IF count_parent_packages EQ 0.
-        TEST-SEAM parent_package2.
           FORMAT COLOR COL_NEGATIVE.
 
           WRITE: / 'Class ', is_public_elements-element_id, ' has no parent package'.
 
           FORMAT COLOR COL_BACKGROUND.
-        END-TEST-SEAM.
       ENDIF.
     ENDIF.
 
@@ -1742,15 +1733,15 @@ CLASS CL_MAKE_DEMO_MODEL IMPLEMENTATION.
     CREATE OBJECT famix_namespace EXPORTING model = model.
     DATA famix_package      TYPE REF TO cl_famix_package.
     CREATE OBJECT famix_package EXPORTING model = model.
-    DATA famix_class        TYPE REF TO cl_famix_class.
+    DATA famix_class        TYPE REF TO CL_famix_class.
     CREATE OBJECT famix_class EXPORTING model = model.
     DATA famix_method         TYPE REF TO cl_famix_method.
     CREATE OBJECT famix_method EXPORTING model = model.
-    DATA famix_attribute    TYPE REF TO cl_famix_attribute.
+    DATA famix_attribute    TYPE REF TO CL_famix_attribute.
     CREATE OBJECT famix_attribute EXPORTING model = model.
-    DATA famix_inheritance  TYPE REF TO cl_famix_inheritance.
+    DATA famix_inheritance  TYPE REF TO CL_famix_inheritance.
     CREATE OBJECT famix_inheritance EXPORTING model = model.
-    DATA check_famix_model TYPE REF TO cl_check_famix_model.
+    DATA check_famix_model TYPE REF TO CL_check_famix_model.
     CREATE OBJECT check_famix_model.
 
     DATA last_id TYPE i.
@@ -1802,9 +1793,7 @@ CLASS CL_MAKE_DEMO_MODEL IMPLEMENTATION.
                                                           superclass_element = 'FAMIX.Class'
                                                           superclass_name_group = ''
                                                           superclass_name    = 'ClassA' ).
-    TEST-SEAM check.
       check_famix_model->check( model = model ).
-    END-TEST-SEAM.
 
     model->make_mse( IMPORTING mse_model = mse_model ).
   ENDMETHOD.
@@ -1885,7 +1874,8 @@ CLASS cl_sap_class DEFINITION INHERITING FROM cl_sap
     "! Add global class
     "! @parameters modifiers | will be available in FAMIX in the attribute modifiers
     METHODS add
-      IMPORTING name                          TYPE clike
+      IMPORTING name_group                    TYPE clike OPTIONAL
+                name                          TYPE clike
                 modifiers                     TYPE clike
       EXPORTING VALUE(exists_already_with_id) TYPE i
                 VALUE(id)                     TYPE i.
@@ -1916,7 +1906,7 @@ CLASS cl_sap_class DEFINITION INHERITING FROM cl_sap
         VALUE(id) TYPE i.
 
   PRIVATE SECTION.
-    DATA: g_famix_class TYPE REF TO cl_famix_class.
+    DATA: g_famix_class TYPE REF TO CL_famix_class.
 ENDCLASS.
 CLASS CL_SAP_CLASS IMPLEMENTATION.
   METHOD add.
@@ -1974,8 +1964,8 @@ CLASS cl_sap_db_table DEFINITION INHERITING FROM cl_sap
 
   PRIVATE SECTION.
     CONSTANTS modifier_dbtable TYPE string VALUE 'DBTable' ##NO_TEXT.
-    DATA: g_famix_class     TYPE REF TO cl_famix_class,
-          g_famix_attribute TYPE REF TO cl_famix_attribute.
+    DATA: g_famix_class     TYPE REF TO CL_famix_class,
+          g_famix_attribute TYPE REF TO CL_famix_attribute.
 ENDCLASS.
 CLASS CL_SAP_DB_TABLE IMPLEMENTATION.
   METHOD add.
@@ -2019,7 +2009,7 @@ CLASS cl_sap_attribute DEFINITION INHERITING FROM cl_sap
         attribute TYPE clike.
 
   PRIVATE SECTION.
-    DATA: g_famix_attribute TYPE REF TO cl_famix_attribute.
+    DATA: g_famix_attribute TYPE REF TO CL_famix_attribute.
 ENDCLASS.
 CLASS CL_SAP_ATTRIBUTE IMPLEMENTATION.
   METHOD add.
@@ -2147,7 +2137,7 @@ CLASS cl_sap_inheritance DEFINITION INHERITING FROM cl_sap
         superclass_name TYPE any.
 
   PRIVATE SECTION.
-    DATA: g_famix_inheritance TYPE REF TO cl_famix_inheritance.
+    DATA: g_famix_inheritance TYPE REF TO CL_famix_inheritance.
 ENDCLASS.
 CLASS CL_SAP_INHERITANCE IMPLEMENTATION.
   METHOD add.
@@ -2237,7 +2227,7 @@ CLASS cl_sap_access DEFINITION INHERITING FROM cl_sap
         using_method   TYPE i.
 
   PRIVATE SECTION.
-    DATA: g_famix_access TYPE REF TO cl_famix_access.
+    DATA: g_famix_access TYPE REF TO CL_famix_access.
 ENDCLASS.
 CLASS CL_SAP_ACCESS IMPLEMENTATION.
   METHOD add_access.
@@ -2513,7 +2503,7 @@ CLASS cl_extract_sap DEFINITION
     METHODS _add_classes_to_model
       IMPORTING
         sap_package      TYPE REF TO cl_sap_package
-        sap_class        TYPE REF TO cl_sap_class
+        sap_class        TYPE REF TO CL_sap_class
         components_infos TYPE components_infos_type
         existing_classes TYPE existing_classes_type.
     METHODS _add_tables_to_model
@@ -2522,10 +2512,10 @@ CLASS cl_extract_sap DEFINITION
         components_infos TYPE components_infos_type
       CHANGING
         db_tables        TYPE db_tables_type
-        sap_db_table     TYPE REF TO cl_sap_db_table.
+        sap_db_table     TYPE REF TO CL_sap_db_table.
     METHODS _determine_inheritances_betwee
       IMPORTING
-        sap_inheritance  TYPE REF TO cl_sap_inheritance
+        sap_inheritance  TYPE REF TO CL_sap_inheritance
         existing_classes TYPE existing_classes_type.
     TYPES: class_components_type   TYPE HASHED TABLE OF class_component_type WITH UNIQUE KEY clsname cmpname.
     METHODS _determine_class_components
@@ -2537,27 +2527,27 @@ CLASS cl_extract_sap DEFINITION
       IMPORTING
         class_components TYPE class_components_type
         sap_method       TYPE REF TO cl_sap_method
-        sap_attribute    TYPE REF TO cl_sap_attribute.
+        sap_attribute    TYPE REF TO CL_sap_attribute.
     METHODS _determine_usage_of_methods
       IMPORTING
-                sap_class                   TYPE REF TO cl_sap_class
+                sap_class                   TYPE REF TO CL_sap_class
                 class_components            TYPE class_components_type
                 sap_package                 TYPE REF TO cl_sap_package
                 sap_method                  TYPE REF TO cl_sap_method
-                sap_attribute               TYPE REF TO cl_sap_attribute
+                sap_attribute               TYPE REF TO CL_sap_attribute
                 sap_invocation              TYPE REF TO cl_sap_invocation
-                sap_access                  TYPE REF TO cl_sap_access
+                sap_access                  TYPE REF TO CL_sap_access
       RETURNING VALUE(new_components_infos) TYPE components_infos_type.
 
     METHODS _determine_usage_of_db_tables
       IMPORTING
-                sap_class                   TYPE REF TO cl_sap_class
+                sap_class                   TYPE REF TO CL_sap_class
                 class_components            TYPE class_components_type
                 sap_package                 TYPE REF TO cl_sap_package
                 sap_method                  TYPE REF TO cl_sap_method
-                sap_attribute               TYPE REF TO cl_sap_attribute
+                sap_attribute               TYPE REF TO CL_sap_attribute
                 sap_invocation              TYPE REF TO cl_sap_invocation
-                sap_access                  TYPE REF TO cl_sap_access
+                sap_access                  TYPE REF TO CL_sap_access
                 db_tables                   TYPE db_tables_type
       RETURNING VALUE(new_components_infos) TYPE components_infos_type.
 
@@ -2566,13 +2556,13 @@ CLASS cl_extract_sap DEFINITION
     "! Either provide class_component or db_table
     METHODS _determine_usages
       IMPORTING
-                sap_class                   TYPE REF TO cl_sap_class
+                sap_class                   TYPE REF TO CL_sap_class
                 class_component             TYPE class_component_type OPTIONAL
                 db_table                    TYPE db_table_type OPTIONAL
                 sap_package                 TYPE REF TO cl_sap_package
                 sap_method                  TYPE REF TO cl_sap_method
                 sap_invocation              TYPE REF TO cl_sap_invocation
-                sap_access                  TYPE REF TO cl_sap_access
+                sap_access                  TYPE REF TO CL_sap_access
                 used                        TYPE i
       RETURNING VALUE(new_components_infos) TYPE components_infos_type.
     TYPES:
@@ -2594,12 +2584,12 @@ CLASS cl_extract_sap DEFINITION
         nothing_selected      TYPE abap_bool.
     METHODS _handle_used_by_class
       IMPORTING
-        i_sap_class                   TYPE REF TO cl_sap_class
+        i_sap_class                   TYPE REF TO CL_sap_class
         i_class_component             TYPE class_component_type
         i_sap_package                 TYPE REF TO cl_sap_package
         i_sap_method                  TYPE REF TO cl_sap_method
         i_sap_invocation              TYPE REF TO cl_sap_invocation
-        i_sap_access                  TYPE REF TO cl_sap_access
+        i_sap_access                  TYPE REF TO CL_sap_access
         i_used                        TYPE i
         i_class_component_is_supplied TYPE abap_bool
         ib_table_is_supplied          TYPE abap_bool
@@ -2655,22 +2645,22 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
     CREATE OBJECT sap_package EXPORTING model = model.
     DATA sap_program     TYPE REF TO cl_sap_program.
     CREATE OBJECT sap_program EXPORTING model = model.
-    DATA sap_class TYPE REF TO cl_sap_class.
+    DATA sap_class TYPE REF TO CL_sap_class.
     CREATE OBJECT sap_class EXPORTING model = model.
-    DATA sap_inheritance TYPE REF TO cl_sap_inheritance.
+    DATA sap_inheritance TYPE REF TO CL_sap_inheritance.
     CREATE OBJECT sap_inheritance EXPORTING model = model.
     DATA sap_method TYPE REF TO cl_sap_method.
     CREATE OBJECT sap_method EXPORTING model = model.
-    DATA sap_attribute   TYPE REF TO cl_sap_attribute.
+    DATA sap_attribute   TYPE REF TO CL_sap_attribute.
     CREATE OBJECT sap_attribute EXPORTING model = model.
     DATA sap_invocation  TYPE REF TO cl_sap_invocation.
     CREATE OBJECT sap_invocation EXPORTING model = model.
-    DATA sap_access      TYPE REF TO cl_sap_access.
+    DATA sap_access      TYPE REF TO CL_sap_access.
     CREATE OBJECT sap_access EXPORTING model = model.
-    DATA check_famix_model TYPE REF TO cl_check_famix_model.
+    DATA check_famix_model TYPE REF TO CL_check_famix_model.
     CREATE OBJECT check_famix_model.
 
-    DATA sap_db_table TYPE REF TO cl_sap_db_table.
+    DATA sap_db_table TYPE REF TO CL_sap_db_table.
     CREATE OBJECT sap_db_table EXPORTING model = model.
 
     " Set TADIR mapping
@@ -2800,11 +2790,13 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
         ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
         object = ls_tadir-object.
 
-        SELECT SINGLE devclass FROM tadir
-          INTO <component_infos>-package
-         WHERE pgmid = 'R3TR'
-           AND object = object
-           AND obj_name = <component_infos>-component_name.
+
+          SELECT SINGLE devclass FROM tadir
+            INTO <component_infos>-package
+           WHERE pgmid = 'R3TR'
+             AND object = object
+             AND obj_name = <component_infos>-component_name.
+
 
         IF sy-subrc <> 0. "OK
           " TBD
@@ -2841,11 +2833,15 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
           sap_class->set_parent_package( EXPORTING element_id     = id_of_new_component
                                                    parent_package = <component_infos>-package ).
         ELSE.
-          FORMAT COLOR COL_NEGATIVE.
 
-          WRITE: / 'For new element of type ', <component_infos>-component, 'no determination of parent package specified'.
 
-          FORMAT COLOR COL_BACKGROUND.
+            FORMAT COLOR COL_NEGATIVE.
+
+            WRITE: / 'For new element of type ', <component_infos>-component, 'no determination of parent package specified'.
+
+            FORMAT COLOR COL_BACKGROUND.
+
+
         ENDIF.
 
       ENDLOOP.
@@ -2896,7 +2892,11 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
       DATA package_info TYPE packages_info_type.
       DATA packages_info TYPE STANDARD TABLE OF packages_info_type WITH DEFAULT KEY.
 
-      SELECT  devclass parentcl FROM tdevc INTO TABLE packages_info FOR ALL ENTRIES IN packages_with_type_devclass WHERE devclass = packages_with_type_devclass-devclass.
+
+        SELECT  devclass parentcl FROM tdevc INTO TABLE packages_info FOR ALL ENTRIES IN packages_with_type_devclass
+          WHERE devclass = packages_with_type_devclass-devclass.
+
+
       LOOP AT packages_info INTO package_info.
         IF package_info-parentcl IS NOT INITIAL.
           sap_package->add( name = package_info-parentcl ). " So that parent class can always be assigned
@@ -2907,7 +2907,9 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
       ENDLOOP.
     ENDIF.
 
-    check_famix_model->check( model = model ).
+
+      check_famix_model->check( model = model ).
+
 
     model->make_mse( IMPORTING mse_model = mse_model ).
 
@@ -2917,8 +2919,6 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
     " Add to model
     DATA existing_class LIKE LINE OF existing_classes.
     LOOP AT existing_classes INTO existing_class.
-
-
 
       FIELD-SYMBOLS <component_infos> LIKE LINE OF components_infos.
       READ TABLE components_infos ASSIGNING <component_infos> WITH TABLE KEY component = globclass_component_key component_name = existing_class-class.
@@ -3097,11 +3097,13 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
     " SAP_2_FAMIX_12        Extract attributes of interfaces
 
     IF existing_classes IS NOT INITIAL.
-      "
-      SELECT clsname cmpname cmptype FROM seocompo INTO TABLE class_components
-        FOR ALL ENTRIES IN existing_classes
-        WHERE
-          clsname = existing_classes-class.
+
+
+        SELECT clsname cmpname cmptype FROM seocompo INTO TABLE class_components
+          FOR ALL ENTRIES IN existing_classes
+          WHERE
+            clsname = existing_classes-class.
+
 
     ENDIF.
 
@@ -3113,9 +3115,13 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
     DATA: inheritances TYPE STANDARD TABLE OF  inheritance_type.
 
     IF existing_classes IS NOT INITIAL.
-      SELECT clsname refclsname reltype FROM seometarel INTO CORRESPONDING FIELDS OF TABLE inheritances
-        FOR ALL ENTRIES IN existing_classes WHERE clsname = existing_classes-class
-                                               AND version = 1.
+
+
+        SELECT clsname refclsname reltype FROM seometarel INTO CORRESPONDING FIELDS OF TABLE inheritances
+          FOR ALL ENTRIES IN existing_classes WHERE clsname = existing_classes-class
+                                                 AND version = 1.
+
+
     ENDIF.
 
     " Delete all inheritances where superclass is not in selected packages
@@ -3181,9 +3187,13 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
                  parentcl TYPE tdevc-parentcl,
                END OF abap_731_package_type.
         DATA: packages TYPE STANDARD TABLE OF abap_731_package_type WITH DEFAULT KEY.
-        SELECT devclass  parentcl FROM tdevc INTO TABLE packages
-         FOR ALL ENTRIES IN temp_packages_to_search
-          WHERE parentcl = temp_packages_to_search-devclass.
+
+
+          SELECT devclass  parentcl FROM tdevc INTO TABLE packages
+           FOR ALL ENTRIES IN temp_packages_to_search
+            WHERE parentcl = temp_packages_to_search-devclass.
+
+
       ENDIF.
 
       CLEAR temp_packages_to_search.
@@ -3231,21 +3241,32 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
 
           where_used_name = class_component-clsname && |\\ME:| && class_component-cmpname.
           DATA where_used_components TYPE STANDARD TABLE OF wbcrossgt.
-          SELECT * FROM wbcrossgt INTO TABLE where_used_components WHERE otype = 'ME' AND name = where_used_name.
+
+
+            SELECT * FROM wbcrossgt INTO TABLE where_used_components WHERE otype = 'ME' AND name = where_used_name.
+
+
         WHEN comptype_attribute.
 
           " SAP_2_FAMIX_19      Determine usage of class attributes by programs and classes
           " SAP_2_FAMIX_20      Determine usage of interface attributes by programs and classes
 
           where_used_name = class_component-clsname && |\\DA:| && class_component-cmpname.
-          SELECT * FROM wbcrossgt INTO TABLE where_used_components WHERE otype = 'DA' AND name = where_used_name.
+
+
+            SELECT * FROM wbcrossgt INTO TABLE where_used_components WHERE otype = 'DA' AND name = where_used_name.
+
+
         WHEN OTHERS.
           ASSERT 1 = 2.
       ENDCASE.
     ELSEIF db_table IS SUPPLIED.
       db_table_is_supplied = abap_true.
       where_used_name = db_table-db_table.
-      SELECT * FROM wbcrossgt INTO TABLE where_used_components WHERE otype = 'TY' AND name = where_used_name.
+
+
+        SELECT * FROM wbcrossgt INTO TABLE where_used_components WHERE otype = 'TY' AND name = where_used_name.
+
 
     ELSE.
       ASSERT 1 = 2.
@@ -3259,11 +3280,15 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
       DATA: modifier_of_using_class TYPE string.
 
       DATA ls_mtdkey TYPE seocpdkey.
-      CALL FUNCTION 'SEO_METHOD_GET_NAME_BY_INCLUDE'
-        EXPORTING
-          progname = <where_used_component>-include
-        IMPORTING
-          mtdkey   = ls_mtdkey.
+
+
+        CALL FUNCTION 'SEO_METHOD_GET_NAME_BY_INCLUDE'
+          EXPORTING
+            progname = <where_used_component>-include
+          IMPORTING
+            mtdkey   = ls_mtdkey.
+
+
       IF ls_mtdkey IS NOT INITIAL.
 *        FIND FIRST OCCURRENCE OF '~' IN ls_mtdkey-cpdname.
 *        if sy-subrc eq 0.
@@ -3305,7 +3330,11 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
       ELSE.
         "Check for usage in Web Dynpro ABAP
         DATA ls_wd_sourcemap TYPE wdy_wb_sourcemap.
-        SELECT SINGLE * FROM wdy_wb_sourcemap INTO ls_wd_sourcemap WHERE relid = 'LI' AND inclname = <where_used_component>-include AND srtf2 = 0.
+
+
+          SELECT SINGLE * FROM wdy_wb_sourcemap INTO ls_wd_sourcemap WHERE relid = 'LI' AND inclname = <where_used_component>-include AND srtf2 = 0.
+
+
         IF sy-subrc EQ 0.
 
           using_class = ls_wd_sourcemap-component_name.
@@ -3511,28 +3540,33 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
 
     " Determine existing classes
     IF classes IS NOT INITIAL.
-      SELECT clsname AS class FROM seoclass INTO classname FOR ALL ENTRIES IN classes
-        WHERE
-          clsname = classes-obj_name.
 
-        CLEAR new_line.
-        new_line-type = 'C'.
-        new_line-class = classname.
-        INSERT new_line INTO TABLE existing_classes.
 
-      ENDSELECT.
+        SELECT clsname AS class FROM seoclass INTO classname FOR ALL ENTRIES IN classes
+          WHERE
+            clsname = classes-obj_name.
 
-      SELECT component_name AS class FROM wdy_component INTO webdynpro_component FOR ALL ENTRIES IN classes
-        WHERE
-          component_name = classes-obj_name
-          AND version = 'A'.
+          CLEAR new_line.
+          new_line-type = 'C'.
+          new_line-class = classname.
+          INSERT new_line INTO TABLE existing_classes.
 
-        CLEAR new_line.
-        new_line-type = 'W'.
-        new_line-class = webdynpro_component.
-        INSERT new_line INTO TABLE existing_classes.
+        ENDSELECT.
 
-      ENDSELECT.
+
+
+        SELECT component_name AS class FROM wdy_component INTO webdynpro_component FOR ALL ENTRIES IN classes
+          WHERE
+            component_name = classes-obj_name
+            AND version = 'A'.
+
+          CLEAR new_line.
+          new_line-type = 'W'.
+          new_line-class = webdynpro_component.
+          INSERT new_line INTO TABLE existing_classes.
+
+        ENDSELECT.
+
 
     ENDIF.
 
@@ -3585,7 +3619,10 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
       " Select components in package and sub package
       " SAP_2_FAMIX_3     Select all components in a package and the sub packages of this package
 
-      SELECT SINGLE devclass parentcl FROM tdevc INTO first_package WHERE devclass = package_to_analyze.
+
+        SELECT SINGLE devclass parentcl FROM tdevc INTO first_package WHERE devclass = package_to_analyze.
+
+
       IF sy-subrc <> 0. "OK
         WRITE: 'Package does not exist: ', package_to_analyze.
         nothing_selected  = abap_true.
@@ -3640,42 +3677,50 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
                   object   TYPE tadir-object,
                   devclass TYPE tadir-devclass,
                 END OF tadir_component.
-          SELECT obj_name object devclass FROM tadir INTO tadir_component FOR ALL ENTRIES IN processed_packages
-            WHERE pgmid = 'R3TR'
-              AND object = object
-              AND devclass = processed_packages-devclass.
 
-            DATA ls_component_info LIKE LINE OF components_infos. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-            DATA ls_map LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
 
-            READ TABLE g_tadir_components_mapping INTO ls_map WITH TABLE KEY object = tadir_component-object.
-            ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
+            SELECT obj_name object devclass FROM tadir INTO tadir_component FOR ALL ENTRIES IN processed_packages
+              WHERE pgmid = 'R3TR'
+                AND object = object
+                AND devclass = processed_packages-devclass.
 
-            CLEAR ls_component_info.
-            ls_component_info-component = ls_map-component.
-            ls_component_info-component_name = tadir_component-obj_name.
-            ls_component_info-package = tadir_component-devclass.
-            INSERT ls_component_info INTO TABLE components_infos.
+              DATA ls_component_info LIKE LINE OF components_infos. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+              DATA ls_map LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
 
-          ENDSELECT.
+              READ TABLE g_tadir_components_mapping INTO ls_map WITH TABLE KEY object = tadir_component-object.
+              ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
+
+              CLEAR ls_component_info.
+              ls_component_info-component = ls_map-component.
+              ls_component_info-component_name = tadir_component-obj_name.
+              ls_component_info-package = tadir_component-devclass.
+              INSERT ls_component_info INTO TABLE components_infos.
+
+            ENDSELECT.
+
+
         ELSE.
-          SELECT obj_name object devclass FROM tadir INTO tadir_component
-            WHERE pgmid = 'R3TR'
-              AND object = object
-              AND obj_name IN s_compsn
-              AND devclass IN s_pack.
 
-            DATA ls_map_2 LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-            READ TABLE g_tadir_components_mapping INTO ls_map_2 WITH TABLE KEY object = tadir_component-object.
-            ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
 
-            CLEAR ls_component_info.
-            ls_component_info-component = ls_map_2-component.
-            ls_component_info-component_name = tadir_component-obj_name.
-            ls_component_info-package = tadir_component-devclass.
-            INSERT ls_component_info INTO TABLE components_infos.
+            SELECT obj_name object devclass FROM tadir INTO tadir_component
+              WHERE pgmid = 'R3TR'
+                AND object = object
+                AND obj_name IN s_compsn
+                AND devclass IN s_pack.
 
-          ENDSELECT.
+              DATA ls_map_2 LIKE LINE OF g_tadir_components_mapping. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+              READ TABLE g_tadir_components_mapping INTO ls_map_2 WITH TABLE KEY object = tadir_component-object.
+              ASSERT sy-subrc EQ 0. " To be compatible with ABAP 7.40, there an exception is raised if table reads finds nothing
+
+              CLEAR ls_component_info.
+              ls_component_info-component = ls_map_2-component.
+              ls_component_info-component_name = tadir_component-obj_name.
+              ls_component_info-package = tadir_component-devclass.
+              INSERT ls_component_info INTO TABLE components_infos.
+
+            ENDSELECT.
+
+
         ENDIF.
       ENDDO.
     ENDIF.
@@ -3684,9 +3729,12 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
     DATA: tabclass TYPE dd02l-tabclass.
     LOOP AT components_infos INTO ls_component_info WHERE component = databasetable_component_key.
 
-      SELECT SINGLE tabclass FROM dd02l INTO tabclass WHERE tabname = ls_component_info-component_name
-                                                        AND as4local = 'A'
-                                                        AND as4vers = ''.
+
+        SELECT SINGLE tabclass FROM dd02l INTO tabclass WHERE tabname = ls_component_info-component_name
+                                                          AND as4local = 'A'
+                                                          AND as4vers = ''.
+
+
       IF sy-subrc <> 0.
         "TBD report error
       ELSE.
@@ -3707,7 +3755,7 @@ CLASS CL_EXTRACT_SAP IMPLEMENTATION.
 
     " Set default language
 
-    DATA famix_custom_source_language TYPE REF TO cl_famix_custom_source_lng.
+    DATA famix_custom_source_language TYPE REF TO CL_famix_custom_source_lng.
     CREATE OBJECT famix_custom_source_language EXPORTING model = model.
 
     famix_custom_source_language->add( name = 'ABAP' ).
@@ -3986,7 +4034,7 @@ CLASS CL_PROGRAM_ANALYZER IMPLEMENTATION.
 
     " Add local classes to model
 
-    DATA sap_class TYPE REF TO cl_sap_class.
+    DATA sap_class TYPE REF TO CL_sap_class.
     CREATE OBJECT sap_class EXPORTING model = model.
 
     FIELD-SYMBOLS <class> LIKE LINE OF classes_with_model_id.
@@ -4034,7 +4082,7 @@ CLASS CL_PROGRAM_ANALYZER IMPLEMENTATION.
 
     " Add local inheritances to model
 
-    DATA sap_inheritance TYPE REF TO cl_sap_inheritance.
+    DATA sap_inheritance TYPE REF TO CL_sap_inheritance.
     CREATE OBJECT sap_inheritance EXPORTING model = model.
     DATA inheritance LIKE LINE OF inheritances.
     LOOP AT inheritances INTO inheritance.
