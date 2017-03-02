@@ -97,7 +97,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR_WHERE_USED_SAP IMPLEMENTATION.
+CLASS z2mse_extr_where_used_sap IMPLEMENTATION.
 
 
   METHOD add_usage_to_model.
@@ -235,6 +235,7 @@ CLASS Z2MSE_EXTR_WHERE_USED_SAP IMPLEMENTATION.
 
   METHOD get_components_where_used.
     components = g_class_components_where_used.
+    CLEAR g_class_components_where_used.
   ENDMETHOD.
 
 

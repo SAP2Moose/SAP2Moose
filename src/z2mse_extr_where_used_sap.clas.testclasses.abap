@@ -89,6 +89,16 @@ CLASS ltcl_main IMPLEMENTATION.
         exp                  = g_class_comp_where_used_exp
         msg                  = 'Expect correct list of class components found by where used analysis' ).
 
+
+
+    g_class_comp_where_used_act = f_cut->get_components_where_used( ).
+
+    cl_abap_unit_assert=>assert_equals(
+      EXPORTING
+        act                  = g_class_comp_where_used_act
+        exp                  = VALUE z2mse_extr_classes=>ty_class_components_hashed( )
+        msg                  = 'Expect empty list of class components found by where used analysis if method is called a second time' ).
+
   ENDMETHOD.
 
 ENDCLASS.
