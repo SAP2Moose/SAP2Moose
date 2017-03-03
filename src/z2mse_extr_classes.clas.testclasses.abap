@@ -9,9 +9,7 @@ CLASS ltcl_test DEFINITION FINAL FOR TESTING
     METHODS:
       simple FOR TESTING RAISING cx_static_check,
       simple_model_from_package FOR TESTING RAISING cx_static_check,
-      simple_model_from_component FOR TESTING RAISING cx_static_check,
-      simple_model_from_package2 FOR TESTING RAISING cx_static_check,
-      simple_model_from_component2 FOR TESTING RAISING cx_static_check.
+      simple_model_from_component FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
 
@@ -124,185 +122,11 @@ CLASS ltcl_test IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+
+
+
   METHOD simple_model_from_package.
-
-    DATA: model            TYPE REF TO z2mse_model,
-          sap_package TYPE REF TO z2mse_sap_package,
-          sap_class     TYPE REF TO Z2MSE_sap_class,
-          sap_method     TYPE REF TO z2mse_sap_method,
-          sap_attribute     TYPE REF TO Z2MSE_sap_attribute.
-
-    DATA: tadir_test TYPE z2mse_extr_classes=>ty_t_tadir_test.
-
-    tadir_test = VALUE #( ( object = 'CLASS' obj_name = 'CLASS_A' devclass = 'A' )
-                          ( object = 'INTF' obj_name = 'INTERFACE_A' devclass = 'A' ) ).
-
-    data: seoclass_test TYPE z2mse_extr_classes=>ty_t_seoclass_test.
-
-    seoclass_test = value #( ( clsname = 'CLASS_A')
-                             ( clsname = 'INTERFACE_A') ).
-
-    data: seocompo_test TYPE z2mse_extr_classes=>ty_t_seocompo_test.
-
-    seocompo_test = value #( ( clsname = 'CLASS_A' cmpname = 'METHOD_A' CMPTYPE = z2mse_extr_classes=>method_type )
-                             ( clsname = 'CLASS_A' cmpname = 'ATTRIBUTE_A' CMPTYPE = z2mse_extr_classes=>attribute_type )
-                             ( clsname = 'CLASS_A' cmpname = 'EVENT_A' CMPTYPE = z2mse_extr_classes=>event_type ) ).
-
-
-    f_cut = NEW #( tadir_test = tadir_test
-                   seoclass_test = seoclass_test
-                   seocompo_test = seocompo_test ).
-
-    DATA: packages_to_select TYPE z2mse_extr_packages=>ty_packages.
-
-    packages_to_select = value #( ( package = 'A' ) ).
-
-    f_cut->select_classes_by_packages( packages = packages_to_select ).
-
-    DATA: selected_tadir_act TYPE z2mse_extr_classes=>ty_t_tadir_test,
-          selected_tadir_exp TYPE z2mse_extr_classes=>ty_t_tadir_test.
-
-    CREATE OBJECT model.
-
-    CREATE OBJECT sap_package EXPORTING model = model.
-    CREATE OBJECT sap_class EXPORTING model = model.
-    CREATE OBJECT sap_method EXPORTING model = model.
-    CREATE OBJECT sap_attribute EXPORTING model = model.
-
-    DATA: mse_model_act TYPE z2mse_model=>lines_type,
-          mse_model_exp TYPE z2mse_model=>lines_type.
-
-    mse_model_exp = VALUE #( ( line = |( (FAMIX.Package (id: 1 )| )
-                             ( line = |  (name 'A'))| )
-                             ( line = |(FAMIX.Class (id: 2 )| )
-                             ( line = |  (name 'CLASS_A')| )
-                             ( line = |  (modifiers 'ABAPGlobalClass')| )
-                             ( line = |  (parentPackage (ref: 1)))| )
-                             ( line = |(FAMIX.Attribute (id: 3 )| )
-                             ( line = |  (name 'ATTRIBUTE_A')| )
-                             ( line = |  (parentType (ref: 2)))| )
-                             ( line = |(FAMIX.Method (id: 4 )| )
-                             ( line = |  (name 'EVENT_A')| )
-                             ( line = |  (signature 'EVENT_A')| )
-                             ( line = |  (parentType (ref: 2)))| )
-                             ( line = |(FAMIX.Method (id: 5 )| )
-                             ( line = |  (name 'METHOD_A')| )
-                             ( line = |  (signature 'METHOD_A')| )
-                             ( line = |  (parentType (ref: 2)))| )
-                             ( line = |(FAMIX.Class (id: 6 )| )
-                             ( line = |  (name 'INTERFACE_A')| )
-                             ( line = |  (modifiers 'ABAPGlobalInterface')| )
-                             ( line = |  (parentPackage (ref: 1))| )
-                             ( line = |  (isInterface true)))| )
-                             ).
-
-    f_cut->add_to_model( EXPORTING sap_package   = sap_package
-                                                    sap_class     = sap_class
-                                                    sap_method    = sap_method
-                                                    sap_attribute = sap_attribute ).
-
-    model->make_mse( IMPORTING mse_model = mse_model_act ).
-
-    cl_abap_unit_assert=>assert_equals(
-      EXPORTING
-        act                  = mse_model_act
-        exp                  = mse_model_exp
-        msg                  = 'Wrong mse file for new class' ).
-
-  ENDMETHOD.
-
-  METHOD simple_model_from_component.
-
-    DATA: model            TYPE REF TO z2mse_model,
-          sap_package TYPE REF TO z2mse_sap_package,
-          sap_class     TYPE REF TO Z2MSE_sap_class,
-          sap_method     TYPE REF TO z2mse_sap_method,
-          sap_attribute     TYPE REF TO Z2MSE_sap_attribute.
-
-    DATA: tadir_test TYPE z2mse_extr_classes=>ty_t_tadir_test.
-
-    tadir_test = VALUE #( ( object = 'CLASS' obj_name = 'CLASS_A' devclass = 'A' )
-                          ( object = 'INTF' obj_name = 'INTERFACE_A' devclass = 'A' ) ).
-
-    data: seoclass_test TYPE z2mse_extr_classes=>ty_t_seoclass_test.
-
-    seoclass_test = value #( ( clsname = 'CLASS_A')
-                             ( clsname = 'INTERFACE_A') ).
-
-    data: seocompo_test TYPE z2mse_extr_classes=>ty_t_seocompo_test.
-
-    seocompo_test = value #( ( clsname = 'CLASS_A' cmpname = 'METHOD_A' CMPTYPE = z2mse_extr_classes=>method_type )
-                             ( clsname = 'CLASS_A' cmpname = 'ATTRIBUTE_A' CMPTYPE = z2mse_extr_classes=>attribute_type ) ).
-
-
-    f_cut = NEW #( tadir_test = tadir_test
-                   seoclass_test = seoclass_test
-                   seocompo_test = seocompo_test ).
-
-    DATA: packages_to_select TYPE z2mse_extr_packages=>ty_packages.
-
-    packages_to_select = value #( ( package = 'NOT_EXISTING' ) ).
-
-    f_cut->select_classes_by_packages( packages = packages_to_select ).
-
-    data add_components TYPE z2mse_extr_classes=>ty_class_components_hashed.
-
-    " Add only a class if it not originally selected
-
-    add_components = VALUE #( ( clsname = 'CLASS_A' cmpname = 'ATTRIBUTE_A' CMPTYPE = z2mse_extr_classes=>attribute_type )
-                              ( clsname = 'INTERFACE_A' cmpname = 'ATTRIBUTE_A' CMPTYPE = z2mse_extr_classes=>attribute_type ) ).
-
-    f_cut->select_classes_by_components( components = add_components ).
-
-    DATA: selected_tadir_act TYPE z2mse_extr_classes=>ty_t_tadir_test,
-          selected_tadir_exp TYPE z2mse_extr_classes=>ty_t_tadir_test.
-
-    CREATE OBJECT model.
-
-    CREATE OBJECT sap_package EXPORTING model = model.
-    CREATE OBJECT sap_class EXPORTING model = model.
-    CREATE OBJECT sap_method EXPORTING model = model.
-    CREATE OBJECT sap_attribute EXPORTING model = model.
-
-    DATA: mse_model_act TYPE z2mse_model=>lines_type,
-          mse_model_exp TYPE z2mse_model=>lines_type.
-
-    mse_model_exp = VALUE #( ( line = |( (FAMIX.Package (id: 1 )| )
-                             ( line = |  (name 'A'))| )
-                             ( line = |(FAMIX.Class (id: 2 )| )
-                             ( line = |  (name 'CLASS_A')| )
-                             ( line = |  (modifiers 'ABAPGlobalClass')| )
-                             ( line = |  (parentPackage (ref: 1)))| )
-                             ( line = |(FAMIX.Attribute (id: 3 )| )
-                             ( line = |  (name 'ATTRIBUTE_A')| )
-                             ( line = |  (parentType (ref: 2)))| )
-                             ( line = |(FAMIX.Method (id: 4 )| )
-                             ( line = |  (name 'METHOD_A')| )
-                             ( line = |  (signature 'METHOD_A')| )
-                             ( line = |  (parentType (ref: 2)))| )
-                             ( line = |(FAMIX.Class (id: 5 )| )
-                             ( line = |  (name 'INTERFACE_A')| )
-                             ( line = |  (modifiers 'ABAPGlobalInterface')| )
-                             ( line = |  (parentPackage (ref: 1))| )
-                             ( line = |  (isInterface true)))| )
-                             ).
-
-    f_cut->add_to_model( EXPORTING sap_package   = sap_package
-                                                    sap_class     = sap_class
-                                                    sap_method    = sap_method
-                                                    sap_attribute = sap_attribute ).
-
-    model->make_mse( IMPORTING mse_model = mse_model_act ).
-
-    cl_abap_unit_assert=>assert_equals(
-      EXPORTING
-        act                  = mse_model_act
-        exp                  = mse_model_exp
-        msg                  = 'Wrong mse file for classes added from components' ).
-
-  ENDMETHOD.
-
-  METHOD simple_model_from_package2.
 
     DATA: model            TYPE REF TO z2mse_model,
           famix_package TYPE REF TO z2mse_famix_package,
@@ -374,7 +198,7 @@ CLASS ltcl_test IMPLEMENTATION.
                              ( line = |  (isInterface true)))| )
                              ).
 
-    f_cut->add_to_model2( EXPORTING famix_package   = famix_package
+    f_cut->add_to_model( EXPORTING famix_package   = famix_package
                                                     famix_class     = famix_class
                                                     famix_method    = famix_method
                                                     famix_attribute = famix_attribute ).
@@ -389,7 +213,7 @@ CLASS ltcl_test IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD simple_model_from_component2.
+  METHOD simple_model_from_component.
 
     DATA: model            TYPE REF TO z2mse_model,
           famix_package TYPE REF TO z2mse_famix_package,
@@ -465,7 +289,7 @@ CLASS ltcl_test IMPLEMENTATION.
                              ( line = |  (isInterface true)))| )
                              ).
 
-    f_cut->add_to_model2( EXPORTING famix_package   = famix_package
+    f_cut->add_to_model( EXPORTING famix_package   = famix_package
                                                     famix_class     = famix_class
                                                     famix_method    = famix_method
                                                     famix_attribute = famix_attribute ).

@@ -125,7 +125,7 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
 
     i_extract_packages->add_selected_packages_to_mode2( famix_package = famix_package ).
 
-    i_extract_classes->add_to_model2( EXPORTING famix_package   = famix_package
+    i_extract_classes->add_to_model( EXPORTING famix_package   = famix_package
                                                               famix_class     = famix_class
                                                               famix_method    = famix_method
                                                               famix_attribute = famix_attribute ).

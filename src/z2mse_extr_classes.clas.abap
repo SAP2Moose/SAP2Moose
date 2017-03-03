@@ -60,14 +60,9 @@ CLASS z2mse_extr_classes DEFINITION
     METHODS select_classes_by_components
       IMPORTING
         components TYPE ty_class_components_hashed.
-    METHODS add_to_model
-      IMPORTING
-        sap_package   TYPE REF TO z2mse_sap_package
-        sap_class     TYPE REF TO z2mse_sap_class
-        sap_method    TYPE REF TO z2mse_sap_method
-        sap_attribute TYPE REF TO z2mse_sap_attribute.
+
     "! Add all selected components to the model. Should be called only once
-    METHODS add_to_model2
+    METHODS add_to_model
       IMPORTING
         famix_package   TYPE REF TO z2mse_famix_package
         famix_class     TYPE REF TO z2mse_famix_class
@@ -114,15 +109,8 @@ CLASS z2mse_extr_classes DEFINITION
       IMPORTING
                 obj_names               TYPE ty_tadir_obj_names
       RETURNING VALUE(selected_classes) TYPE z2mse_extr_classes=>ty_classes.
+
     METHODS _add_classes_to_model
-      IMPORTING
-        sap_package   TYPE REF TO z2mse_sap_package
-        sap_class     TYPE REF TO z2mse_sap_class
-        sap_method    TYPE REF TO z2mse_sap_method
-        sap_attribute TYPE REF TO z2mse_sap_attribute
-        classes       TYPE z2mse_extr_classes=>ty_classes
-        components    TYPE z2mse_extr_classes=>ty_class_components.
-    METHODS _add_classes_to_model2
       IMPORTING
         famix_package   TYPE REF TO z2mse_famix_package
         famix_class     TYPE REF TO z2mse_famix_class
@@ -176,33 +164,14 @@ CLASS Z2MSE_EXTR_CLASSES IMPLEMENTATION.
 
   METHOD add_to_model.
 
-    me->_add_classes_to_model( EXPORTING sap_package   = sap_package
-                                        sap_class     = sap_class
-                                        sap_method    = sap_method
-                                        sap_attribute = sap_attribute
-                                        classes       = g_selected_classes
-                                        components    = g_selected_components ).
-
-    me->_add_classes_to_model( EXPORTING sap_package   = sap_package
-                                        sap_class     = sap_class
-                                        sap_method    = sap_method
-                                        sap_attribute = sap_attribute
-                                        classes       = g_add_classes
-                                        components    = g_add_components ).
-
-  ENDMETHOD.
-
-
-  METHOD add_to_model2.
-
-    me->_add_classes_to_model2( EXPORTING famix_package    = famix_package
+    me->_add_classes_to_model( EXPORTING famix_package    = famix_package
                                           famix_class      = famix_class
                                           famix_method    = famix_method
                                           famix_attribute  = famix_attribute
                                           classes       = g_selected_classes
                                           components    = g_selected_components ).
 
-    me->_add_classes_to_model2( EXPORTING famix_package    = famix_package
+    me->_add_classes_to_model( EXPORTING famix_package    = famix_package
                                           famix_class      = famix_class
                                           famix_method    = famix_method
                                           famix_attribute  = famix_attribute
@@ -260,58 +229,10 @@ CLASS Z2MSE_EXTR_CLASSES IMPLEMENTATION.
   ENDMETHOD.
 
 
+
+
+
   METHOD _add_classes_to_model.
-
-    DATA: class LIKE LINE OF g_selected_classes.
-    DATA last_id TYPE i.
-    LOOP AT classes INTO class.
-      sap_package->add( name = class-devclass ).
-
-      IF class-clstype EQ class_type.
-        " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
-        sap_class->add( EXPORTING name_group = 'ABAP_CLASS'
-                                  name       = class-clsname
-                                  modifiers  = z2mse_extract_sap2=>modifier_abapglobalclass
-                        IMPORTING id         = last_id ).
-        sap_class->set_parent_package( element_id     = last_id
-                                       parent_package = class-devclass ).
-      ELSEIF class-clstype EQ interface_type.
-        " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
-        sap_class->add( EXPORTING name_group = 'ABAP_CLASS'
-                                  name       = class-clsname
-                                  modifiers  = z2mse_extract_sap2=>modifier_abapglobalinterface
-                        IMPORTING id         = last_id ).
-        sap_class->set_parent_package( element_id     = last_id
-                                       parent_package = class-devclass ).
-        " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
-        sap_class->is_interface( element_id = last_id ).
-      ELSE.
-        CONTINUE.
-      ENDIF.
-
-      DATA component TYPE ty_class_component.
-
-      LOOP AT components INTO component WHERE clsname = class-clsname.
-
-        CASE component-cmptype.
-          WHEN attribute_type.
-            sap_attribute->add( EXPORTING class     = class-clsname
-                                          attribute = component-cmpname ).
-          WHEN method_type OR event_type.
-            sap_method->add( EXPORTING class  = class-clsname
-                                       method = component-cmpname ).
-          WHEN OTHERS.
-            ASSERT 1 = 2.
-        ENDCASE.
-
-      ENDLOOP.
-
-    ENDLOOP.
-
-  ENDMETHOD.
-
-
-  METHOD _add_classes_to_model2.
 
     DATA: class LIKE LINE OF g_selected_classes.
     DATA last_id TYPE i.
