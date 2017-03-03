@@ -97,7 +97,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr_where_used_sap IMPLEMENTATION.
+CLASS Z2MSE_EXTR_WHERE_USED_SAP IMPLEMENTATION.
 
 
   METHOD add_usage_to_model.
@@ -149,7 +149,7 @@ CLASS z2mse_extr_where_used_sap IMPLEMENTATION.
         WHEN z2mse_extr_classes=>attribute_type.
 
           used_id = famix_attribute->get_id( class     = comp_used_by_comp-clsname
-                                           attribute = comp_used_by_comp-cmpname ).
+                                             attribute = comp_used_by_comp-cmpname ).
 
 
           " SAP_2_FAMIX_26      Map usage of ABAP class attributes by methods of classes to FAMIX.Invocation
@@ -171,8 +171,9 @@ CLASS z2mse_extr_where_used_sap IMPLEMENTATION.
 
         WHEN z2mse_extr_classes=>method_type OR z2mse_extr_classes=>event_type.
 
-          used_id = famix_method->get_id( class  = comp_used_by_comp-clsname
-                                        method = comp_used_by_comp-cmpname ).
+          used_id = famix_method->get_id( class_name_group = ''
+                                          class            = comp_used_by_comp-clsname
+                                          method           = comp_used_by_comp-cmpname ).
 
           " This is an interface. Reverse the usage direction
           " SAP_2_FAMIX_64      Methods that implement an interface are used by the interface method
