@@ -38,7 +38,7 @@ CLASS z2mse_extr_classes DEFINITION
              cmptype TYPE seocmptype,
            END OF ty_class_component.
     TYPES ty_class_components TYPE SORTED TABLE OF ty_class_component WITH UNIQUE KEY clsname cmpname.
-    TYPES ty_class_components_hashed TYPE HASHED TABLE OF ty_class_component WITH UNIQUE KEY clsname cmpname.
+    TYPES ty_class_components_hashed TYPE HASHED TABLE OF ty_class_component WITH UNIQUE KEY clsname cmpname cmptype.
 
     CONSTANTS: class_type     TYPE seoclstype VALUE 0,
                interface_type TYPE seoclstype VALUE 1,
@@ -89,11 +89,9 @@ CLASS z2mse_extr_classes DEFINITION
     "! A list of all primarily selected and existing classes or interfaces
     DATA g_selected_classes TYPE z2mse_extr_classes=>ty_classes.
     "! A list of all components of primarily selected and existing classes or interfaces
-    DATA g_selected_components TYPE z2mse_extr_classes=>ty_class_components.
-    "! A list of all existing classes or interfaces that are added due to a where used analysis
-    DATA g_add_classes TYPE z2mse_extr_classes=>ty_classes.
-    "! A list of all components of all existing classes or interfaces that are added due to a where used analysis
-    DATA g_add_components TYPE z2mse_extr_classes=>ty_class_components.
+    DATA g_selected_components_new TYPE z2mse_extr_classes=>ty_class_components_hashed.
+    "! A list of all components of primarily selected and existing classes or interfaces
+    DATA g_selected_components TYPE z2mse_extr_classes=>ty_class_components_hashed.
     DATA g_is_test TYPE abap_bool.
     "! Checks whether a class exists. There can be TADIR entries for not existing classes.
     METHODS _check_existence
@@ -117,7 +115,7 @@ CLASS z2mse_extr_classes DEFINITION
         famix_method    TYPE REF TO z2mse_famix_method
         famix_attribute TYPE REF TO z2mse_famix_attribute
         classes         TYPE z2mse_extr_classes=>ty_classes
-        components      TYPE z2mse_extr_classes=>ty_class_components.
+        components      TYPE z2mse_extr_classes=>ty_class_components_hashed.
     METHODS add_and_sort_to_classes_table
       IMPORTING
         i_tadirvalues      TYPE z2mse_extr_classes=>ty_t_tadir_test
@@ -127,7 +125,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR_CLASSES IMPLEMENTATION.
+CLASS z2mse_extr_classes IMPLEMENTATION.
 
 
   METHOD add_and_sort_to_classes_table.
@@ -164,6 +162,12 @@ CLASS Z2MSE_EXTR_CLASSES IMPLEMENTATION.
 
   METHOD add_to_model.
 
+    DATA line LIKE LINE OF g_selected_components_new.
+
+    LOOP AT g_selected_components_new INTO line.
+      INSERT line INTO TABLE g_selected_components.
+    ENDLOOP.
+
     me->_add_classes_to_model( EXPORTING famix_package    = famix_package
                                           famix_class      = famix_class
                                           famix_method    = famix_method
@@ -171,12 +175,12 @@ CLASS Z2MSE_EXTR_CLASSES IMPLEMENTATION.
                                           classes       = g_selected_classes
                                           components    = g_selected_components ).
 
-    me->_add_classes_to_model( EXPORTING famix_package    = famix_package
-                                          famix_class      = famix_class
-                                          famix_method    = famix_method
-                                          famix_attribute  = famix_attribute
-                                          classes       = g_add_classes
-                                          components    = g_add_components ).
+*    me->_add_classes_to_model( EXPORTING famix_package    = famix_package
+*                                          famix_class      = famix_class
+*                                          famix_method    = famix_method
+*                                          famix_attribute  = famix_attribute
+*                                          classes       = g_add_classes
+*                                          components    = g_add_components ).
 
   ENDMETHOD.
 
@@ -194,7 +198,21 @@ CLASS Z2MSE_EXTR_CLASSES IMPLEMENTATION.
 
 
   METHOD get_comp_to_do_where_used.
-    components = g_selected_components.
+
+    DATA line LIKE LINE OF g_selected_components_new.
+
+    LOOP AT g_selected_components_new INTO line.
+      READ TABLE g_selected_components TRANSPORTING NO FIELDS WITH TABLE KEY clsname = line-clsname cmpname = line-cmpname cmptype = line-cmptype.
+      IF sy-subrc <> 0.
+        INSERT line INTO TABLE components.
+      ENDIF.
+    ENDLOOP.
+
+    LOOP AT g_selected_components_new INTO line.
+      INSERT line INTO TABLE g_selected_components.
+    ENDLOOP.
+    CLEAR g_selected_components_new.
+
   ENDMETHOD.
 
 
@@ -213,9 +231,16 @@ CLASS Z2MSE_EXTR_CLASSES IMPLEMENTATION.
       obj_name = component-clsname.
       INSERT obj_name INTO TABLE obj_names.
     ENDLOOP.
-    g_add_classes = me->_select_from_tadir_by_comp( obj_names = obj_names ).
-    _check_existence( CHANGING classes = g_add_classes ).
-    g_add_components = _read_class_details(  g_add_classes ).
+    data: l_add_classes TYPE ty_classes,
+          l_added_class TYPE ty_class.
+    l_add_classes = me->_select_from_tadir_by_comp( obj_names = obj_names ).
+
+    _check_existence( CHANGING classes = l_add_classes ).
+
+    loop at l_add_classes INTO l_added_class.
+      insert l_added_class INTO TABLE g_selected_classes.
+    ENDLOOP.
+    g_selected_components_new = _read_class_details(  l_add_classes ).
 
   ENDMETHOD.
 
@@ -224,12 +249,9 @@ CLASS Z2MSE_EXTR_CLASSES IMPLEMENTATION.
 
     g_selected_classes = _select_from_tadir( packages ).
     _check_existence( CHANGING classes = g_selected_classes ).
-    g_selected_components = _read_class_details(  g_selected_classes ).
+    g_selected_components_new = _read_class_details(  g_selected_classes ).
 
   ENDMETHOD.
-
-
-
 
 
   METHOD _add_classes_to_model.

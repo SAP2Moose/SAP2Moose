@@ -372,7 +372,8 @@ CLASS Z2MSE_EXTR_WHERE_USED_SAP IMPLEMENTATION.
         INSERT cubc INTO TABLE g_comps_used_by_comps.
 
         READ TABLE g_class_components_initial TRANSPORTING NO FIELDS WITH TABLE KEY clsname = cubc-used_by_clsname
-                                                                                    cmpname = cubc-used_by_cmpname.
+                                                                                    cmpname = cubc-used_by_cmpname
+                                                                                    cmptype = cubc-used_by_cmptype.
         IF sy-subrc <> 0.
           DATA cwu LIKE LINE OF g_class_components_initial.
           cwu-clsname = cubc-used_by_clsname.
