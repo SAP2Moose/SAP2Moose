@@ -182,6 +182,11 @@ CLASS Z2MSE_EXTR_WHERE_USED_SAP IMPLEMENTATION.
           temp = comp_used_by_comp-clsname && |~| && comp_used_by_comp-cmpname.
 
           IF comp_used_by_comp-used_by_cmpname EQ temp.
+
+            "! TBD This will not be used in future, because the implementation of an interface will be handled in Z2MSE_EXTR_CLASSES
+
+            CONTINUE.
+
             DATA: inv_used_id  TYPE i,
                   inv_using_id TYPE i.
             " Reverse direction

@@ -6,6 +6,9 @@ CLASS z2mse_extr_classes DEFINITION
   FINAL
   CREATE PUBLIC .
   PUBLIC SECTION.
+    "! use as replacement for ty_component_long
+    "! Required because in case of interfaces the name of the interface is together with a ~ part of the name
+    TYPES ty_component_long TYPE c LENGTH 61.
     TYPES:
       BEGIN OF ty_tadir_test,
         object   TYPE tadir-object,
@@ -32,12 +35,22 @@ CLASS z2mse_extr_classes DEFINITION
              cmptype TYPE seocmptype,
            END OF ty_seocompo_test.
     TYPES ty_t_seocompo_test TYPE HASHED TABLE OF ty_seocompo_test WITH UNIQUE KEY clsname cmpname.
+
+    TYPES: BEGIN OF ty_seometarel_test,
+             clsname    TYPE seoclsname,
+             refclsname TYPE seoclsname,
+             version    TYPE seoversion,
+             state      TYPE seostate,
+             reltype    TYPE seoreltype,
+           END OF ty_seometarel_test.
+    TYPES ty_t_seometarel_test TYPE HASHED TABLE OF ty_seometarel_test WITH UNIQUE KEY clsname refclsname version.
+
     TYPES: BEGIN OF ty_class_component,
              clsname TYPE seoclsname,
-             cmpname TYPE seocmpname,
+             cmpname TYPE ty_component_long,
              cmptype TYPE seocmptype,
            END OF ty_class_component.
-    TYPES ty_class_components TYPE SORTED TABLE OF ty_class_component WITH UNIQUE KEY clsname cmpname.
+    TYPES ty_class_components TYPE SORTED TABLE OF ty_class_component WITH UNIQUE KEY clsname cmpname cmptype.
     TYPES ty_class_components_hashed TYPE HASHED TABLE OF ty_class_component WITH UNIQUE KEY clsname cmpname cmptype.
 
     CONSTANTS: class_type     TYPE seoclstype VALUE 0,
@@ -49,9 +62,10 @@ CLASS z2mse_extr_classes DEFINITION
                tadir_intf     TYPE tadir-object VALUE 'INTF' ##NO_TEXT.
     METHODS constructor
       IMPORTING
-        !tadir_test   TYPE ty_t_tadir_test OPTIONAL
-        seoclass_test TYPE ty_t_seoclass_test OPTIONAL
-        seocompo_test TYPE ty_t_seocompo_test OPTIONAL.
+        !tadir_test     TYPE ty_t_tadir_test OPTIONAL
+        seoclass_test   TYPE ty_t_seoclass_test OPTIONAL
+        seocompo_test   TYPE ty_t_seocompo_test OPTIONAL
+        seometarel_test TYPE ty_t_seometarel_test OPTIONAL.
     "! Call once to select all classes that are in a list of packages
     METHODS select_classes_by_packages
       IMPORTING
@@ -67,7 +81,9 @@ CLASS z2mse_extr_classes DEFINITION
         famix_package   TYPE REF TO z2mse_famix_package
         famix_class     TYPE REF TO z2mse_famix_class
         famix_method    TYPE REF TO z2mse_famix_method
-        famix_attribute TYPE REF TO z2mse_famix_attribute.
+        famix_attribute TYPE REF TO z2mse_famix_attribute
+        famix_invocation TYPE REF TO z2mse_famix_invocation
+        famix_access     TYPE REF TO z2mse_famix_access.
     "! Returns components. Returns these Components only once
     METHODS get_comp_to_do_where_used
       RETURNING VALUE(components) TYPE z2mse_extr_classes=>ty_class_components.
@@ -86,6 +102,8 @@ CLASS z2mse_extr_classes DEFINITION
     DATA g_seoclass_test TYPE z2mse_extr_classes=>ty_t_seoclass_test.
     "! Filled during tests
     DATA g_seocompo_test TYPE z2mse_extr_classes=>ty_t_seocompo_test.
+    "! Filled during tests
+    DATA g_seometarel_test TYPE z2mse_extr_classes=>ty_t_seometarel_test.
     "! A list of all primarily selected and existing classes or interfaces
     DATA g_selected_classes TYPE z2mse_extr_classes=>ty_classes.
     "! A list of all components of primarily selected and existing classes or interfaces
@@ -94,7 +112,7 @@ CLASS z2mse_extr_classes DEFINITION
     DATA g_selected_components TYPE z2mse_extr_classes=>ty_class_components_hashed.
     DATA g_is_test TYPE abap_bool.
     "! Checks whether a class exists. There can be TADIR entries for not existing classes.
-    METHODS _check_existence
+    METHODS _check_existence_and_add_intf
       CHANGING classes TYPE z2mse_extr_classes=>ty_classes.
     METHODS _read_class_details
       IMPORTING classes           TYPE z2mse_extr_classes=>ty_classes
@@ -110,12 +128,14 @@ CLASS z2mse_extr_classes DEFINITION
 
     METHODS _add_classes_to_model
       IMPORTING
-        famix_package   TYPE REF TO z2mse_famix_package
-        famix_class     TYPE REF TO z2mse_famix_class
-        famix_method    TYPE REF TO z2mse_famix_method
-        famix_attribute TYPE REF TO z2mse_famix_attribute
-        classes         TYPE z2mse_extr_classes=>ty_classes
-        components      TYPE z2mse_extr_classes=>ty_class_components_hashed.
+        famix_package    TYPE REF TO z2mse_famix_package
+        famix_class      TYPE REF TO z2mse_famix_class
+        famix_method     TYPE REF TO z2mse_famix_method
+        famix_attribute  TYPE REF TO z2mse_famix_attribute
+        famix_invocation TYPE REF TO z2mse_famix_invocation
+        famix_access     TYPE REF TO z2mse_famix_access
+        classes          TYPE z2mse_extr_classes=>ty_classes
+        components       TYPE z2mse_extr_classes=>ty_class_components_hashed.
     METHODS add_and_sort_to_classes_table
       IMPORTING
         i_tadirvalues      TYPE z2mse_extr_classes=>ty_t_tadir_test
@@ -125,7 +145,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr_classes IMPLEMENTATION.
+CLASS Z2MSE_EXTR_CLASSES IMPLEMENTATION.
 
 
   METHOD add_and_sort_to_classes_table.
@@ -172,6 +192,8 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
                                           famix_class      = famix_class
                                           famix_method    = famix_method
                                           famix_attribute  = famix_attribute
+                                          famix_invocation = famix_invocation
+                                          famix_access = famix_access
                                           classes       = g_selected_classes
                                           components    = g_selected_components ).
 
@@ -188,10 +210,12 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
   METHOD constructor.
     IF tadir_test IS SUPPLIED
     OR seoclass_test IS SUPPLIED
-    OR seocompo_test IS SUPPLIED.
+    OR seocompo_test IS SUPPLIED
+    OR seometarel_test IS SUPPLIED.
       g_tadir_test = tadir_test.
       g_seoclass_test = seoclass_test.
       g_seocompo_test = seocompo_test.
+      g_seometarel_test = seometarel_test.
       g_is_test = abap_true.
     ENDIF.
   ENDMETHOD.
@@ -231,14 +255,14 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
       obj_name = component-clsname.
       INSERT obj_name INTO TABLE obj_names.
     ENDLOOP.
-    data: l_add_classes TYPE ty_classes,
+    DATA: l_add_classes TYPE ty_classes,
           l_added_class TYPE ty_class.
     l_add_classes = me->_select_from_tadir_by_comp( obj_names = obj_names ).
 
-    _check_existence( CHANGING classes = l_add_classes ).
+    _check_existence_and_add_intf( CHANGING classes = l_add_classes ).
 
-    loop at l_add_classes INTO l_added_class.
-      insert l_added_class INTO TABLE g_selected_classes.
+    LOOP AT l_add_classes INTO l_added_class.
+      INSERT l_added_class INTO TABLE g_selected_classes.
     ENDLOOP.
     g_selected_components_new = _read_class_details(  l_add_classes ).
 
@@ -248,7 +272,7 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
   METHOD select_classes_by_packages.
 
     g_selected_classes = _select_from_tadir( packages ).
-    _check_existence( CHANGING classes = g_selected_classes ).
+    _check_existence_and_add_intf( CHANGING classes = g_selected_classes ).
     g_selected_components_new = _read_class_details(  g_selected_classes ).
 
   ENDMETHOD.
@@ -343,10 +367,59 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
 
     ENDLOOP.
 
+    "! TBD Add implementation of interfaces here
+
+    LOOP AT components INTO component.
+      DATA: interface TYPE string,
+            element   TYPE string.
+      SPLIT component-cmpname AT '~' INTO interface element.
+
+      IF element IS NOT INITIAL.
+
+        CASE component-cmptype.
+          WHEN attribute_type.
+
+          WHEN method_type.
+
+            DATA: class_comp_id     TYPE i,
+                  interface_comp_id TYPE i.
+
+            class_comp_id = famix_method->get_id(
+               EXPORTING
+*                class_name_group  =
+                 class             = component-clsname
+*                method_name_group =
+                 method            = component-cmpname
+*              RECEIVING
+*                id                =
+             ).
+
+            interface_comp_id = famix_method->get_id(
+*                        class_name_group  =
+                        class             = interface
+*                        method_name_group =
+                        method            = element
+                    ).
+
+            DATA invocation_id TYPE i.
+            invocation_id = famix_invocation->add( ).
+            famix_invocation->set_invocation_by_reference( EXPORTING element_id = invocation_id
+                                                                       sender_id     = interface_comp_id
+                                                                       candidates_id = class_comp_id
+                                                                       signature     = 'DUMMY' ).
+
+          WHEN OTHERS.
+            "! TBD is this error handling OK?
+            ASSERT 1 = 2.
+        ENDCASE.
+
+      ENDIF.
+
+    ENDLOOP.
   ENDMETHOD.
 
 
-  METHOD _check_existence.
+  METHOD _check_existence_and_add_intf.
 
     TYPES: BEGIN OF ty_existing,
              clsname TYPE seoclsname,
@@ -396,10 +469,93 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
 
     DELETE classes WHERE exists = abap_false.
 
+    " Add interfaces
+
+    TYPES: BEGIN OF ty_interface,
+             clsname    TYPE seoclsname,
+             refclsname TYPE seoclsname,
+           END OF ty_interface.
+    TYPES: ty_interfaces TYPE STANDARD TABLE OF ty_interface.
+    DATA interface TYPE ty_interface.
+    DATA interfaces TYPE ty_interfaces.
+
+    " Select from database
+    IF g_is_test EQ abap_false.
+
+      IF classes IS NOT INITIAL.
+
+        SELECT clsname refclsname FROM seometarel INTO TABLE interfaces
+          FOR ALL ENTRIES IN classes
+          WHERE clsname = classes-clsname
+            AND version = 1 "Active
+            AND state = 1 "Implemented
+            AND reltype = 1. "Interface implementation
+
+      ENDIF.
+
+    ELSE.
+
+      DATA seometarel         TYPE ty_seometarel_test.
+
+      "! TBD this is duplicate code, remove by single access to database
+
+      LOOP AT g_seometarel_test INTO seometarel
+          WHERE version = 1
+            AND state = 1
+            AND reltype = 1.
+
+        READ TABLE classes TRANSPORTING NO FIELDS WITH KEY clsname = seometarel-clsname.
+        IF sy-subrc EQ 0.
+          CLEAR interface.
+          interface-clsname = seometarel-clsname.
+          interface-refclsname = seometarel-refclsname.
+          INSERT interface INTO TABLE interfaces.
+        ENDIF.
+
+      ENDLOOP.
+
+    ENDIF.
+
+    " Find interfaces that are not yet selected
+    LOOP AT interfaces INTO interface.
+
+      READ TABLE g_selected_classes TRANSPORTING NO FIELDS WITH TABLE KEY clsname = interface-refclsname.
+      IF sy-subrc <> 0.
+        "TBD Add to classes
+        DATA class  TYPE ty_class.
+        CLEAR class.
+        class-clsname = interface-refclsname.
+        class-clstype = interface_type.
+        "! TBD fill package correct
+        class-devclass = ''.
+        class-exists = abap_true.
+        INSERT class INTO TABLE classes.
+      ENDIF.
+
+    ENDLOOP.
+
+
   ENDMETHOD.
 
 
   METHOD _read_class_details.
+
+    TYPES: BEGIN OF ty_interface,
+             clsname    TYPE seoclsname,
+             refclsname TYPE seoclsname,
+           END OF ty_interface.
+    TYPES: ty_interfaces TYPE STANDARD TABLE OF ty_interface.
+    DATA interface TYPE ty_interface.
+    DATA interfaces TYPE ty_interfaces.
+
+    "! The new components.
+    "! In case of interfaces add methods and attributes of interface with notation
+    "! interface name ~ attribute/methodname
+    DATA new_comps_including_intf TYPE z2mse_extr_classes=>ty_class_components.
+    DATA new_comp_including_intf TYPE z2mse_extr_classes=>ty_class_component.
+
+    DATA new_comps_intf TYPE z2mse_extr_classes=>ty_class_components.
+    DATA new_comp_intf TYPE z2mse_extr_classes=>ty_class_component.
 
     IF g_is_test EQ abap_false.
 
@@ -407,14 +563,32 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
 
         SELECT clsname cmpname cmptype
           FROM seocompo
-          INTO CORRESPONDING FIELDS OF TABLE components
+          INTO CORRESPONDING FIELDS OF TABLE new_comps_including_intf
           FOR ALL ENTRIES IN classes
           WHERE cmptype <> 3 AND clsname = classes-clsname.
+
+        SELECT clsname refclsname FROM seometarel INTO TABLE interfaces
+          FOR ALL ENTRIES IN classes
+          WHERE clsname = classes-clsname
+            AND version = 1 "Active
+            AND state = 1 "Implemented
+            AND reltype = 1. "Interface implementation
+
+        IF interfaces IS NOT INITIAL.
+
+          SELECT clsname cmpname cmptype
+            FROM seocompo
+            INTO CORRESPONDING FIELDS OF TABLE new_comps_intf
+            FOR ALL ENTRIES IN interfaces
+            WHERE cmptype <> 3 AND clsname = interfaces-refclsname.
+
+        ENDIF.
 
       ENDIF.
     ELSE.
       DATA: seocompo           TYPE ty_seocompo_test,
-            selected_component TYPE ty_class_component.
+            selected_component TYPE ty_class_component,
+            seometarel         TYPE ty_seometarel_test.
       LOOP AT g_seocompo_test INTO seocompo.
 
         READ TABLE classes TRANSPORTING NO FIELDS WITH KEY clsname = seocompo-clsname.
@@ -423,11 +597,60 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
           selected_component-clsname = seocompo-clsname.
           selected_component-cmpname = seocompo-cmpname.
           selected_component-cmptype = seocompo-cmptype.
-          INSERT selected_component INTO TABLE components.
+          INSERT selected_component INTO TABLE new_comps_including_intf.
         ENDIF.
 
       ENDLOOP.
+
+      LOOP AT g_seometarel_test INTO seometarel
+        WHERE version = 1
+          AND state = 1
+          AND reltype = 1.
+
+        READ TABLE classes TRANSPORTING NO FIELDS WITH KEY clsname = seometarel-clsname.
+        IF sy-subrc EQ 0.
+          CLEAR interface.
+          interface-clsname = seometarel-clsname.
+          interface-refclsname = seometarel-refclsname.
+          INSERT interface INTO TABLE interfaces.
+        ENDIF.
+
+      ENDLOOP.
+
+      IF interfaces IS NOT INITIAL.
+
+        LOOP AT g_seocompo_test INTO seocompo.
+
+          READ TABLE interfaces TRANSPORTING NO FIELDS WITH KEY refclsname = seocompo-clsname.
+          IF sy-subrc EQ 0.
+            CLEAR selected_component.
+            selected_component-clsname = seocompo-clsname.
+            selected_component-cmpname = seocompo-cmpname.
+            selected_component-cmptype = seocompo-cmptype.
+            INSERT selected_component INTO TABLE new_comps_intf.
+          ENDIF.
+
+        ENDLOOP.
+
+      ENDIF.
     ENDIF.
+
+    LOOP AT new_comps_including_intf INTO new_comp_including_intf.
+      INSERT new_comp_including_intf INTO TABLE components.
+    ENDLOOP.
+
+    " Add interface attributes and methods
+    DATA class  TYPE z2mse_extr_classes=>ty_class.
+    DATA component  TYPE ty_class_component.
+    LOOP AT interfaces INTO interface.
+      LOOP AT new_comps_intf INTO new_comp_intf WHERE clsname = interface-refclsname.
+        CLEAR component.
+        component-clsname = interface-clsname.
+        CONCATENATE interface-refclsname '~' new_comp_intf-cmpname INTO component-cmpname.
+        component-cmptype = new_comp_intf-cmptype.
+        INSERT component INTO TABLE components.
+      ENDLOOP.
+    ENDLOOP.
 
   ENDMETHOD.
 

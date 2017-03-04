@@ -41,6 +41,7 @@ CLASS ltcl_end_to_end_packages IMPLEMENTATION.
         i_top_packages        = top_packages
         i_sub_packages_filter = sub_packages_filter
         i_search_sub_packages = abap_true
+        i_search_up           = 1
       IMPORTING
         mse_model             = mse_model_act
         nothing_done          = nothing_done_act ).
@@ -99,6 +100,7 @@ CLASS ltcl_end_to_end_packages IMPLEMENTATION.
         i_top_packages        = top_packages
         i_sub_packages_filter = sub_packages_filter
         i_search_sub_packages = abap_true
+        i_search_up           = 1
       IMPORTING
         mse_model             = mse_model_act
         nothing_done          = nothing_done_act ).

@@ -11,11 +11,14 @@ CLASS z2mse_extract_sap2 DEFINITION
     CONSTANTS modifier_webdynpro_component TYPE string VALUE 'ABAPWebDynproComponent'.
     CONSTANTS modifier_dbtable TYPE string VALUE 'DBTable' ##NO_TEXT.
     METHODS constructor .
+    "! Main start to do the extraction
+    "! @parameter i_search_up | how often is a upward searched in the where-used-information to be repeated. Search infinite if < 0
     METHODS extract
       IMPORTING
         !i_top_packages        TYPE ty_s_pack
         !i_sub_packages_filter TYPE ty_s_pack
         !i_search_sub_packages TYPE abap_bool
+        i_search_up            TYPE i
       EXPORTING
         !mse_model             TYPE z2mse_model=>lines_type
         VALUE(nothing_done)    TYPE abap_bool .
@@ -23,18 +26,18 @@ CLASS z2mse_extract_sap2 DEFINITION
   PRIVATE SECTION.
     DATA model            TYPE REF TO z2mse_model.
     DATA famix_package     TYPE REF TO z2mse_famix_package.
-    DATA famix_class     TYPE REF TO Z2MSE_famix_class.
+    DATA famix_class     TYPE REF TO z2mse_famix_class.
     DATA famix_method     TYPE REF TO z2mse_famix_method.
-    DATA famix_attribute     TYPE REF TO Z2MSE_famix_attribute.
+    DATA famix_attribute     TYPE REF TO z2mse_famix_attribute.
     DATA famix_invocation     TYPE REF TO z2mse_famix_invocation.
-    DATA famix_access     TYPE REF TO Z2MSE_famix_access.
+    DATA famix_access     TYPE REF TO z2mse_famix_access.
     METHODS _add_all_to_model_and_make_mse
       IMPORTING
         i_extract_packages       TYPE REF TO z2mse_extr_packages
         i_extract_classes        TYPE REF TO z2mse_extr_classes
         i_extract_where_used_sap TYPE REF TO z2mse_extr_where_used_sap
       RETURNING
-        VALUE(r_mse_model) TYPE z2mse_model=>lines_type.
+        VALUE(r_mse_model)       TYPE z2mse_model=>lines_type.
     METHODS _initial_selections_by_filter
       IMPORTING
         i_top_packages        TYPE z2mse_extract_sap2=>ty_s_pack
@@ -42,15 +45,17 @@ CLASS z2mse_extract_sap2 DEFINITION
         i_search_sub_packages TYPE abap_bool
         i_extract_packages    TYPE REF TO z2mse_extr_packages
         i_extract_classes     TYPE REF TO z2mse_extr_classes.
+    "! @parameter i_search_up | how often is a upward searched in the where-used-information to be repeated. Search infinite if < 0
     METHODS _get_using_elements
       IMPORTING
         i_extract_classes        TYPE REF TO z2mse_extr_classes
-        i_extract_where_used_sap TYPE REF TO z2mse_extr_where_used_sap.
+        i_extract_where_used_sap TYPE REF TO z2mse_extr_where_used_sap
+        i_search_up              TYPE i.
 ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
+CLASS z2mse_extract_sap2 IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -93,13 +98,76 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
                                    i_extract_classes     = extract_classes ).
 
     _get_using_elements( i_extract_classes        = extract_classes
-                         i_extract_where_used_sap = extract_where_used_sap ).
+                         i_extract_where_used_sap = extract_where_used_sap
+                         i_search_up              = i_search_up ).
 
     mse_model = _add_all_to_model_and_make_mse( i_extract_packages       = extract_packages
                                                 i_extract_classes        = extract_classes
                                                 i_extract_where_used_sap = extract_where_used_sap ).
 
   ENDMETHOD.
+
+
+  METHOD _add_all_to_model_and_make_mse.
+
+    i_extract_packages->add_selected_packages_to_mode2( famix_package = famix_package ).
+
+    i_extract_classes->add_to_model( EXPORTING famix_package   = famix_package
+                                                              famix_class     = famix_class
+                                                              famix_method    = famix_method
+                                                              famix_attribute = famix_attribute
+                                                          famix_invocation = famix_invocation
+                                                          famix_access     = famix_access  ).
+
+    i_extract_where_used_sap->add_usage_to_model( EXPORTING famix_method    = famix_method
+                                                          famix_attribute = famix_attribute
+                                                          famix_invocation = famix_invocation
+                                                          famix_access     = famix_access ).
+
+    model->make_mse( IMPORTING mse_model = r_mse_model ).
+
+  ENDMETHOD.
+
+
+  METHOD _get_using_elements.
+
+    DATA: classes_to_do_where_used_up TYPE z2mse_extr_classes=>ty_class_components,
+          repeat                      TYPE abap_bool,
+          counter                     TYPE i.
+
+    counter = i_search_up.
+
+    IF i_search_up EQ 0.
+
+      repeat = abap_false.
+
+    ELSE.
+
+      repeat = abap_true.
+
+    ENDIF.
+
+    WHILE repeat EQ abap_true.
+
+      classes_to_do_where_used_up = i_extract_classes->get_comp_to_do_where_used( ).
+
+      IF classes_to_do_where_used_up IS INITIAL
+        OR counter EQ 0.
+        EXIT.
+      ENDIF.
+
+      i_extract_where_used_sap->used_by_class_component( class_components = classes_to_do_where_used_up ).
+
+      i_extract_classes->select_classes_by_components( components = i_extract_where_used_sap->get_components_where_used( ) ).
+
+      IF counter > 0.
+        SUBTRACT 1 FROM counter.
+      ENDIF.
+
+    ENDWHILE.
+
+  ENDMETHOD.
+
 
   METHOD _initial_selections_by_filter.
 
@@ -112,31 +180,4 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
     i_extract_classes->select_classes_by_packages( packages = i_extract_packages->g_selected_packages ).
 
   ENDMETHOD.
-
-  METHOD _get_using_elements.
-
-    i_extract_where_used_sap->used_by_class_component( class_components = i_extract_classes->get_comp_to_do_where_used( ) ).
-
-    i_extract_classes->select_classes_by_components( components = i_extract_where_used_sap->get_components_where_used( ) ).
-
-  ENDMETHOD.
-
-  METHOD _add_all_to_model_and_make_mse.
-
-    i_extract_packages->add_selected_packages_to_mode2( famix_package = famix_package ).
-
-    i_extract_classes->add_to_model( EXPORTING famix_package   = famix_package
-                                                              famix_class     = famix_class
-                                                              famix_method    = famix_method
-                                                              famix_attribute = famix_attribute ).
-
-    i_extract_where_used_sap->add_usage_to_model( EXPORTING famix_method    = famix_method
-                                                          famix_attribute = famix_attribute
-                                                          famix_invocation = famix_invocation
-                                                          famix_access     = famix_access ).
-
-    model->make_mse( IMPORTING mse_model = r_mse_model ).
-
-  ENDMETHOD.
-
 ENDCLASS.

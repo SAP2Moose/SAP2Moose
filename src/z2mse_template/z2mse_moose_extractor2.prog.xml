@@ -57,15 +57,15 @@
     </item>
     <item>
      <ID>S</ID>
-     <KEY>P_SAP</KEY>
-     <ENTRY>Extract from SAP</ENTRY>
-     <LENGTH>24</LENGTH>
-    </item>
-    <item>
-     <ID>S</ID>
      <KEY>P_SUB</KEY>
      <ENTRY>Extract sub packagaes</ENTRY>
      <LENGTH>29</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_UP</KEY>
+     <ENTRY>Search up (-1 if no limit)</ENTRY>
+     <LENGTH>34</LENGTH>
     </item>
     <item>
      <ID>S</ID>

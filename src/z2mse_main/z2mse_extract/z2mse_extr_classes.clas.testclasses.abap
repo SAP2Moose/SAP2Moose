@@ -10,7 +10,8 @@ CLASS ltcl_test DEFINITION FINAL FOR TESTING
       simple FOR TESTING RAISING cx_static_check,
       simple_model_from_package FOR TESTING RAISING cx_static_check,
       simple_model_from_component FOR TESTING RAISING cx_static_check,
-      repeated_call FOR TESTING RAISING cx_static_check.
+      repeated_call FOR TESTING RAISING cx_static_check,
+      simple_interface FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
 
@@ -133,7 +134,71 @@ CLASS ltcl_test IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD simple_interface.
 
+    DATA: tadir_test TYPE z2mse_extr_classes=>ty_t_tadir_test.
+
+    tadir_test = VALUE #( ( object = 'CLASS' obj_name = 'CLASS_A' devclass = 'A' )
+                          ( object = 'INTF' obj_name = 'INTERFACE_A' devclass = 'B' ) ).
+
+    DATA: seoclass_test TYPE z2mse_extr_classes=>ty_t_seoclass_test.
+
+    seoclass_test = VALUE #( ( clsname = 'CLASS_A')
+                             ( clsname = 'INTERFACE_A') ).
+
+    DATA: seocompo_test TYPE z2mse_extr_classes=>ty_t_seocompo_test.
+
+    seocompo_test = VALUE #( ( clsname = 'CLASS_A' cmpname = 'ATTRIBUTE_A' cmptype = z2mse_extr_classes=>attribute_type )
+                             ( clsname = 'INTERFACE_A' cmpname = 'ATTRIBUTE_A' cmptype = z2mse_extr_classes=>attribute_type )
+                             ( clsname = 'INTERFACE_A' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type )
+                              ).
+
+    DATA: seometarel_test TYPE z2mse_extr_classes=>ty_t_seometarel_test.
+
+    seometarel_test = VALUE #( ( clsname = 'CLASS_A' refclsname = 'INTERFACE_A'  version = 1 state = 1 reltype = 1 )
+                              ).
+
+    f_cut = NEW #( tadir_test = tadir_test
+                   seoclass_test = seoclass_test
+                   seocompo_test = seocompo_test
+                   seometarel_test = seometarel_test ).
+
+    DATA: packages_to_select TYPE z2mse_extr_packages=>ty_packages.
+
+    packages_to_select = VALUE #( ( package = 'A' ) ).
+
+    f_cut->select_classes_by_packages( packages = packages_to_select ).
+
+    DATA: selected_classes_act TYPE z2mse_extr_classes=>ty_classes,
+          selected_classes_exp TYPE z2mse_extr_classes=>ty_classes.
+
+    selected_classes_act = f_cut->g_selected_classes.
+    selected_classes_exp = VALUE #( ( clstype = z2mse_extr_classes=>class_type clsname = 'CLASS_A' devclass = 'A' exists = 'X' )
+                                    ( clstype = z2mse_extr_classes=>interface_type clsname = 'INTERFACE_A' devclass = '' exists = 'X' ) ).
+
+    cl_abap_unit_assert=>assert_equals(
+      EXPORTING
+        act                  = selected_classes_act
+        exp                  = selected_classes_exp
+        msg                  = 'Select correct classes' ).
+
+    DATA: selected_components_act TYPE z2mse_extr_classes=>ty_class_components,
+          selected_components_exp TYPE z2mse_extr_classes=>ty_class_components.
+
+    selected_components_act = f_cut->get_comp_to_do_where_used( ).
+    selected_components_exp = VALUE #( ( clsname = 'CLASS_A' cmpname = 'ATTRIBUTE_A' cmptype = z2mse_extr_classes=>attribute_type )
+                                       ( clsname = 'CLASS_A' cmpname = 'INTERFACE_A~ATTRIBUTE_A' cmptype = z2mse_extr_classes=>attribute_type )
+                                       ( clsname = 'CLASS_A' cmpname = 'INTERFACE_A~METHOD_A' cmptype = z2mse_extr_classes=>method_type )
+                                       ( clsname = 'INTERFACE_A' cmpname = 'ATTRIBUTE_A' cmptype = z2mse_extr_classes=>attribute_type )
+                                       ( clsname = 'INTERFACE_A' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type ) ).
+
+    cl_abap_unit_assert=>assert_equals(
+      EXPORTING
+        act                  = selected_components_act
+        exp                  = selected_components_exp
+        msg                  = 'Select correct class components' ).
+
+  ENDMETHOD.
 
 
 
@@ -143,7 +208,9 @@ CLASS ltcl_test IMPLEMENTATION.
           famix_package   TYPE REF TO z2mse_famix_package,
           famix_class     TYPE REF TO z2mse_famix_class,
           famix_method    TYPE REF TO z2mse_famix_method,
-          famix_attribute TYPE REF TO z2mse_famix_attribute.
+          famix_attribute TYPE REF TO z2mse_famix_attribute,
+          famix_invocation TYPE REF TO z2mse_famix_invocation,
+          famix_access TYPE REF TO z2mse_famix_access.
 
     DATA: tadir_test TYPE z2mse_extr_classes=>ty_t_tadir_test.
 
@@ -178,6 +245,8 @@ CLASS ltcl_test IMPLEMENTATION.
     CREATE OBJECT famix_class EXPORTING model = model.
     CREATE OBJECT famix_method EXPORTING model = model.
     CREATE OBJECT famix_attribute EXPORTING model = model.
+    CREATE OBJECT famix_invocation EXPORTING model = model.
+    CREATE OBJECT famix_access EXPORTING model = model.
 
     DATA: mse_model_act TYPE z2mse_model=>lines_type,
           mse_model_exp TYPE z2mse_model=>lines_type.
@@ -209,7 +278,9 @@ CLASS ltcl_test IMPLEMENTATION.
     f_cut->add_to_model( EXPORTING famix_package   = famix_package
                                                     famix_class     = famix_class
                                                     famix_method    = famix_method
-                                                    famix_attribute = famix_attribute ).
+                                                    famix_attribute = famix_attribute
+                                                    famix_invocation = famix_invocation
+                                                    famix_access = famix_access ).
 
     model->make_mse( IMPORTING mse_model = mse_model_act ).
 
@@ -227,7 +298,9 @@ CLASS ltcl_test IMPLEMENTATION.
           famix_package   TYPE REF TO z2mse_famix_package,
           famix_class     TYPE REF TO z2mse_famix_class,
           famix_method    TYPE REF TO z2mse_famix_method,
-          famix_attribute TYPE REF TO z2mse_famix_attribute.
+          famix_attribute TYPE REF TO z2mse_famix_attribute,
+          famix_invocation TYPE REF TO z2mse_famix_invocation,
+          famix_access TYPE REF TO z2mse_famix_access.
 
     DATA: tadir_test TYPE z2mse_extr_classes=>ty_t_tadir_test.
 
@@ -270,6 +343,8 @@ CLASS ltcl_test IMPLEMENTATION.
     CREATE OBJECT famix_class EXPORTING model = model.
     CREATE OBJECT famix_method EXPORTING model = model.
     CREATE OBJECT famix_attribute EXPORTING model = model.
+    CREATE OBJECT famix_invocation EXPORTING model = model.
+    CREATE OBJECT famix_access EXPORTING model = model.
 
     DATA: mse_model_act TYPE z2mse_model=>lines_type,
           mse_model_exp TYPE z2mse_model=>lines_type.
@@ -297,7 +372,9 @@ CLASS ltcl_test IMPLEMENTATION.
     f_cut->add_to_model( EXPORTING famix_package   = famix_package
                                                     famix_class     = famix_class
                                                     famix_method    = famix_method
-                                                    famix_attribute = famix_attribute ).
+                                                    famix_attribute = famix_attribute
+                                                    famix_invocation = famix_invocation
+                                                    famix_access = famix_access ).
 
     model->make_mse( IMPORTING mse_model = mse_model_act ).
 
@@ -315,7 +392,9 @@ CLASS ltcl_test IMPLEMENTATION.
           famix_package   TYPE REF TO z2mse_famix_package,
           famix_class     TYPE REF TO z2mse_famix_class,
           famix_method    TYPE REF TO z2mse_famix_method,
-          famix_attribute TYPE REF TO z2mse_famix_attribute.
+          famix_attribute TYPE REF TO z2mse_famix_attribute,
+          famix_invocation TYPE REF TO z2mse_famix_invocation,
+          famix_access TYPE REF TO z2mse_famix_access.
 
     DATA: tadir_test TYPE z2mse_extr_classes=>ty_t_tadir_test.
 
@@ -424,6 +503,8 @@ CLASS ltcl_test IMPLEMENTATION.
     CREATE OBJECT famix_class EXPORTING model = model.
     CREATE OBJECT famix_method EXPORTING model = model.
     CREATE OBJECT famix_attribute EXPORTING model = model.
+    CREATE OBJECT famix_invocation EXPORTING model = model.
+    CREATE OBJECT famix_access EXPORTING model = model.
 
     DATA: mse_model_act TYPE z2mse_model=>lines_type,
           mse_model_exp TYPE z2mse_model=>lines_type.
@@ -461,7 +542,9 @@ CLASS ltcl_test IMPLEMENTATION.
     f_cut->add_to_model( EXPORTING famix_package   = famix_package
                                                     famix_class     = famix_class
                                                     famix_method    = famix_method
-                                                    famix_attribute = famix_attribute ).
+                                                    famix_attribute = famix_attribute
+                                                    famix_invocation = famix_invocation
+                                                    famix_access = famix_access ).
 
     model->make_mse( IMPORTING mse_model = mse_model_act ).
 

@@ -88,6 +88,7 @@ SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE TEXT-002.
 SELECT-OPTIONS s_pack FOR tadir-devclass.
 SELECT-OPTIONS s_spack FOR tadir-devclass.
 PARAMETERS p_sub AS CHECKBOX DEFAULT 'X'.
+parameters p_up TYPE i DEFAULT -1.
 
 *SELECT-OPTIONS s_compsn FOR tadir-obj_name.
 
@@ -276,6 +277,7 @@ START-OF-SELECTION.
     sap_extractor->extract( EXPORTING i_top_packages        = ls_pack
                                       i_sub_packages_filter = ls_spack
                                       i_search_sub_packages = p_sub
+                                      i_search_up           = p_up
                             IMPORTING mse_model             = mse_model
                                       nothing_done          = nothing_done ).
 
