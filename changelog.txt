@@ -1,0 +1,14 @@
+SAP2Moose changelog
+=====================
+
+Legend
+------
+* : fixed
+! : changed
++ : added
+- : removed
+
+v0.2.0
++ Display interface methods for classes also if interface method is not used
++ Display interface attributes for classes (But do not connect)
++ Connect interface methods to implementing methods by an invocation
