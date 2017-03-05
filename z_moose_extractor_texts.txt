@@ -1,0 +1,7 @@
+
+Selection texts:
+P_DOWN	Download model to file
+P_SUB	Extract sub packagaes
+P_UP	Search up (-1 if no limit)
+S_PACK	Extract object of packages
+S_SPACK	Filter sub packages if require
