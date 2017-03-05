@@ -75,12 +75,7 @@ CLASS z2mse_extr_tables DEFINITION
     "! Checks whether a class exists. There can be TADIR entries for not existing classes.
     METHODS _check_existence
       CHANGING db_tables TYPE z2mse_extr_tables=>ty_tables.
-    METHODS _add_tables_to_model
-      IMPORTING
-        sap_package   TYPE REF TO z2mse_sap_package
-        sap_class     TYPE REF TO z2mse_sap_class
-        sap_attribute TYPE REF TO z2mse_sap_attribute
-        tables        TYPE ty_tables.
+
 ENDCLASS.
 
 
@@ -175,57 +170,7 @@ CLASS Z2MSE_EXTR_TABLES IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD _add_tables_to_model.
 
-*    DATA: table LIKE LINE OF g_selected_tables.
-*    DATA last_id TYPE i.
-*    LOOP AT tables INTO table.
-*      sap_package->add( name = table-devclass ).
-*
-**      IF class-clstype EQ class_type.
-**        " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
-**        sap_class->add( EXPORTING name_group = 'ABAP_CLASS'
-**                                  name       = class-clsname
-**                                  modifiers  = yrw1_mcextract_sap2=>modifier_abapglobalclass
-**                        IMPORTING id         = last_id ).
-**        sap_class->set_parent_package( element_id     = last_id
-**                                       parent_package = class-devclass ).
-**      ELSEIF class-clstype EQ interface_type.
-**        " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
-**        sap_class->add( EXPORTING name_group = 'ABAP_CLASS'
-**                                  name       = class-clsname
-**                                  modifiers  = yrw1_mcextract_sap2=>modifier_abapglobalinterface
-**                        IMPORTING id         = last_id ).
-**        sap_class->set_parent_package( element_id     = last_id
-**                                       parent_package = class-devclass ).
-**        " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
-**        sap_class->is_interface( element_id = last_id ).
-**      ELSE.
-**        CONTINUE.
-**      ENDIF.
-*
-*    " SAP_2_FAMIX_54        Map database tables to FAMIX Class
-*    " SAP_2_FAMIX_58        Mark the FAMIX Class with the attribute modifiers = 'DBTable'
-*    sap_class->add( EXPORTING name_group             = 'ABAP_TABLE'
-*                                  name                   = table-tabname
-*                                  modifiers              = yrw1_mcextract_sap2=>modifier_dbtable
-*                        IMPORTING id         = last_id ).
-*    " SAP_2_FAMIX_56      Add a dummy attribute with the name of the table
-*    sap_attribute->add(
-*      EXPORTING
-*        class     =
-*        attribute =
-*    ).
-*    g_famix_attribute->add( EXPORTING name = name IMPORTING id = dummy_attribute_id ).
-*    g_famix_attribute->set_parent_type( EXPORTING element_id = dummy_attribute_id
-**                                                  parent_id  = id ).
-*  ENDMETHOD.
-*  METHOD set_parent_package.
-*    g_famix_class->set_parent_package( element_id = element_id parent_package = parent_package ).
-*
-*    ENDLOOP.
-
-  ENDMETHOD.
 
 
   METHOD _check_existence.

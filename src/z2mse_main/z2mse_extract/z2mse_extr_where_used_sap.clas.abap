@@ -42,6 +42,9 @@ CLASS z2mse_extr_where_used_sap DEFINITION
     METHODS used_by_class_component
       IMPORTING
         class_components TYPE z2mse_extr_classes=>ty_class_components.
+    "! Returns all components that are found in the last where-used analysis. Returns this components only once
+    METHODS get_components_where_used
+      RETURNING VALUE(components) TYPE z2mse_extr_classes=>ty_class_components_hashed.
     "! Add all selected components to the model. Should be called only once
     METHODS add_usage_to_model
       IMPORTING
@@ -49,9 +52,6 @@ CLASS z2mse_extr_where_used_sap DEFINITION
         famix_attribute  TYPE REF TO z2mse_famix_attribute
         famix_invocation TYPE REF TO z2mse_famix_invocation
         famix_access     TYPE REF TO z2mse_famix_access.
-    "! Returns all components that are found in the last where-used analysis. Returns this components only once
-    METHODS get_components_where_used
-      RETURNING VALUE(components) TYPE z2mse_extr_classes=>ty_class_components_hashed.
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -97,7 +97,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR_WHERE_USED_SAP IMPLEMENTATION.
+CLASS z2mse_extr_where_used_sap IMPLEMENTATION.
 
 
   METHOD add_usage_to_model.
