@@ -110,7 +110,7 @@ CLASS z2mse_extract_sap2 IMPLEMENTATION.
 
   METHOD _add_all_to_model_and_make_mse.
 
-    i_extract_packages->add_selected_packages_to_mode2( famix_package = famix_package ).
+    i_extract_packages->add_selected_packages_to_model( famix_package = famix_package ).
 
     i_extract_classes->add_to_model( EXPORTING famix_package   = famix_package
                                                               famix_class     = famix_class

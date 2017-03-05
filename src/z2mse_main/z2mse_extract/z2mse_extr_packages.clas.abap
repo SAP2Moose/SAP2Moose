@@ -39,11 +39,9 @@ CLASS z2mse_extr_packages DEFINITION
         !sub_packages_filter    TYPE ty_s_pack OPTIONAL
         !including_sub_packages TYPE abap_bool DEFAULT abap_false.
 
-    METHODS add_selected_packages_to_model
-      IMPORTING
-        sap_package TYPE REF TO z2mse_sap_package.
+
     "! Add all selected components to the model. Should be called only once
-    METHODS add_selected_packages_to_mode2
+    METHODS add_selected_packages_to_model
       IMPORTING
         famix_package TYPE REF TO z2mse_famix_package.
 
@@ -78,7 +76,7 @@ ENDCLASS.
 CLASS Z2MSE_EXTR_PACKAGES IMPLEMENTATION.
 
 
-  METHOD add_selected_packages_to_mode2.
+  METHOD add_selected_packages_to_model.
 
     DATA: selected_package  TYPE z2mse_extr_packages=>ty_package.
 
@@ -100,24 +98,7 @@ CLASS Z2MSE_EXTR_PACKAGES IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD add_selected_packages_to_model.
 
-    DATA: selected_package  TYPE z2mse_extr_packages=>ty_package.
-
-    LOOP AT g_selected_packages INTO selected_package.
-
-      sap_package->add( name = selected_package-package ).
-
-      IF selected_package-parentpackage IS NOT INITIAL.
-
-        sap_package->add( name = selected_package-parentpackage ).
-        sap_package->set_parent_package( EXPORTING this_package   = selected_package-package
-                                                   parent_package = selected_package-parentpackage ).
-      ENDIF.
-
-    ENDLOOP.
-
-  ENDMETHOD.
 
 
   METHOD constructor.
