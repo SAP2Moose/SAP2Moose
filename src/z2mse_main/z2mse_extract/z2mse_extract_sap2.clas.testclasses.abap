@@ -29,6 +29,10 @@ CLASS ltcl_end_to_end_packages IMPLEMENTATION.
       extract_classes = NEW #( tadir_test = VALUE #( ( ) ) ).
     END-TEST-INJECTION.
 
+    TEST-INJECTION creator_tables.
+      extract_tables = NEW #( tadir_test = VALUE #( ( ) ) ).
+    END-TEST-INJECTION.
+
     DATA: mse_model_act TYPE z2mse_model=>lines_type.
     DATA: nothing_done_act TYPE abap_bool.
     DATA: top_packages        TYPE z2mse_extract_sap2=>ty_s_pack,
@@ -86,6 +90,10 @@ CLASS ltcl_end_to_end_packages IMPLEMENTATION.
       extract_classes = NEW #( tadir_test = ttadir_test
                                seoclass_test = tseoclass_test
                                seocompo_test = tseocompo_test ).
+    END-TEST-INJECTION.
+
+    TEST-INJECTION creator_tables.
+      extract_tables = NEW #( tadir_test = VALUE #( ( ) ) ).
     END-TEST-INJECTION.
 
     DATA: mse_model_act TYPE z2mse_model=>lines_type.

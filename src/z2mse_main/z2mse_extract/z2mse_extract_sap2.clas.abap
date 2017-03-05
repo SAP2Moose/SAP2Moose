@@ -36,6 +36,7 @@ CLASS z2mse_extract_sap2 DEFINITION
         i_extract_packages       TYPE REF TO z2mse_extr_packages
         i_extract_classes        TYPE REF TO z2mse_extr_classes
         i_extract_where_used_sap TYPE REF TO z2mse_extr_where_used_sap
+        i_extract_tables      type REF TO z2mse_extr_tables
       RETURNING
         VALUE(r_mse_model)       TYPE z2mse_model=>lines_type.
     METHODS _initial_selections_by_filter
@@ -44,7 +45,8 @@ CLASS z2mse_extract_sap2 DEFINITION
         i_sub_packages_filter TYPE z2mse_extract_sap2=>ty_s_pack
         i_search_sub_packages TYPE abap_bool
         i_extract_packages    TYPE REF TO z2mse_extr_packages
-        i_extract_classes     TYPE REF TO z2mse_extr_classes.
+        i_extract_classes     TYPE REF TO z2mse_extr_classes
+        i_extract_tables      type REF TO z2mse_extr_tables.
     "! @parameter i_search_up | how often is a upward searched in the where-used-information to be repeated. Search infinite if < 0
     METHODS _get_using_elements
       IMPORTING
@@ -55,7 +57,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extract_sap2 IMPLEMENTATION.
+CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -85,6 +87,12 @@ CLASS z2mse_extract_sap2 IMPLEMENTATION.
       CREATE OBJECT extract_classes.
     END-TEST-SEAM.
 
+    DATA extract_tables TYPE REF TO z2mse_extr_tables.
+
+    TEST-SEAM creator_tables.
+      CREATE OBJECT extract_tables.
+    END-TEST-SEAM.
+
     DATA extract_where_used_sap TYPE REF TO z2mse_extr_where_used_sap.
 
     TEST-SEAM creator_where_used_sap.
@@ -95,7 +103,8 @@ CLASS z2mse_extract_sap2 IMPLEMENTATION.
                                    i_sub_packages_filter = i_sub_packages_filter
                                    i_search_sub_packages = i_search_sub_packages
                                    i_extract_packages    = extract_packages
-                                   i_extract_classes     = extract_classes ).
+                                   i_extract_classes     = extract_classes
+                                   i_extract_tables      = extract_tables ).
 
     _get_using_elements( i_extract_classes        = extract_classes
                          i_extract_where_used_sap = extract_where_used_sap
@@ -103,6 +112,7 @@ CLASS z2mse_extract_sap2 IMPLEMENTATION.
 
     mse_model = _add_all_to_model_and_make_mse( i_extract_packages       = extract_packages
                                                 i_extract_classes        = extract_classes
+                                                i_extract_tables      = extract_tables
                                                 i_extract_where_used_sap = extract_where_used_sap ).
 
   ENDMETHOD.
@@ -112,17 +122,21 @@ CLASS z2mse_extract_sap2 IMPLEMENTATION.
 
     i_extract_packages->add_selected_packages_to_model( famix_package = famix_package ).
 
-    i_extract_classes->add_to_model( EXPORTING famix_package   = famix_package
-                                                              famix_class     = famix_class
-                                                              famix_method    = famix_method
-                                                              famix_attribute = famix_attribute
-                                                          famix_invocation = famix_invocation
-                                                          famix_access     = famix_access  ).
+    i_extract_classes->add_to_model( EXPORTING famix_package = famix_package
+                                               famix_class     = famix_class
+                                               famix_method    = famix_method
+                                               famix_attribute = famix_attribute
+                                               famix_invocation = famix_invocation
+                                               famix_access     = famix_access  ).
+
+    i_extract_tables->add_to_model( EXPORTING famix_package   = famix_package
+                                              famix_class     = famix_class
+                                              famix_attribute = famix_attribute ).
 
     i_extract_where_used_sap->add_usage_to_model( EXPORTING famix_method    = famix_method
-                                                          famix_attribute = famix_attribute
-                                                          famix_invocation = famix_invocation
-                                                          famix_access     = famix_access ).
+                                                            famix_attribute = famix_attribute
+                                                            famix_invocation = famix_invocation
+                                                            famix_access     = famix_access ).
 
     model->make_mse( IMPORTING mse_model = r_mse_model ).
 
@@ -178,6 +192,8 @@ CLASS z2mse_extract_sap2 IMPLEMENTATION.
                                                  including_sub_packages = i_search_sub_packages  ).
 
     i_extract_classes->select_classes_by_packages( packages = i_extract_packages->g_selected_packages ).
+
+    i_extract_tables->select_tables_by_packages( packages = i_extract_packages->g_selected_packages ).
 
   ENDMETHOD.
 ENDCLASS.

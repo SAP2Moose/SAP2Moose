@@ -11,7 +11,9 @@ ENDCLASS.
 
 
 
-CLASS z2mse_test_cl_b1 IMPLEMENTATION.
+CLASS Z2MSE_TEST_CL_B1 IMPLEMENTATION.
+
+
   METHOD method_a.
 
     DATA(a) = NEW z2mse_test_cl_a( ).
@@ -19,6 +21,9 @@ CLASS z2mse_test_cl_b1 IMPLEMENTATION.
     DATA(interface_attribute) = a->z2mse_test_if_a~attribute_a.
     a->z2mse_test_if_a~method_a( ).
 
-  ENDMETHOD.
+    DATA z2mse_test_a TYPE z2mse_test_a.
 
+    SELECT SINGLE * FROM z2mse_test_a INTO z2mse_test_a.
+
+  ENDMETHOD.
 ENDCLASS.

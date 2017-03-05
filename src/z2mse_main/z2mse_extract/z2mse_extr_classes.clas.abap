@@ -106,7 +106,7 @@ CLASS z2mse_extr_classes DEFINITION
     DATA g_seometarel_test TYPE z2mse_extr_classes=>ty_t_seometarel_test.
     "! A list of all primarily selected and existing classes or interfaces
     DATA g_selected_classes TYPE z2mse_extr_classes=>ty_classes.
-    "! A list of all components of primarily selected and existing classes or interfaces
+    "! A list of all components of primarily selected and existing classes or interfaces. Only if not yet transfered to where used analysis
     DATA g_selected_components_new TYPE z2mse_extr_classes=>ty_class_components_hashed.
     "! A list of all components of primarily selected and existing classes or interfaces
     DATA g_selected_components TYPE z2mse_extr_classes=>ty_class_components_hashed.

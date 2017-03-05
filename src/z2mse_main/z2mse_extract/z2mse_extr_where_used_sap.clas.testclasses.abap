@@ -240,11 +240,7 @@ CLASS ltcl_main IMPLEMENTATION.
                              ( line = |(FAMIX.Method (id: 16 )| ) " CLASS_C>>INTF_A~I_METHOD_A
                              ( line = |  (name 'INTF_A~I_METHOD_A')| )
                              ( line = |  (signature 'INTF_A~I_METHOD_A')| )
-                             ( line = |  (parentType (ref: 5)))| )
-                             ( line = |(FAMIX.Invocation| )
-                             ( line = |  (sender (ref: 7))| ) " INTF_A>>I_METHOD_A
-                             ( line = |  (candidates (ref: 16))| ) " CLASS_C>>INTF_A~I_METHOD_A
-                             ( line = |  (signature 'DUMMY')))| )
+                             ( line = |  (parentType (ref: 5))))| )
                              ).
 
     cl_abap_unit_assert=>assert_equals(
