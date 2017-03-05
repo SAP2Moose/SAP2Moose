@@ -49,7 +49,7 @@
 "!
 "! Last activation:
 "! Generated 05.03.2017
-"! Contains commit 8daf2e99640f74ebf72bd5f23fa22337370191f1
+"! Contains commit af00693de759ac2555b839debbb4e8734daeba1e
 "!
 "! This is version 0.2.0. It will be much better covered with unit tests and end-to-end tests than the first version. It is currently incomplete.
 "!
