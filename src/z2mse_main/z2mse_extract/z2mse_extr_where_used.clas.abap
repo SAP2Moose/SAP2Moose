@@ -38,7 +38,7 @@ CLASS z2mse_extr_where_used DEFINITION
         VALUE(web_dynpro_components) TYPE z2mse_extr_web_dynpro=>ty_web_dynpro_components_hash.
   PROTECTED SECTION.
     "! Filled during tests
-    DATA g_wbcrossgt_test TYPE z2mse_extr_where_used_classes=>ty_t_wbcrossgt_test.
+    DATA g_wbcrossgt_test TYPE ty_t_wbcrossgt_test.
     DATA g_is_test TYPE abap_bool.
     "! Filled during tests
     DATA g_includes_to_components_test TYPE ty_includes_to_components.
@@ -57,7 +57,7 @@ CLASS z2mse_extr_where_used DEFINITION
       IMPORTING
         i_names_to_components    TYPE z2mse_extr_where_used=>ty_where_used_names
       RETURNING
-        VALUE(r_found_wbcrossgt) TYPE z2mse_extr_where_used_classes=>ty_t_wbcrossgt_test.
+        VALUE(r_found_wbcrossgt) TYPE ty_t_wbcrossgt_test.
     METHODS _determine_mapping_include_to
       IMPORTING
         i_found_wbcrossgt              TYPE ty_t_wbcrossgt_test
@@ -69,7 +69,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr_where_used IMPLEMENTATION.
+CLASS Z2MSE_EXTR_WHERE_USED IMPLEMENTATION.
 
 
   METHOD constructor.
