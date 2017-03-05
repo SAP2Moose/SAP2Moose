@@ -55,14 +55,18 @@ CLASS ltcl_main IMPLEMENTATION.
 
     comps_used_by_comps_exp =
     VALUE #( ( clsname = 'CLASS_A' cmpname = 'ATTRIBUTE_A' cmptype = z2mse_extr_classes=>attribute_type
-               used_by_clsname = 'CLASS_B' used_by_cmpname = 'METHOD_A' used_by_cmptype = z2mse_extr_classes=>method_type )
+               is_class_component = 'X' used_by_clsname = 'CLASS_B' used_by_cmpname = 'METHOD_A' used_by_cmptype = z2mse_extr_classes=>method_type )
              ( clsname = 'CLASS_A' cmpname = 'EVENT_A' cmptype = z2mse_extr_classes=>event_type
+               is_class_component = 'X'
                used_by_clsname = 'CLASS_B' used_by_cmpname = 'METHOD_B' used_by_cmptype = z2mse_extr_classes=>method_type )
              ( clsname = 'CLASS_A' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type
+               is_class_component = 'X'
                used_by_clsname = 'CLASS_B' used_by_cmpname = 'METHOD_A' used_by_cmptype = z2mse_extr_classes=>method_type )
              ( clsname = 'CLASS_A' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type
+               is_class_component = 'X'
                used_by_clsname = 'CLASS_B' used_by_cmpname = 'METHOD_C' used_by_cmptype = z2mse_extr_classes=>method_type )
              ( clsname = 'INTF_A' cmpname = 'I_METHOD_A' cmptype = z2mse_extr_classes=>method_type
+               is_class_component = 'X'
                used_by_clsname = 'CLASS_C' used_by_cmpname = 'INTF_A~I_METHOD_A' used_by_cmptype = z2mse_extr_classes=>method_type ) ).
 
     SORT comps_used_by_comps_exp.
@@ -98,7 +102,7 @@ CLASS ltcl_main IMPLEMENTATION.
         exp                  = g_class_components_initial_exp
         msg                  = 'Expect correct list of initial class components' ).
 
-    g_class_comp_where_used_act = f_cut->get_components_where_used( ).
+    f_cut->get_components_where_used( IMPORTING components = g_class_comp_where_used_act ).
 
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
@@ -108,7 +112,7 @@ CLASS ltcl_main IMPLEMENTATION.
 
 
 
-    g_class_comp_where_used_act = f_cut->get_components_where_used( ).
+     f_cut->get_components_where_used( IMPORTING components = g_class_comp_where_used_act ).
 
     cl_abap_unit_assert=>assert_equals(
       EXPORTING

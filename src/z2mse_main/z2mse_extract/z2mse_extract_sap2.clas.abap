@@ -38,29 +38,31 @@ CLASS z2mse_extract_sap2 DEFINITION
         i_search_sub_packages TYPE abap_bool
         i_extract_packages    TYPE REF TO z2mse_extr_packages
         i_extract_classes     TYPE REF TO z2mse_extr_classes
-        i_extract_tables      type REF TO z2mse_extr_tables.
+        i_extract_tables      TYPE REF TO z2mse_extr_tables.
     "! @parameter i_search_up | how often is a upward searched in the where-used-information to be repeated. Search infinite if < 0
     METHODS _get_using_elements
       IMPORTING
-        i_extract_classes        TYPE REF TO z2mse_extr_classes
-        i_extract_tables      type REF TO z2mse_extr_tables
+        i_extract_classes            TYPE REF TO z2mse_extr_classes
+        i_extract_tables             TYPE REF TO z2mse_extr_tables
+        i_extract_web_dynpro         TYPE REF TO z2mse_extr_web_dynpro
         i_extract_where_used_classes TYPE REF TO z2mse_extr_where_used_classes
-        i_extract_where_used_tables TYPE REF TO z2mse_extr_where_used_tables
-        i_search_up              TYPE i.
+        i_extract_where_used_tables  TYPE REF TO z2mse_extr_where_used_tables
+        i_search_up                  TYPE i.
     METHODS _add_all_to_model_and_make_mse
       IMPORTING
-        i_extract_packages       TYPE REF TO z2mse_extr_packages
-        i_extract_classes        TYPE REF TO z2mse_extr_classes
+        i_extract_packages           TYPE REF TO z2mse_extr_packages
+        i_extract_classes            TYPE REF TO z2mse_extr_classes
+        i_extract_web_dynpro         TYPE REF TO z2mse_extr_web_dynpro
         i_extract_where_used_classes TYPE REF TO z2mse_extr_where_used_classes
-        i_extract_where_used_tables TYPE REF TO z2mse_extr_where_used_tables
-        i_extract_tables      type REF TO z2mse_extr_tables
+        i_extract_where_used_tables  TYPE REF TO z2mse_extr_where_used_tables
+        i_extract_tables             TYPE REF TO z2mse_extr_tables
       RETURNING
-        VALUE(r_mse_model)       TYPE z2mse_model=>lines_type.
+        VALUE(r_mse_model)           TYPE z2mse_model=>lines_type.
 ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
+CLASS z2mse_extract_sap2 IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -96,6 +98,12 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
       CREATE OBJECT extract_tables.
     END-TEST-SEAM.
 
+    DATA extract_web_dynpro TYPE REF TO z2mse_extr_web_dynpro.
+
+    TEST-SEAM creator_web_dynpro.
+      CREATE OBJECT extract_web_dynpro.
+    END-TEST-SEAM.
+
     DATA extract_where_used_classes TYPE REF TO z2mse_extr_where_used_classes.
 
     TEST-SEAM creator_where_used_classes.
@@ -117,6 +125,7 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
 
     _get_using_elements( i_extract_classes            = extract_classes
                          i_extract_tables             = extract_tables
+                         i_extract_web_dynpro         = extract_web_dynpro
                          i_extract_where_used_classes = extract_where_used_classes
                          i_extract_where_used_tables  = extract_where_used_tables
                          i_search_up                  = i_search_up ).
@@ -124,6 +133,7 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
     mse_model = _add_all_to_model_and_make_mse( i_extract_packages           = extract_packages
                                                 i_extract_classes            = extract_classes
                                                 i_extract_tables             = extract_tables
+                                                i_extract_web_dynpro         = extract_web_dynpro
                                                 i_extract_where_used_classes = extract_where_used_classes
                                                 i_extract_where_used_tables  = extract_where_used_tables ).
 
@@ -170,18 +180,32 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
 
       tables_to_do_where_used_up = i_extract_tables->get_tables_to_do_where_used( ).
 
-      IF classes_to_do_where_used_up IS INITIAL
+      IF ( classes_to_do_where_used_up IS INITIAL AND
+           tables_to_do_where_used_up IS INITIAL )
         OR counter EQ 0.
         EXIT.
       ENDIF.
 
       i_extract_where_used_classes->used_by_class_component( class_components = classes_to_do_where_used_up ).
 
-      i_extract_classes->select_classes_by_components( components = i_extract_where_used_classes->get_components_where_used( ) ).
+      DATA class_components TYPE z2mse_extr_classes=>ty_class_components_hashed.
+      DATA web_dynpro_components TYPE z2mse_extr_web_dynpro=>ty_web_dynpro_components_hash.
+
+      i_extract_where_used_classes->get_components_where_used( IMPORTING components            = class_components
+                                                                         web_dynpro_components = web_dynpro_components ).
+
+      i_extract_classes->select_classes_by_components( components = class_components ).
+
+      i_extract_web_dynpro->select_classes_by_components( components = web_dynpro_components ).
 
       i_extract_where_used_tables->used_by_table( tables = tables_to_do_where_used_up ).
 
-      i_extract_classes->select_classes_by_components( components = i_extract_where_used_tables->get_components_where_used( ) ).
+      i_extract_where_used_tables->get_components_where_used( IMPORTING components            = class_components
+                                                                        web_dynpro_components = web_dynpro_components ).
+
+      i_extract_classes->select_classes_by_components( components = class_components ).
+
+      i_extract_web_dynpro->select_classes_by_components( components = web_dynpro_components ).
 
       IF counter > 0.
         SUBTRACT 1 FROM counter.
@@ -206,6 +230,9 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
     i_extract_tables->add_to_model( EXPORTING famix_package   = famix_package
                                               famix_class     = famix_class
                                               famix_attribute = famix_attribute ).
+
+    i_extract_web_dynpro->add_to_model( EXPORTING famix_class  = famix_class
+                                                  famix_method = famix_method ).
 
     i_extract_where_used_classes->add_usage_to_model( EXPORTING famix_method    = famix_method
                                                                 famix_attribute = famix_attribute

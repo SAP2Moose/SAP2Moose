@@ -21,17 +21,21 @@ CLASS z2mse_extr_where_used DEFINITION
         clstype            TYPE seoclstype,
         cmpname            TYPE seocmpname,
         cmptype            TYPE seocmptype,
+        is_webdynpro       TYPE abap_bool,
+        component_name     TYPE wdy_component_name,
+        controller_name    TYPE wdy_controller_name,
       END OF ty_include_to_component .
     TYPES:
       ty_includes_to_components TYPE HASHED TABLE OF ty_include_to_component WITH UNIQUE KEY include .
     METHODS constructor
       IMPORTING
-         wbcrossgt_test        TYPE ty_t_wbcrossgt_test
+        wbcrossgt_test         TYPE ty_t_wbcrossgt_test
         includes_to_components TYPE ty_includes_to_components.
     "! Returns all components that are found in the last where-used analysis. Returns this components only once
     METHODS get_components_where_used
-      RETURNING
-        value(components) TYPE z2mse_extr_classes=>ty_class_components_hashed .
+      EXPORTING
+        VALUE(components)            TYPE z2mse_extr_classes=>ty_class_components_hashed
+        VALUE(web_dynpro_components) TYPE z2mse_extr_web_dynpro=>ty_web_dynpro_components_hash.
   PROTECTED SECTION.
     "! Filled during tests
     DATA g_wbcrossgt_test TYPE z2mse_extr_where_used_classes=>ty_t_wbcrossgt_test.
@@ -40,6 +44,8 @@ CLASS z2mse_extr_where_used DEFINITION
     DATA g_includes_to_components_test TYPE ty_includes_to_components.
     "! All class components that where found during where used
     DATA g_class_components_where_used TYPE z2mse_extr_classes=>ty_class_components_hashed.
+    "! All Web Dynpro ABAP components that where found during where used
+    DATA g_web_dynpro_cmpnts_where_used TYPE z2mse_extr_web_dynpro=>ty_web_dynpro_components_hash.
 
     TYPES: BEGIN OF ty_where_used_name,
              otype           TYPE char2,
@@ -65,11 +71,6 @@ ENDCLASS.
 
 CLASS z2mse_extr_where_used IMPLEMENTATION.
 
-  METHOD get_components_where_used.
-    components = g_class_components_where_used.
-    CLEAR g_class_components_where_used.
-  ENDMETHOD.
-
 
   METHOD constructor.
 
@@ -82,6 +83,14 @@ CLASS z2mse_extr_where_used IMPLEMENTATION.
       g_is_test = abap_true.
     ENDIF.
 
+  ENDMETHOD.
+
+
+  METHOD get_components_where_used.
+    components = g_class_components_where_used.
+    CLEAR g_class_components_where_used.
+    web_dynpro_components = g_web_dynpro_cmpnts_where_used.
+    CLEAR g_web_dynpro_cmpnts_where_used.
   ENDMETHOD.
 
 
@@ -125,6 +134,22 @@ CLASS z2mse_extr_where_used IMPLEMENTATION.
         ).
         IF sy-subrc <> 0.
           "! TBD handle
+
+          "Check for usage in Web Dynpro ABAP
+          DATA ls_wd_sourcemap TYPE wdy_wb_sourcemap.
+
+          TEST-SEAM wdy_wb_sourcemap.
+
+            SELECT SINGLE * FROM wdy_wb_sourcemap INTO ls_wd_sourcemap WHERE relid = 'LI' AND inclname = <include_2_component>-include AND srtf2 = 0.
+
+          END-TEST-SEAM.
+
+          IF sy-subrc EQ 0.
+            <include_2_component>-is_webdynpro = abap_true.
+            <include_2_component>-component_name = ls_wd_sourcemap-component_name.
+            <include_2_component>-controller_name = ls_wd_sourcemap-controller_name.
+          ENDIF.
+
         ELSE.
           <include_2_component>-clsname = obj_name+0(30).
           "! <include_2_component>-clstype = ?

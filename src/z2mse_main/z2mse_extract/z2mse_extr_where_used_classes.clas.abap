@@ -9,12 +9,16 @@ CLASS z2mse_extr_where_used_classes DEFINITION
 
     TYPES:
       BEGIN OF ty_comp_used_by_element,
-        clsname         TYPE seoclsname,
-        cmpname         TYPE seocmpname,
-        cmptype         TYPE seocmptype,
-        used_by_clsname TYPE seoclsname,
-        used_by_cmpname TYPE seocmpname,
-        used_by_cmptype TYPE seocmptype,
+        clsname            TYPE seoclsname,
+        cmpname            TYPE seocmpname,
+        cmptype            TYPE seocmptype,
+        is_class_component TYPE abap_bool,
+        used_by_clsname    TYPE seoclsname,
+        used_by_cmpname    TYPE seocmpname,
+        used_by_cmptype    TYPE seocmptype,
+        is_webdynpro       TYPE abap_bool,
+        component_name     TYPE wdy_component_name,
+        controller_name    TYPE wdy_controller_name,
       END OF ty_comp_used_by_element .
     TYPES:
       ty_comps_used_by_elements TYPE STANDARD TABLE OF ty_comp_used_by_element WITH DEFAULT KEY .
@@ -71,67 +75,36 @@ ENDCLASS.
 
 CLASS z2mse_extr_where_used_classes IMPLEMENTATION.
 
-  METHOD constructor.
-
-    super->constructor( wbcrossgt_test         = wbcrossgt_test
-                        includes_to_components = includes_to_components ).
-
-  ENDMETHOD.
-
-  METHOD used_by_class_component.
-
-    DATA name_to_component TYPE ty_name_to_component.
-    DATA names_to_components TYPE ty_names_to_components.
-
-    DATA where_used_name TYPE eu_lname.
-    DATA class_component TYPE z2mse_extr_classes=>ty_class_component.
-
-    g_class_components_initial = class_components.
-
-    names_to_components = _get_mapping_to_name( class_components ).
-
-    DATA found_wbcrossgt TYPE ty_t_wbcrossgt_test.
-    DATA: names TYPE ty_where_used_names,
-          name  TYPE ty_where_used_name.
-
-    LOOP AT names_to_components INTO name_to_component.
-      CLEAR name.
-      name-otype = name_to_component-otype.
-      name-where_used_name = name_to_component-where_used_name.
-      INSERT name INTO TABLE names.
-    ENDLOOP.
-
-    found_wbcrossgt = _select_where_used_table( names ).
-
-    DATA includes_2_components TYPE ty_includes_to_components.
-
-    includes_2_components = _determine_mapping_include_to( found_wbcrossgt ).
-
-    _fill_comps_used_by_elements(
-          i_names_to_components   = names_to_components
-          i_found_wbcrossgt       = found_wbcrossgt
-          i_includes_2_components = includes_2_components ).
-
-    SORT g_comps_used_by_comps.
-
-  ENDMETHOD.
-
-
 
   METHOD add_usage_to_model.
 
     DATA comp_used_by_comp TYPE ty_comp_used_by_element.
 
-    LOOP AT g_comps_used_by_comps INTO comp_used_by_comp WHERE used_by_cmptype <> z2mse_extr_classes=>attribute_type.
+    LOOP AT g_comps_used_by_comps INTO comp_used_by_comp.
+      IF comp_used_by_comp-is_class_component EQ abap_true.
 
-      ASSERT comp_used_by_comp-used_by_cmptype EQ z2mse_extr_classes=>method_type OR
-             comp_used_by_comp-used_by_cmptype EQ z2mse_extr_classes=>event_type.
+        IF comp_used_by_comp-used_by_cmptype EQ z2mse_extr_classes=>attribute_type.
+          CONTINUE.
+        ENDIF.
 
-      DATA using_method_id TYPE i.
-      using_method_id = famix_method->get_id( class  = comp_used_by_comp-used_by_clsname
-                                              method = comp_used_by_comp-used_by_cmpname ).
+        ASSERT comp_used_by_comp-used_by_cmptype EQ z2mse_extr_classes=>method_type OR
+               comp_used_by_comp-used_by_cmptype EQ z2mse_extr_classes=>event_type.
 
-      IF using_method_id IS INITIAL.
+        DATA using_method_id TYPE i.
+
+        using_method_id = famix_method->get_id( class  = comp_used_by_comp-used_by_clsname
+                                                method = comp_used_by_comp-used_by_cmpname ).
+
+      ELSEIF comp_used_by_comp-is_webdynpro EQ abap_true.
+
+        using_method_id = famix_method->get_id( class  = comp_used_by_comp-component_name
+                                                method = comp_used_by_comp-controller_name ).
+
+      ELSE.
+        ASSERT 1 = 2.
+      ENDIF.
+
+      IF using_method_id IS INITIAL AND comp_used_by_comp-is_class_component EQ abap_true.
         "! TBD report or handle this better.
         "! Should this not have been solved already because while extracting classe SEOMETAREL is already used
         " This happened because interface methods are not in table SEOCOMPO
@@ -200,7 +173,7 @@ CLASS z2mse_extr_where_used_classes IMPLEMENTATION.
           DATA: temp TYPE seocmpname.
           temp = comp_used_by_comp-clsname && |~| && comp_used_by_comp-cmpname.
 
-          IF comp_used_by_comp-used_by_cmpname EQ temp.
+          IF comp_used_by_comp-used_by_cmpname EQ temp AND comp_used_by_comp-is_class_component EQ abap_true.
 
             "! TBD This will not be used in future, because the implementation of an interface will be handled in Z2MSE_EXTR_CLASSES
 
@@ -248,6 +221,109 @@ CLASS z2mse_extr_where_used_classes IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD constructor.
+
+    super->constructor( wbcrossgt_test         = wbcrossgt_test
+                        includes_to_components = includes_to_components ).
+
+  ENDMETHOD.
+
+
+  METHOD used_by_class_component.
+
+    DATA name_to_component TYPE ty_name_to_component.
+    DATA names_to_components TYPE ty_names_to_components.
+
+    DATA where_used_name TYPE eu_lname.
+    DATA class_component TYPE z2mse_extr_classes=>ty_class_component.
+
+    g_class_components_initial = class_components.
+
+    names_to_components = _get_mapping_to_name( class_components ).
+
+    DATA found_wbcrossgt TYPE ty_t_wbcrossgt_test.
+    DATA: names TYPE ty_where_used_names,
+          name  TYPE ty_where_used_name.
+
+    LOOP AT names_to_components INTO name_to_component.
+      CLEAR name.
+      name-otype = name_to_component-otype.
+      name-where_used_name = name_to_component-where_used_name.
+      INSERT name INTO TABLE names.
+    ENDLOOP.
+
+    found_wbcrossgt = _select_where_used_table( names ).
+
+    DATA includes_2_components TYPE ty_includes_to_components.
+
+    includes_2_components = _determine_mapping_include_to( found_wbcrossgt ).
+
+    _fill_comps_used_by_elements(
+          i_names_to_components   = names_to_components
+          i_found_wbcrossgt       = found_wbcrossgt
+          i_includes_2_components = includes_2_components ).
+
+    SORT g_comps_used_by_comps.
+
+  ENDMETHOD.
+
+
+  METHOD _fill_comps_used_by_elements.
+
+    DATA ntc TYPE z2mse_extr_where_used_classes=>ty_name_to_component.
+    DATA found_wbcrossgt_line TYPE z2mse_extr_where_used_classes=>ty_wbcrossgt_test.
+    DATA include_2_component TYPE z2mse_extr_where_used_classes=>ty_include_to_component.
+
+    " fill comps used by comps
+
+    LOOP AT i_found_wbcrossgt INTO found_wbcrossgt_line.
+
+      DATA cubc TYPE ty_comp_used_by_element.
+
+      CLEAR cubc.
+      READ TABLE i_names_to_components INTO ntc WITH TABLE KEY otype           = found_wbcrossgt_line-otype
+                                                                           where_used_name = found_wbcrossgt_line-name.
+      cubc-clsname = ntc-clsname.
+      cubc-cmpname = ntc-cmpname.
+      cubc-cmptype = ntc-cmptype.
+
+      READ TABLE i_includes_2_components INTO include_2_component WITH TABLE KEY include = found_wbcrossgt_line-include.
+      IF include_2_component-is_class_component EQ abap_true.
+        cubc-is_class_component = abap_true.
+        cubc-used_by_clsname = include_2_component-clsname.
+        cubc-used_by_cmpname = include_2_component-cmpname.
+        cubc-used_by_cmptype = include_2_component-cmptype.
+
+        INSERT cubc INTO TABLE g_comps_used_by_comps.
+
+        READ TABLE g_class_components_initial TRANSPORTING NO FIELDS WITH TABLE KEY clsname = cubc-used_by_clsname
+                                                                                    cmpname = cubc-used_by_cmpname
+                                                                                    cmptype = cubc-used_by_cmptype.
+        IF sy-subrc <> 0.
+          DATA cwu LIKE LINE OF g_class_components_initial.
+          cwu-clsname = cubc-used_by_clsname.
+          cwu-cmpname = cubc-used_by_cmpname.
+          cwu-cmptype = cubc-used_by_cmptype.
+          INSERT cwu INTO TABLE g_class_components_where_used.
+        ENDIF.
+
+      ELSEIF include_2_component-is_webdynpro EQ abap_true.
+
+        cubc-is_webdynpro = abap_true.
+        cubc-component_name = include_2_component-component_name.
+        cubc-controller_name = include_2_component-controller_name.
+
+        INSERT cubc INTO TABLE g_comps_used_by_comps.
+
+        DATA wdcwu LIKE LINE OF g_web_dynpro_cmpnts_where_used.
+        wdcwu-component_name = include_2_component-component_name.
+        wdcwu-controller_name = include_2_component-controller_name.
+        INSERT wdcwu INTO TABLE g_web_dynpro_cmpnts_where_used.
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
 
 
   METHOD _get_mapping_to_name.
@@ -276,53 +352,4 @@ CLASS z2mse_extr_where_used_classes IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
-
-
-
-
-  METHOD _fill_comps_used_by_elements.
-
-    DATA ntc TYPE z2mse_extr_where_used_classes=>ty_name_to_component.
-    DATA found_wbcrossgt_line TYPE z2mse_extr_where_used_classes=>ty_wbcrossgt_test.
-    DATA include_2_component TYPE z2mse_extr_where_used_classes=>ty_include_to_component.
-
-    " fill comps used by comps
-
-    LOOP AT i_found_wbcrossgt INTO found_wbcrossgt_line.
-
-      DATA cubc TYPE ty_comp_used_by_element.
-
-      CLEAR cubc.
-      READ TABLE i_names_to_components INTO ntc WITH TABLE KEY otype           = found_wbcrossgt_line-otype
-                                                                           where_used_name = found_wbcrossgt_line-name.
-      cubc-clsname = ntc-clsname.
-      cubc-cmpname = ntc-cmpname.
-      cubc-cmptype = ntc-cmptype.
-
-      READ TABLE i_includes_2_components INTO include_2_component WITH TABLE KEY include = found_wbcrossgt_line-include.
-      IF include_2_component-is_class_component EQ abap_true.
-        cubc-used_by_clsname = include_2_component-clsname.
-        cubc-used_by_cmpname = include_2_component-cmpname.
-        cubc-used_by_cmptype = include_2_component-cmptype.
-
-        INSERT cubc INTO TABLE g_comps_used_by_comps.
-
-        READ TABLE g_class_components_initial TRANSPORTING NO FIELDS WITH TABLE KEY clsname = cubc-used_by_clsname
-                                                                                    cmpname = cubc-used_by_cmpname
-                                                                                    cmptype = cubc-used_by_cmptype.
-        IF sy-subrc <> 0.
-          DATA cwu LIKE LINE OF g_class_components_initial.
-          cwu-clsname = cubc-used_by_clsname.
-          cwu-cmpname = cubc-used_by_cmpname.
-          cwu-cmptype = cubc-used_by_cmptype.
-          INSERT cwu INTO TABLE g_class_components_where_used.
-        ENDIF.
-
-      ENDIF.
-
-    ENDLOOP.
-
-  ENDMETHOD.
-
-
 ENDCLASS.

@@ -78,10 +78,10 @@ CLASS z2mse_extr_classes DEFINITION
     "! Add all selected components to the model. Should be called only once
     METHODS add_to_model
       IMPORTING
-        famix_package   TYPE REF TO z2mse_famix_package
-        famix_class     TYPE REF TO z2mse_famix_class
-        famix_method    TYPE REF TO z2mse_famix_method
-        famix_attribute TYPE REF TO z2mse_famix_attribute
+        famix_package    TYPE REF TO z2mse_famix_package
+        famix_class      TYPE REF TO z2mse_famix_class
+        famix_method     TYPE REF TO z2mse_famix_method
+        famix_attribute  TYPE REF TO z2mse_famix_attribute
         famix_invocation TYPE REF TO z2mse_famix_invocation
         famix_access     TYPE REF TO z2mse_famix_access.
     "! Returns components. Returns these Components only once
@@ -145,7 +145,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR_CLASSES IMPLEMENTATION.
+CLASS z2mse_extr_classes IMPLEMENTATION.
 
 
   METHOD add_and_sort_to_classes_table.
@@ -264,7 +264,13 @@ CLASS Z2MSE_EXTR_CLASSES IMPLEMENTATION.
     LOOP AT l_add_classes INTO l_added_class.
       INSERT l_added_class INTO TABLE g_selected_classes.
     ENDLOOP.
-    g_selected_components_new = _read_class_details(  l_add_classes ).
+*    g_selected_components_new = _read_class_details(  l_add_classes ).
+    DATA: tmp_components TYPE ty_class_components_hashed,
+          tmp_component  TYPE ty_class_component.
+    tmp_components = _read_class_details(  l_add_classes ).
+    LOOP AT tmp_components INTO tmp_component.
+      INSERT tmp_component INTO TABLE g_selected_components_new.
+    ENDLOOP.
 
   ENDMETHOD.
 

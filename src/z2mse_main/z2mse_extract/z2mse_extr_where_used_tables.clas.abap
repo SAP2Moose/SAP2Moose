@@ -17,10 +17,14 @@ CLASS z2mse_extr_where_used_tables DEFINITION
 
     TYPES:
       BEGIN OF ty_table_used_by_element,
-        table           TYPE tabname,
-        used_by_clsname TYPE seoclsname,
-        used_by_cmpname TYPE seocmpname,
-        used_by_cmptype TYPE seocmptype,
+        table              TYPE tabname,
+        is_class_component TYPE abap_bool,
+        used_by_clsname    TYPE seoclsname,
+        used_by_cmpname    TYPE seocmpname,
+        used_by_cmptype    TYPE seocmptype,
+        is_webdynpro       TYPE abap_bool,
+        component_name     TYPE wdy_component_name,
+        controller_name    TYPE wdy_controller_name,
       END OF ty_table_used_by_element .
     TYPES:
       ty_tables_used_by_elements TYPE STANDARD TABLE OF ty_table_used_by_element WITH DEFAULT KEY.
@@ -141,6 +145,7 @@ CLASS z2mse_extr_where_used_tables IMPLEMENTATION.
 
       READ TABLE i_includes_2_components INTO include_2_component WITH TABLE KEY include = found_wbcrossgt_line-include.
       IF include_2_component-is_class_component EQ abap_true.
+        tbube-is_class_component = abap_true.
         tbube-used_by_clsname = include_2_component-clsname.
         tbube-used_by_cmpname = include_2_component-cmpname.
         tbube-used_by_cmptype = include_2_component-cmptype.
@@ -153,6 +158,19 @@ CLASS z2mse_extr_where_used_tables IMPLEMENTATION.
         cwu-cmptype = tbube-used_by_cmptype.
         INSERT cwu INTO TABLE g_class_components_where_used.
 
+      ELSEIF include_2_component-is_webdynpro EQ abap_true.
+
+        tbube-is_webdynpro = abap_true.
+        tbube-component_name = include_2_component-component_name.
+        tbube-controller_name = include_2_component-controller_name.
+
+        INSERT tbube INTO TABLE g_tables_used_by_elements.
+
+        DATA wdcwu LIKE LINE OF g_web_dynpro_cmpnts_where_used.
+        wdcwu-component_name = include_2_component-component_name.
+        wdcwu-controller_name = include_2_component-controller_name.
+        INSERT wdcwu INTO TABLE g_web_dynpro_cmpnts_where_used.
+
       ENDIF.
 
     ENDLOOP.
@@ -163,14 +181,29 @@ CLASS z2mse_extr_where_used_tables IMPLEMENTATION.
 
     DATA comp_used_by_comp TYPE ty_table_used_by_element.
 
-    LOOP AT g_tables_used_by_elements INTO comp_used_by_comp WHERE used_by_cmptype <> z2mse_extr_classes=>attribute_type.
+    LOOP AT g_tables_used_by_elements INTO comp_used_by_comp.
 
-      ASSERT comp_used_by_comp-used_by_cmptype EQ z2mse_extr_classes=>method_type OR
-             comp_used_by_comp-used_by_cmptype EQ z2mse_extr_classes=>event_type.
+      IF comp_used_by_comp-is_class_component EQ abap_true.
 
-      DATA using_method_id TYPE i.
-      using_method_id = famix_method->get_id( class  = comp_used_by_comp-used_by_clsname
-                                              method = comp_used_by_comp-used_by_cmpname ).
+        IF comp_used_by_comp-used_by_cmptype EQ z2mse_extr_classes=>attribute_type.
+          CONTINUE.
+        ENDIF.
+
+        ASSERT comp_used_by_comp-used_by_cmptype EQ z2mse_extr_classes=>method_type OR
+               comp_used_by_comp-used_by_cmptype EQ z2mse_extr_classes=>event_type.
+
+        DATA using_method_id TYPE i.
+
+        using_method_id = famix_method->get_id( class  = comp_used_by_comp-used_by_clsname
+                                                method = comp_used_by_comp-used_by_cmpname ).
+      ELSEIF comp_used_by_comp-is_webdynpro EQ abap_true.
+
+        using_method_id = famix_method->get_id( class  = comp_used_by_comp-component_name
+                                                method = comp_used_by_comp-controller_name ).
+      ELSE.
+        ASSERT 1 = 2.
+      ENDIF.
+
 
 *      IF using_method_id IS INITIAL.
 *        "! TBD report or handle this better.
