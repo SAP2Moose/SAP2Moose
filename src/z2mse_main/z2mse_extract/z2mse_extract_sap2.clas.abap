@@ -35,7 +35,7 @@ CLASS z2mse_extract_sap2 DEFINITION
       IMPORTING
         i_extract_packages       TYPE REF TO z2mse_extr_packages
         i_extract_classes        TYPE REF TO z2mse_extr_classes
-        i_extract_where_used_sap TYPE REF TO z2mse_extr_where_used_sap
+        i_extract_where_used_sap TYPE REF TO z2mse_extr_where_used_classes
         i_extract_tables      type REF TO z2mse_extr_tables
       RETURNING
         VALUE(r_mse_model)       TYPE z2mse_model=>lines_type.
@@ -51,7 +51,7 @@ CLASS z2mse_extract_sap2 DEFINITION
     METHODS _get_using_elements
       IMPORTING
         i_extract_classes        TYPE REF TO z2mse_extr_classes
-        i_extract_where_used_sap TYPE REF TO z2mse_extr_where_used_sap
+        i_extract_where_used_sap TYPE REF TO z2mse_extr_where_used_classes
         i_search_up              TYPE i.
 ENDCLASS.
 
@@ -93,7 +93,7 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
       CREATE OBJECT extract_tables.
     END-TEST-SEAM.
 
-    DATA extract_where_used_sap TYPE REF TO z2mse_extr_where_used_sap.
+    DATA extract_where_used_sap TYPE REF TO z2mse_extr_where_used_classes.
 
     TEST-SEAM creator_where_used_sap.
       CREATE OBJECT extract_where_used_sap.
