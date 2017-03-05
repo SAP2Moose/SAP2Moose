@@ -44,7 +44,7 @@ CLASS ltcl_main IMPLEMENTATION.
                    includes_to_components = includes_to_components ).
 
     DATA: components              TYPE z2mse_extr_classes=>ty_class_components,
-          comps_used_by_comps_exp TYPE z2mse_extr_where_used_classes=>ty_comps_used_by_comps.
+          comps_used_by_comps_exp TYPE z2mse_extr_where_used_classes=>ty_comps_used_by_elements.
 
 
     components = VALUE #( ( clsname = 'CLASS_A' cmpname = 'ATTRIBUTE_A' cmptype = z2mse_extr_classes=>attribute_type )
