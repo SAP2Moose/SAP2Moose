@@ -4,6 +4,8 @@ This repository provides a program to extract model data from a SAP system into 
 
 Last stable release 0.1.0: [Extractor](../../releases/download/v0.1.0/z_moose_extractor.abap) and [Texts for extractor](../../releases/download/v0.1.0/z_moose_extractor_texts.txt)
 
+Should work in ABAP 7.02 SP6, but there is currently only a syntax check for this release done.
+
 See [YouTube video on how this application is typically used during development](https://youtu.be/0jLN-2AVIvo) for a 2.5 minute demo.
 
 See [YouTube video on how to install this application](https://www.youtube.com/watch?v=_RMeqd5-ZQ4&t=95s) for a complete 14 minute description on how to install and run.
