@@ -49,11 +49,11 @@
 "!
 "! Last activation:
 "! Generated 07.03.2017
-"! Contains commit a82e81c9285a353cf0c2a8661808e99ad08ca653
+"! Contains commit 6fdc87a740329008899f8429ab20dc69b6e173d9
 "!
 "! This is version 0.2.0. It will be much better covered with unit tests and end-to-end tests than the first version. It is currently incomplete.
 "! Includes fix for #44 ignore SAP interfaces in Where-Used
-"!
+"! Select where-used now not only for a single table
 REPORT z2mse_moose_extractor2.
 TABLES tadir. "So that select-options work
 
@@ -4133,13 +4133,13 @@ CLASS CL_EXTR_WHERE_USED_TABLES IMPLEMENTATION.
 
     LOOP AT tables INTO table.
       CLEAR n2t.
-    ENDLOOP.
 
-    n2t-otype = 'TY'.
-    "! TYPE is also used for classes, ... What happen if a table has the same name as a class?
-    n2t-where_used_name = table-tabname.
-    n2t-table = table-tabname.
-    INSERT n2t INTO TABLE r_names_to_tables.
+      n2t-otype = 'TY'.
+      "! TYPE is also used for classes, ... What happen if a table has the same name as a class?
+      n2t-where_used_name = table-tabname.
+      n2t-table = table-tabname.
+      INSERT n2t INTO TABLE r_names_to_tables.
+    ENDLOOP.
 
   ENDMETHOD.
   METHOD add_usage_to_model.
