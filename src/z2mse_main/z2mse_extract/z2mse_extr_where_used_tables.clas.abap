@@ -116,13 +116,13 @@ CLASS z2mse_extr_where_used_tables IMPLEMENTATION.
 
     LOOP AT tables INTO table.
       CLEAR n2t.
-    ENDLOOP.
 
-    n2t-otype = 'TY'.
-    "! TYPE is also used for classes, ... What happen if a table has the same name as a class?
-    n2t-where_used_name = table-tabname.
-    n2t-table = table-tabname.
-    INSERT n2t INTO TABLE r_names_to_tables.
+      n2t-otype = 'TY'.
+      "! TYPE is also used for classes, ... What happen if a table has the same name as a class?
+      n2t-where_used_name = table-tabname.
+      n2t-table = table-tabname.
+      INSERT n2t INTO TABLE r_names_to_tables.
+    ENDLOOP.
 
   ENDMETHOD.
 
