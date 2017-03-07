@@ -89,7 +89,9 @@ SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE TEXT-002.
 SELECT-OPTIONS s_pack FOR tadir-devclass.
 SELECT-OPTIONS s_spack FOR tadir-devclass.
 PARAMETERS p_sub AS CHECKBOX DEFAULT 'X'.
-parameters p_up TYPE i DEFAULT -1.
+PARAMETERS p_up TYPE i DEFAULT -1.
+"Exclude interfaces in sap name space when found via where used analysis
+PARAMETERS p_ex AS CHECKBOX DEFAULT 'X'.
 
 *SELECT-OPTIONS s_compsn FOR tadir-obj_name.
 
@@ -274,29 +276,30 @@ START-OF-SELECTION.
 
   DATA: mse_model TYPE z2mse_model=>lines_type.
 
-    DATA sap_extractor TYPE REF TO z2mse_extract_sap2.
+  DATA sap_extractor TYPE REF TO z2mse_extract_sap2.
 
-    DATA: ls_pack_line LIKE LINE OF s_pack.
-    DATA: ls_pack TYPE sap_extractor->ty_s_pack.
-    LOOP AT s_pack INTO ls_pack_line.
-      APPEND ls_pack_line TO ls_pack.
-    ENDLOOP.
+  DATA: ls_pack_line LIKE LINE OF s_pack.
+  DATA: ls_pack TYPE sap_extractor->ty_s_pack.
+  LOOP AT s_pack INTO ls_pack_line.
+    APPEND ls_pack_line TO ls_pack.
+  ENDLOOP.
 
-    DATA: ls_spack_line LIKE LINE OF s_pack.
-    DATA: ls_spack TYPE sap_extractor->ty_s_pack.
-    LOOP AT s_spack INTO ls_spack_line.
-      APPEND ls_spack_line TO ls_spack.
-    ENDLOOP.
+  DATA: ls_spack_line LIKE LINE OF s_pack.
+  DATA: ls_spack TYPE sap_extractor->ty_s_pack.
+  LOOP AT s_spack INTO ls_spack_line.
+    APPEND ls_spack_line TO ls_spack.
+  ENDLOOP.
 
-    CREATE OBJECT sap_extractor.
+  CREATE OBJECT sap_extractor.
 
-    DATA nothing_done TYPE boolean.
-    sap_extractor->extract( EXPORTING i_top_packages        = ls_pack
-                                      i_sub_packages_filter = ls_spack
-                                      i_search_sub_packages = p_sub
-                                      i_search_up           = p_up
-                            IMPORTING mse_model             = mse_model
-                                      nothing_done          = nothing_done ).
+  DATA nothing_done TYPE boolean.
+  sap_extractor->extract( EXPORTING i_top_packages           = ls_pack
+                                    i_sub_packages_filter    = ls_spack
+                                    i_search_sub_packages    = p_sub
+                                    i_search_up              = p_up
+                                    i_exclude_found_sap_intf = p_ex
+                          IMPORTING mse_model             = mse_model
+                                    nothing_done          = nothing_done ).
 
   IF nothing_done EQ abap_true.
     RETURN.

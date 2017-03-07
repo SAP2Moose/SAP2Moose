@@ -29,8 +29,8 @@ CLASS z2mse_extr_where_used DEFINITION
       ty_includes_to_components TYPE HASHED TABLE OF ty_include_to_component WITH UNIQUE KEY include .
     METHODS constructor
       IMPORTING
-        wbcrossgt_test         TYPE ty_t_wbcrossgt_test
-        includes_to_components TYPE ty_includes_to_components.
+        wbcrossgt_test           TYPE ty_t_wbcrossgt_test
+        includes_to_components   TYPE ty_includes_to_components.
     "! Returns all components that are found in the last where-used analysis. Returns this components only once
     METHODS get_components_where_used
       EXPORTING

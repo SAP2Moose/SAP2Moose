@@ -13,12 +13,14 @@ CLASS z2mse_extract_sap2 DEFINITION
     METHODS constructor .
     "! Main start to do the extraction
     "! @parameter i_search_up | how often is a upward searched in the where-used-information to be repeated. Search infinite if < 0
+    "! @parameter i_exclude_found_sap_intf | exclude found interfaces in SAP namespace in the where-used analysis
     METHODS extract
       IMPORTING
         !i_top_packages        TYPE ty_s_pack
         !i_sub_packages_filter TYPE ty_s_pack
         !i_search_sub_packages TYPE abap_bool
         i_search_up            TYPE i
+        i_exclude_found_sap_intf TYPE abap_bool
       EXPORTING
         !mse_model             TYPE z2mse_model=>lines_type
         VALUE(nothing_done)    TYPE abap_bool .
@@ -62,7 +64,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extract_sap2 IMPLEMENTATION.
+CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -89,7 +91,7 @@ CLASS z2mse_extract_sap2 IMPLEMENTATION.
     DATA extract_classes TYPE REF TO z2mse_extr_classes.
 
     TEST-SEAM creator_classes.
-      CREATE OBJECT extract_classes.
+      CREATE OBJECT extract_classes EXPORTING i_exclude_found_sap_intf = i_exclude_found_sap_intf.
     END-TEST-SEAM.
 
     DATA extract_tables TYPE REF TO z2mse_extr_tables.
@@ -140,17 +142,35 @@ CLASS z2mse_extract_sap2 IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD _initial_selections_by_filter.
+  METHOD _add_all_to_model_and_make_mse.
 
-    " Initial selections due to filter of report
+    i_extract_packages->add_selected_packages_to_model( famix_package = famix_package ).
 
-    i_extract_packages->select_packages( EXPORTING top_packages           = i_top_packages
-                                                 sub_packages_filter    = i_sub_packages_filter
-                                                 including_sub_packages = i_search_sub_packages  ).
+    i_extract_classes->add_to_model( EXPORTING famix_package = famix_package
+                                               famix_class     = famix_class
+                                               famix_method    = famix_method
+                                               famix_attribute = famix_attribute
+                                               famix_invocation = famix_invocation
+                                               famix_access     = famix_access  ).
 
-    i_extract_classes->select_classes_by_packages( packages = i_extract_packages->g_selected_packages ).
+    i_extract_tables->add_to_model( EXPORTING famix_package   = famix_package
+                                              famix_class     = famix_class
+                                              famix_attribute = famix_attribute ).
 
-    i_extract_tables->select_tables_by_packages( packages = i_extract_packages->g_selected_packages ).
+    i_extract_web_dynpro->add_to_model( EXPORTING famix_class  = famix_class
+                                                  famix_method = famix_method ).
+
+    i_extract_where_used_classes->add_usage_to_model( EXPORTING famix_method    = famix_method
+                                                                famix_attribute = famix_attribute
+                                                                famix_invocation = famix_invocation
+                                                                famix_access     = famix_access ).
+
+    i_extract_where_used_tables->add_usage_to_model( EXPORTING famix_method    = famix_method
+                                                               famix_attribute = famix_attribute
+                                                               famix_invocation = famix_invocation
+                                                               famix_access     = famix_access ).
+
+    model->make_mse( IMPORTING mse_model = r_mse_model ).
 
   ENDMETHOD.
 
@@ -216,35 +236,17 @@ CLASS z2mse_extract_sap2 IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD _add_all_to_model_and_make_mse.
+  METHOD _initial_selections_by_filter.
 
-    i_extract_packages->add_selected_packages_to_model( famix_package = famix_package ).
+    " Initial selections due to filter of report
 
-    i_extract_classes->add_to_model( EXPORTING famix_package = famix_package
-                                               famix_class     = famix_class
-                                               famix_method    = famix_method
-                                               famix_attribute = famix_attribute
-                                               famix_invocation = famix_invocation
-                                               famix_access     = famix_access  ).
+    i_extract_packages->select_packages( EXPORTING top_packages           = i_top_packages
+                                                 sub_packages_filter    = i_sub_packages_filter
+                                                 including_sub_packages = i_search_sub_packages  ).
 
-    i_extract_tables->add_to_model( EXPORTING famix_package   = famix_package
-                                              famix_class     = famix_class
-                                              famix_attribute = famix_attribute ).
+    i_extract_classes->select_classes_by_packages( packages = i_extract_packages->g_selected_packages ).
 
-    i_extract_web_dynpro->add_to_model( EXPORTING famix_class  = famix_class
-                                                  famix_method = famix_method ).
-
-    i_extract_where_used_classes->add_usage_to_model( EXPORTING famix_method    = famix_method
-                                                                famix_attribute = famix_attribute
-                                                                famix_invocation = famix_invocation
-                                                                famix_access     = famix_access ).
-
-    i_extract_where_used_tables->add_usage_to_model( EXPORTING famix_method    = famix_method
-                                                               famix_attribute = famix_attribute
-                                                               famix_invocation = famix_invocation
-                                                               famix_access     = famix_access ).
-
-    model->make_mse( IMPORTING mse_model = r_mse_model ).
+    i_extract_tables->select_tables_by_packages( packages = i_extract_packages->g_selected_packages ).
 
   ENDMETHOD.
 ENDCLASS.

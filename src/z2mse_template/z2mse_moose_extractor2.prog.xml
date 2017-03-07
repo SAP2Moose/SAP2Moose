@@ -57,6 +57,12 @@
     </item>
     <item>
      <ID>S</ID>
+     <KEY>P_EX</KEY>
+     <ENTRY>No Where-Used: SAP Interfaces</ENTRY>
+     <LENGTH>37</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
      <KEY>P_SUB</KEY>
      <ENTRY>Extract sub packagaes</ENTRY>
      <LENGTH>29</LENGTH>

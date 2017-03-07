@@ -26,7 +26,8 @@ CLASS ltcl_end_to_end_packages IMPLEMENTATION.
     END-TEST-INJECTION.
 
     TEST-INJECTION creator_classes.
-      extract_classes = NEW #( tadir_test = VALUE #( ( ) ) ).
+      extract_classes = NEW #( tadir_test = VALUE #( ( ) )
+                               i_exclude_found_sap_intf = abap_false ).
     END-TEST-INJECTION.
 
     TEST-INJECTION creator_tables.
@@ -42,10 +43,11 @@ CLASS ltcl_end_to_end_packages IMPLEMENTATION.
     f_cut = NEW #( ).
     f_cut->extract(
       EXPORTING
-        i_top_packages        = top_packages
-        i_sub_packages_filter = sub_packages_filter
-        i_search_sub_packages = abap_true
-        i_search_up           = 1
+        i_top_packages           = top_packages
+        i_sub_packages_filter    = sub_packages_filter
+        i_search_sub_packages    = abap_true
+        i_search_up              = 1
+        i_exclude_found_sap_intf = abap_false
       IMPORTING
         mse_model             = mse_model_act
         nothing_done          = nothing_done_act ).
@@ -87,9 +89,10 @@ CLASS ltcl_end_to_end_packages IMPLEMENTATION.
                              ( object = 'CLAS' obj_name = 'CLASS_NOT_EXISTING' devclass = 'A' ) ).
       tseoclass_test = VALUE #( ( clsname = 'CLASSA') ).
       tseocompo_test = VALUE #( ( clsname = 'CLASSA' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type ) ).
-      extract_classes = NEW #( tadir_test = ttadir_test
-                               seoclass_test = tseoclass_test
-                               seocompo_test = tseocompo_test ).
+      extract_classes = NEW #( tadir_test               = ttadir_test
+                               seoclass_test            = tseoclass_test
+                               seocompo_test            = tseocompo_test
+                               i_exclude_found_sap_intf = abap_false ).
     END-TEST-INJECTION.
 
     TEST-INJECTION creator_tables.
@@ -105,10 +108,11 @@ CLASS ltcl_end_to_end_packages IMPLEMENTATION.
     f_cut = NEW #( ).
     f_cut->extract(
       EXPORTING
-        i_top_packages        = top_packages
-        i_sub_packages_filter = sub_packages_filter
-        i_search_sub_packages = abap_true
-        i_search_up           = 1
+        i_top_packages           = top_packages
+        i_sub_packages_filter    = sub_packages_filter
+        i_search_sub_packages    = abap_true
+        i_search_up              = 1
+        i_exclude_found_sap_intf = abap_false
       IMPORTING
         mse_model             = mse_model_act
         nothing_done          = nothing_done_act ).

@@ -24,21 +24,21 @@ CLASS ltcl_test IMPLEMENTATION.
     tadir_test = VALUE #( ( object = 'CLASS' obj_name = 'CLASS_A' devclass = 'A' )
                           ( object = 'CLASS' obj_name = 'CLASS_D' devclass = 'OTHER' )
                           ( object = 'CLASS' obj_name = 'CLASS_A_NOT_EXISTING' devclass = 'A' )
-                          ( object = 'INTF' obj_name = 'INTERFACE_A' devclass = 'A' )
+                          ( object = 'INTF' obj_name = 'ZINTERFACE_A' devclass = 'A' )
                           ( object = 'CLASS' obj_name = 'CLASS_B' devclass = 'B' )
-                          ( object = 'INTF' obj_name = 'INTERFACE_B' devclass = 'B' ) ).
+                          ( object = 'INTF' obj_name = 'ZINTERFACE_B' devclass = 'B' ) ).
 
     DATA: seoclass_test TYPE z2mse_extr_classes=>ty_t_seoclass_test.
 
     seoclass_test = VALUE #( ( clsname = 'CLASS_A')
                              ( clsname = 'CLASS_B')
                              ( clsname = 'CLASS_D')
-                             ( clsname = 'INTERFACE_A')
-                             ( clsname = 'INTERFACE_B') ).
+                             ( clsname = 'ZINTERFACE_A')
+                             ( clsname = 'ZINTERFACE_B') ).
 
     DATA: seocompo_test TYPE z2mse_extr_classes=>ty_t_seocompo_test.
 
-    seocompo_test = VALUE #( ( clsname = 'INTERFACE_A' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type )
+    seocompo_test = VALUE #( ( clsname = 'ZINTERFACE_A' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type )
                              ( clsname = 'CLASS_A' cmpname = 'ATTRIBUTE_A' cmptype = z2mse_extr_classes=>attribute_type )
                              ( clsname = 'CLASS_A' cmpname = 'EVENT_A' cmptype = z2mse_extr_classes=>event_type )
                              ( clsname = 'CLASS_D' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type )
@@ -46,7 +46,8 @@ CLASS ltcl_test IMPLEMENTATION.
 
     f_cut = NEW #( tadir_test = tadir_test
                    seoclass_test = seoclass_test
-                   seocompo_test = seocompo_test ).
+                   seocompo_test = seocompo_test
+                   i_exclude_found_sap_intf = abap_false ).
 
     DATA: packages_to_select TYPE z2mse_extr_packages=>ty_packages.
 
@@ -59,7 +60,7 @@ CLASS ltcl_test IMPLEMENTATION.
 
     selected_classes_act = f_cut->g_selected_classes.
     selected_classes_exp = VALUE #( ( clstype = z2mse_extr_classes=>class_type clsname = 'CLASS_A' devclass = 'A' exists = 'X' )
-                                  ( clstype = z2mse_extr_classes=>interface_type clsname = 'INTERFACE_A' devclass = 'A' exists = 'X' ) ).
+                                  ( clstype = z2mse_extr_classes=>interface_type clsname = 'ZINTERFACE_A' devclass = 'A' exists = 'X' ) ).
 
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
@@ -73,7 +74,7 @@ CLASS ltcl_test IMPLEMENTATION.
     selected_components_act = f_cut->get_comp_to_do_where_used( ).
     selected_components_exp = VALUE #( ( clsname = 'CLASS_A' cmpname = 'ATTRIBUTE_A' cmptype = z2mse_extr_classes=>attribute_type )
                                        ( clsname = 'CLASS_A' cmpname = 'EVENT_A' cmptype = z2mse_extr_classes=>event_type )
-                                       ( clsname = 'INTERFACE_A' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type ) ).
+                                       ( clsname = 'ZINTERFACE_A' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type ) ).
 
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
@@ -161,7 +162,8 @@ CLASS ltcl_test IMPLEMENTATION.
     f_cut = NEW #( tadir_test = tadir_test
                    seoclass_test = seoclass_test
                    seocompo_test = seocompo_test
-                   seometarel_test = seometarel_test ).
+                   seometarel_test = seometarel_test
+                   i_exclude_found_sap_intf = abap_false ).
 
     DATA: packages_to_select TYPE z2mse_extr_packages=>ty_packages.
 
@@ -204,13 +206,13 @@ CLASS ltcl_test IMPLEMENTATION.
 
   METHOD simple_model_from_package.
 
-    DATA: model           TYPE REF TO z2mse_model,
-          famix_package   TYPE REF TO z2mse_famix_package,
-          famix_class     TYPE REF TO z2mse_famix_class,
-          famix_method    TYPE REF TO z2mse_famix_method,
-          famix_attribute TYPE REF TO z2mse_famix_attribute,
+    DATA: model            TYPE REF TO z2mse_model,
+          famix_package    TYPE REF TO z2mse_famix_package,
+          famix_class      TYPE REF TO z2mse_famix_class,
+          famix_method     TYPE REF TO z2mse_famix_method,
+          famix_attribute  TYPE REF TO z2mse_famix_attribute,
           famix_invocation TYPE REF TO z2mse_famix_invocation,
-          famix_access TYPE REF TO z2mse_famix_access.
+          famix_access     TYPE REF TO z2mse_famix_access.
 
     DATA: tadir_test TYPE z2mse_extr_classes=>ty_t_tadir_test.
 
@@ -231,7 +233,8 @@ CLASS ltcl_test IMPLEMENTATION.
 
     f_cut = NEW #( tadir_test = tadir_test
                    seoclass_test = seoclass_test
-                   seocompo_test = seocompo_test ).
+                   seocompo_test = seocompo_test
+                   i_exclude_found_sap_intf = abap_false ).
 
     DATA: packages_to_select TYPE z2mse_extr_packages=>ty_packages.
 
@@ -294,13 +297,13 @@ CLASS ltcl_test IMPLEMENTATION.
 
   METHOD simple_model_from_component.
 
-    DATA: model           TYPE REF TO z2mse_model,
-          famix_package   TYPE REF TO z2mse_famix_package,
-          famix_class     TYPE REF TO z2mse_famix_class,
-          famix_method    TYPE REF TO z2mse_famix_method,
-          famix_attribute TYPE REF TO z2mse_famix_attribute,
+    DATA: model            TYPE REF TO z2mse_model,
+          famix_package    TYPE REF TO z2mse_famix_package,
+          famix_class      TYPE REF TO z2mse_famix_class,
+          famix_method     TYPE REF TO z2mse_famix_method,
+          famix_attribute  TYPE REF TO z2mse_famix_attribute,
           famix_invocation TYPE REF TO z2mse_famix_invocation,
-          famix_access TYPE REF TO z2mse_famix_access.
+          famix_access     TYPE REF TO z2mse_famix_access.
 
     DATA: tadir_test TYPE z2mse_extr_classes=>ty_t_tadir_test.
 
@@ -320,7 +323,8 @@ CLASS ltcl_test IMPLEMENTATION.
 
     f_cut = NEW #( tadir_test = tadir_test
                    seoclass_test = seoclass_test
-                   seocompo_test = seocompo_test ).
+                   seocompo_test = seocompo_test
+                   i_exclude_found_sap_intf = abap_false ).
 
     DATA: packages_to_select TYPE z2mse_extr_packages=>ty_packages.
 
@@ -388,36 +392,40 @@ CLASS ltcl_test IMPLEMENTATION.
 
   METHOD repeated_call.
 
-    DATA: model           TYPE REF TO z2mse_model,
-          famix_package   TYPE REF TO z2mse_famix_package,
-          famix_class     TYPE REF TO z2mse_famix_class,
-          famix_method    TYPE REF TO z2mse_famix_method,
-          famix_attribute TYPE REF TO z2mse_famix_attribute,
+    DATA: model            TYPE REF TO z2mse_model,
+          famix_package    TYPE REF TO z2mse_famix_package,
+          famix_class      TYPE REF TO z2mse_famix_class,
+          famix_method     TYPE REF TO z2mse_famix_method,
+          famix_attribute  TYPE REF TO z2mse_famix_attribute,
           famix_invocation TYPE REF TO z2mse_famix_invocation,
-          famix_access TYPE REF TO z2mse_famix_access.
+          famix_access     TYPE REF TO z2mse_famix_access.
 
     DATA: tadir_test TYPE z2mse_extr_classes=>ty_t_tadir_test.
 
     tadir_test = VALUE #( ( object = 'CLASS' obj_name = 'CLASS_A' devclass = 'A' )
                           ( object = 'CLASS' obj_name = 'CLASS_B' devclass = '' )
-                          ( object = 'CLASS' obj_name = 'CLASS_C' devclass = '' ) ).
+                          ( object = 'CLASS' obj_name = 'CLASS_C' devclass = '' )
+                          ( object = 'INTF' obj_name = 'SAP_INTERFACE_A' devclass = '' ) ).
 
     DATA: seoclass_test TYPE z2mse_extr_classes=>ty_t_seoclass_test.
 
     seoclass_test = VALUE #( ( clsname = 'CLASS_A')
                              ( clsname = 'CLASS_B')
-                             ( clsname = 'CLASS_C') ).
+                             ( clsname = 'CLASS_C')
+                             ( clsname = 'SAP_INTERFACE_A') ).
 
     DATA: seocompo_test TYPE z2mse_extr_classes=>ty_t_seocompo_test.
 
     seocompo_test = VALUE #( ( clsname = 'CLASS_A' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type )
                              ( clsname = 'CLASS_B' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type )
-                             ( clsname = 'CLASS_C' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type ) ).
+                             ( clsname = 'CLASS_C' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type )
+                             ( clsname = 'SAP_INTERFACE_A' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type ) ).
 
 
     f_cut = NEW #( tadir_test = tadir_test
                    seoclass_test = seoclass_test
-                   seocompo_test = seocompo_test ).
+                   seocompo_test = seocompo_test
+                   i_exclude_found_sap_intf = abap_true ).
 
     DATA: packages_to_select TYPE z2mse_extr_packages=>ty_packages.
 
@@ -429,6 +437,7 @@ CLASS ltcl_test IMPLEMENTATION.
           selected_components_exp TYPE z2mse_extr_classes=>ty_class_components.
 
     selected_components_act = f_cut->get_comp_to_do_where_used( ).
+    " SAP_2_FAMIX_65 : The SAP Interface will not be returned to do a where used analysis
     selected_components_exp = VALUE #( ( clsname = 'CLASS_A' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type ) ).
 
     cl_abap_unit_assert=>assert_equals(
@@ -450,7 +459,8 @@ CLASS ltcl_test IMPLEMENTATION.
 
     " Add only a class if it not originally selected
 
-    add_components = VALUE #( ( clsname = 'CLASS_B' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type ) ).
+    add_components = VALUE #( ( clsname = 'CLASS_B' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type )
+                              ( clsname = 'SAP_INTERFACE_A' cmpname = 'METHOD_A' cmptype = z2mse_extr_classes=>method_type ) ).
 
     f_cut->select_classes_by_components( components = add_components ).
 
@@ -530,13 +540,22 @@ CLASS ltcl_test IMPLEMENTATION.
                              ( line = |  (signature 'METHOD_A')| )
                              ( line = |  (parentType (ref: 5)))| )
                              ( line = |(FAMIX.Class (id: 7 )| )
-                             ( line = |  (name 'CLASS_C')| )
-                             ( line = |  (modifiers 'ABAPGlobalClass')| )
-                             ( line = |  (parentPackage (ref: 4)))| )
+                             ( line = |  (name 'SAP_INTERFACE_A')| )
+                             ( line = |  (modifiers 'ABAPGlobalInterface')| )
+                             ( line = |  (parentPackage (ref: 4))| )
+                             ( line = |  (isInterface true))| )
                              ( line = |(FAMIX.Method (id: 8 )| )
                              ( line = |  (name 'METHOD_A')| )
                              ( line = |  (signature 'METHOD_A')| )
-                             ( line = |  (parentType (ref: 7))))| )
+                             ( line = |  (parentType (ref: 7)))| )
+                             ( line = |(FAMIX.Class (id: 9 )| )
+                             ( line = |  (name 'CLASS_C')| )
+                             ( line = |  (modifiers 'ABAPGlobalClass')| )
+                             ( line = |  (parentPackage (ref: 4)))| )
+                             ( line = |(FAMIX.Method (id: 10 )| )
+                             ( line = |  (name 'METHOD_A')| )
+                             ( line = |  (signature 'METHOD_A')| )
+                             ( line = |  (parentType (ref: 9))))| )
                              ).
 
     f_cut->add_to_model( EXPORTING famix_package   = famix_package

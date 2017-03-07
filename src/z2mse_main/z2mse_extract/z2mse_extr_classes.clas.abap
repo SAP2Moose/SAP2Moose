@@ -62,10 +62,11 @@ CLASS z2mse_extr_classes DEFINITION
                tadir_intf     TYPE tadir-object VALUE 'INTF' ##NO_TEXT.
     METHODS constructor
       IMPORTING
-        !tadir_test     TYPE ty_t_tadir_test OPTIONAL
-        seoclass_test   TYPE ty_t_seoclass_test OPTIONAL
-        seocompo_test   TYPE ty_t_seocompo_test OPTIONAL
-        seometarel_test TYPE ty_t_seometarel_test OPTIONAL.
+        !tadir_test              TYPE ty_t_tadir_test OPTIONAL
+        seoclass_test            TYPE ty_t_seoclass_test OPTIONAL
+        seocompo_test            TYPE ty_t_seocompo_test OPTIONAL
+        seometarel_test          TYPE ty_t_seometarel_test OPTIONAL
+        i_exclude_found_sap_intf TYPE abap_bool.
     "! Call once to select all classes that are in a list of packages
     METHODS select_classes_by_packages
       IMPORTING
@@ -111,6 +112,8 @@ CLASS z2mse_extr_classes DEFINITION
     "! A list of all components of primarily selected and existing classes or interfaces
     DATA g_selected_components TYPE z2mse_extr_classes=>ty_class_components_hashed.
     DATA g_is_test TYPE abap_bool.
+    " Exclude found interfaces in SAP namespace in the where-used analysis
+    DATA g_exclude_found_sap_intf TYPE abap_bool.
     "! Checks whether a class exists. There can be TADIR entries for not existing classes.
     METHODS _check_existence_and_add_intf
       CHANGING classes TYPE z2mse_extr_classes=>ty_classes.
@@ -141,6 +144,10 @@ CLASS z2mse_extr_classes DEFINITION
         i_tadirvalues      TYPE z2mse_extr_classes=>ty_t_tadir_test
       CHANGING
         c_selected_classes TYPE z2mse_extr_classes=>ty_classes.
+    "! Exclude certain elements where no where used analysis shall be made
+    METHODS _exclude_classes_from_where_us
+      CHANGING
+        c_components TYPE z2mse_extr_classes=>ty_class_components.
 ENDCLASS.
 
 
@@ -218,6 +225,9 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
       g_seometarel_test = seometarel_test.
       g_is_test = abap_true.
     ENDIF.
+
+    g_exclude_found_sap_intf = i_exclude_found_sap_intf.
+
   ENDMETHOD.
 
 
@@ -231,6 +241,8 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
         INSERT line INTO TABLE components.
       ENDIF.
     ENDLOOP.
+
+    _exclude_classes_from_where_us( CHANGING c_components = components ).
 
     LOOP AT g_selected_components_new INTO line.
       INSERT line INTO TABLE g_selected_components.
@@ -646,7 +658,6 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
     ENDLOOP.
 
     " Add interface attributes and methods
-    DATA class  TYPE z2mse_extr_classes=>ty_class.
     DATA component  TYPE ty_class_component.
     LOOP AT interfaces INTO interface.
       LOOP AT new_comps_intf INTO new_comp_intf WHERE clsname = interface-refclsname.
@@ -737,4 +748,34 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
                                     CHANGING c_selected_classes = selected_classes ).
 
   ENDMETHOD.
+
+  METHOD _exclude_classes_from_where_us.
+
+    DATA class TYPE z2mse_extr_classes=>ty_class.
+
+    " Exclude classes from where used analysis
+    " SAP_2_FAMIX_65 : The SAP Interface will not be returned to do a where used analysis
+    DATA component  TYPE ty_class_component.
+
+    IF g_exclude_found_sap_intf EQ abap_true.
+
+      LOOP AT c_components INTO component.
+        READ TABLE g_selected_classes INTO class WITH TABLE KEY  clsname  = component-clsname.
+        ASSERT sy-subrc EQ 0.
+        IF class-clstype EQ interface_type.
+          IF component-clsname CP 'Y*'
+          OR component-clsname CP 'Z*'
+          OR component-clsname CP '/*' .
+            " OK
+          ELSE.
+
+            DELETE c_components.
+          ENDIF.
+        ENDIF.
+      ENDLOOP.
+
+    ENDIF.
+
+  ENDMETHOD.
+
 ENDCLASS.

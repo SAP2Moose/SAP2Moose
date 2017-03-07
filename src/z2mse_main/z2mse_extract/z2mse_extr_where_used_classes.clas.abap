@@ -225,7 +225,6 @@ CLASS z2mse_extr_where_used_classes IMPLEMENTATION.
 
     super->constructor( wbcrossgt_test         = wbcrossgt_test
                         includes_to_components = includes_to_components ).
-
   ENDMETHOD.
 
 
