@@ -403,7 +403,6 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
                   interface_comp_id TYPE i.
 
             class_comp_id = famix_method->get_id(
-               EXPORTING
 *                class_name_group  =
                  class             = component-clsname
 *                method_name_group =
