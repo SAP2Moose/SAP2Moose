@@ -53,6 +53,8 @@
 "!
 "! This is version 0.2.0. It will be much better covered with unit tests and end-to-end tests than the first version. It is currently incomplete.
 "! Includes fix for #44 ignore SAP interfaces in Where-Used
+"! Select where-used now not only for a single table
+"! Fix syntax error for ABAP 7.02
 "!
 REPORT z2mse_moose_extractor2.
 TABLES tadir. "So that select-options work
