@@ -48,10 +48,11 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! Generated 05.03.2017
-"! Contains commit af00693de759ac2555b839debbb4e8734daeba1e
+"! Generated 07.03.2017
+"! Contains commit a82e81c9285a353cf0c2a8661808e99ad08ca653
 "!
 "! This is version 0.2.0. It will be much better covered with unit tests and end-to-end tests than the first version. It is currently incomplete.
+"! Includes fix for #44 ignore SAP interfaces in Where-Used
 "!
 REPORT z2mse_moose_extractor2.
 TABLES tadir. "So that select-options work
