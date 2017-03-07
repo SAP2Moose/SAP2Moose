@@ -48,10 +48,11 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! Generated 05.03.2017
-"! Contains commit af00693de759ac2555b839debbb4e8734daeba1e
+"! Generated 07.03.2017
+"! Contains commit a82e81c9285a353cf0c2a8661808e99ad08ca653
 "!
 "! This is version 0.2.0. It will be much better covered with unit tests and end-to-end tests than the first version. It is currently incomplete.
+"! Includes fix for #44 ignore SAP interfaces in Where-Used
 "!
 REPORT z2mse_moose_extractor2.
 TABLES tadir. "So that select-options work
@@ -89,7 +90,9 @@ SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE TEXT-002.
 SELECT-OPTIONS s_pack FOR tadir-devclass.
 SELECT-OPTIONS s_spack FOR tadir-devclass.
 PARAMETERS p_sub AS CHECKBOX DEFAULT 'X'.
-parameters p_up TYPE i DEFAULT -1.
+PARAMETERS p_up TYPE i DEFAULT -1.
+"Exclude interfaces in sap name space when found via where used analysis
+PARAMETERS p_ex AS CHECKBOX DEFAULT 'X'.
 
 *SELECT-OPTIONS s_compsn FOR tadir-obj_name.
 
@@ -2240,10 +2243,11 @@ CLASS cl_extr_classes DEFINITION
                tadir_intf     TYPE tadir-object VALUE 'INTF' ##NO_TEXT.
     METHODS constructor
       IMPORTING
-        !tadir_test     TYPE ty_t_tadir_test OPTIONAL
-        seoclass_test   TYPE ty_t_seoclass_test OPTIONAL
-        seocompo_test   TYPE ty_t_seocompo_test OPTIONAL
-        seometarel_test TYPE ty_t_seometarel_test OPTIONAL.
+        !tadir_test              TYPE ty_t_tadir_test OPTIONAL
+        seoclass_test            TYPE ty_t_seoclass_test OPTIONAL
+        seocompo_test            TYPE ty_t_seocompo_test OPTIONAL
+        seometarel_test          TYPE ty_t_seometarel_test OPTIONAL
+        i_exclude_found_sap_intf TYPE abap_bool.
     "! Call once to select all classes that are in a list of packages
     METHODS select_classes_by_packages
       IMPORTING
@@ -2289,6 +2293,8 @@ CLASS cl_extr_classes DEFINITION
     "! A list of all components of primarily selected and existing classes or interfaces
     DATA g_selected_components TYPE cl_extr_classes=>ty_class_components_hashed.
     DATA g_is_test TYPE abap_bool.
+    " Exclude found interfaces in SAP namespace in the where-used analysis
+    DATA g_exclude_found_sap_intf TYPE abap_bool.
     "! Checks whether a class exists. There can be TADIR entries for not existing classes.
     METHODS _check_existence_and_add_intf
       CHANGING classes TYPE cl_extr_classes=>ty_classes.
@@ -2319,6 +2325,10 @@ CLASS cl_extr_classes DEFINITION
         i_tadirvalues      TYPE cl_extr_classes=>ty_t_tadir_test
       CHANGING
         c_selected_classes TYPE cl_extr_classes=>ty_classes.
+    "! Exclude certain elements where no where used analysis shall be made
+    METHODS _exclude_classes_from_where_us
+      CHANGING
+        c_components TYPE cl_extr_classes=>ty_class_components.
 ENDCLASS.
 
 "! Extract informations on SAP database tables
@@ -2474,8 +2484,8 @@ CLASS cl_extr_where_used DEFINITION
       ty_includes_to_components TYPE HASHED TABLE OF ty_include_to_component WITH UNIQUE KEY include .
     METHODS constructor
       IMPORTING
-        wbcrossgt_test         TYPE ty_t_wbcrossgt_test
-        includes_to_components TYPE ty_includes_to_components.
+        wbcrossgt_test           TYPE ty_t_wbcrossgt_test
+        includes_to_components   TYPE ty_includes_to_components.
     "! Returns all components that are found in the last where-used analysis. Returns this components only once
     METHODS get_components_where_used
       EXPORTING
@@ -2661,12 +2671,14 @@ CLASS cl_extract_sap2 DEFINITION
     METHODS constructor .
     "! Main start to do the extraction
     "! @parameter i_search_up | how often is a upward searched in the where-used-information to be repeated. Search infinite if < 0
+    "! @parameter i_exclude_found_sap_intf | exclude found interfaces in SAP namespace in the where-used analysis
     METHODS extract
       IMPORTING
         !i_top_packages        TYPE ty_s_pack
         !i_sub_packages_filter TYPE ty_s_pack
         !i_search_sub_packages TYPE abap_bool
         i_search_up            TYPE i
+        i_exclude_found_sap_intf TYPE abap_bool
       EXPORTING
         !mse_model             TYPE cl_model=>lines_type
         VALUE(nothing_done)    TYPE abap_bool .
@@ -2893,6 +2905,9 @@ CLASS CL_EXTR_CLASSES IMPLEMENTATION.
       g_seometarel_test = seometarel_test.
       g_is_test = abap_true.
     ENDIF.
+
+    g_exclude_found_sap_intf = i_exclude_found_sap_intf.
+
   ENDMETHOD.
   METHOD get_comp_to_do_where_used.
 
@@ -2904,6 +2919,8 @@ CLASS CL_EXTR_CLASSES IMPLEMENTATION.
         INSERT line INTO TABLE components.
       ENDIF.
     ENDLOOP.
+
+    _exclude_classes_from_where_us( CHANGING c_components = components ).
 
     LOOP AT g_selected_components_new INTO line.
       INSERT line INTO TABLE g_selected_components.
@@ -3053,7 +3070,6 @@ CLASS CL_EXTR_CLASSES IMPLEMENTATION.
     ENDLOOP.
 
     " Add interface attributes and methods
-    DATA class  TYPE cl_extr_classes=>ty_class.
     DATA component  TYPE ty_class_component.
     LOOP AT interfaces INTO interface.
       LOOP AT new_comps_intf INTO new_comp_intf WHERE clsname = interface-refclsname.
@@ -3419,6 +3435,34 @@ CLASS CL_EXTR_CLASSES IMPLEMENTATION.
 
     ENDLOOP.
 
+
+  ENDMETHOD.
+  METHOD _exclude_classes_from_where_us.
+
+    DATA class TYPE cl_extr_classes=>ty_class.
+
+    " Exclude classes from where used analysis
+    " SAP_2_FAMIX_65 : The SAP Interface will not be returned to do a where used analysis
+    DATA component  TYPE ty_class_component.
+
+    IF g_exclude_found_sap_intf EQ abap_true.
+
+      LOOP AT c_components INTO component.
+        READ TABLE g_selected_classes INTO class WITH TABLE KEY  clsname  = component-clsname.
+        ASSERT sy-subrc EQ 0.
+        IF class-clstype EQ interface_type.
+          IF component-clsname CP 'Y*'
+          OR component-clsname CP 'Z*'
+          OR component-clsname CP '/*' .
+            " OK
+          ELSE.
+
+            DELETE c_components.
+          ENDIF.
+        ENDIF.
+      ENDLOOP.
+
+    ENDIF.
 
   ENDMETHOD.
 ENDCLASS.
@@ -3920,7 +3964,6 @@ CLASS CL_EXTR_WHERE_USED_CLASSES IMPLEMENTATION.
 
     super->constructor( wbcrossgt_test         = wbcrossgt_test
                         includes_to_components = includes_to_components ).
-
   ENDMETHOD.
   METHOD used_by_class_component.
 
@@ -4313,7 +4356,7 @@ CLASS CL_EXTRACT_SAP2 IMPLEMENTATION.
 
     DATA extract_classes TYPE REF TO cl_extr_classes.
 
-      CREATE OBJECT extract_classes.
+      CREATE OBJECT extract_classes EXPORTING i_exclude_found_sap_intf = i_exclude_found_sap_intf.
 
     DATA extract_tables TYPE REF TO cl_extr_tables.
 
@@ -4462,29 +4505,30 @@ START-OF-SELECTION.
 
   DATA: mse_model TYPE cl_model=>lines_type.
 
-    DATA sap_extractor TYPE REF TO cl_extract_sap2.
+  DATA sap_extractor TYPE REF TO cl_extract_sap2.
 
-    DATA: ls_pack_line LIKE LINE OF s_pack.
-    DATA: ls_pack TYPE sap_extractor->ty_s_pack.
-    LOOP AT s_pack INTO ls_pack_line.
-      APPEND ls_pack_line TO ls_pack.
-    ENDLOOP.
+  DATA: ls_pack_line LIKE LINE OF s_pack.
+  DATA: ls_pack TYPE sap_extractor->ty_s_pack.
+  LOOP AT s_pack INTO ls_pack_line.
+    APPEND ls_pack_line TO ls_pack.
+  ENDLOOP.
 
-    DATA: ls_spack_line LIKE LINE OF s_pack.
-    DATA: ls_spack TYPE sap_extractor->ty_s_pack.
-    LOOP AT s_spack INTO ls_spack_line.
-      APPEND ls_spack_line TO ls_spack.
-    ENDLOOP.
+  DATA: ls_spack_line LIKE LINE OF s_pack.
+  DATA: ls_spack TYPE sap_extractor->ty_s_pack.
+  LOOP AT s_spack INTO ls_spack_line.
+    APPEND ls_spack_line TO ls_spack.
+  ENDLOOP.
 
-    CREATE OBJECT sap_extractor.
+  CREATE OBJECT sap_extractor.
 
-    DATA nothing_done TYPE boolean.
-    sap_extractor->extract( EXPORTING i_top_packages        = ls_pack
-                                      i_sub_packages_filter = ls_spack
-                                      i_search_sub_packages = p_sub
-                                      i_search_up           = p_up
-                            IMPORTING mse_model             = mse_model
-                                      nothing_done          = nothing_done ).
+  DATA nothing_done TYPE boolean.
+  sap_extractor->extract( EXPORTING i_top_packages           = ls_pack
+                                    i_sub_packages_filter    = ls_spack
+                                    i_search_sub_packages    = p_sub
+                                    i_search_up              = p_up
+                                    i_exclude_found_sap_intf = p_ex
+                          IMPORTING mse_model             = mse_model
+                                    nothing_done          = nothing_done ).
 
   IF nothing_done EQ abap_true.
     RETURN.
