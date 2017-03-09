@@ -1,3 +1,5 @@
+"! Analyses an mse file
+"! See https://hal.inria.fr/hal-00646884/fr/ 2.2.1 for the specification of the grammar. This class follows the names given there.
 CLASS ltcl_main DEFINITION DEFERRED.
 CLASS z2mse_mse_harmonize DEFINITION LOCAL FRIENDS ltcl_main.
 CLASS ltcl_main DEFINITION FINAL FOR TESTING
