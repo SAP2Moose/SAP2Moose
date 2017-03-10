@@ -1,5 +1,6 @@
-"! Used in Unit Tests to simplify checking for correct Moose models
-"! Will not be delivered as local class, thus use new ABAP statements
+"! Used in Unit Tests to simplify checking for correct Moose models.
+"! Will not be delivered as local class, thus use new ABAP statements.
+"! Is not optimized to handle general mse files fast but only to support the unit test in this application.
 CLASS z2mse_mse_harmonize DEFINITION
   PUBLIC
   FINAL
@@ -10,7 +11,9 @@ CLASS z2mse_mse_harmonize DEFINITION
     TYPES harmonized_mse TYPE TABLE OF string WITH DEFAULT KEY.
     CLASS-METHODS:
       mse_2_harmonized
-        IMPORTING mse                             TYPE mse
+        IMPORTING
+                  string_table                    TYPE mse OPTIONAL
+                  mse                             TYPE z2mse_model=>lines_type OPTIONAL
         RETURNING VALUE(equalized_harmonized_mse) TYPE harmonized_mse,
       equalize_harmonized
         CHANGING harmonized_mse TYPE harmonized_mse.
@@ -38,7 +41,7 @@ CLASS z2mse_mse_harmonize DEFINITION
       EXPORTING
         VALUE(is_serial)      TYPE abap_bool
         VALUE(serial_id)      TYPE i
-        VALUE(simplename)     TYPE string
+        VALUE(attributename)  TYPE string
         VALUE(valuenodes)     TYPE string_table.
     CLASS-METHODS _ext_valuenodes
       IMPORTING
@@ -47,7 +50,7 @@ CLASS z2mse_mse_harmonize DEFINITION
         VALUE(is_primitive)         TYPE abap_bool
         VALUE(primitive)            TYPE string
         VALUE(is_integer_reference) TYPE abap_bool
-        VALUE(integer)              TYPE i
+        VALUE(integer_reference)    TYPE i
         VALUE(is_name_reference)    TYPE abap_bool
         VALUE(ref_elementname)      TYPE string
         VALUE(is_elementnode)       TYPE abap_bool.
@@ -57,14 +60,18 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
+CLASS z2mse_mse_harmonize IMPLEMENTATION.
 
 
   METHOD equalize_harmonized.
 
     SORT harmonized_mse.
     LOOP AT harmonized_mse ASSIGNING FIELD-SYMBOL(<eq>).
+
       CONDENSE <eq>.
+      IF <eq> eq ''.
+        DELETE harmonized_mse.
+      ENDIF.
     ENDLOOP.
 
   ENDMETHOD.
@@ -74,9 +81,17 @@ CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
 
     DATA msestr TYPE string.
     " Make flat string where linebreaks are replaced by blanks
-    LOOP AT mse INTO DATA(line).
-      msestr = msestr && ' ' && line.
-    ENDLOOP.
+    IF mse IS SUPPLIED.
+      LOOP AT mse INTO DATA(line).
+        msestr = msestr && ' ' && line-line.
+      ENDLOOP.
+    ELSEIF string_table IS SUPPLIED.
+      LOOP AT string_table INTO DATA(string_line).
+        msestr = msestr && ' ' && string_line.
+      ENDLOOP.
+    ELSE.
+      ASSERT 1 = 2.
+    ENDIF.
     " Counts element nodes
     DATA element_node TYPE string.
     DATA element_nodes TYPE string_table.
@@ -139,14 +154,14 @@ CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
       LOOP AT serial_attribute_nodes INTO serial_attribute_node.
 
         DATA serial_id TYPE i.
-        DATA simplename TYPE string.
+        DATA attributename TYPE string.
         DATA valuenodes TYPE string_table.
         DATA is_serial TYPE abap_bool.
 
         _ext_serial_attribute_nodes( EXPORTING serial_attribute_node = serial_attribute_node
                                      IMPORTING is_serial             = is_serial
                                                serial_id             = serial_id
-                                               simplename            = simplename
+                                               attributename            = attributename
                                                valuenodes            = valuenodes ).
 
         IF is_serial EQ abap_true.
@@ -156,7 +171,7 @@ CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
 
         ELSE.
 
-          element-attribute = simplename.
+          element-attribute = attributename.
 
           DATA valuenode TYPE string.
           LOOP AT valuenodes INTO valuenode.
@@ -164,30 +179,41 @@ CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
             DATA is_primitive TYPE abap_bool.
             DATA primitive TYPE string.
             DATA is_integer_reference TYPE abap_bool.
-            DATA integer TYPE i.
+            DATA integer_reference TYPE i.
             DATA is_name_reference TYPE abap_bool.
             DATA ref_elementname TYPE string.
             DATA is_elementnode TYPE abap_bool.
+
+*            element-access_accessor_ref = VALUE #( ).
+*            element-access_variable_ref = VALUE #( )..
+*            element-invocation_sender_ref = VALUE #( ).
+*            element-invocation_candidates_ref = VALUE #( ).
+*            element-invocation_signatur = VALUE #( ).
+            element-is_integer_reference = VALUE #( ).
+            element-integer_reference = VALUE #( ).
+            element-value = VALUE #( ).
 
             _ext_valuenodes( EXPORTING valuenode = valuenode
                              IMPORTING is_primitive = is_primitive
                                        primitive = primitive
                                        is_integer_reference = is_integer_reference
-                                       integer = integer
+                                       integer_reference = integer_reference
                                        is_name_reference = is_name_reference
                                        ref_elementname = ref_elementname
                                        is_elementnode = is_elementnode ).
 
-            IF simplename EQ 'name' AND
+            IF attributename EQ 'name' AND
                is_primitive EQ abap_true.
               id_to_name-simple_name = primitive.
 
               _remove_apostroph( CHANGING string = id_to_name-simple_name ).
 
-            ELSEIF ( simplename EQ 'parentType' OR
-                     simplename EQ 'parentPackage' ) AND
-               is_integer_reference EQ abap_true.
-              id_to_name-parent_id = integer.
+            ELSEIF ( attributename EQ 'parentType' OR
+                     attributename EQ 'parentPackage' ) AND
+               is_integer_reference EQ abap_true AND
+               ( element-elementname <> 'FAMIX.Class' AND
+                 element-elementname <> 'FAMIX.Package' ) .
+              id_to_name-parent_id = integer_reference.
             ELSE.
 *            ENDIF.
 *
@@ -195,18 +221,18 @@ CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
 
               CASE element-elementname.
                 WHEN 'FAMIX.Access'.
-                  CASE simplename.
+                  CASE attributename.
                     WHEN 'accessor'.
-                      element-access_accessor_ref = integer.
+                      element-access_accessor_ref = integer_reference.
                     WHEN 'variable'.
-                      element-access_variable_ref = integer.
+                      element-access_variable_ref = integer_reference.
                   ENDCASE.
                 WHEN 'FAMIX.Invocation'.
-                  CASE simplename.
+                  CASE attributename.
                     WHEN 'sender'.
-                      element-invocation_sender_ref = integer.
+                      element-invocation_sender_ref = integer_reference.
                     WHEN 'candidates'.
-                      element-invocation_candidates_ref = integer.
+                      element-invocation_candidates_ref = integer_reference.
                     WHEN 'signature'.
                       element-invocation_signatur = primitive.
                   ENDCASE.
@@ -216,15 +242,13 @@ CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
 
                   IF is_integer_reference EQ abap_true.
                     element-is_integer_reference = abap_true.
-                    element-integer_reference = integer.
+                    element-integer_reference = integer_reference.
                   ELSEIF is_name_reference EQ abap_true.
                     element-value = is_name_reference.
                   ELSEIF is_primitive EQ abap_true.
                     element-value = primitive.
                   ENDIF.
-                  IF element-elementname EQ 'FAMIX.Class' AND element-attribute EQ 'parentPackage'.
-                    " Not required
-                  ELSEIF element-elementname EQ 'FAMIX.Method' AND element-attribute EQ 'parentType'.
+                  IF element-elementname EQ 'FAMIX.Method' AND element-attribute EQ 'parentType'.
                     " Not required
                   ELSE.
                     INSERT element INTO TABLE elements.
@@ -268,11 +292,11 @@ CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
       IF <element>-element_id IS NOT INITIAL.
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name3>) WITH TABLE KEY id = <element>-element_id.
         IF sy-subrc EQ 0.
-          IF <id_to_name3>-concatenated_name IS NOT INITIAL
-          AND <element>-elementname <> 'FAMIX.Class'.
-            <element>-concatenated_name = <id_to_name3>-concatenated_name.
-          ELSE.
+          IF <id_to_name3>-simple_name IS NOT INITIAL
+          AND <element>-elementname EQ 'FAMIX.Class' OR <element>-elementname EQ 'FAMIX.Package'.
             <element>-concatenated_name = <id_to_name3>-simple_name.
+          ELSE.
+            <element>-concatenated_name = <id_to_name3>-concatenated_name.
           ENDIF.
         ENDIF.
       ENDIF.
@@ -285,10 +309,11 @@ CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
           variable   TYPE string,
           sender     TYPE string,
           candidates TYPE string,
-          signature  TYPE string.
+          signature  TYPE string,
+          value      TYPE string.
 
     LOOP AT elements INTO element.
-      CLEAR: result, accessor, variable, sender, candidates.
+      CLEAR: result, accessor, variable, sender, candidates, value.
 
       IF  element-elementname EQ 'FAMIX.Access'.
 
@@ -328,9 +353,27 @@ CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
 
         ELSE.
 
-          _remove_apostroph( CHANGING string = element-value ).
+          IF element-is_integer_reference EQ abap_true.
 
-          result = |{ element-elementname } | && |{ element-concatenated_name } | && |{ element-attribute } | && |{ element-value }|.
+            READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name8>) WITH TABLE KEY id = element-integer_reference.
+            IF sy-subrc EQ 0.
+              IF <id_to_name8>-concatenated_name IS NOT INITIAL.
+                value = <id_to_name8>-concatenated_name.
+              ELSE.
+                value = <id_to_name8>-simple_name.
+              ENDIF.
+
+              result = |{ element-elementname } | && |{ element-concatenated_name } | && |{ element-attribute } | && |{ value }|.
+
+            ENDIF.
+
+          ELSE.
+
+            _remove_apostroph( CHANGING string = element-value ).
+
+            result = |{ element-elementname } | && |{ element-concatenated_name } | && |{ element-attribute } | && |{ element-value }|.
+
+          ENDIF.
 
         ENDIF.
 
@@ -431,7 +474,7 @@ CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
             IF component EQ |id:|.
               is_serial = abap_true.
             ELSE.
-              simplename = component.
+              attributename = component.
             ENDIF.
           ELSE.
             IF is_serial EQ abap_false.
@@ -501,7 +544,7 @@ CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
 
             IF component CO '+-0123456789eE'.
               is_integer_reference = abap_true.
-              integer = component.
+              integer_reference = component.
               RETURN.
             ELSE.
               is_name_reference = abap_true.

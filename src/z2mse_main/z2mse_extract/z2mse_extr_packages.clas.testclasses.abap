@@ -154,10 +154,30 @@ CLASS ltcl_main IMPLEMENTATION.
 
     model->make_mse( IMPORTING mse_model = mse_model_act ).
 
+    DATA: equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
+
+    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
+
+    equalized_harmonized_mse_exp = VALUE #(
+( |FAMIX.Package A| )
+( |FAMIX.Package A_A| )
+( |FAMIX.Package A_A_A parentPackage A_A| )
+
+*( |FAMIX.Package A| )
+*( |FAMIX.Class CLASS_A modifiers ABAPGlobalClass| )
+*( |FAMIX.Attribute CLASS_A>>ATTRIBUTE_A| )
+*( |FAMIX.Method CLASS_A>>METHOD_A signature METHOD_A| )
+*( |FAMIX.Class INTERFACE_A modifiers ABAPGlobalInterface| )
+*( |FAMIX.Class INTERFACE_A isInterface true  | )
+    ).
+
+    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
-        act                  = mse_model_act
-        exp                  = mse_model_exp
+        act                  = equalized_harmonized_mse_act
+        exp                  = equalized_harmonized_mse_exp
         msg                  = 'Wrong mse file for new class' ).
 
 

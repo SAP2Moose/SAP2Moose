@@ -16,7 +16,9 @@ CLASS ltcl_main DEFINITION FINAL FOR TESTING
       _ext_serial_attribute_nodes FOR TESTING RAISING cx_static_check,
       _ext_serial_attribute_nodes2 FOR TESTING RAISING cx_static_check,
       _ext_valuenodes FOR TESTING RAISING cx_static_check,
-      _remove_apostroph FOR TESTING RAISING cx_static_check.
+      _remove_apostroph FOR TESTING RAISING cx_static_check,
+      mse_2_harmonized_package FOR TESTING RAISING cx_static_check,
+      mse_2_harmonized_interface FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
 
@@ -109,7 +111,7 @@ CLASS ltcl_main IMPLEMENTATION.
     z2mse_mse_harmonize=>_ext_serial_attribute_nodes( EXPORTING serial_attribute_node = serial_attribute_node
                                                       IMPORTING is_serial             = is_serial_act
                                                                 serial_id             = serial_id_act
-                                                                simplename            = simplename_act
+                                                                attributename            = simplename_act
                                                                 valuenodes            = valuenodes_act ).
 
     cl_abap_unit_assert=>assert_equals( EXPORTING act = is_serial_act
@@ -153,7 +155,7 @@ CLASS ltcl_main IMPLEMENTATION.
     z2mse_mse_harmonize=>_ext_serial_attribute_nodes( EXPORTING serial_attribute_node = serial_attribute_node
                                                       IMPORTING is_serial             = is_serial_act
                                                                 serial_id             = serial_id_act
-                                                                simplename            = simplename_act
+                                                                attributename            = simplename_act
                                                                 valuenodes            = valuenodes_act ).
 
     cl_abap_unit_assert=>assert_equals( EXPORTING act = is_serial_act
@@ -246,7 +248,7 @@ CLASS ltcl_main IMPLEMENTATION.
                                             IMPORTING is_primitive = is_primitive_act
                                                       primitive = primitive_act
                                                       is_integer_reference = is_integer_reference_act
-                                                      integer = integer_act
+                                                      integer_reference = integer_act
                                                       is_name_reference = is_name_reference_act
                                                       ref_elementname = ref_elementname_act
                                                       is_elementnode = is_elementnode_act ).
@@ -285,7 +287,7 @@ CLASS ltcl_main IMPLEMENTATION.
 
   METHOD mse_2_harmonized.
 
-    DATA: mse                          TYPE z2mse_mse_harmonize=>mse,
+    DATA: mse                          TYPE z2mse_mse_harmonize=>string_table,
           equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
           equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
 
@@ -324,14 +326,88 @@ CLASS ltcl_main IMPLEMENTATION.
                                             ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>METHOD_B candidates Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~METHOD_A signature DUMMY| )
                                             ( |FAMIX.Method Z2MSE_TEST_CL_A>>METHOD_B signature METHOD_B| )
                                             ( |FAMIX.Method Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~METHOD_A signature Z2MSE_TEST_IF_A~METHOD_A| )
-                                            ( |FAMIX.Package Z2MSE_TEST_INITIAL_SELECTION| ) ).
+                                            ( |FAMIX.Package Z2MSE_TEST_INITIAL_SELECTION| )
+                                            ( |FAMIX.Class Z2MSE_TEST_CL_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
+
+                                             ).
+
+    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( string_table = mse ).
+    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
+    cl_abap_unit_assert=>assert_equals( EXPORTING act = equalized_harmonized_mse_act
+                                                  exp = equalized_harmonized_mse_exp
+                                                  msg = 'Harmonize simple Package specification correctly' ).
+
+
+  ENDMETHOD.
+
+  METHOD mse_2_harmonized_package.
+
+    DATA: mse                          TYPE z2mse_model=>lines_type,
+          equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
+
+    mse = VALUE #( ( line = |( (FAMIX.Package (id: 1 )| )
+                   ( line = |  (name 'A'))| )
+                   ( line = |(FAMIX.Package (id: 2 )| )
+                   ( line = |  (name 'A_A_A')| )
+                   ( line = |  (parentPackage (ref: 3)))| )
+                   ( line = |(FAMIX.Package (id: 3 )| )
+                   ( line = |  (name 'A_A')))| )
+                             ).
+
+*    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.Package Z2MSE_TEST_INITIAL_SELECTION| )
+*                                            ( |FAMIX.Class Z2MSE_TEST_CL_A modifiers 'ABAPGlobalClass'| )
+*                                            ( |FAMIX.Class Z2MSE_TEST_CL_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| ) ).
+
+    equalized_harmonized_mse_exp = VALUE #(
+( |FAMIX.Package A| )
+( |FAMIX.Package A_A| )
+( |FAMIX.Package A_A_A parentPackage A_A| )
+                                            ).
 
     equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse ).
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
 
     cl_abap_unit_assert=>assert_equals( EXPORTING act = equalized_harmonized_mse_act
                                                   exp = equalized_harmonized_mse_exp
-                                                  msg = 'Harmonize simple Package specification correctly' ).
+                                                  msg = 'Harmonize complex Package specification correctly' ).
+
+
+  ENDMETHOD.
+
+  METHOD mse_2_harmonized_interface.
+
+    DATA: mse                          TYPE z2mse_model=>lines_type,
+          equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
+
+    mse = VALUE #( ( line = |( (FAMIX.Package (id: 1 )| )
+                   ( line = |  (name 'A'))| )
+                             ( line = |(FAMIX.Class (id: 5 )| )
+                             ( line = |  (name 'INTERFACE_A')| )
+                             ( line = |  (modifiers 'ABAPGlobalInterface')| )
+                             ( line = |  (parentPackage (ref: 1))| )
+                             ( line = |  (isInterface true)))| )
+                             ).
+
+*    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.Package Z2MSE_TEST_INITIAL_SELECTION| )
+*                                            ( |FAMIX.Class Z2MSE_TEST_CL_A modifiers 'ABAPGlobalClass'| )
+*                                            ( |FAMIX.Class Z2MSE_TEST_CL_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| ) ).
+
+    equalized_harmonized_mse_exp = VALUE #(
+( |FAMIX.Package A| )
+( |FAMIX.Class INTERFACE_A isInterface true| )
+( |FAMIX.Class INTERFACE_A modifiers ABAPGlobalInterface| )
+( |FAMIX.Class INTERFACE_A parentPackage A| )
+                                            ).
+
+    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse ).
+    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
+    cl_abap_unit_assert=>assert_equals( EXPORTING act = equalized_harmonized_mse_act
+                                                  exp = equalized_harmonized_mse_exp
+                                                  msg = 'Harmonize complex Package specification correctly' ).
 
 
   ENDMETHOD.
@@ -342,7 +418,8 @@ CLASS ltcl_main IMPLEMENTATION.
           equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
 
     harmonized_mse = VALUE #( ( |B      B| ) "Many blanks between both B
-                              ( |A| ) ).
+                              ( |A| )
+                              (  ) ).
 
     equalized_harmonized_mse_exp = VALUE #( ( |A| )
                                             ( |B B| ) ). "Only a single blank between both B

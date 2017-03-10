@@ -287,10 +287,27 @@ CLASS ltcl_test IMPLEMENTATION.
 
     model->make_mse( IMPORTING mse_model = mse_model_act ).
 
+    DATA: equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
+
+    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
+
+    equalized_harmonized_mse_exp = VALUE #(
+( |FAMIX.Package A| )
+( |FAMIX.Class CLASS_A modifiers ABAPGlobalClass| )
+( |FAMIX.Attribute CLASS_A>>ATTRIBUTE_A| )
+( |FAMIX.Method CLASS_A>>EVENT_A signature EVENT_A| )
+( |FAMIX.Method CLASS_A>>METHOD_A signature METHOD_A| )
+( |FAMIX.Class INTERFACE_A modifiers ABAPGlobalInterface| )
+( |FAMIX.Class INTERFACE_A isInterface true| )
+    ).
+
+    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
-        act                  = mse_model_act
-        exp                  = mse_model_exp
+        act                  = equalized_harmonized_mse_act
+        exp                  = equalized_harmonized_mse_exp
         msg                  = 'Wrong mse file for new class' ).
 
   ENDMETHOD.
@@ -382,10 +399,28 @@ CLASS ltcl_test IMPLEMENTATION.
 
     model->make_mse( IMPORTING mse_model = mse_model_act ).
 
+    DATA: equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
+
+    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
+
+    equalized_harmonized_mse_exp = VALUE #(
+( |FAMIX.Package A| )
+( |FAMIX.Class CLASS_A modifiers ABAPGlobalClass| )
+( |FAMIX.Class CLASS_A parentPackage A| )
+( |FAMIX.Attribute CLASS_A>>ATTRIBUTE_A| )
+( |FAMIX.Method CLASS_A>>METHOD_A signature METHOD_A| )
+( |FAMIX.Class INTERFACE_A modifiers ABAPGlobalInterface| )
+( |FAMIX.Class INTERFACE_A isInterface true  | )
+( |FAMIX.Class INTERFACE_A parentPackage A  | )
+    ).
+
+    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
-        act                  = mse_model_act
-        exp                  = mse_model_exp
+        act                  = equalized_harmonized_mse_act
+        exp                  = equalized_harmonized_mse_exp
         msg                  = 'Wrong mse file for classes added from components' ).
 
   ENDMETHOD.
@@ -567,10 +602,33 @@ CLASS ltcl_test IMPLEMENTATION.
 
     model->make_mse( IMPORTING mse_model = mse_model_act ).
 
+    DATA: equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
+
+    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
+
+    equalized_harmonized_mse_exp = VALUE #(
+
+( |FAMIX.Package A| )
+( |FAMIX.Class CLASS_A modifiers ABAPGlobalClass| )
+( |FAMIX.Method CLASS_A>>METHOD_A signature METHOD_A| )
+( |FAMIX.Package| )
+( |FAMIX.Class CLASS_B modifiers ABAPGlobalClass| )
+( |FAMIX.Method CLASS_B>>METHOD_A signature METHOD_A| )
+( |FAMIX.Class SAP_INTERFACE_A modifiers ABAPGlobalInterface| )
+( |FAMIX.Class SAP_INTERFACE_A isInterface true| )
+( |FAMIX.Method SAP_INTERFACE_A>>METHOD_A signature METHOD_A| )
+( |FAMIX.Class CLASS_C modifiers ABAPGlobalClass| )
+( |FAMIX.Method CLASS_C>>METHOD_A signature METHOD_A  | )
+
+    ).
+
+    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
-        act                  = mse_model_act
-        exp                  = mse_model_exp
+        act                  = equalized_harmonized_mse_act
+        exp                  = equalized_harmonized_mse_exp
         msg                  = 'Wrong mse file for classes added from components' ).
 
   ENDMETHOD.
