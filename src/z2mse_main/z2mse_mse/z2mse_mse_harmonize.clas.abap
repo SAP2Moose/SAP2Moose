@@ -13,8 +13,7 @@ CLASS z2mse_mse_harmonize DEFINITION
         IMPORTING mse                             TYPE mse
         RETURNING VALUE(equalized_harmonized_mse) TYPE harmonized_mse,
       equalize_harmonized
-        IMPORTING harmonized_mse                  TYPE harmonized_mse
-        RETURNING VALUE(equalized_harmonized_mse) TYPE harmonized_mse.
+        CHANGING harmonized_mse TYPE harmonized_mse.
   PROTECTED SECTION.
   PRIVATE SECTION.
     TYPES string_table TYPE TABLE OF string WITH DEFAULT KEY.
@@ -38,7 +37,7 @@ CLASS z2mse_mse_harmonize DEFINITION
         serial_attribute_node TYPE string
       EXPORTING
         VALUE(is_serial)      TYPE abap_bool
-        VALUE(serial_id)      TYPE id
+        VALUE(serial_id)      TYPE i
         VALUE(simplename)     TYPE string
         VALUE(valuenodes)     TYPE string_table.
     CLASS-METHODS _ext_valuenodes
@@ -58,14 +57,13 @@ ENDCLASS.
 
 
 
-CLASS z2mse_mse_harmonize IMPLEMENTATION.
+CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
 
 
   METHOD equalize_harmonized.
 
-    equalized_harmonized_mse = harmonized_mse.
-    SORT equalized_harmonized_mse.
-    LOOP AT equalized_harmonized_mse ASSIGNING FIELD-SYMBOL(<eq>).
+    SORT harmonized_mse.
+    LOOP AT harmonized_mse ASSIGNING FIELD-SYMBOL(<eq>).
       CONDENSE <eq>.
     ENDLOOP.
 
@@ -73,7 +71,6 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
 
 
   METHOD mse_2_harmonized.
-
 
     DATA msestr TYPE string.
     " Make flat string where linebreaks are replaced by blanks
@@ -97,14 +94,19 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
           id_to_names TYPE HASHED TABLE OF id_to_name WITH UNIQUE KEY id.
 
     TYPES: BEGIN OF element,
-             elementname          TYPE string,
-             element_id           TYPE i,
-             concatenated_name    TYPE string,
-             has_no_attribute     TYPE abap_bool,
-             attribute            TYPE string,
-             is_integer_reference TYPE abap_bool,
-             integer_reference    TYPE i,
-             value                TYPE string,
+             elementname               TYPE string,
+             element_id                TYPE i,
+             concatenated_name         TYPE string,
+             has_no_attribute          TYPE abap_bool,
+             attribute                 TYPE string,
+             is_integer_reference      TYPE abap_bool,
+             integer_reference         TYPE i,
+             value                     TYPE string,
+             access_accessor_ref       TYPE i,
+             access_variable_ref       TYPE i,
+             invocation_sender_ref     TYPE i,
+             invocation_candidates_ref TYPE i,
+             invocation_signatur       TYPE string,
            END OF element.
 
     DATA: element  TYPE element,
@@ -114,6 +116,7 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
     LOOP AT element_nodes INTO element_node.
 
       CLEAR id_to_name.
+      CLEAR element.
 
       DATA serial TYPE string.
       CLEAR serial.
@@ -129,14 +132,13 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
                                        serial_attribute_nodes = serial_attribute_nodes ).
 
       DATA serial_attribute_node TYPE string.
+      DATA(has_attribute) = abap_false.
+
+      element-elementname = elementname.
 
       LOOP AT serial_attribute_nodes INTO serial_attribute_node.
 
-        CLEAR element.
-        element-elementname = elementname.
-        DATA(has_attribute) = abap_false.
-
-        DATA serial_id TYPE id.
+        DATA serial_id TYPE i.
         DATA simplename TYPE string.
         DATA valuenodes TYPE string_table.
         DATA is_serial TYPE abap_bool.
@@ -182,38 +184,68 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
 
               _remove_apostroph( CHANGING string = id_to_name-simple_name ).
 
-            ELSEIF simplename EQ 'parentType' AND
+            ELSEIF ( simplename EQ 'parentType' OR
+                     simplename EQ 'parentPackage' ) AND
                is_integer_reference EQ abap_true.
               id_to_name-parent_id = integer.
-            ENDIF.
+            ELSE.
+*            ENDIF.
+*
+*            IF simplename <> 'name'.
 
-            IF simplename <> 'name'.
+              CASE element-elementname.
+                WHEN 'FAMIX.Access'.
+                  CASE simplename.
+                    WHEN 'accessor'.
+                      element-access_accessor_ref = integer.
+                    WHEN 'variable'.
+                      element-access_variable_ref = integer.
+                  ENDCASE.
+                WHEN 'FAMIX.Invocation'.
+                  CASE simplename.
+                    WHEN 'sender'.
+                      element-invocation_sender_ref = integer.
+                    WHEN 'candidates'.
+                      element-invocation_candidates_ref = integer.
+                    WHEN 'signature'.
+                      element-invocation_signatur = primitive.
+                  ENDCASE.
+                WHEN OTHERS.
 
-              has_attribute = abap_true.
 
-              IF is_integer_reference EQ abap_true.
-                element-is_integer_reference = abap_true.
-                element-integer_reference = integer.
-              ELSEIF is_name_reference EQ abap_true.
-                element-value = is_name_reference.
-              ELSEIF is_primitive EQ abap_true.
-                element-value = primitive.
-              ENDIF.
 
-              INSERT element INTO TABLE elements.
+                  IF is_integer_reference EQ abap_true.
+                    element-is_integer_reference = abap_true.
+                    element-integer_reference = integer.
+                  ELSEIF is_name_reference EQ abap_true.
+                    element-value = is_name_reference.
+                  ELSEIF is_primitive EQ abap_true.
+                    element-value = primitive.
+                  ENDIF.
+                  IF element-elementname EQ 'FAMIX.Class' AND element-attribute EQ 'parentPackage'.
+                    " Not required
+                  ELSEIF element-elementname EQ 'FAMIX.Method' AND element-attribute EQ 'parentType'.
+                    " Not required
+                  ELSE.
+                    INSERT element INTO TABLE elements.
+                    has_attribute = abap_true.
+                  ENDIF.
+
+              ENDCASE.
 
             ENDIF.
 
           ENDLOOP.
 
-          IF has_attribute EQ abap_false.
-            element-has_no_attribute = abap_true.
-            INSERT element INTO TABLE elements.
-          ENDIF.
-
         ENDIF.
 
       ENDLOOP.
+
+
+      IF has_attribute EQ abap_false.
+        element-has_no_attribute = abap_true.
+        INSERT element INTO TABLE elements.
+      ENDIF.
 
       IF id_to_name-simple_name IS NOT INITIAL.
         INSERT id_to_name INTO TABLE id_to_names.
@@ -221,12 +253,94 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
 
     ENDLOOP.
 
+    " Get concatenated names
+
     LOOP AT id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name>).
       READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name2>) WITH TABLE KEY id = <id_to_name>-parent_id.
       IF sy-subrc EQ 0.
         <id_to_name>-concatenated_name = |{ <id_to_name2>-simple_name }| && |>>| && |{ <id_to_name>-simple_name }|.
       ENDIF.
     ENDLOOP.
+
+    " Find concatenated names
+
+    LOOP AT elements ASSIGNING FIELD-SYMBOL(<element>).
+      IF <element>-element_id IS NOT INITIAL.
+        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name3>) WITH TABLE KEY id = <element>-element_id.
+        IF sy-subrc EQ 0.
+          IF <id_to_name3>-concatenated_name IS NOT INITIAL
+          AND <element>-elementname <> 'FAMIX.Class'.
+            <element>-concatenated_name = <id_to_name3>-concatenated_name.
+          ELSE.
+            <element>-concatenated_name = <id_to_name3>-simple_name.
+          ENDIF.
+        ENDIF.
+      ENDIF.
+    ENDLOOP.
+
+    " Build result
+
+    DATA: result     TYPE string,
+          accessor   TYPE string,
+          variable   TYPE string,
+          sender     TYPE string,
+          candidates TYPE string,
+          signature  TYPE string.
+
+    LOOP AT elements INTO element.
+      CLEAR: result, accessor, variable, sender, candidates.
+
+      IF  element-elementname EQ 'FAMIX.Access'.
+
+        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name4>) WITH TABLE KEY id = element-access_accessor_ref.
+        IF sy-subrc EQ 0.
+          accessor = <id_to_name4>-concatenated_name.
+        ENDIF.
+
+        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name5>) WITH TABLE KEY id = element-access_variable_ref.
+        IF sy-subrc EQ 0.
+          variable = <id_to_name5>-concatenated_name.
+        ENDIF.
+
+        result = |{ element-elementname } accessor | && |{ accessor } variable | && |{ variable }|.
+
+      ELSEIF element-elementname EQ 'FAMIX.Invocation'.
+
+        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name6>) WITH TABLE KEY id = element-invocation_sender_ref.
+        IF sy-subrc EQ 0.
+          sender = <id_to_name6>-concatenated_name.
+        ENDIF.
+
+        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name7>) WITH TABLE KEY id = element-invocation_candidates_ref.
+        IF sy-subrc EQ 0.
+          candidates = <id_to_name7>-concatenated_name.
+        ENDIF.
+
+        _remove_apostroph( CHANGING string = element-invocation_signatur ).
+
+        result = |{ element-elementname } sender | && |{ sender } candidates | && |{ candidates } signature | && |{ element-invocation_signatur }|.
+
+      ELSE.
+
+        IF element-has_no_attribute EQ abap_true.
+
+          result = |{ element-elementname } | && |{ element-concatenated_name }|.
+
+        ELSE.
+
+          _remove_apostroph( CHANGING string = element-value ).
+
+          result = |{ element-elementname } | && |{ element-concatenated_name } | && |{ element-attribute } | && |{ element-value }|.
+
+        ENDIF.
+
+      ENDIF.
+
+      INSERT result INTO TABLE equalized_harmonized_mse.
+
+    ENDLOOP.
+
+    equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse ).
 
   ENDMETHOD.
 
@@ -246,60 +360,6 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD _make_list_of_element_nodes.
-
-    DATA element_node TYPE string.
-
-    " Make list of element_nodes
-
-
-    DATA(len) = strlen( i_msestr ).
-
-    DATA(count) = 0.
-    DATA(level) = 0.
-    DO len TIMES.
-
-      DATA(char) = i_msestr+count(1).
-      CASE char.
-        WHEN '('.
-          ADD 1 TO level.
-          IF level EQ 2.
-            _add_element_node( CHANGING element_node  = element_node
-                                        element_nodes = r_element_nodes ).
-          ENDIF.
-
-        WHEN ')'.
-          SUBTRACT 1 FROM level.
-          IF level EQ 0.
-
-*            element_node = element_node && char.
-*            _add_element_node( CHANGING element_node  = element_node
-*                                        element_nodes = element_nodes ).
-
-          ENDIF.
-
-      ENDCASE.
-
-
-      IF level EQ 1 AND r_element_nodes IS INITIAL AND char EQ '('.
-        " Ignore starting (
-      ELSEIF level EQ 0 AND char EQ ')'.
-        " Ignore ending )
-      ELSEIF level EQ 1 AND char EQ | |.
-        " Ignore blanks on level 1
-      ELSE.
-        element_node = element_node && char.
-      ENDIF.
-
-
-      ADD 1 TO count.
-
-    ENDDO.
-
-    _add_element_node( CHANGING element_node  = element_node
-                                element_nodes = r_element_nodes ).
-
-  ENDMETHOD.
 
   METHOD _extract_element_node.
 
@@ -350,6 +410,7 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
     ENDDO.
 
   ENDMETHOD.
+
 
   METHOD _ext_serial_attribute_nodes.
 
@@ -492,10 +553,66 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD _make_list_of_element_nodes.
+
+    DATA element_node TYPE string.
+
+    " Make list of element_nodes
+
+
+    DATA(len) = strlen( i_msestr ).
+
+    DATA(count) = 0.
+    DATA(level) = 0.
+    DO len TIMES.
+
+      DATA(char) = i_msestr+count(1).
+      CASE char.
+        WHEN '('.
+          ADD 1 TO level.
+          IF level EQ 2.
+            _add_element_node( CHANGING element_node  = element_node
+                                        element_nodes = r_element_nodes ).
+          ENDIF.
+
+        WHEN ')'.
+          SUBTRACT 1 FROM level.
+          IF level EQ 0.
+
+*            element_node = element_node && char.
+*            _add_element_node( CHANGING element_node  = element_node
+*                                        element_nodes = element_nodes ).
+
+          ENDIF.
+
+      ENDCASE.
+
+
+      IF level EQ 1 AND r_element_nodes IS INITIAL AND char EQ '('.
+        " Ignore starting (
+      ELSEIF level EQ 0 AND char EQ ')'.
+        " Ignore ending )
+      ELSEIF level EQ 1 AND char EQ | |.
+        " Ignore blanks on level 1
+      ELSE.
+        element_node = element_node && char.
+      ENDIF.
+
+
+      ADD 1 TO count.
+
+    ENDDO.
+
+    _add_element_node( CHANGING element_node  = element_node
+                                element_nodes = r_element_nodes ).
+
+  ENDMETHOD.
+
+
   METHOD _remove_apostroph.
 
     REPLACE ALL OCCURRENCES OF |'| IN string WITH ||.
 
   ENDMETHOD.
-
 ENDCLASS.
