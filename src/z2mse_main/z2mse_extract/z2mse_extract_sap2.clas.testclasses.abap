@@ -195,6 +195,7 @@ CLASS ltcl_integration_test IMPLEMENTATION.
 ( |FAMIX.Class Z2MSE_TEST_CL_B2 parentPackage Z2MSE_TEST_NO_INITIAL_SELECTN| )
 ( |FAMIX.Class Z2MSE_TEST_IF_A isInterface true| )
 ( |FAMIX.Class Z2MSE_TEST_IF_A modifiers ABAPGlobalInterface| )
+( |FAMIX.Class Z2MSE_TEST_IF_A parentPackage| )
 ( |FAMIX.Class Z2MSE_TEST_WDY_A modifiers ABAPWebDynproComponent| )
 ( |FAMIX.Class ZIWCI_2MSE_TEST_WDY_A isInterface true| )
 ( |FAMIX.Class ZIWCI_2MSE_TEST_WDY_A modifiers ABAPGlobalInterface| )

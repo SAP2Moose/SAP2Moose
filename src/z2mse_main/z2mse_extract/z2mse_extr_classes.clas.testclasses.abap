@@ -295,10 +295,12 @@ CLASS ltcl_test IMPLEMENTATION.
     equalized_harmonized_mse_exp = VALUE #(
 ( |FAMIX.Package A| )
 ( |FAMIX.Class CLASS_A modifiers ABAPGlobalClass| )
+( |FAMIX.Class CLASS_A parentPackage A| )
 ( |FAMIX.Attribute CLASS_A>>ATTRIBUTE_A| )
 ( |FAMIX.Method CLASS_A>>EVENT_A signature EVENT_A| )
 ( |FAMIX.Method CLASS_A>>METHOD_A signature METHOD_A| )
 ( |FAMIX.Class INTERFACE_A modifiers ABAPGlobalInterface| )
+( |FAMIX.Class INTERFACE_A parentPackage A| )
 ( |FAMIX.Class INTERFACE_A isInterface true| )
     ).
 
@@ -610,15 +612,19 @@ CLASS ltcl_test IMPLEMENTATION.
     equalized_harmonized_mse_exp = VALUE #(
 
 ( |FAMIX.Package A| )
-( |FAMIX.Class CLASS_A modifiers ABAPGlobalClass| )
-( |FAMIX.Method CLASS_A>>METHOD_A signature METHOD_A| )
 ( |FAMIX.Package| )
+( |FAMIX.Class CLASS_A modifiers ABAPGlobalClass| )
+( |FAMIX.Class CLASS_A parentPackage A| )
+( |FAMIX.Method CLASS_A>>METHOD_A signature METHOD_A| )
 ( |FAMIX.Class CLASS_B modifiers ABAPGlobalClass| )
+( |FAMIX.Class CLASS_B parentPackage| )
 ( |FAMIX.Method CLASS_B>>METHOD_A signature METHOD_A| )
 ( |FAMIX.Class SAP_INTERFACE_A modifiers ABAPGlobalInterface| )
+( |FAMIX.Class SAP_INTERFACE_A parentPackage| )
 ( |FAMIX.Class SAP_INTERFACE_A isInterface true| )
 ( |FAMIX.Method SAP_INTERFACE_A>>METHOD_A signature METHOD_A| )
 ( |FAMIX.Class CLASS_C modifiers ABAPGlobalClass| )
+( |FAMIX.Class CLASS_C parentPackage| )
 ( |FAMIX.Method CLASS_C>>METHOD_A signature METHOD_A  | )
 
     ).

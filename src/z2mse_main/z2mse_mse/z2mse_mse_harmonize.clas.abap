@@ -20,6 +20,30 @@ CLASS z2mse_mse_harmonize DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
     TYPES string_table TYPE TABLE OF string WITH DEFAULT KEY.
+
+    TYPES: BEGIN OF id_to_name,
+             id                TYPE i,
+             simple_name       TYPE string,
+             parent_id         TYPE i,
+             concatenated_name TYPE string,
+           END OF id_to_name.
+
+    TYPES: BEGIN OF element,
+             elementname               TYPE string,
+             element_id                TYPE i,
+             concatenated_name         TYPE string,
+             has_no_attribute          TYPE abap_bool,
+             attribute                 TYPE string,
+             is_integer_reference      TYPE abap_bool,
+             integer_reference         TYPE i,
+             value                     TYPE string,
+             access_accessor_ref       TYPE i,
+             access_variable_ref       TYPE i,
+             invocation_sender_ref     TYPE i,
+             invocation_candidates_ref TYPE i,
+             invocation_signatur       TYPE string,
+           END OF element.
+
     CLASS-METHODS _add_element_node
       CHANGING
         element_node  TYPE string
@@ -56,11 +80,44 @@ CLASS z2mse_mse_harmonize DEFINITION
         VALUE(is_elementnode)       TYPE abap_bool.
     CLASS-METHODS _remove_apostroph
       CHANGING string TYPE string.
+    TYPES:
+      ty_id_to_names TYPE HASHED TABLE OF id_to_name WITH UNIQUE KEY id,
+      ty_elements    TYPE STANDARD TABLE OF element WITH DEFAULT KEY.
+    CLASS-METHODS _build_result
+      IMPORTING
+        id_to_names                       TYPE ty_id_to_names
+        elements                        TYPE ty_elements
+      RETURNING
+        VALUE(r_equalized_harmonized_mse) TYPE z2mse_mse_harmonize=>harmonized_mse.
+    TYPES:
+      ty_id_to_names_1 TYPE HASHED TABLE OF id_to_name WITH UNIQUE KEY id,
+      ty_elements_1    TYPE STANDARD TABLE OF element WITH DEFAULT KEY.
+    CLASS-METHODS _find_concatenated_names
+      IMPORTING
+        id_to_names TYPE ty_id_to_names_1
+      CHANGING
+        elements  TYPE ty_elements_1.
+    TYPES:
+      ty_id_to_names_2 TYPE HASHED TABLE OF id_to_name WITH UNIQUE KEY id,
+      ty_elements_2 TYPE STANDARD TABLE OF element WITH DEFAULT KEY.
+     CLASS-METHODS _analyze_attribute_value
+      IMPORTING
+        i_attributename TYPE string
+        i_valuenodes    TYPE z2mse_mse_harmonize=>string_table
+      EXPORTING
+        e_elements      TYPE ty_elements_2
+        e_has_attribute TYPE abap_bool
+      CHANGING
+        cd_to_name      TYPE z2mse_mse_harmonize=>id_to_name
+        c_element       TYPE z2mse_mse_harmonize=>element.
+    CLASS-METHODS _get_concatenated_names
+      CHANGING
+        id_to_names TYPE ty_id_to_names_2.
 ENDCLASS.
 
 
 
-CLASS z2mse_mse_harmonize IMPLEMENTATION.
+CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
 
 
   METHOD equalize_harmonized.
@@ -69,7 +126,7 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
     LOOP AT harmonized_mse ASSIGNING FIELD-SYMBOL(<eq>).
 
       CONDENSE <eq>.
-      IF <eq> eq ''.
+      IF <eq> EQ ''.
         DELETE harmonized_mse.
       ENDIF.
     ENDLOOP.
@@ -98,31 +155,8 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
 
     element_nodes = _make_list_of_element_nodes( msestr ).
 
-    TYPES: BEGIN OF id_to_name,
-             id                TYPE i,
-             simple_name       TYPE string,
-             parent_id         TYPE i,
-             concatenated_name TYPE string,
-           END OF id_to_name.
-
     DATA: id_to_name  TYPE id_to_name,
           id_to_names TYPE HASHED TABLE OF id_to_name WITH UNIQUE KEY id.
-
-    TYPES: BEGIN OF element,
-             elementname               TYPE string,
-             element_id                TYPE i,
-             concatenated_name         TYPE string,
-             has_no_attribute          TYPE abap_bool,
-             attribute                 TYPE string,
-             is_integer_reference      TYPE abap_bool,
-             integer_reference         TYPE i,
-             value                     TYPE string,
-             access_accessor_ref       TYPE i,
-             access_variable_ref       TYPE i,
-             invocation_sender_ref     TYPE i,
-             invocation_candidates_ref TYPE i,
-             invocation_signatur       TYPE string,
-           END OF element.
 
     DATA: element  TYPE element,
           elements TYPE STANDARD TABLE OF element WITH DEFAULT KEY.
@@ -171,95 +205,12 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
 
         ELSE.
 
-          element-attribute = attributename.
-
-          DATA valuenode TYPE string.
-          LOOP AT valuenodes INTO valuenode.
-
-            DATA is_primitive TYPE abap_bool.
-            DATA primitive TYPE string.
-            DATA is_integer_reference TYPE abap_bool.
-            DATA integer_reference TYPE i.
-            DATA is_name_reference TYPE abap_bool.
-            DATA ref_elementname TYPE string.
-            DATA is_elementnode TYPE abap_bool.
-
-*            element-access_accessor_ref = VALUE #( ).
-*            element-access_variable_ref = VALUE #( )..
-*            element-invocation_sender_ref = VALUE #( ).
-*            element-invocation_candidates_ref = VALUE #( ).
-*            element-invocation_signatur = VALUE #( ).
-            element-is_integer_reference = VALUE #( ).
-            element-integer_reference = VALUE #( ).
-            element-value = VALUE #( ).
-
-            _ext_valuenodes( EXPORTING valuenode = valuenode
-                             IMPORTING is_primitive = is_primitive
-                                       primitive = primitive
-                                       is_integer_reference = is_integer_reference
-                                       integer_reference = integer_reference
-                                       is_name_reference = is_name_reference
-                                       ref_elementname = ref_elementname
-                                       is_elementnode = is_elementnode ).
-
-            IF attributename EQ 'name' AND
-               is_primitive EQ abap_true.
-              id_to_name-simple_name = primitive.
-
-              _remove_apostroph( CHANGING string = id_to_name-simple_name ).
-
-            ELSEIF ( attributename EQ 'parentType' OR
-                     attributename EQ 'parentPackage' ) AND
-               is_integer_reference EQ abap_true AND
-               ( element-elementname <> 'FAMIX.Class' AND
-                 element-elementname <> 'FAMIX.Package' ) .
-              id_to_name-parent_id = integer_reference.
-            ELSE.
-*            ENDIF.
-*
-*            IF simplename <> 'name'.
-
-              CASE element-elementname.
-                WHEN 'FAMIX.Access'.
-                  CASE attributename.
-                    WHEN 'accessor'.
-                      element-access_accessor_ref = integer_reference.
-                    WHEN 'variable'.
-                      element-access_variable_ref = integer_reference.
-                  ENDCASE.
-                WHEN 'FAMIX.Invocation'.
-                  CASE attributename.
-                    WHEN 'sender'.
-                      element-invocation_sender_ref = integer_reference.
-                    WHEN 'candidates'.
-                      element-invocation_candidates_ref = integer_reference.
-                    WHEN 'signature'.
-                      element-invocation_signatur = primitive.
-                  ENDCASE.
-                WHEN OTHERS.
-
-
-
-                  IF is_integer_reference EQ abap_true.
-                    element-is_integer_reference = abap_true.
-                    element-integer_reference = integer_reference.
-                  ELSEIF is_name_reference EQ abap_true.
-                    element-value = is_name_reference.
-                  ELSEIF is_primitive EQ abap_true.
-                    element-value = primitive.
-                  ENDIF.
-                  IF element-elementname EQ 'FAMIX.Method' AND element-attribute EQ 'parentType'.
-                    " Not required
-                  ELSE.
-                    INSERT element INTO TABLE elements.
-                    has_attribute = abap_true.
-                  ENDIF.
-
-              ENDCASE.
-
-            ENDIF.
-
-          ENDLOOP.
+          _analyze_attribute_value( EXPORTING i_attributename = attributename
+                                              i_valuenodes    = valuenodes
+                                    IMPORTING e_elements      = elements
+                                              e_has_attribute = has_attribute
+                                     CHANGING cd_to_name = id_to_name
+                                              c_element  = element ).
 
         ENDIF.
 
@@ -271,36 +222,138 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
         INSERT element INTO TABLE elements.
       ENDIF.
 
-      IF id_to_name-simple_name IS NOT INITIAL.
+      IF id_to_name-id IS NOT INITIAL.
         INSERT id_to_name INTO TABLE id_to_names.
       ENDIF.
 
     ENDLOOP.
 
-    " Get concatenated names
+    _get_concatenated_names( CHANGING id_to_names = id_to_names ).
 
-    LOOP AT id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name>).
-      READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name2>) WITH TABLE KEY id = <id_to_name>-parent_id.
-      IF sy-subrc EQ 0.
-        <id_to_name>-concatenated_name = |{ <id_to_name2>-simple_name }| && |>>| && |{ <id_to_name>-simple_name }|.
+    _find_concatenated_names( EXPORTING id_to_names = id_to_names
+                              CHANGING  elements  = elements ).
+
+    equalized_harmonized_mse = _build_result( id_to_names = id_to_names
+                                              elements  = elements ).
+
+    equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse ).
+
+  ENDMETHOD.
+
+
+  METHOD _add_element_node.
+
+    DATA temp TYPE string.
+
+    temp = element_node.
+    CONDENSE temp.
+
+    " Add element node
+    IF temp IS NOT INITIAL.
+      INSERT element_node INTO TABLE element_nodes.
+    ENDIF.
+    CLEAR element_node.
+
+  ENDMETHOD.
+
+
+  METHOD _analyze_attribute_value.
+
+    " Analyze attribute value
+
+    c_element-attribute = i_attributename.
+
+    DATA valuenode TYPE string.
+    LOOP AT i_valuenodes INTO valuenode.
+
+      DATA is_primitive TYPE abap_bool.
+      DATA primitive TYPE string.
+      DATA is_integer_reference TYPE abap_bool.
+      DATA integer_reference TYPE i.
+      DATA is_name_reference TYPE abap_bool.
+      DATA ref_elementname TYPE string.
+      DATA is_elementnode TYPE abap_bool.
+
+*            element-access_accessor_ref = VALUE #( ).
+*            element-access_variable_ref = VALUE #( )..
+*            element-invocation_sender_ref = VALUE #( ).
+*            element-invocation_candidates_ref = VALUE #( ).
+*            element-invocation_signatur = VALUE #( ).
+      c_element-is_integer_reference = VALUE #( ).
+      c_element-integer_reference = VALUE #( ).
+      c_element-value = VALUE #( ).
+
+      _ext_valuenodes( EXPORTING valuenode = valuenode
+                       IMPORTING is_primitive = is_primitive
+                                 primitive = primitive
+                                 is_integer_reference = is_integer_reference
+                                 integer_reference = integer_reference
+                                 is_name_reference = is_name_reference
+                                 ref_elementname = ref_elementname
+                                 is_elementnode = is_elementnode ).
+
+      IF i_attributename EQ 'name' AND
+         is_primitive EQ abap_true.
+        cd_to_name-simple_name = primitive.
+
+        _remove_apostroph( CHANGING string = cd_to_name-simple_name ).
+
+      ELSEIF ( i_attributename EQ 'parentType' OR
+               i_attributename EQ 'parentPackage' ) AND
+         is_integer_reference EQ abap_true AND
+         ( c_element-elementname <> 'FAMIX.Class' AND
+           c_element-elementname <> 'FAMIX.Package' ) .
+        cd_to_name-parent_id = integer_reference.
+      ELSE.
+
+        CASE c_element-elementname.
+          WHEN 'FAMIX.Access'.
+            CASE i_attributename.
+              WHEN 'accessor'.
+                c_element-access_accessor_ref = integer_reference.
+              WHEN 'variable'.
+                c_element-access_variable_ref = integer_reference.
+            ENDCASE.
+          WHEN 'FAMIX.Invocation'.
+            CASE i_attributename.
+              WHEN 'sender'.
+                c_element-invocation_sender_ref = integer_reference.
+              WHEN 'candidates'.
+                c_element-invocation_candidates_ref = integer_reference.
+              WHEN 'signature'.
+                c_element-invocation_signatur = primitive.
+            ENDCASE.
+          WHEN OTHERS.
+
+
+
+            IF is_integer_reference EQ abap_true.
+              c_element-is_integer_reference = abap_true.
+              c_element-integer_reference = integer_reference.
+            ELSEIF is_name_reference EQ abap_true.
+              c_element-value = is_name_reference.
+            ELSEIF is_primitive EQ abap_true.
+              c_element-value = primitive.
+            ENDIF.
+            IF c_element-elementname EQ 'FAMIX.Method' AND c_element-attribute EQ 'parentType'.
+              " Not required
+            ELSE.
+              INSERT c_element INTO TABLE e_elements.
+              e_has_attribute = abap_true.
+            ENDIF.
+
+        ENDCASE.
+
       ENDIF.
+
     ENDLOOP.
 
-    " Find concatenated names
+  ENDMETHOD.
 
-    LOOP AT elements ASSIGNING FIELD-SYMBOL(<element>).
-      IF <element>-element_id IS NOT INITIAL.
-        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name3>) WITH TABLE KEY id = <element>-element_id.
-        IF sy-subrc EQ 0.
-          IF <id_to_name3>-simple_name IS NOT INITIAL
-          AND <element>-elementname EQ 'FAMIX.Class' OR <element>-elementname EQ 'FAMIX.Package'.
-            <element>-concatenated_name = <id_to_name3>-simple_name.
-          ELSE.
-            <element>-concatenated_name = <id_to_name3>-concatenated_name.
-          ENDIF.
-        ENDIF.
-      ENDIF.
-    ENDLOOP.
+
+  METHOD _build_result.
+
+    DATA element TYPE z2mse_mse_harmonize=>element.
 
     " Build result
 
@@ -379,27 +432,9 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
 
       ENDIF.
 
-      INSERT result INTO TABLE equalized_harmonized_mse.
+      INSERT result INTO TABLE r_equalized_harmonized_mse.
 
     ENDLOOP.
-
-    equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse ).
-
-  ENDMETHOD.
-
-
-  METHOD _add_element_node.
-
-    DATA temp TYPE string.
-
-    temp = element_node.
-    CONDENSE temp.
-
-    " Add element node
-    IF temp IS NOT INITIAL.
-      INSERT element_node INTO TABLE element_nodes.
-    ENDIF.
-    CLEAR element_node.
 
   ENDMETHOD.
 
@@ -593,6 +628,41 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
     ELSE.
       is_elementnode = abap_true.
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD _find_concatenated_names.
+
+    " Find concatenated names
+
+    LOOP AT elements ASSIGNING FIELD-SYMBOL(<element>).
+      IF <element>-element_id IS NOT INITIAL.
+        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name3>) WITH TABLE KEY id = <element>-element_id.
+        IF sy-subrc EQ 0.
+          IF <id_to_name3>-simple_name IS NOT INITIAL
+          AND <element>-elementname EQ 'FAMIX.Class' OR <element>-elementname EQ 'FAMIX.Package'.
+            <element>-concatenated_name = <id_to_name3>-simple_name.
+          ELSE.
+            <element>-concatenated_name = <id_to_name3>-concatenated_name.
+          ENDIF.
+        ENDIF.
+      ENDIF.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD _get_concatenated_names.
+
+    " Get concatenated names
+
+    LOOP AT id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name>).
+      READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name2>) WITH TABLE KEY id = <id_to_name>-parent_id.
+      IF sy-subrc EQ 0.
+        <id_to_name>-concatenated_name = |{ <id_to_name2>-simple_name }| && |>>| && |{ <id_to_name>-simple_name }|.
+      ENDIF.
+    ENDLOOP.
 
   ENDMETHOD.
 
