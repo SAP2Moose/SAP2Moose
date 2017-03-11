@@ -2,7 +2,7 @@
 
 This repository provides a program to extract model data from a SAP system into the analysis platform Moose on Pharo Smalltalk. It uses FAMIX as a flexible enhancable meta model.
 
-Last stable release 0.1.0: [Extractor](../../releases/download/v0.1.0/z_moose_extractor.abap) and [Texts for extractor](../../releases/download/v0.1.0/z_moose_extractor_texts.txt)
+Last stable release 0.2.0: [Extractor](../../releases/download/v0.2.0/z_moose_extractor.abap) and [Texts for extractor](../../releases/download/v0.2.0/z_moose_extractor_texts.txt)
 
 Should work in ABAP 7.02 SP6, but there is currently only a syntax check for this release done.
 
