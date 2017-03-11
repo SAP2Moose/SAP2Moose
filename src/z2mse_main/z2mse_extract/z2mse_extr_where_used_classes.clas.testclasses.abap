@@ -247,10 +247,37 @@ CLASS ltcl_main IMPLEMENTATION.
                              ( line = |  (parentType (ref: 5))))| )
                              ).
 
+    DATA: equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
+
+    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
+
+    equalized_harmonized_mse_exp = VALUE #(
+
+( |FAMIX.Access accessor CLASS_B>>METHOD_A variable CLASS_A>>ATTRIBUTE_A| )
+( |FAMIX.Attribute CLASS_A>>ATTRIBUTE_A| )
+( |FAMIX.Class CLASS_A| )
+( |FAMIX.Class CLASS_B| )
+( |FAMIX.Class CLASS_C| )
+( |FAMIX.Class INTF_A| )
+( |FAMIX.Invocation sender CLASS_B>>METHOD_A candidates CLASS_A>>METHOD_A signature DUMMY| )
+( |FAMIX.Invocation sender CLASS_B>>METHOD_B candidates CLASS_A>>EVENT_A signature DUMMY| )
+( |FAMIX.Invocation sender CLASS_B>>METHOD_C candidates CLASS_A>>METHOD_A signature DUMMY| )
+( |FAMIX.Method CLASS_A>>EVENT_A| )
+( |FAMIX.Method CLASS_A>>METHOD_A| )
+( |FAMIX.Method CLASS_B>>METHOD_A| )
+( |FAMIX.Method CLASS_B>>METHOD_B| )
+( |FAMIX.Method CLASS_B>>METHOD_C| )
+( |FAMIX.Method CLASS_C>>INTF_A~I_METHOD_A signature INTF_A~I_METHOD_A| )
+( |FAMIX.Method INTF_A>>I_METHOD_A| )
+    ).
+
+    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
-        act                  = mse_model_act
-        exp                  = mse_model_exp
+        act                  = equalized_harmonized_mse_act
+        exp                  = equalized_harmonized_mse_exp
         msg                  = 'Wrong mse file for new class' ).
 
   ENDMETHOD.

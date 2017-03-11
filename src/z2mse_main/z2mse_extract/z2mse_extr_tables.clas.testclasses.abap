@@ -86,8 +86,23 @@ CLASS ltcl_main IMPLEMENTATION.
 
     model->make_mse( IMPORTING mse_model = mse_model_act ).
 
-    cl_abap_unit_assert=>assert_equals( EXPORTING act                  = mse_model_act
-                                                  exp                  = mse_model_exp
+    DATA: equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
+    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
+    equalized_harmonized_mse_exp = VALUE #(
+
+
+( |FAMIX.Attribute TABLE_A>>TABLE_A| )
+( |FAMIX.Class TABLE_A modifiers DBTable| )
+( |FAMIX.Class TABLE_A parentPackage A| )
+( |FAMIX.Package A| )
+
+    ).
+    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
+
+    cl_abap_unit_assert=>assert_equals( EXPORTING act                  = equalized_harmonized_mse_act
+                                                  exp                  = equalized_harmonized_mse_exp
                                                   msg                  = 'Wrong mse file for new table' ).
 
   ENDMETHOD.
