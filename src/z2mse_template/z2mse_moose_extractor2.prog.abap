@@ -48,11 +48,12 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! Generated 07.03.2017
+"! Generated 13.03.2017
 "! Contains commit a82e81c9285a353cf0c2a8661808e99ad08ca653
 "!
-"! This is version 0.2.0. It will be much better covered with unit tests and end-to-end tests than the first version. It is currently incomplete.
+"! This is version 0.2.1. It will be much better covered with unit tests and end-to-end tests than the first version. It is currently incomplete.
 "! Includes fix for #44 ignore SAP interfaces in Where-Used
+"! Includes fix for #45 Crash when interface events are selected
 "! Select where-used now not only for a single table
 "! Fix syntax error for ABAP 7.02
 "!
@@ -210,38 +211,11 @@ SELECTION-SCREEN END OF BLOCK bl_model_settings.
 
 * REPLACE Z2MSE_FAMIX_CUSTOM_SOURCE_LNG
 
-* REPLACE Z2MSE_CHECK_FAMIX_MODEL
-
 " Obsolete:
 
 * REPLACE Z2MSE_FAMIX_MODULE
 
 ******************************************** End Include Z_FAMIX_ABAP *****************************
-
-" include z_sap_2_famix
-******************************************** Begin Include Z_SAP_2_FAMIX ****************************
-
-* REPLACE Z2MSE_SAP
-
-* REPLACE Z2MSE_SAP_PACKAGE
-
-* REPLACE Z2MSE_SAP_CLASS
-
-* REPLACE Z2MSE_SAP_DB_TABLE
-
-* REPLACE Z2MSE_SAP_ATTRIBUTE
-
-* REPLACE Z2MSE_SAP_METHOD
-
-* REPLACE Z2MSE_SAP_INHERITANCE
-
-* REPLACE Z2MSE_SAP_INVOCATION
-
-* REPLACE Z2MSE_SAP_ACCESS
-
-* REPLACE Z2MSE_SAP_PROGRAM
-
-******************************************** End Include Z_SAP_2_FAMIX ******************************
 
 * REPLACE_DEFINITION Z2MSE_EXTR_PACKAGES
 

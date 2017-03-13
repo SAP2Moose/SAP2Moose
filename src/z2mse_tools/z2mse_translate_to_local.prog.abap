@@ -95,7 +95,12 @@ CLASS cl_read_class IMPLEMENTATION.
       EXCEPTIONS
         OTHERS = 1.
     IF sy-subrc <> 0.
-      ASSERT 1 = 2.
+      FORMAT COLOR COL_NEGATIVE.
+      WRITE: / 'Class ', cifkey, ' is not found.'.
+
+      FORMAT COLOR COL_BACKGROUND.
+      WRITE: / 'Check whether the class is removed or renamed. In that case the template has to be adapted.'.
+      RETURN.
     ENDIF.
 
     CASE cifref->clstype.
