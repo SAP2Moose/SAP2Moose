@@ -48,11 +48,12 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! Generated 11.03.2017
+"! Generated 13.03.2017
 "! Contains commit a82e81c9285a353cf0c2a8661808e99ad08ca653
 "!
-"! This is version 0.2.0. It will be much better covered with unit tests and end-to-end tests than the first version. It is currently incomplete.
+"! This is version 0.2.1. It will be much better covered with unit tests and end-to-end tests than the first version. It is currently incomplete.
 "! Includes fix for #44 ignore SAP interfaces in Where-Used
+"! Includes fix for #45 Crash when interface events are selected
 "! Select where-used now not only for a single table
 "! Fix syntax error for ABAP 7.02
 "!
@@ -2666,7 +2667,7 @@ CLASS CL_EXTR_CLASSES IMPLEMENTATION.
         CASE component-cmptype.
           WHEN attribute_type.
 
-          WHEN method_type.
+          WHEN method_type OR event_type.
 
             DATA: class_comp_id     TYPE i,
                   interface_comp_id TYPE i.
