@@ -152,7 +152,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr_classes IMPLEMENTATION.
+CLASS Z2MSE_EXTR_CLASSES IMPLEMENTATION.
 
 
   METHOD add_and_sort_to_classes_table.
@@ -397,7 +397,7 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
         CASE component-cmptype.
           WHEN attribute_type.
 
-          WHEN method_type.
+          WHEN method_type OR event_type.
 
             DATA: class_comp_id     TYPE i,
                   interface_comp_id TYPE i.
@@ -551,6 +551,36 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
 
     ENDLOOP.
 
+
+  ENDMETHOD.
+
+
+  METHOD _exclude_classes_from_where_us.
+
+    DATA class TYPE z2mse_extr_classes=>ty_class.
+
+    " Exclude classes from where used analysis
+    " SAP_2_FAMIX_65 : The SAP Interface will not be returned to do a where used analysis
+    DATA component  TYPE ty_class_component.
+
+    IF g_exclude_found_sap_intf EQ abap_true.
+
+      LOOP AT c_components INTO component.
+        READ TABLE g_selected_classes INTO class WITH TABLE KEY  clsname  = component-clsname.
+        ASSERT sy-subrc EQ 0.
+        IF class-clstype EQ interface_type.
+          IF component-clsname CP 'Y*'
+          OR component-clsname CP 'Z*'
+          OR component-clsname CP '/*' .
+            " OK
+          ELSE.
+
+            DELETE c_components.
+          ENDIF.
+        ENDIF.
+      ENDLOOP.
+
+    ENDIF.
 
   ENDMETHOD.
 
@@ -747,34 +777,4 @@ CLASS z2mse_extr_classes IMPLEMENTATION.
                                     CHANGING c_selected_classes = selected_classes ).
 
   ENDMETHOD.
-
-  METHOD _exclude_classes_from_where_us.
-
-    DATA class TYPE z2mse_extr_classes=>ty_class.
-
-    " Exclude classes from where used analysis
-    " SAP_2_FAMIX_65 : The SAP Interface will not be returned to do a where used analysis
-    DATA component  TYPE ty_class_component.
-
-    IF g_exclude_found_sap_intf EQ abap_true.
-
-      LOOP AT c_components INTO component.
-        READ TABLE g_selected_classes INTO class WITH TABLE KEY  clsname  = component-clsname.
-        ASSERT sy-subrc EQ 0.
-        IF class-clstype EQ interface_type.
-          IF component-clsname CP 'Y*'
-          OR component-clsname CP 'Z*'
-          OR component-clsname CP '/*' .
-            " OK
-          ELSE.
-
-            DELETE c_components.
-          ENDIF.
-        ENDIF.
-      ENDLOOP.
-
-    ENDIF.
-
-  ENDMETHOD.
-
 ENDCLASS.
