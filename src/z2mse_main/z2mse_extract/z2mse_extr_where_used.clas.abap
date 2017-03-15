@@ -29,8 +29,8 @@ CLASS z2mse_extr_where_used DEFINITION
       ty_includes_to_components TYPE HASHED TABLE OF ty_include_to_component WITH UNIQUE KEY include .
     METHODS constructor
       IMPORTING
-        wbcrossgt_test           TYPE ty_t_wbcrossgt_test
-        includes_to_components   TYPE ty_includes_to_components.
+        wbcrossgt_test         TYPE ty_t_wbcrossgt_test
+        includes_to_components TYPE ty_includes_to_components.
     "! Returns all components that are found in the last where-used analysis. Returns this components only once
     METHODS get_components_where_used
       EXPORTING
@@ -69,7 +69,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR_WHERE_USED IMPLEMENTATION.
+CLASS z2mse_extr_where_used IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -132,8 +132,21 @@ CLASS Z2MSE_EXTR_WHERE_USED IMPLEMENTATION.
             internal_error  = 3
             OTHERS          = 4
         ).
-        IF sy-subrc <> 0.
-          "! TBD handle
+        IF sy-subrc EQ 0.
+
+          <include_2_component>-clsname = obj_name+0(30).
+          " TBD include code here?
+          <include_2_component>-cmpname = obj_name+30(30).
+          CASE object.
+            WHEN 'METH'.
+              <include_2_component>-cmptype = z2mse_extr_classes=>method_type.
+            WHEN OTHERS.
+              " TBD is code required here?
+          ENDCASE.
+          <include_2_component>-is_class_component = abap_true.
+
+        ELSE.
+
 
           "Check for usage in Web Dynpro ABAP
           DATA ls_wd_sourcemap TYPE wdy_wb_sourcemap.
@@ -148,19 +161,12 @@ CLASS Z2MSE_EXTR_WHERE_USED IMPLEMENTATION.
             <include_2_component>-is_webdynpro = abap_true.
             <include_2_component>-component_name = ls_wd_sourcemap-component_name.
             <include_2_component>-controller_name = ls_wd_sourcemap-controller_name.
+
+          ELSE.
+            " Is it a program
+
           ENDIF.
 
-        ELSE.
-          <include_2_component>-clsname = obj_name+0(30).
-          "! <include_2_component>-clstype = ?
-          <include_2_component>-cmpname = obj_name+30(30).
-          CASE object.
-            WHEN 'METH'.
-              <include_2_component>-cmptype = z2mse_extr_classes=>method_type.
-            WHEN OTHERS.
-              "! TBD handle
-          ENDCASE.
-          <include_2_component>-is_class_component = abap_true.
         ENDIF.
 
       ELSE.
