@@ -27,6 +27,7 @@ CLASS z2mse_extr_programs DEFINITION
   PRIVATE SECTION.
     CONSTANTS: tadir_program TYPE tadir-object VALUE 'PROG' ##NO_TEXT.
     DATA g_selected_programs TYPE ty_programs.
+    DATA g_selected_programs_new TYPE ty_programs.
     METHODS _select_from_tadir
       IMPORTING
         i_packages               TYPE z2mse_extr_packages=>ty_packages
@@ -73,6 +74,7 @@ CLASS Z2MSE_EXTR_PROGRAMS IMPLEMENTATION.
 
     g_selected_programs = _select_from_tadir( packages ).
     _check_existence( CHANGING programs = g_selected_programs ).
+    g_selected_programs_new = g_selected_programs.
 
   ENDMETHOD.
 
