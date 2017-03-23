@@ -1,5 +1,6 @@
 CLASS z2mse_extr_functions DEFINITION
   PUBLIC
+  INHERITING FROM z2mse_extr_include
   FINAL
   CREATE PUBLIC .
 
@@ -8,6 +9,9 @@ CLASS z2mse_extr_functions DEFINITION
              "! program of a function group
              fugr_program TYPE progname,
              function     TYPE rs38l_fnam,
+             includenr    TYPE includenr,
+             "! use include to determine the connection between where used and the FAMIX model of a function
+             include      TYPE programm,
            END OF ty_function_group_component.
     TYPES: ty_function_groups_compts_hash TYPE HASHED TABLE OF ty_function_group_component WITH UNIQUE KEY fugr_program function.
 
@@ -56,6 +60,10 @@ CLASS z2mse_extr_functions DEFINITION
         tadirline       TYPE ty_tadir_test
       RETURNING
         VALUE(progname) TYPE progname.
+    METHODS _convert_fugr_progname_2_fugr
+      IMPORTING
+                fugr_progname TYPE progname
+      RETURNING VALUE(fugr)   TYPE string.
     METHODS _check_existence
       CHANGING
         function_groups TYPE z2mse_extr_functions=>ty_function_groups.
@@ -99,6 +107,21 @@ CLASS z2mse_extr_functions IMPLEMENTATION.
     _check_existence( CHANGING function_groups = g_selected_function_groups ).
 
     g_selected_fugr_comps_new = _read_function_group_comps( g_selected_function_groups ).
+
+    " Determine the name of the include for the function
+
+    FIELD-SYMBOLS <fugr_comp> TYPE ty_function_group_component.
+
+    LOOP AT g_selected_fugr_comps_new ASSIGNING <fugr_comp>.
+
+      DATA fugr TYPE string.
+
+      " TBD check for partner namespace (Program FUNC_GET_OBJECT)
+
+      fugr = _convert_fugr_progname_2_fugr( fugr_progname = <fugr_comp>-fugr_program ).
+
+      CONCATENATE 'L' fugr 'U' <fugr_comp>-includenr INTO <fugr_comp>-include.
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -166,7 +189,8 @@ CLASS z2mse_extr_functions IMPLEMENTATION.
     " TBD 17.03.2017
     IF function_groups IS NOT INITIAL.
       SELECT funcname AS function
-             pname    AS fugr_program FROM tfdir INTO CORRESPONDING FIELDS OF TABLE function_group_comps
+             pname    AS fugr_program
+             include AS includenr FROM tfdir INTO CORRESPONDING FIELDS OF TABLE function_group_comps
              FOR ALL ENTRIES IN function_groups
              WHERE pname = function_groups-fugr_program.
     ENDIF.
@@ -205,6 +229,12 @@ CLASS z2mse_extr_functions IMPLEMENTATION.
 *      INSERT line INTO TABLE g_selected_components.
 *    ENDLOOP.
 *    CLEAR g_selected_components_new.
+
+  ENDMETHOD.
+
+  METHOD _convert_fugr_progname_2_fugr.
+
+    fugr = fugr_progname+4.
 
   ENDMETHOD.
 

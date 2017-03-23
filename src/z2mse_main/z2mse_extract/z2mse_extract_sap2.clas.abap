@@ -49,6 +49,7 @@ CLASS z2mse_extract_sap2 DEFINITION
         i_extract_classes            TYPE REF TO z2mse_extr_classes
         i_extract_tables             TYPE REF TO z2mse_extr_tables
         i_extract_web_dynpro         TYPE REF TO z2mse_extr_web_dynpro
+        i_extract_programs           TYPE REF TO z2mse_extr_programs
         i_extract_where_used_classes TYPE REF TO z2mse_extr_where_used_classes
         i_extract_where_used_tables  TYPE REF TO z2mse_extr_where_used_tables
         i_search_up                  TYPE i.
@@ -140,6 +141,7 @@ CLASS z2mse_extract_sap2 IMPLEMENTATION.
     _get_using_elements( i_extract_classes            = extract_classes
                          i_extract_tables             = extract_tables
                          i_extract_web_dynpro         = extract_web_dynpro
+                         i_extract_programs           = extract_programs
                          i_extract_where_used_classes = extract_where_used_classes
                          i_extract_where_used_tables  = extract_where_used_tables
                          i_search_up                  = i_search_up ).
@@ -222,18 +224,23 @@ CLASS z2mse_extract_sap2 IMPLEMENTATION.
 
       DATA class_components TYPE z2mse_extr_classes=>ty_class_components_hashed.
       DATA web_dynpro_components TYPE z2mse_extr_web_dynpro=>ty_web_dynpro_components_hash.
+      DATA includes TYPE z2mse_extr_include=>ty_includes_hashed.
 
       i_extract_where_used_classes->get_components_where_used( IMPORTING components            = class_components
-                                                                         web_dynpro_components = web_dynpro_components ).
+                                                                         web_dynpro_components = web_dynpro_components
+                                                                         includes              = includes ).
 
       i_extract_classes->select_classes_by_components( components = class_components ).
 
       i_extract_web_dynpro->select_classes_by_components( components = web_dynpro_components ).
 
+      i_extract_programs->select_by_includes( includes = includes ).
+
       i_extract_where_used_tables->used_by_table( tables = tables_to_do_where_used_up ).
 
       i_extract_where_used_tables->get_components_where_used( IMPORTING components            = class_components
-                                                                        web_dynpro_components = web_dynpro_components ).
+                                                                        web_dynpro_components = web_dynpro_components
+                                                                        includes              = includes ).
 
       i_extract_classes->select_classes_by_components( components = class_components ).
 

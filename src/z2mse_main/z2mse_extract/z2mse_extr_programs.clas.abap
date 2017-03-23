@@ -1,5 +1,6 @@
 CLASS z2mse_extr_programs DEFINITION
   PUBLIC
+  INHERITING FROM z2mse_extr_include
   FINAL
   CREATE PUBLIC .
 
@@ -21,6 +22,9 @@ CLASS z2mse_extr_programs DEFINITION
     METHODS select_by_packages
       IMPORTING
         packages TYPE z2mse_extr_packages=>ty_packages.
+    METHODS select_by_includes
+      IMPORTING
+        includes TYPE ty_includes_hashed.
     METHODS get_to_do_where_used
       RETURNING VALUE(programs) TYPE ty_programs_public.
   PROTECTED SECTION.
@@ -152,6 +156,31 @@ CLASS z2mse_extr_programs IMPLEMENTATION.
 *    ENDLOOP.
 *
 *    CLEAR g_selected_tables_new.
+  ENDMETHOD.
+
+  METHOD select_by_includes.
+
+    DATA: programs TYPE ty_programs,
+          program  TYPE ty_program,
+          include  TYPE ty_include.
+
+    LOOP AT includes INTO include.
+
+      program-program = include-include.
+      INSERT program INTO TABLE programs.
+
+      _check_existence( CHANGING programs = programs ).
+
+      LOOP AT programs INTO program.
+        READ TABLE g_selected_programs TRANSPORTING NO FIELDS WITH KEY program = program-program.
+        IF sy-subrc <> 0.
+          INSERT program INTO TABLE g_selected_programs.
+          INSERT program INTO TABLE g_selected_programs_new.
+        ENDIF.
+      ENDLOOP.
+
+    ENDLOOP.
+
   ENDMETHOD.
 
 ENDCLASS.

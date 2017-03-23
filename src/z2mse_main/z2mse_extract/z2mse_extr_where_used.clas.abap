@@ -15,15 +15,16 @@ CLASS z2mse_extr_where_used DEFINITION
 
     TYPES:
       BEGIN OF ty_include_to_component,
-        include            TYPE programm,
-        is_class_component TYPE abap_bool,
-        clsname            TYPE seoclsname,
-        clstype            TYPE seoclstype,
-        cmpname            TYPE seocmpname,
-        cmptype            TYPE seocmptype,
-        is_webdynpro       TYPE abap_bool,
-        component_name     TYPE wdy_component_name,
-        controller_name    TYPE wdy_controller_name,
+        include                TYPE programm,
+        is_class_component     TYPE abap_bool,
+        clsname                TYPE seoclsname,
+        clstype                TYPE seoclstype,
+        cmpname                TYPE seocmpname,
+        cmptype                TYPE seocmptype,
+        is_webdynpro           TYPE abap_bool,
+        component_name         TYPE wdy_component_name,
+        controller_name        TYPE wdy_controller_name,
+        is_program_or_function TYPE abap_bool,
       END OF ty_include_to_component .
     TYPES:
       ty_includes_to_components TYPE HASHED TABLE OF ty_include_to_component WITH UNIQUE KEY include .
@@ -35,7 +36,8 @@ CLASS z2mse_extr_where_used DEFINITION
     METHODS get_components_where_used
       EXPORTING
         VALUE(components)            TYPE z2mse_extr_classes=>ty_class_components_hashed
-        VALUE(web_dynpro_components) TYPE z2mse_extr_web_dynpro=>ty_web_dynpro_components_hash.
+        VALUE(web_dynpro_components) TYPE z2mse_extr_web_dynpro=>ty_web_dynpro_components_hash
+        VALUE(includes)              TYPE z2mse_extr_programs=>ty_includes_hashed.
   PROTECTED SECTION.
     "! Filled during tests
     DATA g_wbcrossgt_test TYPE ty_t_wbcrossgt_test.
@@ -46,6 +48,8 @@ CLASS z2mse_extr_where_used DEFINITION
     DATA g_class_components_where_used TYPE z2mse_extr_classes=>ty_class_components_hashed.
     "! All Web Dynpro ABAP components that where found during where used
     DATA g_web_dynpro_cmpnts_where_used TYPE z2mse_extr_web_dynpro=>ty_web_dynpro_components_hash.
+    "! All Includes (Programs or Functions) that where found during where used
+    DATA g_includes_where_used TYPE z2mse_extr_programs=>ty_includes_hashed.
 
     TYPES: BEGIN OF ty_where_used_name,
              otype           TYPE char2,
@@ -87,10 +91,16 @@ CLASS z2mse_extr_where_used IMPLEMENTATION.
 
 
   METHOD get_components_where_used.
+
     components = g_class_components_where_used.
     CLEAR g_class_components_where_used.
+
     web_dynpro_components = g_web_dynpro_cmpnts_where_used.
     CLEAR g_web_dynpro_cmpnts_where_used.
+
+    includes = g_includes_where_used.
+    CLEAR g_includes_where_used.
+
   ENDMETHOD.
 
 
@@ -163,9 +173,7 @@ CLASS z2mse_extr_where_used IMPLEMENTATION.
             <include_2_component>-controller_name = ls_wd_sourcemap-controller_name.
 
           ELSE.
-            " Is it a program
-
-
+            <include_2_component>-is_program_or_function = abap_true.
           ENDIF.
 
         ENDIF.

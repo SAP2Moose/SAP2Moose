@@ -9,16 +9,18 @@ CLASS z2mse_extr_where_used_classes DEFINITION
 
     TYPES:
       BEGIN OF ty_comp_used_by_element,
-        clsname            TYPE seoclsname,
-        cmpname            TYPE seocmpname,
-        cmptype            TYPE seocmptype,
-        is_class_component TYPE abap_bool,
-        used_by_clsname    TYPE seoclsname,
-        used_by_cmpname    TYPE seocmpname,
-        used_by_cmptype    TYPE seocmptype,
-        is_webdynpro       TYPE abap_bool,
-        component_name     TYPE wdy_component_name,
-        controller_name    TYPE wdy_controller_name,
+        clsname                TYPE seoclsname,
+        cmpname                TYPE seocmpname,
+        cmptype                TYPE seocmptype,
+        is_class_component     TYPE abap_bool,
+        used_by_clsname        TYPE seoclsname,
+        used_by_cmpname        TYPE seocmpname,
+        used_by_cmptype        TYPE seocmptype,
+        is_webdynpro           TYPE abap_bool,
+        component_name         TYPE wdy_component_name,
+        controller_name        TYPE wdy_controller_name,
+        is_program_or_function TYPE abap_bool,
+        include                TYPE programm,
       END OF ty_comp_used_by_element .
     TYPES:
       ty_comps_used_by_elements TYPE STANDARD TABLE OF ty_comp_used_by_element WITH DEFAULT KEY .
@@ -73,7 +75,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr_where_used_classes IMPLEMENTATION.
+CLASS Z2MSE_EXTR_WHERE_USED_CLASSES IMPLEMENTATION.
 
 
   METHOD add_usage_to_model.
@@ -318,6 +320,17 @@ CLASS z2mse_extr_where_used_classes IMPLEMENTATION.
         wdcwu-component_name = include_2_component-component_name.
         wdcwu-controller_name = include_2_component-controller_name.
         INSERT wdcwu INTO TABLE g_web_dynpro_cmpnts_where_used.
+      ELSEIF include_2_component-is_program_or_function EQ abap_true.
+        cubc-is_program_or_function = abap_true.
+        cubc-include = include_2_component-include.
+
+        INSERT cubc INTO TABLE g_comps_used_by_comps.
+
+        data pfwu like LINE OF g_includes_where_used.
+        pfwu-include = include_2_component-include.
+        insert pfwu INTO TABLE g_includes_where_used.
+
+
       ENDIF.
 
     ENDLOOP.

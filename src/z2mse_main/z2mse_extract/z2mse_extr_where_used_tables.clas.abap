@@ -17,14 +17,15 @@ CLASS z2mse_extr_where_used_tables DEFINITION
 
     TYPES:
       BEGIN OF ty_table_used_by_element,
-        table              TYPE tabname,
-        is_class_component TYPE abap_bool,
-        used_by_clsname    TYPE seoclsname,
-        used_by_cmpname    TYPE seocmpname,
-        used_by_cmptype    TYPE seocmptype,
-        is_webdynpro       TYPE abap_bool,
-        component_name     TYPE wdy_component_name,
-        controller_name    TYPE wdy_controller_name,
+        table                  TYPE tabname,
+        is_class_component     TYPE abap_bool,
+        used_by_clsname        TYPE seoclsname,
+        used_by_cmpname        TYPE seocmpname,
+        used_by_cmptype        TYPE seocmptype,
+        is_webdynpro           TYPE abap_bool,
+        component_name         TYPE wdy_component_name,
+        controller_name        TYPE wdy_controller_name,        is_program_or_function TYPE abap_bool,
+        include                TYPE programm,
       END OF ty_table_used_by_element .
     TYPES:
       ty_tables_used_by_elements TYPE STANDARD TABLE OF ty_table_used_by_element WITH DEFAULT KEY.
@@ -156,6 +157,7 @@ CLASS z2mse_extr_where_used_tables IMPLEMENTATION.
         cwu-clsname = tbube-used_by_clsname.
         cwu-cmpname = tbube-used_by_cmpname.
         cwu-cmptype = tbube-used_by_cmptype.
+
         INSERT cwu INTO TABLE g_class_components_where_used.
 
       ELSEIF include_2_component-is_webdynpro EQ abap_true.
@@ -169,7 +171,20 @@ CLASS z2mse_extr_where_used_tables IMPLEMENTATION.
         DATA wdcwu LIKE LINE OF g_web_dynpro_cmpnts_where_used.
         wdcwu-component_name = include_2_component-component_name.
         wdcwu-controller_name = include_2_component-controller_name.
+
         INSERT wdcwu INTO TABLE g_web_dynpro_cmpnts_where_used.
+
+      ELSEIF include_2_component-is_program_or_function EQ abap_true.
+
+        tbube-is_program_or_function = abap_true.
+        tbube-include = include_2_component-include.
+
+        INSERT tbube INTO TABLE g_tables_used_by_elements.
+
+        DATA pfwu LIKE LINE OF g_includes_where_used.
+        pfwu-include = include_2_component-include.
+
+        INSERT pfwu INTO TABLE g_includes_where_used.
 
       ENDIF.
 
