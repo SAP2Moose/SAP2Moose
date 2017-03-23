@@ -5,12 +5,10 @@ CLASS z2mse_extr_programs DEFINITION
 
   PUBLIC SECTION.
 
-    TYPES: BEGIN OF ty_program,
-             program  TYPE progname,
-             devclass TYPE tadir-devclass,
-             exists   TYPE abap_bool,
-           END OF ty_program.
-    TYPES: ty_programs TYPE HASHED TABLE OF ty_program WITH UNIQUE KEY program.
+    TYPES: BEGIN OF ty_program_public,
+             program TYPE progname,
+           END OF ty_program_public.
+    TYPES: ty_programs_public TYPE HASHED TABLE OF ty_program_public WITH UNIQUE KEY program.
     TYPES:
       BEGIN OF ty_tadir_test,
         object   TYPE tadir-object,
@@ -23,8 +21,17 @@ CLASS z2mse_extr_programs DEFINITION
     METHODS select_by_packages
       IMPORTING
         packages TYPE z2mse_extr_packages=>ty_packages.
+    METHODS get_to_do_where_used
+      RETURNING VALUE(programs) TYPE ty_programs_public.
   PROTECTED SECTION.
   PRIVATE SECTION.
+
+    TYPES: BEGIN OF ty_program,
+             program  TYPE progname,
+             devclass TYPE tadir-devclass,
+             exists   TYPE abap_bool,
+           END OF ty_program.
+    TYPES: ty_programs TYPE HASHED TABLE OF ty_program WITH UNIQUE KEY program.
     CONSTANTS: tadir_program TYPE tadir-object VALUE 'PROG' ##NO_TEXT.
     DATA g_selected_programs TYPE ty_programs.
     DATA g_selected_programs_new TYPE ty_programs.
@@ -45,7 +52,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR_PROGRAMS IMPLEMENTATION.
+CLASS z2mse_extr_programs IMPLEMENTATION.
 
 
   METHOD add_and_sort.
@@ -79,14 +86,22 @@ CLASS Z2MSE_EXTR_PROGRAMS IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD _select_from_tadir.
-    DATA: tadirline   TYPE ty_tadir_test,
-          tadirvalues TYPE ty_t_tadir_test.
+    DATA: tadirline        TYPE ty_tadir_test,
+          tadirvalues      TYPE ty_t_tadir_test,
+          selected_program TYPE ty_program.
 
     IF i_packages IS NOT INITIAL.
       SELECT object obj_name devclass FROM tadir INTO CORRESPONDING FIELDS OF TABLE tadirvalues FOR ALL ENTRIES IN i_packages  WHERE
         pgmid = 'R3TR' AND
         devclass = i_packages-package AND
         object = tadir_program.
+
+      LOOP AT tadirvalues INTO tadirline.
+        selected_program-program = tadirline-obj_name.
+        selected_program-devclass = tadirline-devclass.
+        INSERT selected_program INTO TABLE selected_programs.
+        ASSERT sy-subrc EQ 0.
+      ENDLOOP.
 
     ENDIF.
   ENDMETHOD.
@@ -118,4 +133,25 @@ CLASS Z2MSE_EXTR_PROGRAMS IMPLEMENTATION.
     DELETE programs WHERE exists = abap_false.
 
   ENDMETHOD.
+  METHOD get_to_do_where_used.
+    DATA: line        LIKE LINE OF g_selected_programs_new,
+          line_public TYPE ty_program_public.
+    LOOP AT g_selected_programs_new INTO line.
+      CLEAR line_public.
+      line_public-program = line-program.
+      INSERT line_public INTO TABLE programs.
+    ENDLOOP.
+
+    CLEAR g_selected_programs_new.
+*    DATA: line        LIKE LINE OF g_selected_tables_new,
+*          line_public TYPE ty_table_public.
+*    LOOP AT g_selected_tables_new INTO line.
+*      CLEAR line_public.
+*      line_public-tabname = line-tabname.
+*      INSERT line_public INTO TABLE tables.
+*    ENDLOOP.
+*
+*    CLEAR g_selected_tables_new.
+  ENDMETHOD.
+
 ENDCLASS.

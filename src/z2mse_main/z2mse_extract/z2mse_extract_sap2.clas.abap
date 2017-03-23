@@ -16,14 +16,14 @@ CLASS z2mse_extract_sap2 DEFINITION
     "! @parameter i_exclude_found_sap_intf | exclude found interfaces in SAP namespace in the where-used analysis
     METHODS extract
       IMPORTING
-        !i_top_packages        TYPE ty_s_pack
-        !i_sub_packages_filter TYPE ty_s_pack
-        !i_search_sub_packages TYPE abap_bool
-        i_search_up            TYPE i
+        !i_top_packages          TYPE ty_s_pack
+        !i_sub_packages_filter   TYPE ty_s_pack
+        !i_search_sub_packages   TYPE abap_bool
+        i_search_up              TYPE i
         i_exclude_found_sap_intf TYPE abap_bool
       EXPORTING
-        !mse_model             TYPE z2mse_model=>lines_type
-        VALUE(nothing_done)    TYPE abap_bool .
+        !mse_model               TYPE z2mse_model=>lines_type
+        VALUE(nothing_done)      TYPE abap_bool .
   PROTECTED SECTION.
   PRIVATE SECTION.
     DATA model            TYPE REF TO z2mse_model.
@@ -40,7 +40,9 @@ CLASS z2mse_extract_sap2 DEFINITION
         i_search_sub_packages TYPE abap_bool
         i_extract_packages    TYPE REF TO z2mse_extr_packages
         i_extract_classes     TYPE REF TO z2mse_extr_classes
-        i_extract_tables      TYPE REF TO z2mse_extr_tables.
+        i_extract_tables      TYPE REF TO z2mse_extr_tables
+        i_extract_programs    TYPE REF TO z2mse_extr_programs
+        i_extract_functions   TYPE REF TO z2mse_extr_functions.
     "! @parameter i_search_up | how often is a upward searched in the where-used-information to be repeated. Search infinite if < 0
     METHODS _get_using_elements
       IMPORTING
@@ -64,7 +66,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
+CLASS z2mse_extract_sap2 IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -106,6 +108,14 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
       CREATE OBJECT extract_web_dynpro.
     END-TEST-SEAM.
 
+    DATA extract_programs TYPE REF TO z2mse_extr_programs.
+
+    CREATE OBJECT extract_programs.
+
+    DATA extract_functions TYPE REF TO z2mse_extr_functions.
+
+    CREATE OBJECT extract_functions.
+
     DATA extract_where_used_classes TYPE REF TO z2mse_extr_where_used_classes.
 
     TEST-SEAM creator_where_used_classes.
@@ -123,7 +133,9 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
                                    i_search_sub_packages = i_search_sub_packages
                                    i_extract_packages    = extract_packages
                                    i_extract_classes     = extract_classes
-                                   i_extract_tables      = extract_tables ).
+                                   i_extract_tables      = extract_tables
+                                   i_extract_programs    = extract_programs
+                                   i_extract_functions   = extract_functions ).
 
     _get_using_elements( i_extract_classes            = extract_classes
                          i_extract_tables             = extract_tables
@@ -247,6 +259,10 @@ CLASS Z2MSE_EXTRACT_SAP2 IMPLEMENTATION.
     i_extract_classes->select_classes_by_packages( packages = i_extract_packages->g_selected_packages ).
 
     i_extract_tables->select_tables_by_packages( packages = i_extract_packages->g_selected_packages ).
+
+    i_extract_programs->select_by_packages( packages = i_extract_packages->g_selected_packages ).
+
+    i_extract_functions->select_by_packages( packages = i_extract_packages->g_selected_packages ).
 
   ENDMETHOD.
 ENDCLASS.
