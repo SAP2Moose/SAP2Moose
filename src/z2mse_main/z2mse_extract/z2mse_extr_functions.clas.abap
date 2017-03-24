@@ -26,6 +26,9 @@ CLASS z2mse_extr_functions DEFINITION
     METHODS select_by_packages
       IMPORTING
         packages TYPE z2mse_extr_packages=>ty_packages.
+    METHODS select_by_includes
+      IMPORTING
+        includes TYPE ty_includes_hashed.
     METHODS get_to_do_where_used
       RETURNING VALUE(functions) TYPE ty_function_groups_compts_hash.
   PROTECTED SECTION.
@@ -183,6 +186,10 @@ CLASS z2mse_extr_functions IMPLEMENTATION.
       ENDLOOP.
 
     ENDIF.
+  ENDMETHOD.
+
+  METHOD select_by_includes.
+
   ENDMETHOD.
 
   METHOD _read_function_group_comps.
