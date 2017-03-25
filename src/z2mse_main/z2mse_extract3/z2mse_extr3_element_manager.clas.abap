@@ -11,11 +11,12 @@ CLASS z2mse_extr3_element_manager DEFINITION
     "! Add the element if it is not already part of the model.
     METHODS add_element
       IMPORTING
-        element_specification TYPE REF TO z2mse_extr3_element_specifictn.
-    methods add_association
+                element           TYPE REF TO z2mse_extr3_elements
+      RETURNING VALUE(element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
+    METHODS add_association
       IMPORTING
-        element_specification_1 TYPE REF TO z2mse_extr3_element_specifictn
-        element_specification_2 TYPE REF TO z2mse_extr3_element_specifictn
+        element_specification_1   TYPE REF TO z2mse_extr3_element_specifictn
+        element_specification_2   TYPE REF TO z2mse_extr3_element_specifictn
         association_specification TYPE REF TO z2mse_extr3_association_spec.
 
   PROTECTED SECTION.
@@ -41,7 +42,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
+CLASS z2mse_extr3_element_manager IMPLEMENTATION.
 
 
   METHOD add_association.
@@ -50,6 +51,12 @@ CLASS Z2MSE_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
 
 
   METHOD add_element.
+
+    DATA element_line TYPE object_type.
+    element_line-obj_id = next_object_id.
+    element_line-object =  element.
+    INSERT element_line INTO TABLE objects.
+    ADD 1 TO next_object_id.
 
   ENDMETHOD.
 

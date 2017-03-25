@@ -3,12 +3,12 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>Z2MSE_EXTR3_PACKAGES</CLSNAME>
+    <CLSNAME>Z2MSE_EXTR3</CLSNAME>
     <VERSION>1</VERSION>
     <LANGU>E</LANGU>
-    <DESCRIPT>Database Tables</DESCRIPT>
+    <DESCRIPT>Classes that need the Element Manager</DESCRIPT>
+    <EXPOSURE>1</EXPOSURE>
     <STATE>1</STATE>
-    <CLSFINAL>X</CLSFINAL>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
     <UNICODE>X</UNICODE>

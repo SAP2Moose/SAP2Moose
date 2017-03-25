@@ -27,6 +27,23 @@ CLASS z2mse_extract3 IMPLEMENTATION.
 
   METHOD extract.
 
+    DATA element_manager TYPE REF TO z2mse_extr3_element_manager.
+
+    DATA package_spec TYPE REF TO z2mse_extr3_package_spec.
+    CREATE OBJECT element_manager.
+
+    package_spec = z2mse_extr3_package_spec=>get_instance( i_element_manager = element_manager ).
+
+    DATA: packages TYPE z2mse_extr3_initial_elements=>ty_packages,
+          package  TYPE z2mse_extr3_initial_elements=>ty_package.
+
+    packages = initial_elements->get_selected( ).
+
+    loop at packages INTO package.
+
+      package_spec->add( IMPORTING package = package-package ).
+
+    ENDLOOP.
   ENDMETHOD.
 
 ENDCLASS.

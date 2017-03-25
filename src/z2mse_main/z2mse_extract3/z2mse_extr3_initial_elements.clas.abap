@@ -4,6 +4,13 @@ CLASS z2mse_extr3_initial_elements DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+
+    TYPES: BEGIN OF ty_package,
+             package       TYPE devclass,
+             parentpackage TYPE parentcl,
+           END OF ty_package.
+    TYPES ty_packages TYPE HASHED TABLE OF ty_package WITH UNIQUE KEY package.
+
     TYPES: ty_s_pack TYPE RANGE OF tadir-devclass .
     TYPES:
       BEGIN OF ty_tdevc_test,
@@ -13,10 +20,13 @@ CLASS z2mse_extr3_initial_elements DEFINITION
     TYPES ty_t_tdevc_test TYPE HASHED TABLE OF ty_tdevc_test WITH UNIQUE KEY devclass.
     METHODS select_packages
       IMPORTING
-        !top_packages           TYPE ty_s_pack
-        !sub_packages_filter    TYPE ty_s_pack OPTIONAL
-        !including_sub_packages TYPE abap_bool DEFAULT abap_false.
-            "! @parameter tdevc_test | provide test data for table TDEVC during unit tests.
+                !top_packages           TYPE ty_s_pack
+                !sub_packages_filter    TYPE ty_s_pack OPTIONAL
+                !including_sub_packages TYPE abap_bool DEFAULT abap_false.
+    METHODS get_selected
+      RETURNING VALUE(r_packages)       TYPE ty_packages.
+
+    "! @parameter tdevc_test | provide test data for table TDEVC during unit tests.
     METHODS constructor
       IMPORTING
         !tdevc_test TYPE ty_t_tdevc_test OPTIONAL.
@@ -24,11 +34,6 @@ CLASS z2mse_extr3_initial_elements DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    TYPES: BEGIN OF ty_package,
-             package       TYPE devclass,
-             parentpackage TYPE parentcl,
-           END OF ty_package.
-    TYPES ty_packages TYPE HASHED TABLE OF ty_package WITH UNIQUE KEY package.
     TYPES: BEGIN OF ty_package_store,
              package           TYPE devclass,
              parentpackage     TYPE parentcl,
@@ -187,6 +192,12 @@ CLASS z2mse_extr3_initial_elements IMPLEMENTATION.
       g_tdevc_test = tdevc_test.
       g_is_test = abap_true.
     ENDIF.
+
+  ENDMETHOD.
+
+  METHOD get_selected.
+
+    r_packages = g_selected_packages.
 
   ENDMETHOD.
 
