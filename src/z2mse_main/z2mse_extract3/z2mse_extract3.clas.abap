@@ -5,6 +5,8 @@ CLASS z2mse_extract3 DEFINITION
 
   PUBLIC SECTION.
 
+    METHODS constructor.
+
     "! Main start to do the extraction
     "! @parameter i_search_up | how often is a upward searched in the where-used-information to be repeated. Search infinite if < 0
     "! @parameter i_exclude_found_sap_intf | exclude found interfaces in SAP namespace in the where-used analysis
@@ -44,6 +46,13 @@ CLASS z2mse_extract3 IMPLEMENTATION.
       package_spec->add( IMPORTING package = package-package ).
 
     ENDLOOP.
+
+    mse_model = element_manager->make_model( ).
+
+  ENDMETHOD.
+
+  METHOD constructor.
+
   ENDMETHOD.
 
 ENDCLASS.
