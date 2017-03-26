@@ -67,6 +67,7 @@ CLASS Z2MSE_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
 
     DATA element_line TYPE element_type.
     element_line-element_id = next_element_id.
+    element_id = next_element_id.
     element_line-element =  element.
     INSERT element_line INTO TABLE elements.
     ADD 1 TO next_element_id.
@@ -107,9 +108,13 @@ CLASS Z2MSE_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
         INSERT association INTO TABLE associations.
       ENDLOOP.
 
-      element-element->make_model( associations = associations ).
+      element-element->make_model( element_id = element-element_id
+                                   associations = associations ).
 
     ENDLOOP.
+
+
+    model->make_mse( IMPORTING mse_model = r_result ).
 
   ENDMETHOD.
 ENDCLASS.

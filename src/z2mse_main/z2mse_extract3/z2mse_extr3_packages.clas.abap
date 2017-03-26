@@ -11,6 +11,7 @@ CLASS z2mse_extr3_packages DEFINITION
       RETURNING VALUE(instance)   TYPE REF TO z2mse_extr3_packages.
     METHODS add
       EXPORTING package TYPE devclass.
+    METHODS make_model REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     TYPES: BEGIN OF element_type,
@@ -46,6 +47,17 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
       INSERT element INTO TABLE elements_devclass.
 
     ENDIF.
+
+  ENDMETHOD.
+
+  METHOD make_model.
+
+    data element TYPE element_type.
+
+    READ TABLE elements_element_id INTO element with TABLE KEY element_id = element_id.
+    ASSERT sy-subrc eq 0.
+
+      element_manager->famix_package->add( name = element-devclass ).
 
   ENDMETHOD.
 

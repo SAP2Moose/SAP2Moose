@@ -8,6 +8,7 @@ CLASS z2mse_extr3_elements DEFINITION
 
     METHODS make_model
       IMPORTING
+        element_id TYPE z2mse_extr3_element_manager=>element_id_type
         associations TYPE z2mse_extr3_element_manager=>associations_type.
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -16,11 +17,10 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_elements IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_ELEMENTS IMPLEMENTATION.
 
 
   METHOD make_model.
 
   ENDMETHOD.
-
 ENDCLASS.
