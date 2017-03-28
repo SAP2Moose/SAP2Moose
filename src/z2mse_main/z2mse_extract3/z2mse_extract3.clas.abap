@@ -1,3 +1,4 @@
+"! I am the starting point for an extraction. I am called from the main report.
 CLASS z2mse_extract3 DEFINITION
   PUBLIC
   FINAL
@@ -27,32 +28,39 @@ ENDCLASS.
 CLASS z2mse_extract3 IMPLEMENTATION.
 
 
+  METHOD constructor.
+
+  ENDMETHOD.
+
+
   METHOD extract.
 
+    DATA model_builder TYPE REF TO z2mse_extr3_model_builder.
+    CREATE OBJECT model_builder.
+
+    model_builder->initial_selection_started( ).
+
     DATA element_manager TYPE REF TO z2mse_extr3_element_manager.
+    CREATE OBJECT element_manager EXPORTING i_model_builder = model_builder.
 
-    DATA package_spec TYPE REF TO z2mse_extr3_package_spec.
-    CREATE OBJECT element_manager.
+    DATA package_builder TYPE REF TO z2mse_extr3_package_builder.
 
-    package_spec = z2mse_extr3_package_spec=>get_instance( i_element_manager = element_manager ).
+    package_builder = z2mse_extr3_package_builder=>get_instance( i_element_manager = element_manager ).
 
     DATA: packages TYPE z2mse_extr3_initial_elements=>ty_packages,
           package  TYPE z2mse_extr3_initial_elements=>ty_package.
 
     packages = initial_elements->get_selected( ).
 
-    loop at packages INTO package.
+    LOOP AT packages INTO package.
 
-      package_spec->add( IMPORTING package = package-package ).
+      package_builder->add( IMPORTING package = package-package ).
 
     ENDLOOP.
+
+    model_builder->search( ).
 
     mse_model = element_manager->make_model( ).
 
   ENDMETHOD.
-
-  METHOD constructor.
-
-  ENDMETHOD.
-
 ENDCLASS.

@@ -1,6 +1,7 @@
-CLASS z2mse_extr3_package_spec DEFINITION
+"! I build elements of type package
+CLASS z2mse_extr3_package_builder DEFINITION
   PUBLIC
-  INHERITING FROM z2mse_extr3_element_specifictn
+  INHERITING FROM z2mse_extr3_element_builder
   FINAL
   CREATE PRIVATE.
 
@@ -8,12 +9,12 @@ CLASS z2mse_extr3_package_spec DEFINITION
     CLASS-METHODS get_instance
       IMPORTING
                 i_element_manager TYPE REF TO z2mse_extr3_element_manager
-      RETURNING VALUE(instance)   TYPE REF TO z2mse_extr3_package_spec.
+      RETURNING VALUE(instance)   TYPE REF TO z2mse_extr3_package_builder.
     METHODS add
       EXPORTING package TYPE devclass.
   PROTECTED SECTION.
   PRIVATE SECTION.
-    CLASS-DATA instance TYPE REF TO z2mse_extr3_package_spec.
+    CLASS-DATA instance TYPE REF TO z2mse_extr3_package_builder.
     DATA packages TYPE REF TO z2mse_extr3_packages.
     METHODS constructor
       IMPORTING
@@ -22,7 +23,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_package_spec IMPLEMENTATION.
+CLASS z2mse_extr3_package_builder IMPLEMENTATION.
 
   METHOD get_instance.
 

@@ -3,13 +3,12 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>Z2MSE_EXTR3_LEVELS</CLSNAME>
+    <CLSNAME>Z2MSE_EXTR3_ELEMENT_BUILDER</CLSNAME>
     <VERSION>1</VERSION>
     <LANGU>E</LANGU>
-    <DESCRIPT>Levels where elements where found</DESCRIPT>
+    <DESCRIPT>Specification of an requiremen element</DESCRIPT>
     <EXPOSURE>2</EXPOSURE>
     <STATE>1</STATE>
-    <CLSFINAL>X</CLSFINAL>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
     <UNICODE>X</UNICODE>

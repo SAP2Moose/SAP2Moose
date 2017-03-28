@@ -1,3 +1,4 @@
+"! I am the top superclass for all classes that require the element manager.
 CLASS z2mse_extr3 DEFINITION
   PUBLIC
   CREATE PROTECTED .

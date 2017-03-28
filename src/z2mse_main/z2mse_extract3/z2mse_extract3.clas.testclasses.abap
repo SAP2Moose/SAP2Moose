@@ -7,16 +7,11 @@ CLASS ltcl_main DEFINITION FINAL FOR TESTING
   PRIVATE SECTION.
     DATA: f_cut TYPE REF TO z2mse_extract3.
     METHODS:
-      first_test FOR TESTING RAISING cx_static_check,
       z2mse_test_initial_selection FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
 
 CLASS ltcl_main IMPLEMENTATION.
-
-  METHOD first_test.
-    cl_abap_unit_assert=>fail( 'Implement your first test here' ).
-  ENDMETHOD.
 
   METHOD z2mse_test_initial_selection.
 

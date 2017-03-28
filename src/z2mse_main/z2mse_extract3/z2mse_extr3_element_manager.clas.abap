@@ -21,7 +21,8 @@ CLASS z2mse_extr3_element_manager DEFINITION
            END OF association_type.
     TYPES associations_type TYPE STANDARD TABLE OF association_type WITH DEFAULT KEY.
 
-    METHODS constructor.
+    METHODS constructor
+      IMPORTING i_model_builder TYPE REF TO z2mse_extr3_model_builder.
     "! Call if an element might be added.
     "! Add the element if it is not already part of the model.
     METHODS add_element
@@ -30,19 +31,20 @@ CLASS z2mse_extr3_element_manager DEFINITION
       RETURNING VALUE(element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
     METHODS add_association
       IMPORTING
-        element_specification_1   TYPE REF TO z2mse_extr3_element_specifictn
-        element_specification_2   TYPE REF TO z2mse_extr3_element_specifictn
-        association_specification TYPE REF TO z2mse_extr3_association_spec.
+        element_specification_1   TYPE REF TO z2mse_extr3_element_builder
+        element_specification_2   TYPE REF TO z2mse_extr3_element_builder
+        association_specification TYPE REF TO z2mse_extr3_association_build.
     METHODS make_model
       RETURNING
         VALUE(r_result) TYPE z2mse_model=>lines_type.
+
 
   PROTECTED SECTION.
   PRIVATE SECTION.
     TYPES: BEGIN OF element_type,
              element_id TYPE element_id_type,
              "! A reference to the instance that handles this object
-             element     TYPE REF TO z2mse_extr3_elements,
+             element    TYPE REF TO z2mse_extr3_elements,
            END OF element_type.
     TYPES elements_type TYPE HASHED TABLE OF element_type WITH UNIQUE KEY element_id.
     DATA elements TYPE elements_type.
@@ -51,34 +53,18 @@ CLASS z2mse_extr3_element_manager DEFINITION
     DATA associations1 TYPE associations1_type.
     DATA associations2 TYPE associations2_type.
     DATA next_element_id TYPE i.
+    data model_builder TYPE REF TO z2mse_extr3_model_builder.
 ENDCLASS.
 
 
 
 CLASS Z2MSE_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
 
-
-  METHOD add_association.
-
-  ENDMETHOD.
-
-
-  METHOD add_element.
-
-    DATA element_line TYPE element_type.
-    element_line-element_id = next_element_id.
-    element_id = next_element_id.
-    element_line-element =  element.
-    INSERT element_line INTO TABLE elements.
-    ADD 1 TO next_element_id.
-
-  ENDMETHOD.
-
-
   METHOD constructor.
+
+    model_builder = i_model_builder.
+
     next_element_id = 1.
-
-
 
     CREATE OBJECT model.
 
@@ -91,6 +77,24 @@ CLASS Z2MSE_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD add_element.
+
+    DATA element_line TYPE element_type.
+    element_line-element_id = next_element_id.
+    element_id = next_element_id.
+    element_line-element =  element.
+    INSERT element_line INTO TABLE elements.
+
+    model_builder->new_element_id( element_id ).
+
+    ADD 1 TO next_element_id.
+
+  ENDMETHOD.
+
+
+  METHOD add_association.
+
+  ENDMETHOD.
 
   METHOD make_model.
 
@@ -117,4 +121,7 @@ CLASS Z2MSE_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
     model->make_mse( IMPORTING mse_model = r_result ).
 
   ENDMETHOD.
+
+
+
 ENDCLASS.

@@ -1,3 +1,4 @@
+"! I describe an element of type package
 CLASS z2mse_extr3_packages DEFINITION
   PUBLIC
   INHERITING FROM z2mse_extr3_elements
@@ -23,15 +24,10 @@ CLASS z2mse_extr3_packages DEFINITION
     DATA elements_devclass TYPE HASHED TABLE OF element_type WITH UNIQUE KEY devclass.
 ENDCLASS.
 
-CLASS z2mse_extr3_packages IMPLEMENTATION.
-  METHOD get_instance.
-    IF instance IS NOT BOUND.
-      CREATE OBJECT instance
-        EXPORTING
-          i_element_manager = i_element_manager.
-    ENDIF.
-    instance = instance.
-  ENDMETHOD.
+
+
+CLASS Z2MSE_EXTR3_PACKAGES IMPLEMENTATION.
+
 
   METHOD add.
 
@@ -50,6 +46,17 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD get_instance.
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = i_element_manager.
+    ENDIF.
+    instance = instance.
+  ENDMETHOD.
+
+
   METHOD make_model.
 
     data element TYPE element_type.
@@ -60,5 +67,4 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
       element_manager->famix_package->add( name = element-devclass ).
 
   ENDMETHOD.
-
 ENDCLASS.

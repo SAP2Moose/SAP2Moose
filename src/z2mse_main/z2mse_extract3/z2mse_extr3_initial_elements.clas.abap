@@ -1,3 +1,4 @@
+"! I build all initial elements that are the starting point for searching further elements.
 CLASS z2mse_extr3_initial_elements DEFINITION
   PUBLIC
   FINAL
