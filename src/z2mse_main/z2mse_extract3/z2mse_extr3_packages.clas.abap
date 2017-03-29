@@ -10,14 +10,22 @@ CLASS z2mse_extr3_packages DEFINITION
       IMPORTING
                 i_element_manager TYPE REF TO z2mse_extr3_element_manager
       RETURNING VALUE(instance)   TYPE REF TO z2mse_extr3_packages.
+    METHODS constructor
+      IMPORTING
+        i_element_manager TYPE REF TO z2mse_extr3_element_manager.
     METHODS add
       EXPORTING package TYPE devclass.
+    METHODS devclass
+      IMPORTING
+        i_element_id    TYPE i
+      RETURNING
+        VALUE(r_result) TYPE devclass.
     METHODS make_model REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     TYPES: BEGIN OF element_type,
-             element_id   TYPE z2mse_extr3_element_manager=>element_id_type,
-             devclass TYPE devclass,
+             element_id TYPE z2mse_extr3_element_manager=>element_id_type,
+             devclass   TYPE devclass,
            END OF element_type.
     DATA instance TYPE REF TO z2mse_extr3_packages.
     DATA elements_element_id TYPE HASHED TABLE OF element_type WITH UNIQUE KEY element_id.
@@ -26,7 +34,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_PACKAGES IMPLEMENTATION.
+CLASS z2mse_extr3_packages IMPLEMENTATION.
 
 
   METHOD add.
@@ -47,6 +55,12 @@ CLASS Z2MSE_EXTR3_PACKAGES IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD constructor.
+    super->constructor( i_element_manager = i_element_manager ).
+    type = package_type.
+  ENDMETHOD.
+
+
   METHOD get_instance.
     IF instance IS NOT BOUND.
       CREATE OBJECT instance
@@ -59,12 +73,24 @@ CLASS Z2MSE_EXTR3_PACKAGES IMPLEMENTATION.
 
   METHOD make_model.
 
-    data element TYPE element_type.
+    DATA element TYPE element_type.
 
-    READ TABLE elements_element_id INTO element with TABLE KEY element_id = element_id.
-    ASSERT sy-subrc eq 0.
+    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
+    ASSERT sy-subrc EQ 0.
 
-      element_manager->famix_package->add( name = element-devclass ).
+    element_manager->famix_package->add( name = element-devclass ).
 
   ENDMETHOD.
+
+  METHOD devclass.
+
+    DATA element TYPE element_type.
+
+    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = i_element_id.
+    ASSERT sy-subrc EQ 0.
+
+    r_result = element-devclass.
+
+  ENDMETHOD.
+
 ENDCLASS.

@@ -43,6 +43,8 @@ CLASS z2mse_extract3 IMPLEMENTATION.
     DATA element_manager TYPE REF TO z2mse_extr3_element_manager.
     CREATE OBJECT element_manager EXPORTING i_model_builder = model_builder.
 
+    model_builder->initialize( element_manager = element_manager ).
+
     DATA package_builder TYPE REF TO z2mse_extr3_package_builder.
 
     package_builder = z2mse_extr3_package_builder=>get_instance( i_element_manager = element_manager ).

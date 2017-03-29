@@ -6,9 +6,13 @@ CLASS z2mse_extr3_elements DEFINITION
 
   PUBLIC SECTION.
 
+    DATA type TYPE c LENGTH 30.
+
+    CONSTANTS: package_type LIKE type VALUE 'package'.
+
     METHODS make_model
       IMPORTING
-        element_id TYPE z2mse_extr3_element_manager=>element_id_type
+        element_id   TYPE z2mse_extr3_element_manager=>element_id_type
         associations TYPE z2mse_extr3_element_manager=>associations_type.
   PROTECTED SECTION.
   PRIVATE SECTION.
