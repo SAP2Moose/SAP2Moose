@@ -5,6 +5,10 @@ CLASS z2mse_extr3_association DEFINITION
   INHERITING FROM z2mse_extr3.
 
   PUBLIC SECTION.
+
+    DATA type TYPE c LENGTH 30 READ-ONLY.
+
+    CONSTANTS: parent_package_ass LIKE type VALUE 'parent_package'.
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.

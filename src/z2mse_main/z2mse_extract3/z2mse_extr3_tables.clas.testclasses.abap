@@ -50,6 +50,13 @@ CLASS ltcl_main IMPLEMENTATION.
                                         exp = z2mse_extr3_elements=>table_type
                                         act = r_result->type ).
 
+    " Now add parent package to check correct building of FAMIX element
+
+    data package TYPE REF TO z2mse_extr3_packages.
+    package = z2mse_extr3_packages=>get_instance( i_element_manager = element_manager ).
+*    package->add( package = |PACKAGE1| ).
+
+
     DATA: mse_model_act TYPE z2mse_model=>lines_type.
 
     mse_model_act = element_manager->make_model( ).

@@ -45,9 +45,9 @@ CLASS z2mse_extract3 IMPLEMENTATION.
 
     model_builder->initialize( element_manager = element_manager ).
 
-    DATA package_builder TYPE REF TO z2mse_extr3_package_builder.
+    DATA packages_elements TYPE REF TO z2mse_extr3_packages.
 
-    package_builder = z2mse_extr3_package_builder=>get_instance( i_element_manager = element_manager ).
+    packages_elements = z2mse_extr3_packages=>get_instance( i_element_manager = element_manager ).
 
     DATA: packages TYPE z2mse_extr3_initial_elements=>ty_packages,
           package  TYPE z2mse_extr3_initial_elements=>ty_package.
@@ -56,7 +56,7 @@ CLASS z2mse_extract3 IMPLEMENTATION.
 
     LOOP AT packages INTO package.
 
-      package_builder->add( IMPORTING package = package-package ).
+      packages_elements->add( EXPORTING package = package-package ).
 
     ENDLOOP.
 

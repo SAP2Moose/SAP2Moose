@@ -35,7 +35,8 @@ CLASS ltcl_main IMPLEMENTATION.
       sy-subrc = 0.
     END-TEST-INJECTION.
 
-    is_added = f_cut->add( EXPORTING package = 'PACKAGE_A' ).
+    f_cut->add( EXPORTING package  = 'PACKAGE_A'
+                IMPORTING is_added = is_added ).
 
     cl_abap_unit_assert=>assert_equals( msg = 'Expect to be found' exp = abap_true act = is_added ).
 

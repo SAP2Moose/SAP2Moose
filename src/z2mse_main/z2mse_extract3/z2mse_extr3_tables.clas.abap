@@ -17,10 +17,10 @@ CLASS z2mse_extr3_tables DEFINITION
         i_element_manager TYPE REF TO z2mse_extr3_element_manager.
     METHODS add
       IMPORTING
-        table           TYPE tabname
+        table                 TYPE tabname
       EXPORTING
-        VALUE(is_added) TYPE abap_bool
-        new_element_id TYPE z2mse_extr3_element_manager=>element_id_type.
+        VALUE(is_added)       TYPE abap_bool
+        VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
     METHODS table_name
       IMPORTING
         i_element_id    TYPE i
@@ -29,7 +29,7 @@ CLASS z2mse_extr3_tables DEFINITION
     METHODS make_model REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
-    class-data instance TYPE REF TO z2mse_extr3_tables.
+    CLASS-DATA instance TYPE REF TO z2mse_extr3_tables.
     TYPES: BEGIN OF element_type,
              element_id TYPE z2mse_extr3_element_manager=>element_id_type,
              tabname    TYPE tabname,
@@ -40,7 +40,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_TABLES IMPLEMENTATION.
+CLASS z2mse_extr3_tables IMPLEMENTATION.
 
 
   METHOD add.
@@ -109,8 +109,17 @@ CLASS Z2MSE_EXTR3_TABLES IMPLEMENTATION.
                                                  name                   = element-tabname
                                                  modifiers              = z2mse_extract_sap2=>modifier_dbtable
                                        IMPORTING id         = last_id ).
-*      element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
-*                                                 parent_package     = table-devclass ).
+    DATA association TYPE z2mse_extr3_element_manager=>association_type.
+    LOOP AT associations INTO association WHERE element_id1 = element_id
+                                            AND association->type = z2mse_extr3_association=>parent_package_ass.
+      DATA package TYPE REF TO z2mse_extr3_packages.
+      package ?= element_manager->get_element( i_element_id = association-element_id2 ).
+
+      element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
+                                                 parent_package     = package->devclass( i_element_id = association-element_id2 ) ).
+
+    ENDLOOP.
+
     DATA dummy_attribute_id TYPE i.
     " SAP_2_FAMIX_56      Add a dummy attribute with the name of the table
     element_manager->famix_attribute->add( EXPORTING name                   = element-tabname

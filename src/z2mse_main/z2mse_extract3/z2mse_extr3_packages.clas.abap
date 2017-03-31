@@ -14,9 +14,9 @@ CLASS z2mse_extr3_packages DEFINITION
       IMPORTING
         i_element_manager TYPE REF TO z2mse_extr3_element_manager.
     METHODS add
-      IMPORTING package         TYPE devclass
-      RETURNING
-                VALUE(is_added) TYPE abap_bool.
+      IMPORTING package               TYPE devclass
+      EXPORTING VALUE(is_added)       TYPE abap_bool
+                VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
     METHODS devclass
       IMPORTING
         i_element_id    TYPE i
@@ -54,7 +54,6 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
       IF sy-subrc EQ 0.
         is_added = abap_true.
 
-        DATA new_element_id TYPE z2mse_extr3_element_manager=>element_id_type.
         new_element_id = element_manager->add_element( element = me ).
 
         DATA element TYPE element_type.

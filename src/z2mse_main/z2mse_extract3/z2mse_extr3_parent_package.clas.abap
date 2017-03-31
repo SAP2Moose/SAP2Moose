@@ -54,5 +54,6 @@ CLASS z2mse_extr3_parent_package IMPLEMENTATION.
           i_element_manager = i_element_manager.
     ENDIF.
     instance = instance.
+    instance->type = parent_package_ass.
   ENDMETHOD.
 ENDCLASS.

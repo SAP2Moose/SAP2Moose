@@ -19,7 +19,7 @@ CLASS z2mse_extr3_element_manager DEFINITION
              element_id2 TYPE element_id_type,
              association TYPE REF TO z2mse_extr3_association,
            END OF association_type.
-    TYPES associations_type TYPE STANDARD TABLE OF association_type WITH DEFAULT KEY.
+    TYPES associations_type TYPE STANDARD TABLE OF association_type WITH KEY element_id1 element_id2 association.
     METHODS constructor
       IMPORTING i_model_builder TYPE REF TO z2mse_extr3_model_builder.
     "! Call if an element might be added.
@@ -93,7 +93,7 @@ CLASS z2mse_extr3_element_manager IMPLEMENTATION.
     element_line-element =  element.
     INSERT element_line INTO TABLE elements.
 
-      model_builder->new_element_id( element_id ).
+    model_builder->new_element_id( element_id ).
 
     ADD 1 TO next_element_id.
 
@@ -132,6 +132,9 @@ CLASS z2mse_extr3_element_manager IMPLEMENTATION.
       INSERT association INTO TABLE associations.
     ENDLOOP.
 
+    SORT associations.
+    DELETE ADJACENT DUPLICATES FROM associations.
+
   ENDMETHOD.
 
   METHOD make_model.
@@ -142,13 +145,7 @@ CLASS z2mse_extr3_element_manager IMPLEMENTATION.
 
     LOOP AT elements INTO element.
 
-      LOOP AT associations1 INTO association WHERE element_id1 = element-element_id.
-        INSERT association INTO TABLE associations.
-      ENDLOOP.
-
-      LOOP AT associations2 INTO association WHERE element_id2 = element-element_id.
-        INSERT association INTO TABLE associations.
-      ENDLOOP.
+      associations = get_associations( i_element_id = element-element_id ).
 
       element-element->make_model( element_id = element-element_id
                                    associations = associations ).

@@ -42,6 +42,10 @@ CLASS ltcl_main IMPLEMENTATION.
                                       element_2   = 2
                                       association = association ).
 
+    f_cut->add_association( EXPORTING element_1   = 1
+                                      element_2   = 2
+                                      association = association ).
+
     DATA: associations_act TYPE z2mse_extr3_element_manager=>associations_type,
           associations_exp TYPE z2mse_extr3_element_manager=>associations_type.
 
