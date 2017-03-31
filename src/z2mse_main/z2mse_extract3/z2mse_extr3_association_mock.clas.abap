@@ -1,0 +1,15 @@
+CLASS z2mse_extr3_association_mock DEFINITION
+  PUBLIC
+  INHERITING FROM z2mse_extr3_association
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS z2mse_extr3_association_mock IMPLEMENTATION.
+ENDCLASS.

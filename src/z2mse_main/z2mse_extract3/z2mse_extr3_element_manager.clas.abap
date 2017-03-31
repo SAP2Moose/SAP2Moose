@@ -68,49 +68,6 @@ ENDCLASS.
 
 CLASS z2mse_extr3_element_manager IMPLEMENTATION.
 
-
-  METHOD add_association.
-
-    DATA line TYPE association_type.
-    line-element_id1 = element_1.
-    line-element_id2 = element_2.
-    line-association = association.
-    INSERT line INTO TABLE associations1.
-    INSERT line INTO TABLE associations2.
-
-  ENDMETHOD.
-
-  METHOD get_associations.
-    DATA association TYPE association_type.
-
-    LOOP AT associations1 INTO association
-      WHERE element_id1 = i_element_id.
-      INSERT association INTO TABLE associations.
-    ENDLOOP.
-
-    LOOP AT associations2 INTO association
-      WHERE element_id2 = i_element_id.
-      INSERT association INTO TABLE associations.
-    ENDLOOP.
-
-  ENDMETHOD.
-
-
-  METHOD add_element.
-
-    DATA element_line TYPE element_type.
-    element_line-element_id = next_element_id.
-    element_id = next_element_id.
-    element_line-element =  element.
-    INSERT element_line INTO TABLE elements.
-
-      model_builder->new_element_id( element_id ).
-
-    ADD 1 TO next_element_id.
-
-  ENDMETHOD.
-
-
   METHOD constructor.
 
     model_builder = i_model_builder.
@@ -128,6 +85,19 @@ CLASS z2mse_extr3_element_manager IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD add_element.
+
+    DATA element_line TYPE element_type.
+    element_line-element_id = next_element_id.
+    element_id = next_element_id.
+    element_line-element =  element.
+    INSERT element_line INTO TABLE elements.
+
+      model_builder->new_element_id( element_id ).
+
+    ADD 1 TO next_element_id.
+
+  ENDMETHOD.
 
   METHOD get_element.
 
@@ -140,6 +110,29 @@ CLASS z2mse_extr3_element_manager IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD add_association.
+
+    DATA line TYPE association_type.
+    line-element_id1 = element_1.
+    line-element_id2 = element_2.
+    line-association = association.
+    INSERT line INTO TABLE associations1.
+    INSERT line INTO TABLE associations2.
+
+  ENDMETHOD.
+
+  METHOD get_associations.
+    DATA association TYPE association_type.
+
+    LOOP AT associations1 INTO association WHERE element_id1 = i_element_id.
+      INSERT association INTO TABLE associations.
+    ENDLOOP.
+
+    LOOP AT associations2 INTO association WHERE element_id2 = i_element_id.
+      INSERT association INTO TABLE associations.
+    ENDLOOP.
+
+  ENDMETHOD.
 
   METHOD make_model.
 
