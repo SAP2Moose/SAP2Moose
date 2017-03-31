@@ -12,9 +12,6 @@ CLASS z2mse_extr3_tables DEFINITION
         i_element_manager TYPE REF TO z2mse_extr3_element_manager
       RETURNING
         VALUE(instance)   TYPE REF TO z2mse_extr3_tables.
-    METHODS constructor
-      IMPORTING
-        i_element_manager TYPE REF TO z2mse_extr3_element_manager.
     METHODS add
       IMPORTING
         table                 TYPE tabname
@@ -75,14 +72,6 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
 
   ENDMETHOD.
 
-
-  METHOD constructor.
-    super->constructor( i_element_manager = i_element_manager ).
-    type = table_type.
-
-  ENDMETHOD.
-
-
   METHOD get_instance.
     IF instance IS NOT BOUND.
       CREATE OBJECT instance
@@ -90,6 +79,7 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
           i_element_manager = i_element_manager.
     ENDIF.
     instance = instance.
+    instance->type = table_type.
   ENDMETHOD.
 
 

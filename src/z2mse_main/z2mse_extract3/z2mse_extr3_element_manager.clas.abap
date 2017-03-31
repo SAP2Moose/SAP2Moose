@@ -141,16 +141,34 @@ CLASS z2mse_extr3_element_manager IMPLEMENTATION.
 
     DATA: element      TYPE element_type,
           associations TYPE associations_type,
-          association  TYPE association_type.
+          association  TYPE association_type,
+          step         TYPE i.
 
-    LOOP AT elements INTO element.
+    DO 2 TIMES.
 
-      associations = get_associations( i_element_id = element-element_id ).
+      step = sy-index.
 
-      element-element->make_model( element_id = element-element_id
-                                   associations = associations ).
+      LOOP AT elements INTO element.
 
-    ENDLOOP.
+        " Add packages first to the Moose model. This simplifies building the model, as many elements have parent
+        IF step EQ 1.
+          IF element-element->type <> element-element->package_type.
+            CONTINUE.
+          ENDIF.
+        ELSE.
+          IF element-element->type EQ element-element->package_type.
+            CONTINUE.
+          ENDIF.
+        ENDIF.
+
+        associations = get_associations( i_element_id = element-element_id ).
+
+        element-element->make_model( element_id = element-element_id
+                                     associations = associations ).
+
+      ENDLOOP.
+
+    ENDDO.
 
 
     model->make_mse( IMPORTING mse_model = r_result ).

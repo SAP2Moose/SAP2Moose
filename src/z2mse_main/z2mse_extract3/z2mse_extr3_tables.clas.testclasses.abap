@@ -28,7 +28,7 @@ CLASS ltcl_main IMPLEMENTATION.
 
     DATA: table_name_act TYPE tabname,
           table_name_exp TYPE tabname,
-          is_found TYPE abap_bool.
+          is_found       TYPE abap_bool.
 
     TEST-INJECTION dd02l.
       found_tabname = 'TABLE_A'.
@@ -52,10 +52,18 @@ CLASS ltcl_main IMPLEMENTATION.
 
     " Now add parent package to check correct building of FAMIX element
 
-    data package TYPE REF TO z2mse_extr3_packages.
-    package = z2mse_extr3_packages=>get_instance( i_element_manager = element_manager ).
-*    package->add( package = |PACKAGE1| ).
+    DATA package TYPE REF TO z2mse_extr3_packages_mock.
+    DATA parent_package TYPE REF TO z2mse_extr3_parent_package.
+    package = z2mse_extr3_packages_mock=>get_mock_instance( i_element_manager = element_manager ).
+    package->add( EXPORTING package = |PACKAGE1|
+                  IMPORTING new_element_id = DATA(new_element_id) ).
 
+    parent_package = z2mse_extr3_parent_package=>get_instance( i_element_manager = element_manager ).
+
+    parent_package->add( EXPORTING element_id = 1
+                                   parent_element_id = new_element_id ).
+
+    " Test model
 
     DATA: mse_model_act TYPE z2mse_model=>lines_type.
 
@@ -67,7 +75,9 @@ CLASS ltcl_main IMPLEMENTATION.
 
     equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
     equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.Class TABLE_A modifiers DBTable| )
-                                            ( |FAMIX.Attribute TABLE_A>>TABLE_A| ) ).
+                                            ( |FAMIX.Attribute TABLE_A>>TABLE_A| )
+                                            ( |FAMIX.Class TABLE_A parentPackage PACKAGE1| )
+                                            ( |FAMIX.Package PACKAGE1| ) ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
 

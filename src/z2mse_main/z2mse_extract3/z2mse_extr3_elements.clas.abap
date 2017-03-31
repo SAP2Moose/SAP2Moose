@@ -9,7 +9,8 @@ CLASS z2mse_extr3_elements DEFINITION
     DATA type TYPE c LENGTH 30.
 
     CONSTANTS: package_type LIKE type VALUE 'package',
-               table_type like type VALUE 'table' .
+               table_type like type VALUE 'table',
+               class_type like type value 'class'.
 
     METHODS make_model
       IMPORTING
