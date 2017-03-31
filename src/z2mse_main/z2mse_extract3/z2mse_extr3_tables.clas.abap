@@ -97,7 +97,7 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
     " SAP_2_FAMIX_58        Mark the FAMIX Class with the attribute modifiers = 'DBTable'
     element_manager->famix_class->add( EXPORTING name_group             = 'ABAP_TABLE'
                                                  name                   = element-tabname
-                                                 modifiers              = z2mse_extract_sap2=>modifier_dbtable
+                                                 modifiers              = z2mse_extract3=>modifier_dbtable
                                        IMPORTING id         = last_id ).
     DATA association TYPE z2mse_extr3_element_manager=>association_type.
     LOOP AT associations INTO association WHERE element_id1 = element_id
