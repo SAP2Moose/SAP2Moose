@@ -2,7 +2,6 @@
 "! I know whether it was found in upward or downward search.
 CLASS z2mse_extr3_model_builder DEFINITION
   PUBLIC
-  FINAL
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -45,7 +44,8 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_model_builder IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
+
 
   METHOD initialize.
 
@@ -64,6 +64,21 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD new_element_id.
+    DATA found_in_level TYPE found_in_level_type.
+
+    IF is_initial_selection EQ abap_true.
+      found_in_level-element_id = i_element_id.
+      found_in_level-found_in_initial_selection = abap_true.
+      INSERT found_in_level INTO TABLE found_in_levels.
+    ELSE.
+      ASSERT 1 = 2.
+      "Unfinished coding
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD search.
     DATA: found_in_level         TYPE found_in_level_type,
           first_initial_elements TYPE found_in_levels_type.
@@ -75,7 +90,7 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
       <found_in_level>-initially_selected_analyzed = abap_true.
 
-      INSERT found_in_level INTO TABLE first_initial_elements.
+      INSERT <found_in_level> INTO TABLE first_initial_elements.
 
     ENDLOOP.
 
@@ -94,19 +109,4 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
     is_initial_selection = abap_false.
 
   ENDMETHOD.
-
-  METHOD new_element_id.
-    DATA found_in_level TYPE found_in_level_type.
-
-    IF is_initial_selection EQ abap_true.
-      found_in_level-element_id = i_element_id.
-      found_in_level-found_in_initial_selection = abap_true.
-      INSERT found_in_level INTO TABLE found_in_levels.
-    ELSE.
-      ASSERT 1 = 2.
-      "Unfinished coding
-    ENDIF.
-
-  ENDMETHOD.
-
 ENDCLASS.

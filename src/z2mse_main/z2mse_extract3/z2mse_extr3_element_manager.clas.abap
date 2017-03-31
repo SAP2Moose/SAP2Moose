@@ -20,7 +20,6 @@ CLASS z2mse_extr3_element_manager DEFINITION
              association TYPE REF TO z2mse_extr3_association,
            END OF association_type.
     TYPES associations_type TYPE STANDARD TABLE OF association_type WITH DEFAULT KEY.
-
     METHODS constructor
       IMPORTING i_model_builder TYPE REF TO z2mse_extr3_model_builder.
     "! Call if an element might be added.
@@ -31,17 +30,21 @@ CLASS z2mse_extr3_element_manager DEFINITION
       RETURNING VALUE(element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
     METHODS add_association
       IMPORTING
-        element_specification_1   TYPE REF TO z2mse_extr3_element_builder
-        element_specification_2   TYPE REF TO z2mse_extr3_element_builder
-        association_specification TYPE REF TO z2mse_extr3_association_build.
+        element_1   TYPE element_id_type
+        element_2   TYPE element_id_type
+        association TYPE REF TO z2mse_extr3_association.
     METHODS make_model
       RETURNING
         VALUE(r_result) TYPE z2mse_model=>lines_type.
     METHODS get_element
       IMPORTING
-        i_element_id    TYPE i
+        i_element_id    TYPE element_id_type
       RETURNING
         VALUE(r_result) TYPE REF TO z2mse_extr3_elements.
+    METHODS get_associations
+      IMPORTING
+                i_element_id        TYPE element_id_type
+      RETURNING VALUE(associations) TYPE associations_type.
 
 
   PROTECTED SECTION.
@@ -53,8 +56,8 @@ CLASS z2mse_extr3_element_manager DEFINITION
            END OF element_type.
     TYPES elements_type TYPE HASHED TABLE OF element_type WITH UNIQUE KEY element_id.
     DATA elements TYPE elements_type.
-    TYPES associations1_type TYPE SORTED TABLE OF association_type WITH NON-UNIQUE KEY element_id1.
-    TYPES associations2_type TYPE SORTED TABLE OF association_type WITH NON-UNIQUE KEY element_id2.
+    TYPES associations1_type TYPE SORTED TABLE OF association_type WITH NON-UNIQUE KEY element_id1 element_id2.
+    TYPES associations2_type TYPE SORTED TABLE OF association_type WITH NON-UNIQUE KEY element_id2 element_id1.
     DATA associations1 TYPE associations1_type.
     DATA associations2 TYPE associations2_type.
     DATA next_element_id TYPE i.
@@ -63,10 +66,32 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
+CLASS z2mse_extr3_element_manager IMPLEMENTATION.
 
 
   METHOD add_association.
+
+    DATA line TYPE association_type.
+    line-element_id1 = element_1.
+    line-element_id2 = element_2.
+    line-association = association.
+    INSERT line INTO TABLE associations1.
+    INSERT line INTO TABLE associations2.
+
+  ENDMETHOD.
+
+  METHOD get_associations.
+    DATA association TYPE association_type.
+
+    LOOP AT associations1 INTO association
+      WHERE element_id1 = i_element_id.
+      INSERT association INTO TABLE associations.
+    ENDLOOP.
+
+    LOOP AT associations2 INTO association
+      WHERE element_id2 = i_element_id.
+      INSERT association INTO TABLE associations.
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -79,7 +104,7 @@ CLASS Z2MSE_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
     element_line-element =  element.
     INSERT element_line INTO TABLE elements.
 
-    model_builder->new_element_id( element_id ).
+      model_builder->new_element_id( element_id ).
 
     ADD 1 TO next_element_id.
 

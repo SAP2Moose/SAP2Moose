@@ -14,7 +14,9 @@ CLASS z2mse_extr3_packages DEFINITION
       IMPORTING
         i_element_manager TYPE REF TO z2mse_extr3_element_manager.
     METHODS add
-      EXPORTING package TYPE devclass.
+      IMPORTING package         TYPE devclass
+      RETURNING
+                VALUE(is_added) TYPE abap_bool.
     METHODS devclass
       IMPORTING
         i_element_id    TYPE i
@@ -27,7 +29,7 @@ CLASS z2mse_extr3_packages DEFINITION
              element_id TYPE z2mse_extr3_element_manager=>element_id_type,
              devclass   TYPE devclass,
            END OF element_type.
-    DATA instance TYPE REF TO z2mse_extr3_packages.
+    CLASS-DATA instance TYPE REF TO z2mse_extr3_packages.
     DATA elements_element_id TYPE HASHED TABLE OF element_type WITH UNIQUE KEY element_id.
     DATA elements_devclass TYPE HASHED TABLE OF element_type WITH UNIQUE KEY devclass.
 ENDCLASS.
@@ -41,14 +43,27 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
 
     READ TABLE elements_devclass TRANSPORTING NO FIELDS WITH KEY devclass = package.
     IF sy-subrc <> 0.
-      DATA new_element_id TYPE z2mse_extr3_element_manager=>element_id_type.
-      new_element_id = element_manager->add_element( element = me ).
 
-      DATA element TYPE element_type.
-      element-element_id = new_element_id.
-      element-devclass = package.
-      INSERT element INTO TABLE elements_element_id.
-      INSERT element INTO TABLE elements_devclass.
+      " Does package exists?
+      DATA found_obj_name TYPE sobj_name.
+      TEST-SEAM tadir.
+        SELECT SINGLE obj_name FROM tadir INTO found_obj_name WHERE pgmid = 'R3TR'
+                                                                AND object = 'DEVC'
+                                                                AND obj_name = package.
+      END-TEST-SEAM.
+      IF sy-subrc EQ 0.
+        is_added = abap_true.
+
+        DATA new_element_id TYPE z2mse_extr3_element_manager=>element_id_type.
+        new_element_id = element_manager->add_element( element = me ).
+
+        DATA element TYPE element_type.
+        element-element_id = new_element_id.
+        element-devclass = package.
+        INSERT element INTO TABLE elements_element_id.
+        INSERT element INTO TABLE elements_devclass.
+
+      ENDIF.
 
     ENDIF.
 

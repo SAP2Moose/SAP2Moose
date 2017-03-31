@@ -103,7 +103,7 @@ CLASS Z2MSE_EXTR_WHERE_USED_CLASSES IMPLEMENTATION.
                                                 method = comp_used_by_comp-controller_name ).
 
       ELSE.
-        ASSERT 1 = 2.
+        "ASSERT 1 = 2.
       ENDIF.
 
       IF using_method_id IS INITIAL AND comp_used_by_comp-is_class_component EQ abap_true.

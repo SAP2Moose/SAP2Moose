@@ -43,7 +43,7 @@ CLASS z2mse_extr3_package_builder IMPLEMENTATION.
 
   METHOD add.
 
-    packages->add( IMPORTING package = package ).
+    packages->add( package ).
 
   ENDMETHOD.
 ENDCLASS.
