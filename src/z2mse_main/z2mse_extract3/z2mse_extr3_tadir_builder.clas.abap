@@ -5,28 +5,39 @@ CLASS z2mse_extr3_tadir_builder DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
-
+    METHODS constructor
+      IMPORTING
+        i_element_manager TYPE REF TO z2mse_extr3_element_manager.
     METHODS search_down REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
+    DATA: tables         TYPE REF TO z2mse_extr3_tables,
+          classes        TYPE REF TO z2mse_extr3_classes,
+          parent_package TYPE REF TO z2mse_extr3_parent_package.
 ENDCLASS.
 
 
 
 CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
 
+  METHOD constructor.
+
+    super->constructor( i_element_manager = i_element_manager ).
+
+    parent_package = z2mse_extr3_parent_package=>get_instance( i_element_manager = element_manager ).
+    classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
+    tables = z2mse_extr3_tables=>get_instance( i_element_manager = element_manager ).
+
+  ENDMETHOD.
 
   METHOD search_down.
 
     DATA: element        TYPE REF TO z2mse_extr3_elements,
           package        TYPE REF TO z2mse_extr3_packages,
-          tables         TYPE REF TO z2mse_extr3_tables,
-          classes        TYPE REF TO z2mse_extr3_classes,
-          parent_package TYPE REF TO z2mse_extr3_parent_package,
           is_found       TYPE abap_bool,
-          new_element_id TYPE z2mse_extr3_element_manager=>element_id_type.
-
-    parent_package = z2mse_extr3_parent_package=>get_instance( i_element_manager = element_manager ).
+          new_element_id TYPE z2mse_extr3_element_manager=>element_id_type,
+          class_name     TYPE string,
+          tabname        TYPE tabname.
 
     element = element_manager->get_element( element_id ).
 
@@ -58,23 +69,19 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
             CASE tadir-object.
               WHEN 'CLAS' OR 'INTF'.
 
-                classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
-                DATA: class_name TYPE string .
                 class_name = tadir-obj_name.
-                classes->add( EXPORTING class         = class_name
-                             IMPORTING is_added       = is_found
-                                       new_element_id = new_element_id ).
+                classes->add( EXPORTING class          = class_name
+                              IMPORTING is_added       = is_found
+                                        new_element_id = new_element_id ).
 
               WHEN 'DEVC'.
               WHEN 'FUGR'.
               WHEN 'PROG'.
               WHEN 'TABL'.
 
-                tables = z2mse_extr3_tables=>get_instance( i_element_manager = element_manager ).
-                DATA: tabname TYPE tabname.
                 tabname = tadir-obj_name.
-                tables->add( EXPORTING table = tabname
-                             IMPORTING is_added = is_found
+                tables->add( EXPORTING table          = tabname
+                             IMPORTING is_added       = is_found
                                        new_element_id = new_element_id ).
 
               WHEN 'WDYN'.
@@ -101,4 +108,5 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+
 ENDCLASS.
