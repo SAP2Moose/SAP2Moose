@@ -5,6 +5,10 @@ CLASS z2mse_extract3 DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    CONSTANTS modifier_abapglobalclass TYPE string VALUE 'ABAPGlobalClass' ##NO_TEXT.
+    CONSTANTS modifier_abapglobalinterface TYPE string VALUE 'ABAPGlobalInterface' ##NO_TEXT.
+    CONSTANTS modifier_webdynpro_component TYPE string VALUE 'ABAPWebDynproComponent'.
+    CONSTANTS modifier_dbtable TYPE string VALUE 'DBTable' ##NO_TEXT.
 
     METHODS constructor.
 
@@ -25,7 +29,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extract3 IMPLEMENTATION.
+CLASS Z2MSE_EXTRACT3 IMPLEMENTATION.
 
 
   METHOD constructor.

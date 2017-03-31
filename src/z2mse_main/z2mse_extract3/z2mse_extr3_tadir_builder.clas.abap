@@ -21,8 +21,10 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
     DATA: element        TYPE REF TO z2mse_extr3_elements,
           package        TYPE REF TO z2mse_extr3_packages,
           tables         TYPE REF TO z2mse_extr3_tables,
+          classes        TYPE REF TO z2mse_extr3_classes,
           parent_package TYPE REF TO z2mse_extr3_parent_package,
-          is_found       TYPE abap_bool.
+          is_found       TYPE abap_bool,
+          new_element_id TYPE z2mse_extr3_element_manager=>element_id_type.
 
     parent_package = z2mse_extr3_parent_package=>get_instance( i_element_manager = element_manager ).
 
@@ -49,29 +51,32 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
 
       LOOP AT tadirs INTO tadir.
 
+        is_found = abap_false.
+
         CASE tadir-pgmid.
           WHEN 'R3TR'.
             CASE tadir-object.
-              WHEN 'CLAS'.
+              WHEN 'CLAS' OR 'INTF'.
+
+                classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
+                DATA: class_name TYPE string .
+                class_name = tadir-obj_name.
+                classes->add( EXPORTING class         = class_name
+                             IMPORTING is_added       = is_found
+                                       new_element_id = new_element_id ).
+
               WHEN 'DEVC'.
               WHEN 'FUGR'.
-              WHEN 'INTF'.
               WHEN 'PROG'.
               WHEN 'TABL'.
 
                 tables = z2mse_extr3_tables=>get_instance( i_element_manager = element_manager ).
-                DATA: tabname TYPE tabname,
-                      new_element_id TYPE z2mse_extr3_element_manager=>element_id_type.
+                DATA: tabname TYPE tabname.
                 tabname = tadir-obj_name.
                 tables->add( EXPORTING table = tabname
                              IMPORTING is_added = is_found
                                        new_element_id = new_element_id ).
-                IF is_found EQ abap_true.
 
-                  parent_package->add( EXPORTING element_id        = new_element_id
-                                                 parent_element_id = element_id ).
-
-                ENDIF.
               WHEN 'WDYN'.
               WHEN OTHERS.
                 " TBD handle
@@ -80,6 +85,13 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
           WHEN OTHERS.
             "TBD handle
         ENDCASE.
+
+        IF is_found EQ abap_true.
+
+          parent_package->add( EXPORTING element_id        = new_element_id
+                                         parent_element_id = element_id ).
+
+        ENDIF.
 
 
       ENDLOOP.
