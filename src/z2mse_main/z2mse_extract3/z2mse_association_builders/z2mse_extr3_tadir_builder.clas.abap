@@ -36,7 +36,7 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
           package        TYPE REF TO z2mse_extr3_packages,
           is_found       TYPE abap_bool,
           new_element_id TYPE z2mse_extr3_element_manager=>element_id_type,
-          class_name     TYPE string,
+          class_name     TYPE seoclsname,
           tabname        TYPE tabname.
 
     element = element_manager->get_element( element_id ).

@@ -26,8 +26,9 @@ CLASS ltcl_main IMPLEMENTATION.
 
     DATA r_result TYPE REF TO z2mse_extr3_elements.
 
-    DATA: devclass_act TYPE devclass,
-          devclass_exp TYPE devclass.
+    DATA: devclass_act   TYPE devclass,
+          devclass_exp   TYPE devclass,
+          new_element_id TYPE i.
 
     DATA is_added TYPE abap_bool.
 
@@ -36,9 +37,22 @@ CLASS ltcl_main IMPLEMENTATION.
     END-TEST-INJECTION.
 
     f_cut->add( EXPORTING package  = 'PACKAGE_A'
-                IMPORTING is_added = is_added ).
+                IMPORTING is_added = is_added
+                          new_element_id = new_element_id ).
 
     cl_abap_unit_assert=>assert_equals( msg = 'Expect to be found' exp = abap_true act = is_added ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Expect to be 1' exp = 1 act = new_element_id ).
+
+    " Add an existing element
+
+    f_cut->add( EXPORTING package  = 'PACKAGE_A'
+                IMPORTING is_added = is_added
+                          new_element_id = new_element_id ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Expect to be found' exp = abap_true act = is_added ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Expect to be 1' exp = 1 act = new_element_id ).
 
     devclass_act = f_cut->devclass( i_element_id = 1 ).
     devclass_exp = |PACKAGE_A|.

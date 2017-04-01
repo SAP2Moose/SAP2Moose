@@ -76,10 +76,10 @@ CLASS ltcl_main IMPLEMENTATION.
 *( |FAMIX.Invocation sender Z2MSE_TEST_IF_A>>METHOD_A candidates Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~METHOD_A signature DUMMY| )
 *( |FAMIX.Invocation sender Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 *( |FAMIX.Invocation sender Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER candidates ZIWCI_2MSE_TEST_WDY_A>>WD_GET_API signature DUMMY| )
-*( |FAMIX.Method Z2MSE_TEST_CL_A>>CONSTRUCTOR signature CONSTRUCTOR| )
-*( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENTHANDLER_A signature EVENTHANDLER_A| )
-*( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENT_A signature EVENT_A| )
-*( |FAMIX.Method Z2MSE_TEST_CL_A>>METHOD_A signature METHOD_A| )
+( |FAMIX.Method Z2MSE_TEST_CL_A>>CONSTRUCTOR signature CONSTRUCTOR| )
+( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENTHANDLER_A signature EVENTHANDLER_A| )
+( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENT_A signature EVENT_A| )
+( |FAMIX.Method Z2MSE_TEST_CL_A>>METHOD_A signature METHOD_A| )
 *( |FAMIX.Method Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~EVENT_A signature Z2MSE_TEST_IF_A~EVENT_A| )
 *( |FAMIX.Method Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~METHOD_A signature Z2MSE_TEST_IF_A~METHOD_A| )
 *( |FAMIX.Method Z2MSE_TEST_CL_B1>>EVENT_A signature EVENT_A| )
@@ -88,7 +88,7 @@ CLASS ltcl_main IMPLEMENTATION.
 *( |FAMIX.Method Z2MSE_TEST_IF_A>>EVENT_A signature EVENT_A| )
 *( |FAMIX.Method Z2MSE_TEST_IF_A>>METHOD_A signature METHOD_A| )
 *( |FAMIX.Method Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER signature COMPONENTCONTROLLER| )
-*( |FAMIX.Method ZIWCI_2MSE_TEST_WDY_A>>WD_GET_API signature WD_GET_API| )
+( |FAMIX.Method ZIWCI_2MSE_TEST_WDY_A>>WD_GET_API signature WD_GET_API| )
     ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).

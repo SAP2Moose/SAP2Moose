@@ -28,16 +28,30 @@ CLASS ltcl_main IMPLEMENTATION.
 
     DATA: table_name_act TYPE tabname,
           table_name_exp TYPE tabname,
-          is_found       TYPE abap_bool.
+          is_found       TYPE abap_bool,
+          new_element_id TYPE i.
 
     TEST-INJECTION dd02l.
       found_tabname = 'TABLE_A'.
     END-TEST-INJECTION.
 
     f_cut->add( EXPORTING table = 'TABLE_A'
-                IMPORTING is_added = is_found ).
+                IMPORTING is_added = is_found
+                          new_element_id = new_element_id ).
 
     cl_abap_unit_assert=>assert_equals( msg = 'Table has to be found' exp = abap_true act = is_found ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'ID has to be 1' exp = 1 act = new_element_id ).
+
+    " Add an existing id
+
+    f_cut->add( EXPORTING table = 'TABLE_A'
+                IMPORTING is_added = is_found
+                          new_element_id = new_element_id ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Table has to be marked as found if entered a second time' exp = abap_true act = is_found ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'ID has to be 1 if added a second time' exp = 1 act = new_element_id ).
 
     table_name_act = f_cut->table_name( i_element_id = 1 ).
     table_name_exp = |TABLE_A|.
@@ -56,7 +70,7 @@ CLASS ltcl_main IMPLEMENTATION.
     DATA parent_package TYPE REF TO z2mse_extr3_parent_package.
     package = z2mse_extr3_packages_mock=>get_mock_instance( i_element_manager = element_manager ).
     package->add( EXPORTING package = |PACKAGE1|
-                  IMPORTING new_element_id = DATA(new_element_id) ).
+                  IMPORTING new_element_id = new_element_id ).
 
     parent_package = z2mse_extr3_parent_package=>get_instance( i_element_manager = element_manager ).
 

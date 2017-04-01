@@ -10,7 +10,8 @@ CLASS z2mse_extr3_elements DEFINITION
 
     CONSTANTS: package_type LIKE type VALUE 'package',
                table_type like type VALUE 'table',
-               class_type like type value 'class'.
+               class_type like type value 'class',
+               class_components_type like TYPE value 'class_components'.
 
     METHODS make_model
       IMPORTING

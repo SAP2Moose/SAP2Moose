@@ -42,8 +42,13 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
 
   METHOD add.
 
-    READ TABLE elements_tabname TRANSPORTING NO FIELDS WITH KEY tabname = table.
-    IF sy-subrc <> 0.
+    DATA element TYPE element_type.
+
+    READ TABLE elements_tabname INTO element WITH KEY tabname = table.
+    IF sy-subrc EQ 0.
+      is_added = abap_true.
+      new_element_id = element-element_id.
+    ELSE.
 
       " Does table exists?
       DATA found_tabname TYPE tabname.
@@ -59,8 +64,6 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
       IF is_added EQ abap_true.
 
         new_element_id = element_manager->add_element( element = me ).
-
-        DATA element TYPE element_type.
         element-element_id = new_element_id.
         element-tabname = table.
         INSERT element INTO TABLE elements_element_id.

@@ -43,8 +43,13 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
 
   METHOD add.
 
-    READ TABLE elements_devclass TRANSPORTING NO FIELDS WITH KEY devclass = package.
-    IF sy-subrc <> 0.
+    DATA element TYPE element_type.
+
+    READ TABLE elements_devclass INTO element WITH KEY devclass = package.
+    IF sy-subrc EQ 0.
+      is_added = abap_true.
+      new_element_id = element-element_id.
+    ELSE.
 
       DATA exists TYPE abap_bool.
 
@@ -54,7 +59,6 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
 
         new_element_id = element_manager->add_element( element = me ).
 
-        DATA element TYPE element_type.
         element-element_id = new_element_id.
         element-devclass = package.
         INSERT element INTO TABLE elements_element_id.
