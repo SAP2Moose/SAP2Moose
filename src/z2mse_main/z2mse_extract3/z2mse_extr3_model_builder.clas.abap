@@ -5,7 +5,10 @@ CLASS z2mse_extr3_model_builder DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
-    METHODS search.
+    METHODS search
+      IMPORTING
+        i_search_up   TYPE i
+        i_search_down TYPE i.
     "! I am called once to notify that the initial selection of elements is started.
     "! All elements added to the model before my method search is called belong to the level 0
     METHODS initial_selection_started.
@@ -30,30 +33,47 @@ CLASS z2mse_extr3_model_builder DEFINITION
            END OF found_in_level_type.
     TYPES found_in_levels_type TYPE HASHED TABLE OF found_in_level_type WITH UNIQUE KEY element_id.
 
-    DATA: found_in_levels      TYPE found_in_levels_type,
-          is_initial_selection TYPE abap_bool.
+    DATA: found_in_levels               TYPE found_in_levels_type,
+          is_initial_selection          TYPE abap_bool,
+          is_up_search                  TYPE abap_bool,
+          "! Add newly found elements during upsearch in this level
+          level_for_found_in_upsearch   TYPE i,
+          is_down_search                TYPE abap_bool,
+          "! Add newly found elements during downsearch in this level
+          level_for_found_in_downsearch TYPE i.
 
     TYPES: BEGIN OF builder_type,
              association_builder TYPE REF TO z2mse_extr3_association_build,
            END OF builder_type.
-    DATA: association_builders TYPE STANDARD TABLE OF builder_type.
+    "! Use for initial search
+    DATA association_builders_init TYPE STANDARD TABLE OF builder_type.
+    "! Use for search
+    DATA association_builders TYPE STANDARD TABLE OF builder_type.
 
-    DATA: tadir_builder TYPE REF TO z2mse_extr3_tadir_builder.
+    DATA: tadir_builder      TYPE REF TO z2mse_extr3_tadir_builder,
+          where_used_builder TYPE REF TO z2mse_extr3_where_used_builder.
 
 ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
+CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
 
   METHOD initialize.
 
-    DATA association_builder TYPE builder_type.
+    DATA association_builder_init TYPE builder_type.
 
     CREATE OBJECT tadir_builder EXPORTING i_element_manager = element_manager.
 
-    association_builder-association_builder = tadir_builder.
+    association_builder_init-association_builder = tadir_builder.
+    INSERT association_builder_init INTO TABLE association_builders_init.
+
+    DATA association_builder TYPE builder_type.
+
+    CREATE OBJECT where_used_builder EXPORTING i_element_manager = element_manager.
+
+    association_builder-association_builder = where_used_builder.
     INSERT association_builder INTO TABLE association_builders.
 
   ENDMETHOD.
@@ -65,24 +85,61 @@ CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
 
   METHOD new_element_id.
-    DATA found_in_level TYPE found_in_level_type.
+    DATA: found_in_level TYPE found_in_level_type,
+          is_new_line    TYPE abap_bool.
+    FIELD-SYMBOLS <found_in_level> TYPE found_in_level_type.
+
+    READ TABLE found_in_levels ASSIGNING <found_in_level> WITH TABLE KEY element_id = i_element_id.
+    IF sy-subrc <> 0.
+      is_new_line = abap_true.
+      ASSIGN found_in_level TO <found_in_level>.
+      <found_in_level>-element_id = i_element_id.
+
+    ENDIF.
 
     IF is_initial_selection EQ abap_true.
-      found_in_level-element_id = i_element_id.
-      found_in_level-found_in_initial_selection = abap_true.
-      INSERT found_in_level INTO TABLE found_in_levels.
+
+      <found_in_level>-found_in_initial_selection = abap_true.
+
+    ELSEIF is_up_search EQ abap_true.
+
+      IF <found_in_level>-found_in_level_upsearch IS NOT INITIAL.
+
+        <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
+
+      ENDIF.
+
+    ELSEIF is_down_search EQ abap_true.
+
+      IF <found_in_level>-found_in_level_downsearch IS NOT INITIAL.
+
+        <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
+
+      ENDIF.
+
     ELSE.
       ASSERT 1 = 2.
       "Unfinished coding
+    ENDIF.
+
+    IF is_new_line EQ abap_true.
+
+      INSERT <found_in_level> INTO TABLE found_in_levels.
+      ASSERT sy-subrc EQ 0.
+
     ENDIF.
 
   ENDMETHOD.
 
 
   METHOD search.
+
+    " Initial search
+
     DATA: found_in_level         TYPE found_in_level_type,
           first_initial_elements TYPE found_in_levels_type.
     FIELD-SYMBOLS: <found_in_level>         TYPE found_in_level_type.
+
 
     " found_in_levels will be updated in this method, so add this elements to a new temporary table.
 
@@ -96,7 +153,7 @@ CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
     DATA association_builder TYPE builder_type.
 
-    LOOP AT association_builders INTO association_builder.
+    LOOP AT association_builders_init INTO association_builder.
 
       LOOP AT first_initial_elements INTO found_in_level.
 
@@ -107,6 +164,76 @@ CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
     ENDLOOP.
 
     is_initial_selection = abap_false.
+
+    " Search up
+
+    DATA: level_to_search_up      TYPE i,
+          something_to_be_done_up TYPE abap_bool.
+
+    something_to_be_done_up = abap_true.
+
+    WHILE something_to_be_done_up EQ abap_true.
+
+      level_to_search_up = level_for_found_in_upsearch.
+      ADD 1 TO level_for_found_in_upsearch.
+      something_to_be_done_up = abap_false.
+      LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_upsearch = level_to_search_up.
+
+        LOOP AT association_builders INTO association_builder.
+
+          association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
+
+        ENDLOOP.
+
+        something_to_be_done_up = abap_true.
+      ENDLOOP.
+
+      IF i_search_up >= 0.
+
+        IF i_search_up >= level_for_found_in_upsearch.
+
+          something_to_be_done_up = abap_false.
+
+        ENDIF.
+
+      ENDIF.
+
+    ENDWHILE.
+
+    " Search down
+
+    DATA: level_to_search_down      TYPE i,
+          something_to_be_done_down TYPE abap_bool.
+
+    something_to_be_done_down = abap_true.
+
+    WHILE something_to_be_done_down EQ abap_true.
+
+      level_to_search_down = level_for_found_in_downsearch.
+      ADD 1 TO level_for_found_in_downsearch.
+      something_to_be_done_down = abap_false.
+      LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_downsearch = level_to_search_down.
+
+        LOOP AT association_builders INTO association_builder.
+
+          association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
+
+        ENDLOOP.
+
+        something_to_be_done_down = abap_true.
+      ENDLOOP.
+
+      IF i_search_down >= 0.
+
+        IF i_search_down >= level_for_found_in_downsearch.
+
+          something_to_be_done_down = abap_false.
+
+        ENDIF.
+
+      ENDIF.
+
+    ENDWHILE.
 
   ENDMETHOD.
 ENDCLASS.

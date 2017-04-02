@@ -19,6 +19,7 @@ CLASS z2mse_extract3 DEFINITION
       IMPORTING
         !initial_elements        TYPE REF TO z2mse_extr3_initial_elements
         i_search_up              TYPE i
+        i_search_down            TYPE i
         i_exclude_found_sap_intf TYPE abap_bool
       EXPORTING
         !mse_model               TYPE z2mse_model=>lines_type
@@ -64,7 +65,8 @@ CLASS Z2MSE_EXTRACT3 IMPLEMENTATION.
 
     ENDLOOP.
 
-    model_builder->search( ).
+    model_builder->search( i_search_up   = i_search_up
+                           i_search_down = i_search_down  ).
 
     mse_model = element_manager->make_model( ).
 

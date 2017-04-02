@@ -31,6 +31,7 @@ CLASS ltcl_main IMPLEMENTATION.
     f_cut = NEW #( ).
     f_cut->extract( EXPORTING initial_elements         = initial_elements
                               i_search_up              = -1
+                              i_search_down            = -1
                               i_exclude_found_sap_intf = abap_true
                     IMPORTING mse_model             = mse_model_act
                               nothing_done          = nothing_done_act ).
