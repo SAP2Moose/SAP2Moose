@@ -247,6 +247,8 @@ CLASS ltcl_component IMPLEMENTATION.
           class_name_exp TYPE seoclsname,
           cmpname_act    TYPE seocmpname,
           cmpname_exp    TYPE seocmpname,
+          cmptype_act    TYPE seocmptype,
+          cmptype_exp    TYPE seocmptype,
           is_found       TYPE abap_bool,
           new_element_id TYPE i.
 
@@ -258,6 +260,7 @@ CLASS ltcl_component IMPLEMENTATION.
     TEST-INJECTION seocompo.
       found_class_name = 'CLASS_A'.
       found_cmpname = 'METHOD_A'.
+      found_cmptype = me->method_type.
     END-TEST-INJECTION.
 
     f_cut->add_component( EXPORTING clsname        = 'CLASS_A'
@@ -283,13 +286,16 @@ CLASS ltcl_component IMPLEMENTATION.
 
     f_cut->comp_name( EXPORTING element_id = new_element_id
                       IMPORTING class_name = class_name_act
-                                cmpname = cmpname_act ).
+                                cmpname = cmpname_act
+                                cmptype = cmptype_act ).
 
     class_name_exp = |CLASS_A|.
     cmpname_exp = |METHOD_A|.
+    cmptype_exp = f_cut->method_type.
 
     cl_abap_unit_assert=>assert_equals( msg = 'Class has to be stored internally' exp = class_name_exp act = class_name_act ).
     cl_abap_unit_assert=>assert_equals( msg = 'Component has to be stored internally' exp = cmpname_exp act = cmpname_act ).
+    cl_abap_unit_assert=>assert_equals( msg = 'Component Type has to be stored internally' exp = cmptype_exp act = cmptype_act ).
 
     r_result = element_manager->get_element( i_element_id = 1 ).
 
@@ -297,42 +303,6 @@ CLASS ltcl_component IMPLEMENTATION.
                                         exp = z2mse_extr3_elements=>class_type
                                         act = r_result->type ).
 
-*    " Now add parent package to check correct building of FAMIX element
-*
-*    DATA package TYPE REF TO z2mse_extr3_packages_mock.
-*    DATA parent_package TYPE REF TO z2mse_extr3_parent_package.
-*    package = z2mse_extr3_packages_mock=>get_mock_instance( i_element_manager = element_manager ).
-*    package->add( EXPORTING package = |PACKAGE1|
-*                  IMPORTING new_element_id = new_element_id ).
-*
-*    parent_package = z2mse_extr3_parent_package=>get_instance( i_element_manager = element_manager ).
-*
-*    parent_package->add( EXPORTING element_id = 1
-*                                   parent_element_id = new_element_id ).
-*
-*    " Test model
-*
-*    DATA: mse_model_act TYPE z2mse_model=>lines_type.
-*
-*    mse_model_act = element_manager->make_model( ).
-*
-*    DATA: equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
-*          equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
-*
-*
-*    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
-*    equalized_harmonized_mse_exp = VALUE #(
-*                                            ( |FAMIX.Class CLASS_A modifiers ABAPGlobalClass| )
-*                                            ( |FAMIX.Class CLASS_A parentPackage PACKAGE1| )
-*                                            ( |FAMIX.Package PACKAGE1| ) ).
-*
-*    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
-*
-*    cl_abap_unit_assert=>assert_equals(
-*      EXPORTING
-*        act                  = equalized_harmonized_mse_act
-*        exp                  = equalized_harmonized_mse_exp
-*        msg                  = 'Expect mse with correct package' ).
   ENDMETHOD.
 
 ENDCLASS.

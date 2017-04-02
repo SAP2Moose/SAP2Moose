@@ -5,6 +5,11 @@ CLASS z2mse_extr3_classes DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    CONSTANTS: is_class_type  TYPE seoclstype VALUE 0,
+               interface_type TYPE seoclstype VALUE 1,
+               attribute_type TYPE seocmptype VALUE 0,
+               method_type    TYPE seocmptype VALUE 1,
+               event_type     TYPE seocmptype VALUE 2.
 
     CLASS-METHODS get_instance
       IMPORTING
@@ -34,16 +39,12 @@ CLASS z2mse_extr3_classes DEFINITION
         element_id        TYPE i
       EXPORTING
         VALUE(class_name) TYPE seoclsname
-        VALUE(cmpname)    TYPE seocmpname.
+        VALUE(cmpname)    TYPE seocmpname
+        VALUE(cmptype)    TYPE seocmptype.
     METHODS make_model REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO z2mse_extr3_classes.
-    CONSTANTS: is_class_type  TYPE seoclstype VALUE 0,
-               interface_type TYPE seoclstype VALUE 1,
-               attribute_type TYPE seocmptype VALUE 0,
-               method_type    TYPE seocmptype VALUE 1,
-               event_type     TYPE seocmptype VALUE 2.
     TYPES: BEGIN OF element_type,
              element_id   TYPE z2mse_extr3_element_manager=>element_id_type,
              class_name   TYPE seoclsname,
@@ -181,6 +182,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
     class_name = element_comp-clsname.
     cmpname = element_comp-cmpname.
+    cmptype = element_comp-cmptype.
 
   ENDMETHOD.
 
@@ -195,49 +197,6 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
     instance->type = class_type.
   ENDMETHOD.
 
-  METHOD _add_component.
-
-    DATA element_comp TYPE element_comp_type.
-
-    READ TABLE elements_comp_clsname_cmpname INTO element_comp WITH KEY clsname  = clsname cmpname = cmpname.
-    IF sy-subrc EQ 0.
-      is_added = abap_true.
-      new_element_id = element_comp-element_id.
-    ELSE.
-
-      " Does component exists?
-      DATA: found_class_name TYPE seoclsname,
-            found_cmpname    TYPE seocmpname,
-            found_cmptype    TYPE seocmptype,
-            found_mtdtype    TYPE seomtdtype.
-
-      TEST-SEAM seocompo.
-        SELECT SINGLE clsname cmpname cmptype mtdtype FROM seocompo
-          INTO ( found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = clsname
-                                                                                   AND cmpname = cmpname.
-      END-TEST-SEAM.
-
-      IF found_class_name IS NOT INITIAL.
-        is_added = abap_true.
-      ENDIF.
-
-      IF is_added EQ abap_true.
-
-        new_element_id = element_manager->add_element( element = me ).
-        element_comp-element_id = new_element_id.
-        element_comp-clsname = found_class_name.
-        element_comp-cmpname = found_cmpname.
-        element_comp-cmptype = found_cmptype.
-        element_comp-mtdtype = found_mtdtype.
-
-        INSERT element_comp INTO TABLE elements_comp_element_id .
-        INSERT element_comp INTO TABLE elements_comp_clsname_cmpname .
-
-      ENDIF.
-
-    ENDIF.
-
-  ENDMETHOD.
 
   METHOD make_model.
 
@@ -327,4 +286,48 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD _add_component.
+
+    DATA element_comp TYPE element_comp_type.
+
+    READ TABLE elements_comp_clsname_cmpname INTO element_comp WITH KEY clsname  = clsname cmpname = cmpname.
+    IF sy-subrc EQ 0.
+      is_added = abap_true.
+      new_element_id = element_comp-element_id.
+    ELSE.
+
+      " Does component exists?
+      DATA: found_class_name TYPE seoclsname,
+            found_cmpname    TYPE seocmpname,
+            found_cmptype    TYPE seocmptype,
+            found_mtdtype    TYPE seomtdtype.
+
+      TEST-SEAM seocompo.
+        SELECT SINGLE clsname cmpname cmptype mtdtype FROM seocompo
+          INTO ( found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = clsname
+                                                                                   AND cmpname = cmpname.
+      END-TEST-SEAM.
+
+      IF found_class_name IS NOT INITIAL.
+        is_added = abap_true.
+      ENDIF.
+
+      IF is_added EQ abap_true.
+
+        new_element_id = element_manager->add_element( element = me ).
+        element_comp-element_id = new_element_id.
+        element_comp-clsname = found_class_name.
+        element_comp-cmpname = found_cmpname.
+        element_comp-cmptype = found_cmptype.
+        element_comp-mtdtype = found_mtdtype.
+
+        INSERT element_comp INTO TABLE elements_comp_element_id .
+        INSERT element_comp INTO TABLE elements_comp_clsname_cmpname .
+
+      ENDIF.
+
+    ENDIF.
+
+  ENDMETHOD.
 ENDCLASS.
