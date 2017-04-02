@@ -9,7 +9,12 @@ CLASS z2mse_extr3_association DEFINITION
     DATA type TYPE c LENGTH 30 READ-ONLY.
 
     CONSTANTS: parent_package_ass LIKE type VALUE 'parent_package',
-               class_comp_ass like type VALUE 'class_components'.
+               access_ass         LIKE type VALUE 'access',
+               invocation_ass         LIKE type VALUE 'invocation'.
+
+    METHODS make_model
+      IMPORTING
+        association TYPE z2mse_extr3_element_manager=>association_type.
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -17,4 +22,9 @@ ENDCLASS.
 
 
 CLASS z2mse_extr3_association IMPLEMENTATION.
+  METHOD make_model.
+    " I must be redefined
+    ASSERT 1 = 2.
+  ENDMETHOD.
+
 ENDCLASS.

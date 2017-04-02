@@ -8,11 +8,12 @@ CLASS z2mse_extr3_parent_package DEFINITION
     CLASS-METHODS get_instance
       IMPORTING
                 i_element_manager TYPE REF TO z2mse_extr3_element_manager
-      RETURNING VALUE(r_instance)   TYPE REF TO z2mse_extr3_parent_package.
+      RETURNING VALUE(r_instance) TYPE REF TO z2mse_extr3_parent_package.
     METHODS add
       IMPORTING
         element_id        TYPE z2mse_extr3_element_manager=>element_id_type
         parent_element_id TYPE z2mse_extr3_element_manager=>element_id_type.
+    METHODS make_model REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO z2mse_extr3_parent_package.
@@ -52,6 +53,10 @@ CLASS z2mse_extr3_parent_package IMPLEMENTATION.
                                                 element_2   = association-element_id2
                                                 association = me ).
 
+  ENDMETHOD.
+
+  METHOD make_model.
+    " I am added in the elements them self to the model
   ENDMETHOD.
 
 ENDCLASS.

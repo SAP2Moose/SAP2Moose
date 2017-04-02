@@ -26,12 +26,19 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
   METHOD search_up.
 
-    DATA: element TYPE REF TO z2mse_extr3_elements.
+    DATA: element   TYPE REF TO z2mse_extr3_elements,
+          is_access TYPE abap_bool.
 
     element = element_manager->get_element( element_id ).
 
     DATA classes TYPE REF TO z2mse_extr3_classes.
     classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
+
+    DATA access TYPE REF TO z2mse_extr3_access.
+    access = z2mse_extr3_access=>get_instance( i_element_manager = element_manager ).
+
+    DATA invocation TYPE REF TO z2mse_extr3_invocation.
+    invocation = z2mse_extr3_invocation=>get_instance( i_element_manager = element_manager ).
 
     CASE element->type.
       WHEN element->class_type.
@@ -52,6 +59,9 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
             otype = 'ME'.
           WHEN classes->attribute_type.
             otype = 'DA'.
+
+            is_access = abap_true.
+
           WHEN classes->event_type.
             otype = 'EV'.
           WHEN OTHERS.
@@ -75,6 +85,8 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         otype = 'TY'.
 
         where_used_name = table.
+
+        is_access = abap_true.
 
     ENDCASE.
 
@@ -168,7 +180,17 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
         IF is_added EQ abap_true.
 
+          IF is_access EQ abap_true.
 
+            access->add( EXPORTING accessed_element_id1  = element_id
+                                   accessing_element_id2 = used_by_element_id ).
+
+          ELSE.
+
+            invocation->add( EXPORTING invoced_element_id1  = element_id
+                                       invocing_element_id2 = used_by_element_id ).
+
+          ENDIF.
 
         ENDIF.
 

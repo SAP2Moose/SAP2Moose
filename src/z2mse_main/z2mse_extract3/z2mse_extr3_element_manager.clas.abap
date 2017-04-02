@@ -170,6 +170,29 @@ CLASS z2mse_extr3_element_manager IMPLEMENTATION.
 
     ENDDO.
 
+    DATA: access               TYPE REF TO z2mse_extr3_access,
+          invocation           TYPE REF TO z2mse_extr3_invocation,
+          association_instance TYPE REF TO z2mse_extr3_association.
+
+    access = z2mse_extr3_access=>get_instance( i_element_manager = me ).
+    invocation = z2mse_extr3_invocation=>get_instance( i_element_manager = me ).
+
+    LOOP AT associations1 INTO association.
+
+      CLEAR association_instance.
+
+      IF association-association->type EQ association-association->access_ass.
+        association_instance = access.
+      ELSEIF association-association->type EQ association-association->invocation_ass.
+        association_instance = invocation.
+      ENDIF.
+
+      IF association_instance IS BOUND.
+        association_instance->make_model( association = association ).
+      ENDIF.
+
+    ENDLOOP.
+
 
     model->make_mse( IMPORTING mse_model = r_result ).
 
