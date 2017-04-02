@@ -167,14 +167,18 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
           END-TEST-SEAM.
 
-*          IF sy-subrc EQ 0.
-*            <include_2_component>-is_webdynpro = abap_true.
-*            <include_2_component>-component_name = ls_wd_sourcemap-component_name.
-*            <include_2_component>-controller_name = ls_wd_sourcemap-controller_name.
-*
-*          ELSE.
+          IF sy-subrc EQ 0.
+            DATA web_dynpro_component TYPE REF TO z2mse_extr3_web_dynpro_comp.
+            web_dynpro_component = z2mse_extr3_web_dynpro_comp=>get_instance( element_manager = element_manager ).
+
+            web_dynpro_component->add_component( EXPORTING wdy_component_name  = ls_wd_sourcemap-component_name
+                                                           wdy_controller_name = ls_wd_sourcemap-controller_name
+                                                 IMPORTING is_added       = is_added
+                                                           new_element_id = used_by_element_id ).
+
+          ELSE.
 *            <include_2_component>-is_program_or_function = abap_true.
-*          ENDIF.
+          ENDIF.
 
         ENDIF.
 

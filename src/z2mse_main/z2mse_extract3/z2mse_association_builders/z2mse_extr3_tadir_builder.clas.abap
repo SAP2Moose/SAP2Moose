@@ -14,6 +14,7 @@ CLASS z2mse_extr3_tadir_builder DEFINITION
   PRIVATE SECTION.
     DATA: tables         TYPE REF TO z2mse_extr3_tables,
           classes        TYPE REF TO z2mse_extr3_classes,
+          web_dynpro_components TYPE REF TO z2mse_extr3_web_dynpro_comp,
           parent_package TYPE REF TO z2mse_extr3_parent_package.
 ENDCLASS.
 
@@ -28,6 +29,7 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
     parent_package = z2mse_extr3_parent_package=>get_instance( i_element_manager = element_manager ).
     classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
     tables = z2mse_extr3_tables=>get_instance( i_element_manager = element_manager ).
+    web_dynpro_components = z2mse_extr3_web_dynpro_comp=>get_instance( element_manager = element_manager ).
 
   ENDMETHOD.
 
@@ -38,7 +40,8 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
           is_found       TYPE abap_bool,
           new_element_id TYPE z2mse_extr3_element_manager=>element_id_type,
           class_name     TYPE seoclsname,
-          tabname        TYPE tabname.
+          tabname        TYPE tabname,
+          WDY_COMPONENT_NAME TYPE WDY_COMPONENT_NAME.
 
     element = element_manager->get_element( element_id ).
 
@@ -86,6 +89,12 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
                                        new_element_id = new_element_id ).
 
               WHEN 'WDYN'.
+
+              WDY_COMPONENT_NAME = tadir-obj_name.
+              web_dynpro_components->add( EXPORTING wdy_component_name = wdy_component_name
+                                          IMPORTING is_added       = is_found
+                                                    new_element_id = new_element_id ).
+
               WHEN OTHERS.
                 " TBD handle
             ENDCASE.

@@ -61,6 +61,9 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
                                                                attribute           = tabname ).
     ENDCASE.
 
+    DATA: invoicing_famix_class  TYPE string,
+          invoicing_famix_method TYPE string.
+
     CASE invocing_element->type.
       WHEN invocing_element->class_type.
 
@@ -68,15 +71,37 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
               invocing_cmpname    TYPE seocmpname.
 
         classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
+
         classes->comp_name( EXPORTING element_id  = i_association-element_id2
                              IMPORTING class_name = invocing_class_name
                                        cmpname    = invocing_cmpname ).
+
+        invoicing_famix_class = invocing_class_name.
+        invoicing_famix_method = invocing_cmpname.
+
+      WHEN invocing_element->web_dynpro_comps_type.
+
+        DATA web_dynpro_component TYPE REF TO z2mse_extr3_web_dynpro_comp.
+
+        DATA: invocing_wdy_component_name  TYPE wdy_component_name,
+              invocing_wdy_controller_name TYPE wdy_controller_name.
+
+
+        web_dynpro_component = z2mse_extr3_web_dynpro_comp=>get_instance( element_manager = element_manager ).
+
+        web_dynpro_component->wdy_controller_name( EXPORTING element_id          = i_association-element_id2
+                                                   IMPORTING wdy_component_name  = invocing_wdy_component_name
+                                                             wdy_controller_name = invocing_wdy_controller_name ).
+
+        invoicing_famix_class = invocing_wdy_component_name.
+        invoicing_famix_method = invocing_wdy_controller_name.
+
     ENDCASE.
 
     DATA using_method_id TYPE i.
 
-    e_using_method_id = element_manager->famix_method->get_id( class  = invocing_class_name
-                                                             method = invocing_cmpname ).
+    e_using_method_id = element_manager->famix_method->get_id( class  = invoicing_famix_class
+                                                               method = invoicing_famix_method ).
 
   ENDMETHOD.
 ENDCLASS.

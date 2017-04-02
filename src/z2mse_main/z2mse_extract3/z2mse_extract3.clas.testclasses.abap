@@ -56,14 +56,17 @@ CLASS ltcl_main IMPLEMENTATION.
 *( |FAMIX.Class Z2MSE_TEST_IF_A isInterface true| )
 *( |FAMIX.Class Z2MSE_TEST_IF_A modifiers ABAPGlobalInterface| )
 *( |FAMIX.Class Z2MSE_TEST_IF_A parentPackage| )
-*( |FAMIX.Class Z2MSE_TEST_WDY_A modifiers ABAPWebDynproComponent| )
+( |FAMIX.Class Z2MSE_TEST_WDY_A modifiers ABAPWebDynproComponent| )
+" New in 0.3.0 (Web Dynpros now also initially collected, not only added if used by something):
+( |FAMIX.Class Z2MSE_TEST_WDY_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
+
 ( |FAMIX.Class ZIWCI_2MSE_TEST_WDY_A isInterface true| )
 ( |FAMIX.Class ZIWCI_2MSE_TEST_WDY_A modifiers ABAPGlobalInterface| )
 ( |FAMIX.Class ZIWCI_2MSE_TEST_WDY_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_A>>METHOD_A variable Z2MSE_TEST_A>>Z2MSE_TEST_A| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_B1>>METHOD_A variable Z2MSE_TEST_A>>Z2MSE_TEST_A| )
 *( |FAMIX.Access accessor Z2MSE_TEST_CL_B1>>METHOD_A variable Z2MSE_TEST_IF_A>>ATTRIBUTE_A| )
-*( |FAMIX.Access accessor Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER variable Z2MSE_TEST_A>>Z2MSE_TEST_A| )
+( |FAMIX.Access accessor Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER variable Z2MSE_TEST_A>>Z2MSE_TEST_A| )
 ( |FAMIX.Attribute Z2MSE_TEST_A>>Z2MSE_TEST_A| )
 *( |FAMIX.Attribute Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~ATTRIBUTE_A| )
 *( |FAMIX.Attribute Z2MSE_TEST_IF_A>>ATTRIBUTE_A| )
@@ -75,8 +78,8 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B2>>METHOD_A candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
 *( |FAMIX.Invocation sender Z2MSE_TEST_IF_A>>EVENT_A candidates Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~EVENT_A signature DUMMY| )
 *( |FAMIX.Invocation sender Z2MSE_TEST_IF_A>>METHOD_A candidates Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~METHOD_A signature DUMMY| )
-*( |FAMIX.Invocation sender Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
-*( |FAMIX.Invocation sender Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER candidates ZIWCI_2MSE_TEST_WDY_A>>WD_GET_API signature DUMMY| )
+( |FAMIX.Invocation sender Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
+( |FAMIX.Invocation sender Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER candidates ZIWCI_2MSE_TEST_WDY_A>>WD_GET_API signature DUMMY| )
 ( |FAMIX.Method Z2MSE_TEST_CL_A>>CONSTRUCTOR signature CONSTRUCTOR| )
 ( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENTHANDLER_A signature EVENTHANDLER_A| )
 ( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENT_A signature EVENT_A| )
@@ -88,8 +91,14 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Method Z2MSE_TEST_CL_B2>>METHOD_A signature METHOD_A| )
 *( |FAMIX.Method Z2MSE_TEST_IF_A>>EVENT_A signature EVENT_A| )
 *( |FAMIX.Method Z2MSE_TEST_IF_A>>METHOD_A signature METHOD_A| )
-*( |FAMIX.Method Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER signature COMPONENTCONTROLLER| )
+( |FAMIX.Method Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER signature COMPONENTCONTROLLER| )
+" New in 0.3.0 (Web Dynpros now also initially collected, not only added if used by something, so also not used controllers now in model):
+( |FAMIX.Method Z2MSE_TEST_WDY_A>>EMPTYVIEW signature EMPTYVIEW| )
+( |FAMIX.Method Z2MSE_TEST_WDY_A>>V_MAIN signature V_MAIN| )
+( |FAMIX.Method Z2MSE_TEST_WDY_A>>W_MAIN signature W_MAIN| )
+
 ( |FAMIX.Method ZIWCI_2MSE_TEST_WDY_A>>WD_GET_API signature WD_GET_API| )
+
     ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
