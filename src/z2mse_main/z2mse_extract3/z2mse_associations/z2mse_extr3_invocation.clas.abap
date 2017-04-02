@@ -1,6 +1,6 @@
 CLASS z2mse_extr3_invocation DEFINITION
   PUBLIC
-  INHERITING FROM z2mse_extr3_association
+  INHERITING FROM z2mse_extr3_access_or_invocatn
   FINAL
   CREATE PUBLIC .
 
@@ -24,6 +24,7 @@ CLASS z2mse_extr3_invocation DEFINITION
            END OF association_type.
     TYPES associations_type TYPE STANDARD TABLE OF association_type WITH DEFAULT KEY.
     DATA associations TYPE HASHED TABLE OF association_type WITH UNIQUE KEY invoced_element_id1 invocing_element_id2.
+
 ENDCLASS.
 
 
@@ -56,47 +57,16 @@ CLASS z2mse_extr3_invocation IMPLEMENTATION.
 
   METHOD make_model.
 
-    DATA: invoced_element  TYPE REF TO z2mse_extr3_elements,
-          invocing_element TYPE REF TO z2mse_extr3_elements.
-
-    invoced_element = element_manager->get_element( i_element_id = association-element_id1 ).
-
-    invocing_element = element_manager->get_element( i_element_id = association-element_id2 ).
-
-    CASE invoced_element->type.
-      WHEN invoced_element->class_type.
-        DATA classes TYPE REF TO z2mse_extr3_classes.
-        DATA: invoced_class_name TYPE seoclsname,
-              invoced_cmpname    TYPE seocmpname.
-
-        classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
-        classes->comp_name( EXPORTING element_id  = association-element_id1
-                             IMPORTING class_name = invoced_class_name
-                                       cmpname    = invoced_cmpname ).
-    ENDCASE.
-
-    CASE invocing_element->type.
-      WHEN invocing_element->class_type.
-
-        DATA: invocing_class_name TYPE seoclsname,
-              invocing_cmpname    TYPE seocmpname.
-
-        classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
-        classes->comp_name( EXPORTING element_id  = association-element_id1
-                             IMPORTING class_name = invocing_class_name
-                                       cmpname    = invocing_cmpname ).
-    ENDCASE.
-
     DATA using_method_id TYPE i.
-
-    using_method_id = element_manager->famix_method->get_id( class  = invocing_class_name
-                                                             method = invocing_cmpname ).
-
     DATA used_id TYPE i.
 
-    used_id = element_manager->famix_method->get_id( class_name_group = ''
-                                                     class            = invoced_class_name
-                                                     method           = invoced_cmpname ).
+
+    _get_famix_id_used_and_using( EXPORTING i_association = association
+                                  IMPORTING e_using_method_id = using_method_id
+                                            e_used_id         = used_id ).
+
+    ASSERT using_method_id IS NOT INITIAL.
+    ASSERT used_id IS NOT INITIAL.
 
     DATA invocation_id TYPE i.
     invocation_id = element_manager->famix_invocation->add( ).
@@ -108,5 +78,8 @@ CLASS z2mse_extr3_invocation IMPLEMENTATION.
 
 
   ENDMETHOD.
+
+
+
 
 ENDCLASS.
