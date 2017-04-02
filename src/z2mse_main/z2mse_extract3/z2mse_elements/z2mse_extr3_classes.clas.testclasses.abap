@@ -272,6 +272,21 @@ CLASS ltcl_component IMPLEMENTATION.
 
     cl_abap_unit_assert=>assert_equals( msg = 'ID has to be 2' exp = 2 act = new_element_id ).
 
+
+
+    f_cut->comp_name( EXPORTING element_id = 1
+                      IMPORTING class_name = class_name_act
+                                cmpname = cmpname_act
+                                cmptype = cmptype_act ).
+
+    class_name_exp = ||.
+    cmpname_exp = ||.
+    CLEAR cmptype_exp.
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Expect initial values if the method is called for a class' exp = class_name_exp act = class_name_act ).
+    cl_abap_unit_assert=>assert_equals( msg = 'Expect initial values if the method is called for a class' exp = cmpname_exp act = cmpname_act ).
+    cl_abap_unit_assert=>assert_equals( msg = 'Expect initial values if the method is called for a class' exp = cmptype_exp act = cmptype_act ).
+
     " Add an existing id
 
     f_cut->add_component( EXPORTING clsname        = 'CLASS_A'
@@ -283,6 +298,11 @@ CLASS ltcl_component IMPLEMENTATION.
 
     cl_abap_unit_assert=>assert_equals( msg = 'ID has to be 2 if added a second time' exp = 2 act = new_element_id ).
 
+    class_name_act = f_cut->class_name( element_id = new_element_id ).
+
+    class_name_exp = ||.
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Expect empty class name if method is called for method or attribute' exp = class_name_exp act = class_name_act ).
 
     f_cut->comp_name( EXPORTING element_id = new_element_id
                       IMPORTING class_name = class_name_act

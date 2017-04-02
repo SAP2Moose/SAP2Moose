@@ -167,6 +167,8 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
     " Search up
 
+    is_up_search = abap_true.
+
     DATA: level_to_search_up      TYPE i,
           something_to_be_done_up TYPE abap_bool.
 
@@ -200,7 +202,11 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
     ENDWHILE.
 
+    is_up_search = abap_false.
+
     " Search down
+
+    is_down_search = abap_true.
 
     DATA: level_to_search_down      TYPE i,
           something_to_be_done_down TYPE abap_bool.
@@ -234,6 +240,8 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
       ENDIF.
 
     ENDWHILE.
+
+    is_down_search = abap_false.
 
   ENDMETHOD.
 ENDCLASS.

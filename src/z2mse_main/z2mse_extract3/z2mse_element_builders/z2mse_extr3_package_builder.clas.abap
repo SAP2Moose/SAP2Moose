@@ -9,7 +9,7 @@ CLASS z2mse_extr3_package_builder DEFINITION
     CLASS-METHODS get_instance
       IMPORTING
                 i_element_manager TYPE REF TO z2mse_extr3_element_manager
-      RETURNING VALUE(instance)   TYPE REF TO z2mse_extr3_package_builder.
+      RETURNING VALUE(r_instance)   TYPE REF TO z2mse_extr3_package_builder.
     METHODS add
       EXPORTING package TYPE devclass.
   PROTECTED SECTION.
@@ -23,7 +23,21 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_package_builder IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_PACKAGE_BUILDER IMPLEMENTATION.
+
+
+  METHOD add.
+
+    packages->add( package ).
+
+  ENDMETHOD.
+
+
+  METHOD constructor.
+    super->constructor( i_element_manager = i_element_manager ).
+    packages = z2mse_extr3_packages=>get_instance( i_element_manager = element_manager ).
+  ENDMETHOD.
+
 
   METHOD get_instance.
 
@@ -32,18 +46,7 @@ CLASS z2mse_extr3_package_builder IMPLEMENTATION.
         EXPORTING
           i_element_manager = i_element_manager.
     ENDIF.
-    instance = instance.
-
-  ENDMETHOD.
-
-  METHOD constructor.
-    super->constructor( i_element_manager = i_element_manager ).
-    packages = z2mse_extr3_packages=>get_instance( i_element_manager = element_manager ).
-  ENDMETHOD.
-
-  METHOD add.
-
-    packages->add( package ).
+    r_instance = instance.
 
   ENDMETHOD.
 ENDCLASS.

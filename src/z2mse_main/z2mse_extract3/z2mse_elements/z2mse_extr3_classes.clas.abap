@@ -15,7 +15,7 @@ CLASS z2mse_extr3_classes DEFINITION
       IMPORTING
         element_manager TYPE REF TO z2mse_extr3_element_manager
       RETURNING
-        VALUE(instance) TYPE REF TO z2mse_extr3_classes.
+        VALUE(r_instance) TYPE REF TO z2mse_extr3_classes.
     METHODS add
       IMPORTING
         class                 TYPE seoclsname
@@ -166,9 +166,11 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
     DATA element TYPE element_type.
 
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
-    ASSERT sy-subrc EQ 0.
+    IF sy-subrc EQ 0.
 
-    class_name = element-class_name.
+      class_name = element-class_name.
+
+    ENDIF.
 
   ENDMETHOD.
 
@@ -178,11 +180,13 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
     DATA element_comp TYPE element_comp_type.
 
     READ TABLE elements_comp_element_id INTO element_comp WITH KEY element_id = element_id.
-    ASSERT sy-subrc EQ 0.
+    IF sy-subrc EQ 0.
 
-    class_name = element_comp-clsname.
-    cmpname = element_comp-cmpname.
-    cmptype = element_comp-cmptype.
+      class_name = element_comp-clsname.
+      cmpname = element_comp-cmpname.
+      cmptype = element_comp-cmptype.
+
+    ENDIF.
 
   ENDMETHOD.
 
@@ -193,8 +197,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
         EXPORTING
           i_element_manager = element_manager.
     ENDIF.
-    instance = instance.
     instance->type = class_type.
+    r_instance = instance.
   ENDMETHOD.
 
 

@@ -8,7 +8,7 @@ CLASS z2mse_extr3_parent_package DEFINITION
     CLASS-METHODS get_instance
       IMPORTING
                 i_element_manager TYPE REF TO z2mse_extr3_element_manager
-      RETURNING VALUE(instance)   TYPE REF TO z2mse_extr3_parent_package.
+      RETURNING VALUE(r_instance)   TYPE REF TO z2mse_extr3_parent_package.
     METHODS add
       IMPORTING
         element_id        TYPE z2mse_extr3_element_manager=>element_id_type
@@ -36,8 +36,8 @@ CLASS z2mse_extr3_parent_package IMPLEMENTATION.
         EXPORTING
           i_element_manager = i_element_manager.
     ENDIF.
-    instance = instance.
     instance->type = parent_package_ass.
+    r_instance = instance.
   ENDMETHOD.
 
   METHOD add.

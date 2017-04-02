@@ -9,7 +9,7 @@ CLASS z2mse_extr3_packages DEFINITION
     CLASS-METHODS get_instance
       IMPORTING
                 i_element_manager TYPE REF TO z2mse_extr3_element_manager
-      RETURNING VALUE(instance)   TYPE REF TO z2mse_extr3_packages.
+      RETURNING VALUE(r_instance)   TYPE REF TO z2mse_extr3_packages.
     METHODS add
       IMPORTING package               TYPE devclass
       EXPORTING VALUE(is_added)       TYPE abap_bool
@@ -76,8 +76,8 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
         EXPORTING
           i_element_manager = i_element_manager.
     ENDIF.
-    instance = instance.
     instance->type = package_type.
+    r_instance = instance.
   ENDMETHOD.
 
 

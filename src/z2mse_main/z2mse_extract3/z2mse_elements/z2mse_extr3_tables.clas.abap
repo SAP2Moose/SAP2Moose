@@ -11,7 +11,7 @@ CLASS z2mse_extr3_tables DEFINITION
       IMPORTING
         i_element_manager TYPE REF TO z2mse_extr3_element_manager
       RETURNING
-        VALUE(instance)   TYPE REF TO z2mse_extr3_tables.
+        VALUE(r_instance)   TYPE REF TO z2mse_extr3_tables.
     METHODS add
       IMPORTING
         table                 TYPE tabname
@@ -81,8 +81,8 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
         EXPORTING
           i_element_manager = i_element_manager.
     ENDIF.
-    instance = instance.
     instance->type = table_type.
+    r_instance = instance.
   ENDMETHOD.
 
 
