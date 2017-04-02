@@ -13,7 +13,7 @@ CLASS z2mse_extr3_classes DEFINITION
 
     CLASS-METHODS get_instance
       IMPORTING
-        element_manager TYPE REF TO z2mse_extr3_element_manager
+        element_manager   TYPE REF TO z2mse_extr3_element_manager
       RETURNING
         VALUE(r_instance) TYPE REF TO z2mse_extr3_classes.
     METHODS add
@@ -32,8 +32,9 @@ CLASS z2mse_extr3_classes DEFINITION
     METHODS class_name
       IMPORTING
         element_id        TYPE i
-      RETURNING
-        VALUE(class_name) TYPE seoclsname.
+      EXPORTING
+        VALUE(class_name) TYPE seoclsname
+        VALUE(clstype)    TYPE seoclstype.
     METHODS comp_name
       IMPORTING
         element_id        TYPE i
@@ -46,9 +47,10 @@ CLASS z2mse_extr3_classes DEFINITION
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO z2mse_extr3_classes.
     TYPES: BEGIN OF element_type,
-             element_id   TYPE z2mse_extr3_element_manager=>element_id_type,
-             class_name   TYPE seoclsname,
-             is_interface TYPE abap_bool,
+             element_id TYPE z2mse_extr3_element_manager=>element_id_type,
+             class_name TYPE seoclsname,
+             clstype    TYPE seoclstype,
+             "is_interface TYPE abap_bool,
            END OF element_type.
     DATA elements_element_id TYPE HASHED TABLE OF element_type WITH UNIQUE KEY element_id.
     DATA elements_class_name TYPE HASHED TABLE OF element_type WITH UNIQUE KEY class_name.
@@ -102,13 +104,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
         new_element_id = element_manager->add_element( element = me ).
         element-element_id = new_element_id.
         element-class_name = class.
-        IF found_class_type EQ is_class_type.
-          element-is_interface = abap_false.
-        ELSEIF found_class_type EQ interface_type.
-          element-is_interface = abap_true.
-        ELSE.
-          ASSERT 1 = 2. " Serious inconsistency
-        ENDIF.
+        element-clstype = found_class_type.
         INSERT element INTO TABLE elements_element_id.
         INSERT element INTO TABLE elements_class_name.
 
@@ -169,6 +165,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
     IF sy-subrc EQ 0.
 
       class_name = element-class_name.
+      clstype = element-clstype.
 
     ENDIF.
 
@@ -211,14 +208,14 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
       DATA last_id TYPE i.
 
-      IF element-is_interface EQ abap_false.
+      IF element-clstype EQ is_class_type.
         " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
         " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
         element_manager->famix_class->add( EXPORTING name_group = 'ABAP_CLASS'
                                                      name       = element-class_name
                                                      modifiers  = z2mse_extract3=>modifier_abapglobalclass
                                            IMPORTING id         = last_id ).
-      ELSE.
+      ELSEIF element-clstype EQ interface_type.
         " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
         " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
         element_manager->famix_class->add( EXPORTING name_group = 'ABAP_CLASS'
@@ -227,6 +224,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                            IMPORTING id         = last_id ).
         " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
         element_manager->famix_class->is_interface( element_id = last_id ).
+      ELSE.
+        ASSERT 1 = 2.
       ENDIF.
       DATA association TYPE z2mse_extr3_element_manager=>association_type.
       LOOP AT associations INTO association WHERE element_id1 = element_id

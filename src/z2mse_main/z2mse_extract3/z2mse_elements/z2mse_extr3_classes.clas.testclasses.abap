@@ -65,7 +65,8 @@ CLASS ltcl_class IMPLEMENTATION.
 
     cl_abap_unit_assert=>assert_equals( msg = 'Class has to be ID 1' exp = 1 act = new_element_id ).
 
-    class_name_act = f_cut->class_name( 1 ).
+    f_cut->class_name( EXPORTING element_id = 1
+                       IMPORTING class_name = class_name_act ).
     class_name_exp = |CLASS_A|.
 
     cl_abap_unit_assert=>assert_equals( msg = 'Class has to be stored internally' exp = class_name_exp act = class_name_act ).
@@ -163,7 +164,9 @@ CLASS ltcl_interface IMPLEMENTATION.
 
     cl_abap_unit_assert=>assert_equals( msg = 'Class has to be ID 1' exp = 1 act = new_element_id ).
 
-    class_name_act = f_cut->class_name( 1 ).
+    f_cut->class_name( EXPORTING element_id = 1
+                       IMPORTING class_name = class_name_act ).
+
     class_name_exp = |INTERFACE_A|.
 
     cl_abap_unit_assert=>assert_equals( msg = 'Class has to be stored internally' exp = class_name_exp act = class_name_act ).
@@ -298,7 +301,8 @@ CLASS ltcl_component IMPLEMENTATION.
 
     cl_abap_unit_assert=>assert_equals( msg = 'ID has to be 2 if added a second time' exp = 2 act = new_element_id ).
 
-    class_name_act = f_cut->class_name( element_id = new_element_id ).
+    f_cut->class_name( EXPORTING element_id = new_element_id
+                       IMPORTING class_name = class_name_act ).
 
     class_name_exp = ||.
 

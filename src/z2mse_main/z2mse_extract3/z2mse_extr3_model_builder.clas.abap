@@ -24,6 +24,8 @@ CLASS z2mse_extr3_model_builder DEFINITION
              element_id                  TYPE z2mse_extr3_element_manager=>element_id_type,
              "! A flag to mark all elements that are part of the initial selection
              found_in_initial_selection  TYPE abap_bool,
+             "! Elements that where added when the main search is finished
+             found_in_post_selection     TYPE abap_bool,
              "! Marks that an initially selected element is analyzed for lower and higher levels as requested
              initially_selected_analyzed TYPE abap_bool,
              "! The level where an element is first found. Needed to stop searching as specified.
@@ -40,13 +42,16 @@ CLASS z2mse_extr3_model_builder DEFINITION
           level_for_found_in_upsearch   TYPE i,
           is_down_search                TYPE abap_bool,
           "! Add newly found elements during downsearch in this level
-          level_for_found_in_downsearch TYPE i.
+          level_for_found_in_downsearch TYPE i,
+          is_post_selection             TYPE abap_bool.
 
     TYPES: BEGIN OF builder_type,
              association_builder TYPE REF TO z2mse_extr3_association_build,
            END OF builder_type.
     "! Use for initial search
     DATA association_builders_init TYPE STANDARD TABLE OF builder_type.
+    "! Use for final search
+    DATA association_builders_post TYPE STANDARD TABLE OF builder_type.
     "! Use for search
     DATA association_builders TYPE STANDARD TABLE OF builder_type.
 
@@ -68,6 +73,13 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
     association_builder_init-association_builder = tadir_builder.
     INSERT association_builder_init INTO TABLE association_builders_init.
+
+    DATA association_builder_post TYPE builder_type.
+
+    CREATE OBJECT tadir_builder EXPORTING i_element_manager = element_manager.
+
+    association_builder_post-association_builder = tadir_builder.
+    INSERT association_builder_post INTO TABLE association_builders_post.
 
     DATA association_builder TYPE builder_type.
 
@@ -116,6 +128,10 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
         <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
 
       ENDIF.
+
+    ELSEIF is_post_selection EQ abap_true.
+
+      <found_in_level>-found_in_post_selection = abap_true.
 
     ELSE.
       ASSERT 1 = 2.
@@ -242,6 +258,26 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
     ENDWHILE.
 
     is_down_search = abap_false.
+
+    " Post search
+
+    is_post_selection = abap_true.
+
+    DATA all_elements TYPE found_in_levels_type.
+
+    all_elements = found_in_levels.
+
+    LOOP AT association_builders_post INTO association_builder.
+
+      LOOP AT all_elements INTO found_in_level.
+
+        association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
+
+      ENDLOOP.
+
+    ENDLOOP.
+
+    is_post_selection = abap_false.
 
   ENDMETHOD.
 ENDCLASS.

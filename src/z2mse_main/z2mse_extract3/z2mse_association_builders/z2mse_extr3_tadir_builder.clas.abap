@@ -9,6 +9,7 @@ CLASS z2mse_extr3_tadir_builder DEFINITION
       IMPORTING
         i_element_manager TYPE REF TO z2mse_extr3_element_manager.
     METHODS search_down REDEFINITION.
+    METHODS search_up REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     DATA: tables         TYPE REF TO z2mse_extr3_tables,
@@ -103,8 +104,75 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
 
       ENDLOOP.
 
-      "TBD proceed here
+    ENDIF.
 
+  ENDMETHOD.
+
+  METHOD search_up.
+
+    DATA: element        TYPE REF TO z2mse_extr3_elements,
+          package        TYPE REF TO z2mse_extr3_packages,
+          is_found       TYPE abap_bool,
+          new_element_id TYPE z2mse_extr3_element_manager=>element_id_type,
+          class_name     TYPE seoclsname,
+          clstype        TYPE seoclstype,
+          tabname        TYPE tabname.
+
+    package = z2mse_extr3_packages=>get_instance( i_element_manager = element_manager ).
+
+    element = element_manager->get_element( element_id ).
+
+    DATA: object   TYPE trobjtype,
+          obj_name TYPE sobj_name.
+
+    CLEAR object.
+    CLEAR obj_name.
+
+    CASE element->type.
+      WHEN element->class_type.
+        classes->class_name( EXPORTING element_id = element_id
+                             IMPORTING class_name = class_name
+                                       clstype    = clstype ).
+        obj_name = class_name.
+        IF clstype EQ classes->is_class_type.
+          object = 'CLAS'.
+        ELSEIF clstype EQ classes->interface_type.
+          object = 'INTF'.
+        ELSE.
+          ASSERT 1 = 2.
+        ENDIF.
+      WHEN element->table_type.
+        tabname = tables->table_name( i_element_id = element_id ).
+        object = 'TABL'.
+        obj_name = tabname.
+    ENDCASE.
+
+    TYPES: BEGIN OF ty_tadir,
+             devclass TYPE devclass,
+           END OF ty_tadir.
+
+    DATA: tadir  TYPE ty_tadir,
+          tadirs TYPE STANDARD TABLE OF ty_tadir WITH DEFAULT KEY.
+    IF object IS NOT INITIAL.
+      SELECT devclass FROM tadir INTO TABLE tadirs WHERE pgmid = 'R3TR'
+                                                     AND object = object
+                                                     AND obj_name = obj_name.
+      IF sy-subrc EQ 0.
+        LOOP AT tadirs INTO tadir.
+
+          package->add( EXPORTING package        = tadir-devclass
+                        IMPORTING is_added       = is_found
+                                  new_element_id = new_element_id ).
+
+          IF is_found EQ abap_true.
+
+            parent_package->add( EXPORTING element_id        = element_id
+                                           parent_element_id = new_element_id ).
+
+          ENDIF.
+
+        ENDLOOP.
+      ENDIF.
     ENDIF.
 
   ENDMETHOD.
