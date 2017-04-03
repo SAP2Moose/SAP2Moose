@@ -112,7 +112,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_classes IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
 
 
   METHOD add.
@@ -372,6 +372,12 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
           is_added        TYPE abap_bool,
           new_element_id  TYPE i.
 
+    DATA access TYPE REF TO z2mse_extr3_access.
+    access = z2mse_extr3_access=>get_instance( i_element_manager = element_manager ).
+
+    DATA invocation TYPE REF TO z2mse_extr3_invocation.
+    invocation = z2mse_extr3_invocation=>get_instance( i_element_manager = element_manager ).
+
     TEST-SEAM seometarel.
 
       SELECT * FROM seometarel INTO TABLE relations WHERE clsname = clsname
@@ -406,6 +412,28 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                            i_found_cmptype    = interface_class_component-cmptype
                                                            i_found_mtdtype    = interface_class_component-mtdtype ).
 
+          DATA interface_element_id TYPE z2mse_extr3_element_manager=>element_id_type .
+
+          me->add_component( EXPORTING clsname        = interface_class_component-clsname
+                                       cmpname        = interface_class_component-cmpname
+                              IMPORTING "*              is_added       =
+                                        new_element_id = interface_element_id ).
+
+          IF interface_class_component-cmptype EQ attribute_type.
+
+          " Connections between attributes are not expressible in FAMIX, or?
+
+*            access->add( EXPORTING accessed_element_id1  = new_element_id
+*                                   accessing_element_id2 = interface_element_id ).
+
+          ELSE.
+
+            invocation->add( EXPORTING invoced_element_id1  = new_element_id
+                                       invocing_element_id2 = interface_element_id ).
+
+          ENDIF.
+
+
         ENDLOOP.
 
       ENDIF.
@@ -413,6 +441,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+
 
   METHOD _add_single_component_to_class.
 
@@ -431,5 +460,4 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
     INSERT element_comp2 INTO TABLE elements_comp_clsname_cmpname .
 
   ENDMETHOD.
-
 ENDCLASS.
