@@ -17,6 +17,7 @@ CLASS z2mse_extr3_classes DEFINITION
              clsname TYPE seoclsname,
              cmpname TYPE seocmpname,
              cmptype TYPE seocmptype,
+             mtdtype TYPE seomtdtype,
            END OF ty_class_component.
     TYPES ty_class_components TYPE STANDARD TABLE OF ty_class_component WITH KEY clsname cmpname.
     DATA: class_components TYPE ty_class_components.
@@ -97,11 +98,21 @@ CLASS z2mse_extr3_classes DEFINITION
       IMPORTING
         clsname TYPE seoclsname.
 
+    "! Call me only after checking that the component to be added is not already added.
+    METHODS _add_single_component_to_class
+      IMPORTING
+        i_found_class_name      TYPE seoclsname
+        i_found_cmpname         TYPE seocmpname
+        i_found_cmptype         TYPE seocmptype
+        i_found_mtdtype         TYPE seomtdtype
+      RETURNING
+        VALUE(r_new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
+
 ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
+CLASS z2mse_extr3_classes IMPLEMENTATION.
 
 
   METHOD add.
@@ -139,7 +150,7 @@ CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
 
       TEST-SEAM seocompo_2.
 
-        SELECT clsname cmpname cmptype
+        SELECT clsname cmpname cmptype mtdtype
           FROM seocompo
           INTO CORRESPONDING FIELDS OF TABLE class_components
           WHERE cmptype <> 3 " A type
@@ -341,15 +352,10 @@ CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
 
       IF is_added EQ abap_true.
 
-        new_element_id = element_manager->add_element( element = me ).
-        element_comp-element_id = new_element_id.
-        element_comp-clsname = found_class_name.
-        element_comp-cmpname = found_cmpname.
-        element_comp-cmptype = found_cmptype.
-        element_comp-mtdtype = found_mtdtype.
-
-        INSERT element_comp INTO TABLE elements_comp_element_id .
-        INSERT element_comp INTO TABLE elements_comp_clsname_cmpname .
+        new_element_id = _add_single_component_to_class( i_found_class_name = found_class_name
+                                                         i_found_cmpname    = found_cmpname
+                                                         i_found_cmptype    = found_cmptype
+                                                         i_found_mtdtype    = found_mtdtype ).
 
       ENDIF.
 
@@ -376,22 +382,54 @@ CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
 
     LOOP AT relations INTO relation WHERE reltype = 1 OR reltype = 2.
 
-      me->add( EXPORTING class          = relation-refclsname
-               IMPORTING is_added       = is_added
-                         new_element_id = new_element_id ).
+      element_metarel-element_id = new_element_id.
+      element_metarel-refclsname = relation-refclsname.
+      element_metarel-reltype = relation-reltype.
 
-      IF is_added EQ abap_true.
+      INSERT element_metarel INTO TABLE elements_metarel_element_id.
+      INSERT element_metarel INTO TABLE elements_metarel_refclsname.
 
-        element_metarel-element_id = new_element_id.
-        element_metarel-refclsname = relation-refclsname.
-        element_metarel-reltype = relation-reltype.
+      IF relation-reltype EQ 1. " Interface
 
-        INSERT element_metarel INTO TABLE elements_metarel_element_id.
-        INSERT element_metarel INTO TABLE elements_metarel_refclsname.
+        DATA: interface_class_components TYPE ty_class_components,
+              interface_class_component  TYPE ty_class_component.
+
+        me->add( EXPORTING class            = relation-refclsname
+                 IMPORTING is_added         = is_added
+                           new_element_id   = new_element_id
+                           class_components = interface_class_components ).
+
+        LOOP AT interface_class_components INTO interface_class_component.
+
+          new_element_id = _add_single_component_to_class( i_found_class_name = clsname
+                                                           i_found_cmpname    = |{ interface_class_component-clsname }~{ interface_class_component-cmpname }|
+                                                           i_found_cmptype    = interface_class_component-cmptype
+                                                           i_found_mtdtype    = interface_class_component-mtdtype ).
+
+        ENDLOOP.
 
       ENDIF.
 
     ENDLOOP.
 
   ENDMETHOD.
+
+  METHOD _add_single_component_to_class.
+
+    " Add single component to class
+
+    DATA element_comp2 TYPE element_comp_type.
+
+    r_new_element_id = element_manager->add_element( element = me ).
+    element_comp2-element_id = r_new_element_id.
+    element_comp2-clsname = i_found_class_name.
+    element_comp2-cmpname = i_found_cmpname.
+    element_comp2-cmptype = i_found_cmptype.
+    element_comp2-mtdtype = i_found_mtdtype.
+
+    INSERT element_comp2 INTO TABLE elements_comp_element_id .
+    INSERT element_comp2 INTO TABLE elements_comp_clsname_cmpname .
+
+  ENDMETHOD.
+
 ENDCLASS.

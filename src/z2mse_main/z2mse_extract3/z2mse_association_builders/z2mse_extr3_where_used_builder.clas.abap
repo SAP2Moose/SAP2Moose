@@ -137,16 +137,23 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
               " TBD include code here?
               found_cmpname = obj_name+30(30).
 
-              classes->add_component(
-                EXPORTING
-                  clsname        = found_class_name
-                  cmpname        = found_cmpname
-                IMPORTING
-                  is_added       = is_added
-                  new_element_id = used_by_element_id ).
+              DATA: temp TYPE seocmpname.
+              temp = class_name && |~| && cmpname.
 
-              IF is_added EQ abap_false.
-                "TBD what is to be done here?
+              IF found_cmpname <> temp. " Implementation of interface methods are in the where used list. These are added explicitely in the class coding. So filter here.
+
+                classes->add_component(
+                  EXPORTING
+                    clsname        = found_class_name
+                    cmpname        = found_cmpname
+                  IMPORTING
+                    is_added       = is_added
+                    new_element_id = used_by_element_id ).
+
+                IF is_added EQ abap_false.
+                  "TBD what is to be done here?
+
+                ENDIF.
 
               ENDIF.
 
