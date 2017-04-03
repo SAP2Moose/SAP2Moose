@@ -11,6 +11,16 @@ CLASS z2mse_extr3_classes DEFINITION
                method_type    TYPE seocmptype VALUE 1,
                event_type     TYPE seocmptype VALUE 2.
 
+
+
+    TYPES: BEGIN OF ty_class_component,
+             clsname TYPE seoclsname,
+             cmpname TYPE seocmpname,
+             cmptype TYPE seocmptype,
+           END OF ty_class_component.
+    TYPES ty_class_components TYPE STANDARD TABLE OF ty_class_component WITH KEY clsname cmpname.
+    DATA: class_components TYPE ty_class_components.
+
     CLASS-METHODS get_instance
       IMPORTING
         element_manager   TYPE REF TO z2mse_extr3_element_manager
@@ -21,7 +31,8 @@ CLASS z2mse_extr3_classes DEFINITION
         class                 TYPE seoclsname
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
-        VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
+        VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type
+        class_components      TYPE ty_class_components.
     METHODS add_component
       IMPORTING
         clsname               TYPE seoclsname
@@ -46,6 +57,7 @@ CLASS z2mse_extr3_classes DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO z2mse_extr3_classes.
+
     TYPES: BEGIN OF element_type,
              element_id TYPE z2mse_extr3_element_manager=>element_id_type,
              class_name TYPE seoclsname,
@@ -54,6 +66,7 @@ CLASS z2mse_extr3_classes DEFINITION
            END OF element_type.
     DATA elements_element_id TYPE HASHED TABLE OF element_type WITH UNIQUE KEY element_id.
     DATA elements_class_name TYPE HASHED TABLE OF element_type WITH UNIQUE KEY class_name.
+
     TYPES: BEGIN OF element_comp_type,
              element_id TYPE z2mse_extr3_element_manager=>element_id_type,
              clsname    TYPE seoclsname,
@@ -63,6 +76,15 @@ CLASS z2mse_extr3_classes DEFINITION
            END OF element_comp_type.
     DATA elements_comp_element_id TYPE HASHED TABLE OF element_comp_type WITH UNIQUE KEY element_id.
     DATA elements_comp_clsname_cmpname TYPE HASHED TABLE OF element_comp_type WITH UNIQUE KEY clsname cmpname.
+
+    TYPES: BEGIN OF element_metarel_type,
+             element_id TYPE z2mse_extr3_element_manager=>element_id_type,
+             refclsname TYPE seoclsname,
+             reltype    TYPE seoreltype,
+           END OF element_metarel_type.
+    DATA elements_metarel_element_id TYPE HASHED TABLE OF element_metarel_type WITH UNIQUE KEY element_id.
+    DATA elements_metarel_refclsname TYPE HASHED TABLE OF element_metarel_type WITH UNIQUE KEY refclsname.
+
     METHODS _add_component
       IMPORTING
         clsname               TYPE seoclsname
@@ -70,11 +92,16 @@ CLASS z2mse_extr3_classes DEFINITION
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
         VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
+
+    METHODS _add_metarel
+      IMPORTING
+        clsname TYPE seoclsname.
+
 ENDCLASS.
 
 
 
-CLASS z2mse_extr3_classes IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
 
 
   METHOD add.
@@ -110,14 +137,6 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
       ENDIF.
 
-      TYPES: BEGIN OF ty_class_component,
-               clsname TYPE seoclsname,
-               cmpname TYPE seocmpname,
-             END OF ty_class_component.
-      TYPES ty_class_components TYPE STANDARD TABLE OF ty_class_component WITH KEY clsname cmpname.
-      DATA: class_components TYPE ty_class_components,
-            class_component  TYPE ty_class_component.
-
       TEST-SEAM seocompo_2.
 
         SELECT clsname cmpname cmptype
@@ -128,12 +147,16 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
       END-TEST-SEAM.
 
+      DATA class_component  TYPE ty_class_component.
+
       LOOP AT class_components INTO class_component.
 
         _add_component( EXPORTING clsname        = class_component-clsname
                                   cmpname        = class_component-cmpname ).
 
       ENDLOOP.
+
+      _add_metarel( clsname = class ).
 
     ENDIF.
 
@@ -331,6 +354,44 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       ENDIF.
 
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD _add_metarel.
+
+    DATA: relation        TYPE seometarel,
+          relations       TYPE STANDARD TABLE OF seometarel,
+          element_metarel TYPE element_metarel_type,
+          is_added        TYPE abap_bool,
+          new_element_id  TYPE i.
+
+    TEST-SEAM seometarel.
+
+      SELECT * FROM seometarel INTO TABLE relations WHERE clsname = clsname
+                                                      AND version = 1
+                                                      AND state   = 1.
+
+    END-TEST-SEAM.
+
+    LOOP AT relations INTO relation WHERE reltype = 1 OR reltype = 2.
+
+      me->add( EXPORTING class          = relation-refclsname
+               IMPORTING is_added       = is_added
+                         new_element_id = new_element_id ).
+
+      IF is_added EQ abap_true.
+
+        element_metarel-element_id = new_element_id.
+        element_metarel-refclsname = relation-refclsname.
+        element_metarel-reltype = relation-reltype.
+
+        INSERT element_metarel INTO TABLE elements_metarel_element_id.
+        INSERT element_metarel INTO TABLE elements_metarel_refclsname.
+
+      ENDIF.
+
+    ENDLOOP.
 
   ENDMETHOD.
 ENDCLASS.

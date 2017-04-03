@@ -32,19 +32,32 @@ CLASS ltcl_class IMPLEMENTATION.
           new_element_id TYPE i.
 
     TEST-INJECTION seoclass.
-      found_class_name = 'CLASS_A'.
-      found_class_type = 0.
+      IF class EQ 'CLASS_A'.
+        found_class_name = 'CLASS_A'.
+        found_class_type = 0.
+      ELSEIF class EQ 'INTERFACE_A'.
+        found_class_name = 'INTERFACE_A'.
+        found_class_type = 0.
+      ENDIF.
     END-TEST-INJECTION.
 
     TEST-INJECTION seocompo_2.
-
-      class_components = VALUE #( ( clsname = 'CLASS_A' cmpname = 'METHOD_A' ) ).
-
+      IF class EQ 'CLASS_A'.
+        class_components = VALUE #( ( clsname = 'CLASS_A' cmpname = 'METHOD_A' ) ).
+      ENDIF.
     END-TEST-INJECTION.
 
     TEST-INJECTION seocompo.
-      found_class_name = 'CLASS_A'.
-      found_cmpname = 'METHOD_A'.
+      IF clsname EQ 'CLASS_A'.
+        found_class_name = 'CLASS_A'.
+        found_cmpname = 'METHOD_A'.
+      ENDIF.
+    END-TEST-INJECTION.
+
+    TEST-INJECTION seometarel.
+      IF clsname EQ 'CLASS_A'.
+        relations = VALUE #( ( clsname = |CLASS_A| refclsname = |INTERFACE_A| reltype = |1| ) ).
+      ENDIF.
     END-TEST-INJECTION.
 
     f_cut->add( EXPORTING class = 'CLASS_A'
@@ -104,6 +117,7 @@ CLASS ltcl_class IMPLEMENTATION.
     equalized_harmonized_mse_exp = VALUE #(
                                             ( |FAMIX.Class CLASS_A modifiers ABAPGlobalClass| )
                                             ( |FAMIX.Class CLASS_A parentPackage PACKAGE1| )
+                                            ( |FAMIX.Class INTERFACE_A modifiers ABAPGlobalClass| )
                                             ( |FAMIX.Attribute CLASS_A>>METHOD_A| )
                                             ( |FAMIX.Package PACKAGE1| ) ).
 
