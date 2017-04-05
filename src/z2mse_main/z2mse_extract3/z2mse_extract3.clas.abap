@@ -9,6 +9,7 @@ CLASS z2mse_extract3 DEFINITION
     CONSTANTS modifier_abapglobalinterface TYPE string VALUE 'ABAPGlobalInterface' ##NO_TEXT.
     CONSTANTS modifier_webdynpro_component TYPE string VALUE 'ABAPWebDynproComponent'.
     CONSTANTS modifier_dbtable TYPE string VALUE 'DBTable' ##NO_TEXT.
+    CONSTANTS modifier_program TYPE string VALUE 'ABAPProgram' ##NO_TEXT.
 
     METHODS constructor.
 
