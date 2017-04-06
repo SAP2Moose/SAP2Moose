@@ -355,12 +355,18 @@ CLASS cl_remove_global_only IMPLEMENTATION.
         IF part_1 EQ 'PUBLIC' AND part_2 IS INITIAL.
           DELETE source.
           CONTINUE.
+        ELSEIF part_1 EQ 'PUBLIC.' AND part_2 IS INITIAL.
+          <line> = '.'.
+        ELSEIF part_1 EQ 'PUBLIC.' AND part_2 EQ 'ABSTRACT'.
+          <line> = '.'.
         ELSEIF part_1 EQ 'PUBLIC' AND part_2 EQ 'ABSTRACT'.
           DELETE source.
           CONTINUE.
-        ELSEIF ( part_1 EQ 'CREATE' AND part_2 EQ 'PUBLIC.' AND part_3 IS INITIAL ) OR
-               ( part_1 EQ 'CREATE' AND part_2 EQ 'PUBLIC' AND part_3 EQ '.' AND part_4 IS INITIAL ).
-          <line> = '.'.
+        ELSEIF part_1 EQ 'GLOBAL' AND part_2 EQ 'FRIENDS'.
+          <line> = |.|.
+*        ELSEIF ( part_1 EQ 'CREATE' AND part_2 EQ 'PUBLIC.' AND part_3 IS INITIAL ) OR
+*               ( part_1 EQ 'CREATE' AND part_2 EQ 'PUBLIC' AND part_3 EQ '.' AND part_4 IS INITIAL ).
+*          <line> = '.'.
         ENDIF.
       ENDIF.
 

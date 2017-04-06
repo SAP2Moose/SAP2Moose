@@ -6,6 +6,15 @@ CLASS z2mse_extr3_packages DEFINITION
   GLOBAL FRIENDS z2mse_extr3_packages_mock.
 
   PUBLIC SECTION.
+
+    TYPES:
+      ty_s_pack                         TYPE RANGE OF tadir-devclass.
+
+    TYPES: BEGIN OF ty_package,
+             package       TYPE devclass,
+             parentpackage TYPE parentcl,
+           END OF ty_package.
+    TYPES ty_packages TYPE HASHED TABLE OF ty_package WITH UNIQUE KEY package.
     CLASS-METHODS get_instance
       IMPORTING
                 i_element_manager TYPE REF TO z2mse_extr3_element_manager
@@ -38,7 +47,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_packages IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_PACKAGES IMPLEMENTATION.
 
 
   METHOD add.
@@ -70,6 +79,19 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD devclass.
+
+    DATA element TYPE element_type.
+
+    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = i_element_id.
+    ASSERT sy-subrc EQ 0.
+
+    r_result = element-devclass.
+
+  ENDMETHOD.
+
+
   METHOD get_instance.
     IF instance IS NOT BOUND.
       CREATE OBJECT instance
@@ -92,17 +114,6 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD devclass.
-
-    DATA element TYPE element_type.
-
-    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = i_element_id.
-    ASSERT sy-subrc EQ 0.
-
-    r_result = element-devclass.
-
-  ENDMETHOD.
-
 
   METHOD _does_package_exists.
 
@@ -119,5 +130,4 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-
 ENDCLASS.

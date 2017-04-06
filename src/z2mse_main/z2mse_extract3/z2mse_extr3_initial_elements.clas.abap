@@ -53,16 +53,16 @@ CLASS z2mse_extr3_initial_elements DEFINITION
     DATA g_is_test TYPE abap_bool.
     METHODS _select_top_packages
       IMPORTING
-        i_top_packages    TYPE z2mse_extr_packages=>ty_s_pack
+        i_top_packages    TYPE z2mse_extr3_packages=>ty_s_pack
       RETURNING
-        VALUE(r_packages) TYPE z2mse_extr_packages=>ty_packages.
+        VALUE(r_packages) TYPE z2mse_extr3_packages=>ty_packages.
     TYPES:
       ty_packages_to_search_sub TYPE HASHED TABLE OF ty_package WITH UNIQUE KEY package.
     METHODS _select_sub_packages
       IMPORTING
         i_packages_to_search_sub TYPE ty_packages_to_search_sub
       RETURNING
-        VALUE(r_packages)        TYPE z2mse_extr_packages=>ty_packages.
+        VALUE(r_packages)        TYPE z2mse_extr3_packages=>ty_packages.
 ENDCLASS.
 
 
