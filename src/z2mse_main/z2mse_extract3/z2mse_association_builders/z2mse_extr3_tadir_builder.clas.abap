@@ -14,13 +14,15 @@ CLASS z2mse_extr3_tadir_builder DEFINITION
   PRIVATE SECTION.
     DATA: tables         TYPE REF TO z2mse_extr3_tables,
           classes        TYPE REF TO z2mse_extr3_classes,
+          programs       TYPE REF TO z2mse_extr3_programs,
           web_dynpro_components TYPE REF TO z2mse_extr3_web_dynpro_comp,
           parent_package TYPE REF TO z2mse_extr3_parent_package.
 ENDCLASS.
 
 
 
-CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_TADIR_BUILDER IMPLEMENTATION.
+
 
   METHOD constructor.
 
@@ -28,10 +30,12 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
 
     parent_package = z2mse_extr3_parent_package=>get_instance( i_element_manager = element_manager ).
     classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
+    programs = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
     tables = z2mse_extr3_tables=>get_instance( i_element_manager = element_manager ).
     web_dynpro_components = z2mse_extr3_web_dynpro_comp=>get_instance( element_manager = element_manager ).
 
   ENDMETHOD.
+
 
   METHOD search_down.
 
@@ -41,6 +45,7 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
           new_element_id TYPE z2mse_extr3_element_manager=>element_id_type,
           class_name     TYPE seoclsname,
           tabname        TYPE tabname,
+          program        TYPE PROGNAME,
           WDY_COMPONENT_NAME TYPE WDY_COMPONENT_NAME.
 
     element = element_manager->get_element( element_id ).
@@ -81,6 +86,12 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
               WHEN 'DEVC'.
               WHEN 'FUGR'.
               WHEN 'PROG'.
+
+                program = tadir-obj_name.
+                programs->add( EXPORTING program        = program
+                               IMPORTING is_added       = is_found
+                                         new_element_id = new_element_id ).
+
               WHEN 'TABL'.
 
                 tabname = tadir-obj_name.
@@ -116,6 +127,7 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+
 
   METHOD search_up.
 
@@ -185,5 +197,4 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-
 ENDCLASS.

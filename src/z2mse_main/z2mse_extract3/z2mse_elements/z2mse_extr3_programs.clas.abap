@@ -111,16 +111,32 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
 
     ENDLOOP.
 
-    DATA dummy_attribute_id TYPE i.
-    " SAP_2_FAMIX_56      Add a dummy attribute with the name of the table
-    element_manager->famix_attribute->add( EXPORTING name                   = element-program
-                                           IMPORTING id                     = dummy_attribute_id ).
+    DATA dummy_method_id TYPE i.
+*    " SAP_2_FAMIX_56      Add a dummy attribute with the name of the table
+*    element_manager->famix_attribute->add( EXPORTING name                   = element-program
+*                                           IMPORTING id                     = dummy_attribute_id ).
+*
+*    element_manager->famix_attribute->set_parent_type( EXPORTING element_id         = dummy_attribute_id
+*                                                parent_id          = last_id ).
+*
+*    element_manager->famix_attribute->store_id( EXPORTING class     = element-program
+*                                                          attribute = element-program ).
 
-    element_manager->famix_attribute->set_parent_type( EXPORTING element_id         = dummy_attribute_id
-                                                parent_id          = last_id ).
 
-    element_manager->famix_attribute->store_id( EXPORTING class     = element-program
-                                                          attribute = element-program ).
+          element_manager->famix_method->add( EXPORTING name = element-program
+                                              IMPORTING id   = dummy_method_id ).
+
+          element_manager->famix_method->set_signature( element_id = last_id
+                                                         signature = element-program ).
+
+          element_manager->famix_method->set_parent_type( EXPORTING element_id        = dummy_method_id
+                                                                    parent_element    = 'FAMIX.Class'
+                                                                    parent_name_group = 'ABAP_PROGRAM'
+                                                                    parent_name       = element-program ).
+
+
+          element_manager->famix_method->store_id( EXPORTING class  = element-program
+                                                             method = element-program ).
 
   ENDMETHOD.
 

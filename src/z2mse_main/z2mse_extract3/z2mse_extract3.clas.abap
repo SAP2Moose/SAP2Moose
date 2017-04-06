@@ -5,6 +5,7 @@ CLASS z2mse_extract3 DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    TYPES: ty_s_pack TYPE RANGE OF tadir-devclass .
     CONSTANTS modifier_abapglobalclass TYPE string VALUE 'ABAPGlobalClass' ##NO_TEXT.
     CONSTANTS modifier_abapglobalinterface TYPE string VALUE 'ABAPGlobalInterface' ##NO_TEXT.
     CONSTANTS modifier_webdynpro_component TYPE string VALUE 'ABAPWebDynproComponent'.

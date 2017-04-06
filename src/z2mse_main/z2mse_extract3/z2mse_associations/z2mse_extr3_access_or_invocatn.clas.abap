@@ -59,6 +59,8 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
 
         e_used_id = element_manager->famix_attribute->get_id(  class            = tabname
                                                                attribute           = tabname ).
+      WHEN OTHERS.
+        ASSERT 1 = 2.
     ENDCASE.
 
     DATA: invoicing_famix_class  TYPE string,
@@ -95,6 +97,23 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
 
         invoicing_famix_class = invocing_wdy_component_name.
         invoicing_famix_method = invocing_wdy_controller_name.
+
+      WHEN invocing_element->program_type.
+
+        DATA programs TYPE REF TO z2mse_extr3_programs.
+
+        DATA: invoicing_program TYPE progname.
+
+        programs = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
+
+        programs->program_name( EXPORTING i_element_id =          i_association-element_id2
+                                IMPORTING program      = invoicing_program ).
+
+        invoicing_famix_class = invoicing_program.
+        invoicing_famix_method = invoicing_program.
+
+      WHEN OTHERS.
+        ASSERT 1 = 2.
 
     ENDCASE.
 

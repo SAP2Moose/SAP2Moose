@@ -180,11 +180,18 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
             web_dynpro_component->add_component( EXPORTING wdy_component_name  = ls_wd_sourcemap-component_name
                                                            wdy_controller_name = ls_wd_sourcemap-controller_name
-                                                 IMPORTING is_added       = is_added
-                                                           new_element_id = used_by_element_id ).
+                                                 IMPORTING is_added            = is_added
+                                                           new_element_id      = used_by_element_id ).
 
           ELSE.
-*            <include_2_component>-is_program_or_function = abap_true.
+
+            DATA programs TYPE REF TO z2mse_extr3_programs.
+            programs = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
+
+            programs->add( EXPORTING program        = wbcrossgt-include
+                           IMPORTING is_added       = is_added
+                                     new_element_id = used_by_element_id ).
+
           ENDIF.
 
         ENDIF.

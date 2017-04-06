@@ -217,6 +217,49 @@ SELECTION-SCREEN END OF BLOCK bl_model_settings.
 
 ******************************************** End Include Z_FAMIX_ABAP *****************************
 
+
+* REPLACE_DEFINITION Z2MSE_EXTR3_ELEMENT_MANAGER
+* REPLACE_DEFINITION Z2MSE_EXTR3
+* REPLACE_DEFINITION Z2MSE_EXTR3_ACCESS_OR_INVOCATN
+* REPLACE_DEFINITION Z2MSE_EXTR3_ACCESS
+* REPLACE_DEFINITION Z2MSE_EXTR3_ELEMENTS
+* REPLACE_DEFINITION Z2MSE_EXTR3_ASSOCIATION
+* REPLACE_DEFINITION Z2MSE_EXTR3_INVOCATION
+* REPLACE_DEFINITION Z2MSE_EXTR3_PARENT_PACKAGE
+* REPLACE_DEFINITION Z2MSE_EXTR3_ASSOCIATION_BUILD
+* REPLACE_DEFINITION Z2MSE_EXTR3_TADIR_BUILDER
+* REPLACE_DEFINITION Z2MSE_EXTR3_WHERE_USED_BUILDER
+* REPLACE_DEFINITION Z2MSE_EXTR3_CLASSES
+* REPLACE_DEFINITION Z2MSE_EXTR3_PACKAGES
+* REPLACE_DEFINITION Z2MSE_EXTR3_PROGRAMS
+* REPLACE_DEFINITION Z2MSE_EXTR3_TABLES
+* REPLACE_DEFINITION Z2MSE_EXTR3_WEB_DYNPRO_COMP
+* REPLACE_DEFINITION Z2MSE_EXTR3_INITIAL_ELEMENTS
+* REPLACE_DEFINITION Z2MSE_EXTR3_MODEL_BUILDER
+* REPLACE_DEFINITION Z2MSE_EXTRACT3
+
+
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_ACCESS
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_ACCESS_OR_INVOCATN
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_ASSOCIATION
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_INVOCATION
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_PARENT_PACKAGE
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_ASSOCIATION_BUILD
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_TADIR_BUILDER
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_WHERE_USED_BUILDER
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_CLASSES
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_ELEMENTS
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_PACKAGES
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_PROGRAMS
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_TABLES
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_WEB_DYNPRO_COMP
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_ELEMENT_MANAGER
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_INITIAL_ELEMENTS
+* REPLACE_IMPLEMENTATION Z2MSE_EXTR3_MODEL_BUILDER
+* REPLACE_IMPLEMENTATION Z2MSE_EXTRACT3
+
+
 * REPLACE_DEFINITION Z2MSE_EXTR_PACKAGES
 
 * REPLACE_DEFINITION Z2MSE_EXTR_CLASSES
@@ -253,7 +296,7 @@ START-OF-SELECTION.
 
   DATA: mse_model TYPE z2mse_model=>lines_type.
 
-  DATA sap_extractor TYPE REF TO z2mse_extract_sap2.
+  DATA sap_extractor TYPE REF TO z2mse_extract3.
 
   DATA: ls_pack_line LIKE LINE OF s_pack.
   DATA: ls_pack TYPE sap_extractor->ty_s_pack.
@@ -267,16 +310,24 @@ START-OF-SELECTION.
     APPEND ls_spack_line TO ls_spack.
   ENDLOOP.
 
+
+
+
+  DATA: initial_elements TYPE REF TO z2mse_extr3_initial_elements.
+  initial_elements = NEW #( ).
+  initial_elements->select_packages( EXPORTING top_packages           = ls_pack
+                                               sub_packages_filter    = ls_spack
+                                               including_sub_packages = abap_true ).
+
   CREATE OBJECT sap_extractor.
 
   DATA nothing_done TYPE boolean.
-  sap_extractor->extract( EXPORTING i_top_packages           = ls_pack
-                                    i_sub_packages_filter    = ls_spack
-                                    i_search_sub_packages    = p_sub
-                                    i_search_up              = p_up
-                                    i_exclude_found_sap_intf = p_ex
-                          IMPORTING mse_model             = mse_model
-                                    nothing_done          = nothing_done ).
+  sap_extractor->extract( EXPORTING initial_elements         = initial_elements
+                                    i_search_up              = -1
+                                    i_search_down            = -1
+                                    i_exclude_found_sap_intf = abap_true
+                          IMPORTING mse_model                = mse_model
+                                    nothing_done             = nothing_done ).
 
   IF nothing_done EQ abap_true.
     RETURN.

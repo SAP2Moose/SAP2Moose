@@ -59,7 +59,9 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Class Z2MSE_TEST_WDY_A modifiers ABAPWebDynproComponent| )
 " New in 0.3.0 (Web Dynpros now also initially collected, not only added if used by something):
 ( |FAMIX.Class Z2MSE_TEST_WDY_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
-
+( |FAMIX.Class Z2MSE_TEST_PROGRAM_A modifiers ABAPProgram| )
+( |FAMIX.Class Z2MSE_TEST_PROGRAM_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
+( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A| )
 ( |FAMIX.Class ZIWCI_2MSE_TEST_WDY_A isInterface true| )
 ( |FAMIX.Class ZIWCI_2MSE_TEST_WDY_A modifiers ABAPGlobalInterface| )
 ( |FAMIX.Class ZIWCI_2MSE_TEST_WDY_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
