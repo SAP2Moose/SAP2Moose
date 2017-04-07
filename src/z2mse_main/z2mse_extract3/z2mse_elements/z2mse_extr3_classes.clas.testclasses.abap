@@ -17,7 +17,8 @@ CLASS ltcl_class IMPLEMENTATION.
   METHOD setup.
     model_builder = NEW #( ).
     model_builder->initial_selection_started( ).
-    element_manager = NEW #( i_model_builder = model_builder ).
+    element_manager = NEW #( i_model_builder = model_builder
+                             i_exclude_found_sap_intf = abap_true ).
     model_builder->initialize( element_manager = element_manager ).
     f_cut = z2mse_extr3_classes=>get_instance( element_manager ).
   ENDMETHOD.
@@ -151,7 +152,8 @@ CLASS ltcl_interface IMPLEMENTATION.
   METHOD setup.
     model_builder = NEW #( ).
     model_builder->initial_selection_started( ).
-    element_manager = NEW #( i_model_builder = model_builder ).
+    element_manager = NEW #( i_model_builder = model_builder
+                             i_exclude_found_sap_intf = abap_true ).
     model_builder->initialize( element_manager = element_manager ).
     f_cut = z2mse_extr3_classes=>get_instance( element_manager ).
   ENDMETHOD.
@@ -251,7 +253,8 @@ CLASS ltcl_component IMPLEMENTATION.
   METHOD setup.
     model_builder = NEW #( ).
     model_builder->initial_selection_started( ).
-    element_manager = NEW #( i_model_builder = model_builder ).
+    element_manager = NEW #( i_model_builder          = model_builder
+                             i_exclude_found_sap_intf = abap_true ).
     model_builder->initialize( element_manager = element_manager ).
     f_cut = z2mse_extr3_classes=>get_instance( element_manager ).
   ENDMETHOD.

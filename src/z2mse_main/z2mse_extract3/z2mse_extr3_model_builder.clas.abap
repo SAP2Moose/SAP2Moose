@@ -115,19 +115,19 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
     ELSEIF is_up_search EQ abap_true.
 
-      IF <found_in_level>-found_in_level_upsearch IS NOT INITIAL.
+*      IF <found_in_level>-found_in_level_upsearch IS NOT INITIAL.
 
-        <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
+      <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
 
-      ENDIF.
+*      ENDIF.
 
     ELSEIF is_down_search EQ abap_true.
 
-      IF <found_in_level>-found_in_level_downsearch IS NOT INITIAL.
+*      IF <found_in_level>-found_in_level_downsearch IS NOT INITIAL.
 
-        <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
+      <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
 
-      ENDIF.
+*      ENDIF.
 
     ELSEIF is_post_selection EQ abap_true.
 

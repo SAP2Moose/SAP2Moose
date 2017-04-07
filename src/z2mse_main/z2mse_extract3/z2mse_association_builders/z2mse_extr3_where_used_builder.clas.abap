@@ -45,11 +45,50 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         DATA class_name TYPE seoclsname.
         DATA cmpname TYPE seocmpname.
         DATA cmptype TYPE seocmptype.
+        DATA clstype  TYPE seoclstype.
+        DATA exists TYPE abap_bool.
+
+        IF element_manager->exclude_found_sap_intf EQ abap_true.
+
+          classes->class_name( EXPORTING element_id = element_id
+                               IMPORTING class_name = class_name
+                                         clstype    = clstype
+                                         exists     = exists ).
+          IF exists EQ abap_true.
+
+            IF clstype EQ classes->interface_type.
+              IF class_name CP 'Y*'
+              OR class_name CP 'Z*'
+              OR class_name CP '/*' .
+                " OK
+              ELSE.
+
+                " Do not collect, it should be OK just to leave the method here
+                RETURN.
+
+              ENDIF.
+
+            ENDIF.
+
+          ENDIF.
+
+        ENDIF.
 
         classes->comp_name( EXPORTING element_id = element_id
                             IMPORTING class_name = class_name
                                       cmpname    = cmpname
                                       cmptype = cmptype ).
+
+        IF element_manager->exclude_found_sap_intf EQ abap_true.
+
+          IF class_name CP 'IF*'.
+
+            " Do not collect, it should be OK just to leave the method here
+            RETURN.
+
+          ENDIF.
+
+        ENDIF.
 
         DATA: otype           TYPE char2,
               where_used_name TYPE eu_lname.

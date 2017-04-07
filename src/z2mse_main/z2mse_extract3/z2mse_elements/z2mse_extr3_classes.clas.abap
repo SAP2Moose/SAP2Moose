@@ -46,14 +46,16 @@ CLASS z2mse_extr3_classes DEFINITION
         element_id        TYPE i
       EXPORTING
         VALUE(class_name) TYPE seoclsname
-        VALUE(clstype)    TYPE seoclstype.
+        VALUE(clstype)    TYPE seoclstype
+        value(exists)     type abap_bool.
     METHODS comp_name
       IMPORTING
         element_id        TYPE i
       EXPORTING
         VALUE(class_name) TYPE seoclsname
         VALUE(cmpname)    TYPE seocmpname
-        VALUE(cmptype)    TYPE seocmptype.
+        VALUE(cmptype)    TYPE seocmptype
+        value(exists)     type abap_bool.
     METHODS make_model REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -112,7 +114,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
+CLASS z2mse_extr3_classes IMPLEMENTATION.
 
 
   METHOD add.
@@ -196,10 +198,12 @@ CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
     DATA element TYPE element_type.
 
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
+
     IF sy-subrc EQ 0.
 
       class_name = element-class_name.
       clstype = element-clstype.
+      exists = abap_true.
 
     ENDIF.
 
@@ -211,11 +215,13 @@ CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
     DATA element_comp TYPE element_comp_type.
 
     READ TABLE elements_comp_element_id INTO element_comp WITH KEY element_id = element_id.
+
     IF sy-subrc EQ 0.
 
       class_name = element_comp-clsname.
       cmpname = element_comp-cmpname.
       cmptype = element_comp-cmptype.
+      exists = abap_true.
 
     ENDIF.
 
@@ -421,7 +427,7 @@ CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
 
           IF interface_class_component-cmptype EQ attribute_type.
 
-          " Connections between attributes are not expressible in FAMIX, or?
+            " Connections between attributes are not expressible in FAMIX, or?
 
 *            access->add( EXPORTING accessed_element_id1  = new_element_id
 *                                   accessing_element_id2 = interface_element_id ).

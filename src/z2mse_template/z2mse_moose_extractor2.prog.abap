@@ -48,14 +48,10 @@
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!
 "! Last activation:
-"! Generated 13.03.2017
-"! Contains commit a82e81c9285a353cf0c2a8661808e99ad08ca653
+"! Generated 07.04.2017
+"! Contains
 "!
-"! This is version 0.2.1. It will be much better covered with unit tests and end-to-end tests than the first version. It is currently incomplete.
-"! Includes fix for #44 ignore SAP interfaces in Where-Used
-"! Includes fix for #45 Crash when interface events are selected
-"! Select where-used now not only for a single table
-"! Fix syntax error for ABAP 7.02
+"! This is version 0.3.0.
 "!
 REPORT z2mse_moose_extractor2.
 TABLES tadir. "So that select-options work
@@ -93,7 +89,8 @@ SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE TEXT-002.
 SELECT-OPTIONS s_pack FOR tadir-devclass.
 SELECT-OPTIONS s_spack FOR tadir-devclass.
 PARAMETERS p_sub AS CHECKBOX DEFAULT 'X'.
-PARAMETERS p_up TYPE i DEFAULT -1.
+PARAMETERS p_nup TYPE i DEFAULT -1.
+parameters p_ndown TYPE i DEFAULT -1.
 "Exclude interfaces in sap name space when found via where used analysis
 PARAMETERS p_ex AS CHECKBOX DEFAULT 'X'.
 
@@ -294,8 +291,8 @@ START-OF-SELECTION.
 
   DATA nothing_done TYPE boolean.
   sap_extractor->extract( EXPORTING initial_elements         = initial_elements
-                                    i_search_up              = -1
-                                    i_search_down            = -1
+                                    i_search_up              = p_nup
+                                    i_search_down            = p_ndown
                                     i_exclude_found_sap_intf = abap_true
                           IMPORTING mse_model                = mse_model
                                     nothing_done             = nothing_done ).
