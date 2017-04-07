@@ -2,7 +2,8 @@
 Selection texts:
 P_DOWN	Download model to file
 P_EX	No Where-Used: SAP Interfaces
-P_SUB	Extract sub packagaes
-P_UP	Search up (-1 if no limit)
+P_NDOWN	Downsearch not yet working
+P_NUP	Search up (-1 if no limit)
+P_SUB	Extract sub packages
 S_PACK	Extract object of packages
-S_SPACK	Filter sub packages if require
+S_SPACK	Filter sub packages if requird
