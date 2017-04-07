@@ -223,6 +223,9 @@ CLASS cl_global_to_local IMPLEMENTATION.
 
   METHOD do.
 
+    r_source = VALUE #( base r_source ( |* generated on system { sy-sysid } at { sy-datum+6(2) }.{ sy-datum+4(2) }.{ sy-datum+0(4) } on { sy-uzeit+0(2) }:{ sy-uzeit+2(2) }:{ sy-uzeit+4(2) }| ) ) .
+    r_source = VALUE #( base r_source ( ) ) .
+
     DATA(read_class) = NEW cl_read_class( ).
 
     LOOP AT template_source INTO DATA(template_line).

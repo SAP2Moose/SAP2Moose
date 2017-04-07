@@ -63,15 +63,21 @@
     </item>
     <item>
      <ID>S</ID>
-     <KEY>P_SUB</KEY>
-     <ENTRY>Extract sub packagaes</ENTRY>
-     <LENGTH>29</LENGTH>
+     <KEY>P_NDOWN</KEY>
+     <ENTRY>Downsearch not yet working</ENTRY>
+     <LENGTH>34</LENGTH>
     </item>
     <item>
      <ID>S</ID>
-     <KEY>P_UP</KEY>
+     <KEY>P_NUP</KEY>
      <ENTRY>Search up (-1 if no limit)</ENTRY>
      <LENGTH>34</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_SUB</KEY>
+     <ENTRY>Extract sub packages</ENTRY>
+     <LENGTH>29</LENGTH>
     </item>
     <item>
      <ID>S</ID>
@@ -82,7 +88,7 @@
     <item>
      <ID>S</ID>
      <KEY>S_SPACK</KEY>
-     <ENTRY>Filter sub packages if require</ENTRY>
+     <ENTRY>Filter sub packages if requird</ENTRY>
      <LENGTH>38</LENGTH>
     </item>
    </TPOOL>
