@@ -107,6 +107,13 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Class F-Z2MSE_TEST_FUNCTION_A modifiers ABAPProgram| )
 ( |FAMIX.Method F-Z2MSE_TEST_FUNCTION_A>>F-Z2MSE_TEST_FUNCTION_A| )
 ( |FAMIX.Invocation sender F-Z2MSE_TEST_FUNCTION_A>>F-Z2MSE_TEST_FUNCTION_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
+" New in 0.3.0 SAP BW transformations are partly extracted.
+" Currently only if a usage to the generated program is found.
+( |FAMIX.Class BW-ODSO-Z2MSET001-CUBE-Z2MSET002 modifiers ABAPProgram| )
+( |FAMIX.Method BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002| )
+( |FAMIX.Invocation sender BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 candidates Z2MSE_TEST_CL_A>>CONSTRUCTOR signature DUMMY| )
+( |FAMIX.Invocation sender BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
+
     ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).

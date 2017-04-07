@@ -172,6 +172,10 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
       r_result = _extract_function_name( i_element_program ).
 
+    ELSEIF sy-sysid EQ 'NPL' AND i_element_program+0(3) EQ |ZGP|. "Only on test system, currently no SAP BW working there
+
+      r_result = _extract_sap_bw_logic( i_element_program ).
+
     ELSEIF i_element_program+0(2) EQ |GP|.
 
       r_result = _extract_sap_bw_logic( i_element_program ).
@@ -223,18 +227,35 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
     " Extract SAP BW logic
 
-    DATA: transformation_progr_id TYPE rstran_progid,
+    DATA: element_program         TYPE progname,
+          transformation_progr_id TYPE rstran_progid,
           length                  TYPE i,
           id_length               TYPE i,
           transformation          TYPE rstran.
+
+    element_program = i_element_program.
+
+    IF sy-sysid EQ 'NPL' AND element_program+0(3) = 'ZGP'.
+      SHIFT element_program LEFT BY 1 PLACES.
+    ENDIF.
 
     length = strlen( i_element_program ).
     id_length = length - 2.
 
     transformation_progr_id = i_element_program+2(id_length).
 
-    SELECT SINGLE * FROM rstran INTO transformation WHERE objvers = 'A'
-                                                      AND tranprog = transformation_progr_id.
+    IF sy-sysid EQ 'NPL' AND element_program = 'GP003N8S45LS1FG375G2BN69Q4G'.
+      CLEAR transformation.
+      transformation-sourcetype = |ODSO|.
+      transformation-sourcename = |Z2MSET001|.
+      transformation-targettype = |CUBE|.
+      transformation-targetname = |Z2MSET002|.
+    ELSE.
+
+      SELECT SINGLE * FROM rstran INTO transformation WHERE objvers = 'A'
+                                                        AND tranprog = transformation_progr_id.
+
+    ENDIF.
 
     IF sy-subrc <> 0.
       r_result = i_element_program.
@@ -243,6 +264,9 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
                        && transformation-sourcename && |-|
                        && transformation-targettype && |-|
                        && transformation-targetname.
+      " In case of InfoSources there are multiple blanks in the field SOURCENAME
+      " Remove all but a single blank
+      CONDENSE r_result.
     ENDIF.
 
   ENDMETHOD.
