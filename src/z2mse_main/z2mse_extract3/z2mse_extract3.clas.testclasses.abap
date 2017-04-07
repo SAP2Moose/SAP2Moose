@@ -59,9 +59,6 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Class Z2MSE_TEST_WDY_A modifiers ABAPWebDynproComponent| )
 " New in 0.3.0 (Web Dynpros now also initially collected, not only added if used by something):
 ( |FAMIX.Class Z2MSE_TEST_WDY_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
-( |FAMIX.Class Z2MSE_TEST_PROGRAM_A modifiers ABAPProgram| )
-( |FAMIX.Class Z2MSE_TEST_PROGRAM_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
-( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A| )
 ( |FAMIX.Class ZIWCI_2MSE_TEST_WDY_A isInterface true| )
 ( |FAMIX.Class ZIWCI_2MSE_TEST_WDY_A modifiers ABAPGlobalInterface| )
 ( |FAMIX.Class ZIWCI_2MSE_TEST_WDY_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
@@ -100,7 +97,16 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Method Z2MSE_TEST_WDY_A>>W_MAIN signature W_MAIN| )
 
 ( |FAMIX.Method ZIWCI_2MSE_TEST_WDY_A>>WD_GET_API signature WD_GET_API| )
-
+" New in 0.3.0 Programs are displayed
+( |FAMIX.Class Z2MSE_TEST_PROGRAM_A modifiers ABAPProgram| )
+( |FAMIX.Class Z2MSE_TEST_PROGRAM_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
+( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A| )
+( |FAMIX.Invocation sender Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
+" New in 0.3.0 Functions are displayed as external name of the found include program
+" The parent package of functions is not yet found, because the include is not in the TADIR
+( |FAMIX.Class F-Z2MSE_TEST_FUNCTION_A modifiers ABAPProgram| )
+( |FAMIX.Method F-Z2MSE_TEST_FUNCTION_A>>F-Z2MSE_TEST_FUNCTION_A| )
+( |FAMIX.Invocation sender F-Z2MSE_TEST_FUNCTION_A>>F-Z2MSE_TEST_FUNCTION_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
     ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).

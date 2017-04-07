@@ -18,36 +18,44 @@ CLASS z2mse_extr3_programs DEFINITION
         VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
     METHODS program_name
       IMPORTING
-        i_element_id   TYPE i
+        i_element_id                 TYPE i
       EXPORTING
-        VALUE(program) TYPE progname
-        VALUE(subc)    TYPE subc.
+        VALUE(program)               TYPE progname
+        VALUE(external_program_name) TYPE string
+        VALUE(subc)                  TYPE subc.
     METHODS make_model REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO z2mse_extr3_programs.
     TYPES: BEGIN OF element_type,
-             element_id TYPE z2mse_extr3_element_manager=>element_id_type,
-             program    TYPE progname,
-             subc       TYPE subc,
+             element_id            TYPE z2mse_extr3_element_manager=>element_id_type,
+             program               TYPE progname,
+             external_program_name TYPE string,
+             subc                  TYPE subc,
            END OF element_type.
     DATA elements_element_id TYPE HASHED TABLE OF element_type WITH UNIQUE KEY element_id.
     DATA elements_program TYPE HASHED TABLE OF element_type WITH UNIQUE KEY program.
+    METHODS _convert_program_2_ext_name
+      IMPORTING
+        i_element_program TYPE progname
+      RETURNING
+        VALUE(r_result)   TYPE string.
+    METHODS _extract_function_name
+      IMPORTING
+        i_element_program TYPE progname
+      RETURNING
+        VALUE(r_result)   TYPE string.
+    METHODS _extract_sap_bw_logic
+      IMPORTING
+        i_element_program TYPE progname
+      RETURNING
+        VALUE(r_result)   TYPE string.
 ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
+CLASS z2mse_extr3_programs IMPLEMENTATION.
 
-  METHOD get_instance.
-    IF instance IS NOT BOUND.
-      CREATE OBJECT instance
-        EXPORTING
-          i_element_manager = i_element_manager.
-    ENDIF.
-    instance->type = program_type.
-    r_instance = instance.
-  ENDMETHOD.
 
   METHOD add.
 
@@ -74,6 +82,7 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
         new_element_id = element_manager->add_element( element = me ).
         element-element_id = new_element_id.
         element-program = found_program.
+        element-external_program_name = _convert_program_2_ext_name( found_program ).
         element-subc = found_subc.
         INSERT element INTO TABLE elements_element_id.
         INSERT element INTO TABLE elements_program.
@@ -83,6 +92,18 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+
+
+  METHOD get_instance.
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = i_element_manager.
+    ENDIF.
+    instance->type = program_type.
+    r_instance = instance.
+  ENDMETHOD.
+
 
   METHOD make_model.
 
@@ -97,7 +118,7 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
     " SAP_2_FAMIX_54        Map database tables to FAMIX Class
     " SAP_2_FAMIX_58        Mark the FAMIX Class with the attribute modifiers = 'DBTable'
     element_manager->famix_class->add( EXPORTING name_group             = 'ABAP_PROGRAM'
-                                                 name                   = element-program
+                                                 name                   = element-external_program_name
                                                  modifiers              = z2mse_extract3=>modifier_program
                                        IMPORTING id         = last_id ).
     DATA association TYPE z2mse_extr3_element_manager=>association_type.
@@ -112,31 +133,21 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
     ENDLOOP.
 
     DATA dummy_method_id TYPE i.
-*    " SAP_2_FAMIX_56      Add a dummy attribute with the name of the table
-*    element_manager->famix_attribute->add( EXPORTING name                   = element-program
-*                                           IMPORTING id                     = dummy_attribute_id ).
-*
-*    element_manager->famix_attribute->set_parent_type( EXPORTING element_id         = dummy_attribute_id
-*                                                parent_id          = last_id ).
-*
-*    element_manager->famix_attribute->store_id( EXPORTING class     = element-program
-*                                                          attribute = element-program ).
+
+    element_manager->famix_method->add( EXPORTING name = element-external_program_name
+                                        IMPORTING id   = dummy_method_id ).
+
+    element_manager->famix_method->set_signature( element_id = last_id
+                                                   signature = element-external_program_name ).
+
+    element_manager->famix_method->set_parent_type( EXPORTING element_id        = dummy_method_id
+                                                              parent_element    = 'FAMIX.Class'
+                                                              parent_name_group = 'ABAP_PROGRAM'
+                                                              parent_name       = element-external_program_name ).
 
 
-          element_manager->famix_method->add( EXPORTING name = element-program
-                                              IMPORTING id   = dummy_method_id ).
-
-          element_manager->famix_method->set_signature( element_id = last_id
-                                                         signature = element-program ).
-
-          element_manager->famix_method->set_parent_type( EXPORTING element_id        = dummy_method_id
-                                                                    parent_element    = 'FAMIX.Class'
-                                                                    parent_name_group = 'ABAP_PROGRAM'
-                                                                    parent_name       = element-program ).
-
-
-          element_manager->famix_method->store_id( EXPORTING class  = element-program
-                                                             method = element-program ).
+    element_manager->famix_method->store_id( EXPORTING class  = element-external_program_name
+                                                       method = element-external_program_name ).
 
   ENDMETHOD.
 
@@ -149,7 +160,91 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
     ASSERT sy-subrc EQ 0.
 
     program = element-program.
+    external_program_name = element-external_program_name.
     subc = element-subc.
 
   ENDMETHOD.
+
+
+  METHOD _convert_program_2_ext_name.
+
+    IF i_element_program+0(1) EQ |L|.
+
+      r_result = _extract_function_name( i_element_program ).
+
+    ELSEIF i_element_program+0(2) EQ |GP|.
+
+      r_result = _extract_sap_bw_logic( i_element_program ).
+
+    ELSE.
+
+      r_result = i_element_program.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD _extract_function_name.
+
+    " Extract function name
+
+    DATA: length           TYPE i,
+          postfix_position TYPE i,
+          include          TYPE includenr,
+          temp             TYPE string,
+          pname            TYPE pname,
+          funcname         TYPE rs38l_fnam.
+
+    length = strlen( i_element_program ).
+
+    postfix_position = length - 2.
+
+    include = i_element_program+postfix_position(2).
+
+    postfix_position = length - 3.
+
+    temp = i_element_program+0(postfix_position).
+
+    CONCATENATE 'SAP' temp INTO pname.
+
+    SELECT SINGLE funcname FROM tfdir INTO funcname WHERE pname = pname
+                                                      AND include = include.
+
+    IF sy-subrc <> 0.
+      r_result = i_element_program.
+    ELSE.
+      r_result = |F-| && funcname.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD _extract_sap_bw_logic.
+
+    " Extract SAP BW logic
+
+    DATA: transformation_progr_id TYPE rstran_progid,
+          length                  TYPE i,
+          id_length               TYPE i,
+          transformation          TYPE rstran.
+
+    length = strlen( i_element_program ).
+    id_length = length - 2.
+
+    transformation_progr_id = i_element_program+2(id_length).
+
+    SELECT SINGLE * FROM rstran INTO transformation WHERE objvers = 'A'
+                                                      AND tranprog = transformation_progr_id.
+
+    IF sy-subrc <> 0.
+      r_result = i_element_program.
+    ELSE.
+      r_result = |BW-| && transformation-sourcetype && |-|
+                       && transformation-sourcename && |-|
+                       && transformation-targettype && |-|
+                       && transformation-targetname.
+    ENDIF.
+
+  ENDMETHOD.
+
 ENDCLASS.

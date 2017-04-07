@@ -102,12 +102,12 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
 
         DATA programs TYPE REF TO z2mse_extr3_programs.
 
-        DATA: invoicing_program TYPE progname.
+        DATA: invoicing_program TYPE string.
 
         programs = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
 
-        programs->program_name( EXPORTING i_element_id =          i_association-element_id2
-                                IMPORTING program      = invoicing_program ).
+        programs->program_name( EXPORTING i_element_id          = i_association-element_id2
+                                IMPORTING external_program_name = invoicing_program ).
 
         invoicing_famix_class = invoicing_program.
         invoicing_famix_method = invoicing_program.
