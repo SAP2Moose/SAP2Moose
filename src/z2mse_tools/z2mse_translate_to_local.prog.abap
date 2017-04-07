@@ -228,6 +228,16 @@ CLASS cl_global_to_local IMPLEMENTATION.
     LOOP AT template_source INTO DATA(template_line).
 
       SPLIT template_line AT ' ' INTO DATA(part_1) DATA(part_2) DATA(part_3) DATA(part_4).
+
+      IF part_1 EQ '*' AND part_2 EQ 'REMOVE_COMMENT'.
+
+        DATA(line) = |{ part_3 } { part_4 }|.
+
+        r_source = VALUE #( BASE r_source ( line ) ).
+        CONTINUE.
+
+      ENDIF.
+
       TRANSLATE part_2 TO UPPER CASE.
       IF part_1 EQ '*' AND ( part_2 EQ 'REPLACE' ) OR ( part_2 EQ 'REPLACE_DEFINITION' ) OR ( part_2 EQ 'REPLACE_IMPLEMENTATION' ) .
 
