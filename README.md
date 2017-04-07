@@ -18,7 +18,7 @@ Currently diagrams like this can be generated (With methods, attributes, classes
 
 This diagrams use model informations extracted with this tool. But they are generated with a second tool, see the point "Adaptable dependency graphs" a few lines below for this.
 
-Another diagram with all currently supported diagram elements: ![All currently supported diagram elements](../../wiki/figures/All features SAP2Moose.png)
+Another diagram with all currently supported diagram elements: ![All currently supported diagram elements](../../wiki/figures/All%20features%20SAP2Moose.png)
 
 Positions of elements can be changed and stored to file. Comments to elements can be added. Connected elements can be highlighted. See specification for further logic. Further types of elements are planned to be added.
 
