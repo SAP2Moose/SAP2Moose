@@ -17,7 +17,8 @@ CLASS z2mse_extr3_model_builder DEFINITION
       IMPORTING
         i_element_id TYPE i.
     METHODS initialize
-      IMPORTING element_manager TYPE REF TO z2mse_extr3_element_manager.
+      IMPORTING i_element_manager TYPE REF TO z2mse_extr3_element_manager.
+    METHODS write_found_elements.
   PROTECTED SECTION.
   PRIVATE SECTION.
     TYPES: BEGIN OF found_in_level_type,
@@ -48,6 +49,7 @@ CLASS z2mse_extr3_model_builder DEFINITION
     TYPES: BEGIN OF builder_type,
              association_builder TYPE REF TO z2mse_extr3_association_build,
            END OF builder_type.
+    DATA element_manager TYPE REF TO z2mse_extr3_element_manager.
     "! Use for initial search
     DATA association_builders_init TYPE STANDARD TABLE OF builder_type.
     "! Use for final search
@@ -67,23 +69,25 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
   METHOD initialize.
 
+    element_manager = i_element_manager.
+
     DATA association_builder_init TYPE builder_type.
 
-    CREATE OBJECT tadir_builder EXPORTING i_element_manager = element_manager.
+    CREATE OBJECT tadir_builder EXPORTING i_element_manager = i_element_manager.
 
     association_builder_init-association_builder = tadir_builder.
     INSERT association_builder_init INTO TABLE association_builders_init.
 
     DATA association_builder_post TYPE builder_type.
 
-    CREATE OBJECT tadir_builder EXPORTING i_element_manager = element_manager.
+    CREATE OBJECT tadir_builder EXPORTING i_element_manager = i_element_manager.
 
     association_builder_post-association_builder = tadir_builder.
     INSERT association_builder_post INTO TABLE association_builders_post.
 
     DATA association_builder TYPE builder_type.
 
-    CREATE OBJECT where_used_builder EXPORTING i_element_manager = element_manager.
+    CREATE OBJECT where_used_builder EXPORTING i_element_manager = i_element_manager.
 
     association_builder-association_builder = where_used_builder.
     INSERT association_builder INTO TABLE association_builders.
@@ -188,35 +192,42 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
     DATA: level_to_search_up      TYPE i,
           something_to_be_done_up TYPE abap_bool.
 
-    something_to_be_done_up = abap_true.
+    IF i_search_up <> 0.
 
-    WHILE something_to_be_done_up EQ abap_true.
+      something_to_be_done_up = abap_true.
 
-      level_to_search_up = level_for_found_in_upsearch.
-      ADD 1 TO level_for_found_in_upsearch.
-      something_to_be_done_up = abap_false.
-      LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_upsearch = level_to_search_up.
+      WHILE something_to_be_done_up EQ abap_true.
 
-        LOOP AT association_builders INTO association_builder.
+        level_to_search_up = level_for_found_in_upsearch.
+        ADD 1 TO level_for_found_in_upsearch.
 
-          association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_up }|.
 
+        something_to_be_done_up = abap_false.
+        LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_upsearch = level_to_search_up.
+
+          LOOP AT association_builders INTO association_builder.
+
+            association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
+
+          ENDLOOP.
+
+          something_to_be_done_up = abap_true.
         ENDLOOP.
 
-        something_to_be_done_up = abap_true.
-      ENDLOOP.
+        IF i_search_up >= 0.
 
-      IF i_search_up >= 0.
+          IF i_search_up >= level_for_found_in_upsearch.
 
-        IF i_search_up >= level_for_found_in_upsearch.
+            something_to_be_done_up = abap_false.
 
-          something_to_be_done_up = abap_false.
+          ENDIF.
 
         ENDIF.
 
-      ENDIF.
+      ENDWHILE.
 
-    ENDWHILE.
+    ENDIF.
 
     is_up_search = abap_false.
 
@@ -227,39 +238,48 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
     DATA: level_to_search_down      TYPE i,
           something_to_be_done_down TYPE abap_bool.
 
-    something_to_be_done_down = abap_true.
+    IF i_search_down <> 0.
 
-    WHILE something_to_be_done_down EQ abap_true.
+      something_to_be_done_down = abap_true.
 
-      level_to_search_down = level_for_found_in_downsearch.
-      ADD 1 TO level_for_found_in_downsearch.
-      something_to_be_done_down = abap_false.
-      LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_downsearch = level_to_search_down.
+      WHILE something_to_be_done_down EQ abap_true.
 
-        LOOP AT association_builders INTO association_builder.
+        level_to_search_down = level_for_found_in_downsearch.
+        ADD 1 TO level_for_found_in_downsearch.
 
-          association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_down }|.
 
+        something_to_be_done_down = abap_false.
+        LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_downsearch = level_to_search_down.
+
+          LOOP AT association_builders INTO association_builder.
+
+            association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
+
+          ENDLOOP.
+
+          something_to_be_done_down = abap_true.
         ENDLOOP.
 
-        something_to_be_done_down = abap_true.
-      ENDLOOP.
+        IF i_search_down >= 0.
 
-      IF i_search_down >= 0.
+          IF i_search_down >= level_for_found_in_downsearch.
 
-        IF i_search_down >= level_for_found_in_downsearch.
+            something_to_be_done_down = abap_false.
 
-          something_to_be_done_down = abap_false.
+          ENDIF.
 
         ENDIF.
 
-      ENDIF.
+      ENDWHILE.
 
-    ENDWHILE.
+    ENDIF.
 
     is_down_search = abap_false.
 
     " Post search
+
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Final actions of search|.
 
     is_post_selection = abap_true.
 
@@ -280,4 +300,94 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
     is_post_selection = abap_false.
 
   ENDMETHOD.
+
+  METHOD write_found_elements.
+
+    DATA found_in_level TYPE found_in_level_type.
+
+    TYPES: BEGIN OF temp_type,
+             where           TYPE c LENGTH 1,
+             level           TYPE i,
+             "! Not zero in case an element is found in up and down search. If filled this is the level for downsearch
+             alternate_level TYPE i,
+             element_type    TYPE string,
+             parent_name     TYPE string,
+             name            TYPE string,
+           END OF temp_type.
+    DATA: temp  TYPE temp_type,
+          temps TYPE STANDARD TABLE OF temp_type.
+
+    LOOP AT found_in_levels INTO found_in_level.
+      CLEAR temp.
+      IF found_in_level-found_in_initial_selection EQ abap_true.
+        temp-where = |I|.
+        temp-level = 0.
+
+      ELSEIF found_in_level-found_in_post_selection EQ abap_true.
+        temp-where = |P|.
+        temp-level = 0.
+
+      ELSEIF found_in_level-found_in_level_upsearch <> 0
+         AND found_in_level-found_in_level_downsearch <> 0.
+
+        temp-where = |S|.
+        temp-level = found_in_level-found_in_level_upsearch.
+        temp-alternate_level = -1 * found_in_level-found_in_level_downsearch.
+
+      ELSEIF found_in_level-found_in_level_upsearch <> 0.
+
+        temp-where = |S|.
+        temp-level = found_in_level-found_in_level_upsearch.
+
+      ELSEIF found_in_level-found_in_level_downsearch <> 0.
+
+        temp-where = |S|.
+        temp-level = -1 * found_in_level-found_in_level_downsearch.
+
+      ELSE.
+        ASSERT 1 = 2.
+      ENDIF.
+
+      DATA element TYPE REF TO z2mse_extr3_elements.
+
+      element = element_manager->get_element( i_element_id = found_in_level-element_id ).
+
+      element->name( EXPORTING element_id   = found_in_level-element_id
+                     IMPORTING element_type = temp-element_type
+                               parent_name  = temp-parent_name
+                               name         = temp-name ).
+
+      INSERT temp INTO TABLE temps.
+
+    ENDLOOP.
+
+    SORT temps BY where level alternate_level element_type parent_name name.
+
+    WRITE: / 'Legend:'.
+    WRITE: / 'W - "I" Found in initial search "P" Found in final search (packages that where not initially selected) "S" Found in regular search'.
+    WRITE: / 'L - Level where an element is found'.
+    WRITE: / 'AL - In case an element is found in down and up search, this is the level where it is found in down search'.
+    WRITE: /.
+    FORMAT COLOR COL_HEADING.
+    WRITE: /(1) 'W',
+           (3) 'L',
+           (3) 'AL',
+           (30) 'Type',
+           (30) 'Name of Parent',
+           (30) 'Name'.
+    FORMAT COLOR COL_BACKGROUND.
+
+    LOOP AT temps INTO temp.
+      NEW-LINE.
+      WRITE: /(1) temp-where,
+              (3) temp-level,
+              (3) temp-alternate_level,
+              (30) temp-element_type,
+              (30) temp-parent_name,
+              (30) temp-name.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
 ENDCLASS.

@@ -19,7 +19,7 @@ CLASS ltcl_main IMPLEMENTATION.
     model_builder->initial_selection_started( ).
     element_manager = NEW #( i_model_builder = model_builder
                              i_exclude_found_sap_intf = abap_true ).
-    model_builder->initialize( element_manager = element_manager ).
+    model_builder->initialize( i_element_manager = element_manager ).
     f_cut = z2mse_extr3_packages=>get_instance( i_element_manager = element_manager ).
   ENDMETHOD.
 

@@ -32,7 +32,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTRACT3 IMPLEMENTATION.
+CLASS z2mse_extract3 IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -42,16 +42,20 @@ CLASS Z2MSE_EXTRACT3 IMPLEMENTATION.
 
   METHOD extract.
 
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Collect initial elements|.
+
     DATA model_builder TYPE REF TO z2mse_extr3_model_builder.
     CREATE OBJECT model_builder.
 
     model_builder->initial_selection_started( ).
 
     DATA element_manager TYPE REF TO z2mse_extr3_element_manager.
-    CREATE OBJECT element_manager EXPORTING i_model_builder = model_builder
-                                             i_exclude_found_sap_intf = i_exclude_found_sap_intf.
+    CREATE OBJECT element_manager
+      EXPORTING
+        i_model_builder          = model_builder
+        i_exclude_found_sap_intf = i_exclude_found_sap_intf.
 
-    model_builder->initialize( element_manager = element_manager ).
+    model_builder->initialize( i_element_manager = element_manager ).
 
     DATA packages_elements TYPE REF TO z2mse_extr3_packages.
 
@@ -70,6 +74,16 @@ CLASS Z2MSE_EXTRACT3 IMPLEMENTATION.
 
     model_builder->search( i_search_up   = i_search_up
                            i_search_down = i_search_down  ).
+
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Write found elements|.
+
+    TEST-SEAM write_found_elements.
+
+      model_builder->write_found_elements( ).
+
+    END-TEST-SEAM.
+
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Make model file|.
 
     mse_model = element_manager->make_model( ).
 

@@ -24,6 +24,7 @@ CLASS z2mse_extr3_programs DEFINITION
         VALUE(external_program_name) TYPE string
         VALUE(subc)                  TYPE subc.
     METHODS make_model REDEFINITION.
+    METHODS name REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO z2mse_extr3_programs.
@@ -268,6 +269,15 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
       " Remove all but a single blank
       CONDENSE r_result.
     ENDIF.
+
+  ENDMETHOD.
+
+  METHOD name.
+
+    element_type = |ABAPProgramOrFunctionOrSAPBW|.
+    program_name( EXPORTING i_element_id          = element_id
+                  IMPORTING external_program_name = name ).
+    parent_name = ||.
 
   ENDMETHOD.
 

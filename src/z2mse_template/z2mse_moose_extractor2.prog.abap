@@ -1,3 +1,6 @@
+*
+* This is version 0.4.0
+*
 *The MIT License (MIT)
 *
 *Copyright (c) 2016 Rainer Winkler, CubeServ
@@ -20,38 +23,9 @@
 *OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 *SOFTWARE.
 
-"! This is an experimental prototype, that has errors
-"!
 "! The latest version are available on https://github.com/RainerWinkler/Moose-FAMIX-SAP-Extractor
 "!
-"! The program follows the naming conventions proposed in the ABAP Programming Guidelines from 2009.
-"!
-"! Semantics of variables and parameters have to be very strict
-"! The code shall be able to be read near to as fluent as a well written English text
-"! Use ABAP Doc comments if the technical name is not precise enough
-"! Tables are in most cases specified with plural (classes). But not always, mse_model is a table.
-"!
-"! Prefixes are omitted if the reading is simplified
-"!
-"! Classes are prefixed with cl_ the instances have no prefixes
-"! Global attributes are normally prefixed with g_
-"! Instances are normally instanciated only once, to simplify coding no singleton pattern is used
-"!
-"! Object shall be used only for real classes
-"! Component shall be used for programming entities like function, class, method, program, database table, attribute, ...
-"!
-"! Short abbreviations are used if only locally used, in that case an ABAP Doc comments explains the variable
-"! See the start of the report for this
-"!
-"! This is the original version since 23 March 2016 maintained in ABAP 7.31
-"!
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
-"!
-"! Last activation:
-"! Generated 07.04.2017
-"! Contains
-"!
-"! This is version 0.3.0.
 "!
 REPORT z2mse_moose_extractor2.
 TABLES tadir. "So that select-options work
@@ -63,34 +37,11 @@ SELECTION-SCREEN END OF BLOCK block_global_source.
 
 SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE TEXT-002.
 
-*PARAMETERS: p_clas AS CHECKBOX DEFAULT 'X'.
-*PARAMETERS: p_wdyn AS CHECKBOX DEFAULT 'X'.
-*PARAMETERS: p_intf AS CHECKBOX DEFAULT 'X'.
-*PARAMETERS: p_tables AS CHECKBOX DEFAULT 'X'. "Analyze database tables
-*PARAMETERS: p_prog AS CHECKBOX DEFAULT 'X'.
-*PARAMETERS: p_iprog AS CHECKBOX DEFAULT ' '. "Internal parts of reports
-*
-*
-*PARAMETERS: rb_fpack RADIOBUTTON GROUP rbsl DEFAULT 'X'.
-*"! Filter using package
-*DATA g_filter_using_package TYPE abap_bool.
-*g_filter_using_package = rb_fpack.
-*
-*PARAMETERS: p_pack TYPE parentcl DEFAULT ''.
-*"! Package to be analyzed
-*DATA g_parameter_package_to_analyze TYPE parentcl.
-*g_parameter_package_to_analyze = p_pack.
-*
-*PARAMETERS: rb_fname RADIOBUTTON GROUP rbsl.
-*"! Filter using name
-*DATA g_filter_using_name TYPE abap_bool.
-*g_filter_using_name = rb_fname.
-
 SELECT-OPTIONS s_pack FOR tadir-devclass.
 SELECT-OPTIONS s_spack FOR tadir-devclass.
 PARAMETERS p_sub AS CHECKBOX DEFAULT 'X'.
 PARAMETERS p_nup TYPE i DEFAULT -1.
-parameters p_ndown TYPE i DEFAULT -1.
+PARAMETERS p_ndown TYPE i DEFAULT -1.
 "Exclude interfaces in sap name space when found via where used analysis
 PARAMETERS p_ex AS CHECKBOX DEFAULT 'X'.
 
@@ -143,7 +94,9 @@ SELECTION-SCREEN END OF BLOCK block_infos.
 
 SELECTION-SCREEN BEGIN OF BLOCK bl_model_settings WITH FRAME TITLE TEXT-100.
 
-PARAMETERS p_down AS CHECKBOX DEFAULT 'X'.
+PARAMETERS: p_down AS CHECKBOX DEFAULT 'X',
+            " Default filename
+            p_df   TYPE string.
 *"! Download model to file
 *DATA g_parameter_download_file TYPE abap_bool.
 *g_parameter_download_file = p_down.
@@ -303,4 +256,6 @@ START-OF-SELECTION.
 
   DATA model_outputer TYPE REF TO z2mse_output_model.
   CREATE OBJECT model_outputer.
-  model_outputer->make( mse_model = mse_model g_parameter_download_file = p_down ).
+  model_outputer->make( mse_model = mse_model
+                        g_parameter_download_file = p_down
+                        i_default_prefix = p_df ).

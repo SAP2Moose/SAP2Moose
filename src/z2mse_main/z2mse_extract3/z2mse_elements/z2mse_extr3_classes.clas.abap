@@ -47,7 +47,7 @@ CLASS z2mse_extr3_classes DEFINITION
       EXPORTING
         VALUE(class_name) TYPE seoclsname
         VALUE(clstype)    TYPE seoclstype
-        value(exists)     type abap_bool.
+        VALUE(exists)     TYPE abap_bool.
     METHODS comp_name
       IMPORTING
         element_id        TYPE i
@@ -55,8 +55,9 @@ CLASS z2mse_extr3_classes DEFINITION
         VALUE(class_name) TYPE seoclsname
         VALUE(cmpname)    TYPE seocmpname
         VALUE(cmptype)    TYPE seocmptype
-        value(exists)     type abap_bool.
+        VALUE(exists)     TYPE abap_bool.
     METHODS make_model REDEFINITION.
+    METHODS name REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO z2mse_extr3_classes.
@@ -466,4 +467,81 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
     INSERT element_comp2 INTO TABLE elements_comp_clsname_cmpname .
 
   ENDMETHOD.
+  METHOD name.
+    DATA: class_name TYPE seoclsname,
+          clstype    TYPE seoclstype,
+          exists     TYPE abap_bool.
+
+    class_name( EXPORTING element_id = element_id
+                IMPORTING class_name =  class_name
+                          clstype    = clstype
+                          exists     = exists ).
+
+    IF exists EQ abap_true.
+
+      CASE clstype.
+        WHEN is_class_type.
+          element_type = |ABAPClass|.
+        WHEN interface_type.
+          element_type = |ABAPInterface|.
+        WHEN OTHERS.
+          ASSERT 1 = 2.
+      ENDCASE.
+
+      parent_name = ||.
+      name = class_name.
+
+    ELSE.
+
+      DATA: cmpname TYPE seocmpname,
+            cmptype TYPE seocmptype.
+
+      comp_name( EXPORTING element_id = element_id
+                   IMPORTING class_name = class_name
+                             cmpname    = cmpname
+                             cmptype    = cmptype
+                             exists     = exists ).
+
+      ASSERT exists EQ abap_true.
+
+      DATA element TYPE element_type.
+
+      READ TABLE elements_class_name INTO element WITH KEY class_name = class_name.
+      ASSERT sy-subrc EQ 0.
+      clstype = element-clstype.
+
+      CASE clstype.
+        WHEN is_class_type.
+          CASE cmptype.
+            WHEN attribute_type.
+          element_type = |ABAPClassAttribute|.
+            WHEN method_type.
+          element_type = |ABAPClassMethod|.
+            WHEN event_type.
+          element_type = |ABAPClassEvent|.
+            WHEN OTHERS.
+              ASSERT 1 = 2.
+          ENDCASE.
+        WHEN interface_type.
+          CASE cmptype.
+            WHEN attribute_type.
+          element_type = |ABAPInterfaceAttribute|.
+            WHEN method_type.
+          element_type = |ABAPInterfaceMethod|.
+            WHEN event_type.
+          element_type = |ABAPInterfaceEvent|.
+            WHEN OTHERS.
+              ASSERT 1 = 2.
+          ENDCASE.
+        WHEN OTHERS.
+          ASSERT 1 = 2.
+      ENDCASE.
+
+      parent_name = class_name.
+      name = cmpname.
+
+    ENDIF.
+
+  ENDMETHOD.
+
 ENDCLASS.

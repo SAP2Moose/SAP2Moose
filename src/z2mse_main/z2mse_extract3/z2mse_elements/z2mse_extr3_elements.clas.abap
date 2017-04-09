@@ -8,17 +8,26 @@ CLASS z2mse_extr3_elements DEFINITION
 
     DATA type TYPE c LENGTH 30.
 
-    CONSTANTS: package_type LIKE type VALUE 'package',
-               table_type like type VALUE 'table',
-               class_type like type value 'class',
-               class_components_type like TYPE value 'class_components',
-               program_type like TYPE value 'program',
-               web_Dynpro_comps_type like Type VALUE 'web_dynpro_components'.
+    CONSTANTS: package_type          LIKE type VALUE 'package',
+               table_type            LIKE type VALUE 'table',
+               class_type            LIKE type VALUE 'class',
+               class_components_type LIKE type VALUE 'class_components',
+               program_type          LIKE type VALUE 'program',
+               web_dynpro_comps_type LIKE type VALUE 'web_dynpro_components'.
 
     METHODS make_model
       IMPORTING
         element_id   TYPE z2mse_extr3_element_manager=>element_id_type
         associations TYPE z2mse_extr3_element_manager=>associations_type.
+
+    METHODS name
+      IMPORTING
+        element_id   TYPE z2mse_extr3_element_manager=>element_id_type
+      EXPORTING
+        element_type TYPE string
+        parent_name TYPE string
+        name TYPE string.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -30,6 +39,13 @@ CLASS Z2MSE_EXTR3_ELEMENTS IMPLEMENTATION.
 
 
   METHOD make_model.
+    " Redefine me
+    ASSERT 1 = 2.
+  ENDMETHOD.
 
+
+  METHOD NAME.
+    " Redefine me
+    ASSERT 1 = 2.
   ENDMETHOD.
 ENDCLASS.
