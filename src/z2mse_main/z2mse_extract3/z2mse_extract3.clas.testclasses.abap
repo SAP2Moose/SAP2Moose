@@ -22,6 +22,9 @@ CLASS ltcl_main IMPLEMENTATION.
     top_packages = VALUE #( ( sign = 'I' option = 'EQ' low = 'Z2MSE_TEST_INITIAL_SELECTION' ) ).
     sub_packages_filter = VALUE #( ).
 
+    TEST-INJECTION write_found_elements.
+    END-TEST-INJECTION.
+
     DATA: initial_elements TYPE REF TO z2mse_extr3_initial_elements.
     initial_elements = NEW #( ).
     initial_elements->select_packages( EXPORTING top_packages           = top_packages

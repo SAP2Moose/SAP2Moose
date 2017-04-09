@@ -77,7 +77,11 @@ CLASS z2mse_extract3 IMPLEMENTATION.
 
     CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Write found elements|.
 
-    model_builder->write_found_elements( ).
+    TEST-SEAM write_found_elements.
+
+      model_builder->write_found_elements( ).
+
+    END-TEST-SEAM.
 
     CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Make model file|.
 
