@@ -55,7 +55,7 @@ CLASS z2mse_extract3 IMPLEMENTATION.
         i_model_builder          = model_builder
         i_exclude_found_sap_intf = i_exclude_found_sap_intf.
 
-    model_builder->initialize( element_manager = element_manager ).
+    model_builder->initialize( i_element_manager = element_manager ).
 
     DATA packages_elements TYPE REF TO z2mse_extr3_packages.
 
@@ -74,6 +74,12 @@ CLASS z2mse_extract3 IMPLEMENTATION.
 
     model_builder->search( i_search_up   = i_search_up
                            i_search_down = i_search_down  ).
+
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Write found elements|.
+
+    model_builder->write_found_elements( ).
+
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Make model file|.
 
     mse_model = element_manager->make_model( ).
 

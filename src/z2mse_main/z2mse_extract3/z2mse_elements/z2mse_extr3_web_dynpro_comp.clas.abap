@@ -36,6 +36,7 @@ CLASS z2mse_extr3_web_dynpro_comp DEFINITION
         VALUE(wdy_component_name)  TYPE wdy_component_name
         VALUE(wdy_controller_name) TYPE wdy_controller_name.
     METHODS make_model REDEFINITION.
+    METHODS name REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO z2mse_extr3_web_dynpro_comp.
@@ -208,10 +209,10 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
     IF sy-subrc EQ 0.
 
-        element_manager->famix_class->add( EXPORTING name_group = 'WEB_DYNPRO'
-                                                     name       = element-wdy_component_name
-                                                     modifiers  = 'ABAPWebDynproComponent'
-                                           IMPORTING id         = class_id ).
+      element_manager->famix_class->add( EXPORTING name_group = 'WEB_DYNPRO'
+                                                   name       = element-wdy_component_name
+                                                   modifiers  = 'ABAPWebDynproComponent'
+                                         IMPORTING id         = class_id ).
 
       DATA association TYPE z2mse_extr3_element_manager=>association_type.
       LOOP AT associations INTO association WHERE element_id1 = element_id
@@ -267,6 +268,34 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
 
       wdy_component_name = element_comp-wdy_component_name.
       wdy_controller_name = element_comp-wdy_controller_name.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD name.
+
+    DATA: wdy_component_name TYPE wdy_component_name.
+
+    wdy_component_name( EXPORTING element_id         = element_id
+                        IMPORTING wdy_component_name = wdy_component_name ).
+
+    IF wdy_component_name IS NOT INITIAL.
+      element_type = |WebDynproComponent|.
+      parent_name = ||.
+      name = wdy_component_name.
+    ELSE.
+
+      DATA: wdy_controller_name TYPE wdy_controller_name.
+
+      wdy_controller_name( EXPORTING element_id         = element_id
+                           IMPORTING wdy_component_name  = wdy_component_name
+                                     wdy_controller_name = wdy_controller_name ).
+
+      ASSERT wdy_controller_name IS NOT INITIAL.
+      element_type = |WebDynproController|.
+      parent_name = wdy_component_name.
+      name = wdy_controller_name.
 
     ENDIF.
 

@@ -40,10 +40,6 @@ CLASS z2mse_output_model IMPLEMENTATION.
 
     ENDIF.
 
-    FIELD-SYMBOLS <mse_model_line> LIKE LINE OF mse_model.
-    LOOP AT mse_model ASSIGNING <mse_model_line>.
-      WRITE: / <mse_model_line>-line.
-    ENDLOOP.
   ENDMETHOD.
 
 ENDCLASS.

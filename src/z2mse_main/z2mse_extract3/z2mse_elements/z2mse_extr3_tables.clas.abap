@@ -11,7 +11,7 @@ CLASS z2mse_extr3_tables DEFINITION
       IMPORTING
         i_element_manager TYPE REF TO z2mse_extr3_element_manager
       RETURNING
-        VALUE(r_instance)   TYPE REF TO z2mse_extr3_tables.
+        VALUE(r_instance) TYPE REF TO z2mse_extr3_tables.
     METHODS add
       IMPORTING
         table                 TYPE tabname
@@ -24,6 +24,7 @@ CLASS z2mse_extr3_tables DEFINITION
       RETURNING
         VALUE(r_result) TYPE tabname.
     METHODS make_model REDEFINITION.
+    METHODS name REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO z2mse_extr3_tables.
@@ -146,4 +147,17 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
     r_result = element-tabname.
 
   ENDMETHOD.
+
+  METHOD name.
+
+    DATA: table TYPE tabname.
+
+    table = table_name( i_element_id = element_id ).
+
+    element_type = |ABAPDatabaseTable|.
+    parent_name = ||.
+    name = table.
+
+  ENDMETHOD.
+
 ENDCLASS.

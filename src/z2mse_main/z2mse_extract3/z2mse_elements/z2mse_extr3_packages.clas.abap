@@ -18,7 +18,7 @@ CLASS z2mse_extr3_packages DEFINITION
     CLASS-METHODS get_instance
       IMPORTING
                 i_element_manager TYPE REF TO z2mse_extr3_element_manager
-      RETURNING VALUE(r_instance)   TYPE REF TO z2mse_extr3_packages.
+      RETURNING VALUE(r_instance) TYPE REF TO z2mse_extr3_packages.
     METHODS add
       IMPORTING package               TYPE devclass
       EXPORTING VALUE(is_added)       TYPE abap_bool
@@ -29,6 +29,7 @@ CLASS z2mse_extr3_packages DEFINITION
       RETURNING
         VALUE(r_result) TYPE devclass.
     METHODS make_model REDEFINITION.
+    METHODS name REDEFINITION.
   PROTECTED SECTION.
     METHODS _does_package_exists
       IMPORTING
@@ -47,7 +48,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_PACKAGES IMPLEMENTATION.
+CLASS z2mse_extr3_packages IMPLEMENTATION.
 
 
   METHOD add.
@@ -130,4 +131,16 @@ CLASS Z2MSE_EXTR3_PACKAGES IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+  METHOD name.
+
+    DATA devclass TYPE devclass.
+    devclass = devclass( i_element_id = element_id ).
+
+    element_type = |ABAPPackage|.
+    parent_name = ||.
+    name = devclass.
+
+
+  ENDMETHOD.
+
 ENDCLASS.
