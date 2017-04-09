@@ -87,6 +87,24 @@
     </item>
     <item>
      <ID>S</ID>
+     <KEY>S_ELNAM</KEY>
+     <ENTRY>Limit initial selectn: Name</ENTRY>
+     <LENGTH>35</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>S_ELPAR</KEY>
+     <ENTRY>Limit initial selectn: Parent</ENTRY>
+     <LENGTH>37</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>S_ELTYP</KEY>
+     <ENTRY>Limit initial selectn: Type</ENTRY>
+     <LENGTH>35</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
      <KEY>S_PACK</KEY>
      <ENTRY>Extract object of packages</ENTRY>
      <LENGTH>34</LENGTH>

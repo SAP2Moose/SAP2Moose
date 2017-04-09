@@ -39,6 +39,10 @@ SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE TEXT-002.
 
 SELECT-OPTIONS s_pack FOR tadir-devclass.
 SELECT-OPTIONS s_spack FOR tadir-devclass.
+DATA: element_filter TYPE string.
+PARAMETERS p_eltyp TYPE c LENGTH 30.
+PARAMETERS p_elpar TYPE c LENGTH 30.
+PARAMETERS p_elnam TYPE c LENGTH 30.
 PARAMETERS p_sub AS CHECKBOX DEFAULT 'X'.
 PARAMETERS p_nup TYPE i DEFAULT -1.
 PARAMETERS p_ndown TYPE i DEFAULT -1.
@@ -220,25 +224,40 @@ START-OF-SELECTION.
   DATA sap_extractor TYPE REF TO z2mse_extract3.
 
   DATA: ls_pack_line LIKE LINE OF s_pack.
-  DATA: ls_pack TYPE sap_extractor->ty_s_pack.
+  DATA: lt_pack TYPE sap_extractor->ty_s_pack.
   LOOP AT s_pack INTO ls_pack_line.
-    APPEND ls_pack_line TO ls_pack.
+    APPEND ls_pack_line TO lt_pack.
   ENDLOOP.
 
   DATA: ls_spack_line LIKE LINE OF s_pack.
-  DATA: ls_spack TYPE sap_extractor->ty_s_pack.
+  DATA: lt_spack TYPE sap_extractor->ty_s_pack.
   LOOP AT s_spack INTO ls_spack_line.
-    APPEND ls_spack_line TO ls_spack.
+    APPEND ls_spack_line TO lt_spack.
   ENDLOOP.
 
 
-
-
   DATA: initial_elements TYPE REF TO z2mse_extr3_initial_elements.
-  initial_elements = NEW #( ).
-  initial_elements->select_packages( EXPORTING top_packages           = ls_pack
-                                               sub_packages_filter    = ls_spack
-                                               including_sub_packages = abap_true ).
+  CREATE OBJECT initial_elements.
+  IF     lt_pack IS NOT INITIAL
+     AND ( p_eltyp IS INITIAL AND p_elpar IS INITIAL AND p_elnam IS INITIAL ).
+
+    initial_elements->select_packages( EXPORTING top_packages           = lt_pack
+                                                 sub_packages_filter    = lt_spack
+                                                 including_sub_packages = abap_true ).
+
+  ELSEIF     lt_pack IS INITIAL
+         AND ( p_eltyp IS NOT INITIAL OR p_elpar IS NOT INITIAL OR p_elnam IS NOT INITIAL ).
+
+    initial_elements->select_specific( EXPORTING i_element_type_filter = p_eltyp
+                                                 i_parent_name_filter  = p_elpar
+                                                 i_name_filter         = p_elnam ).
+  ELSE.
+
+    FORMAT COLOR COL_TOTAL.
+    WRITE: / 'Enter either a filter by package or by specific component'.
+    FORMAT COLOR COL_BACKGROUND.
+
+  ENDIF.
 
   CREATE OBJECT sap_extractor.
 

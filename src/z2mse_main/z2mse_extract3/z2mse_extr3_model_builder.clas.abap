@@ -7,8 +7,8 @@ CLASS z2mse_extr3_model_builder DEFINITION
   PUBLIC SECTION.
     METHODS search
       IMPORTING
-        i_search_up   TYPE i
-        i_search_down TYPE i.
+        i_search_up           TYPE i
+        i_search_down         TYPE i.
     "! I am called once to notify that the initial selection of elements is started.
     "! All elements added to the model before my method search is called belong to the level 0
     METHODS initial_selection_started.
@@ -64,7 +64,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_model_builder IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
 
   METHOD initialize.
@@ -301,6 +301,7 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD write_found_elements.
 
     DATA found_in_level TYPE found_in_level_type.
@@ -389,5 +390,4 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
-
 ENDCLASS.

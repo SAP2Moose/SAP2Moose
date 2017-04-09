@@ -11,7 +11,6 @@ CLASS z2mse_extr3_elements DEFINITION
     CONSTANTS: package_type          LIKE type VALUE 'package',
                table_type            LIKE type VALUE 'table',
                class_type            LIKE type VALUE 'class',
-               class_components_type LIKE type VALUE 'class_components',
                program_type          LIKE type VALUE 'program',
                web_dynpro_comps_type LIKE type VALUE 'web_dynpro_components'.
 

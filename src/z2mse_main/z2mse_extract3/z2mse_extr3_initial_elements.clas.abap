@@ -21,11 +21,17 @@ CLASS z2mse_extr3_initial_elements DEFINITION
     TYPES ty_t_tdevc_test TYPE HASHED TABLE OF ty_tdevc_test WITH UNIQUE KEY devclass.
     METHODS select_packages
       IMPORTING
-                !top_packages           TYPE ty_s_pack
-                !sub_packages_filter    TYPE ty_s_pack OPTIONAL
-                !including_sub_packages TYPE abap_bool DEFAULT abap_false.
+        !top_packages           TYPE ty_s_pack
+        !sub_packages_filter    TYPE ty_s_pack OPTIONAL
+        !including_sub_packages TYPE abap_bool DEFAULT abap_false.
+    TYPES: ty_filter TYPE c LENGTH 30.
+    METHODS select_specific
+      IMPORTING
+        i_element_type_filter TYPE ty_filter
+        i_parent_name_filter  TYPE ty_filter
+        i_name_filter         TYPE ty_filter.
     METHODS get_selected
-      RETURNING VALUE(r_packages)       TYPE ty_packages.
+      RETURNING VALUE(r_packages) TYPE ty_packages.
 
     "! @parameter tdevc_test | provide test data for table TDEVC during unit tests.
     METHODS constructor
@@ -68,6 +74,23 @@ ENDCLASS.
 
 
 CLASS z2mse_extr3_initial_elements IMPLEMENTATION.
+
+
+  METHOD constructor.
+    IF tdevc_test IS SUPPLIED.
+      g_tdevc_test = tdevc_test.
+      g_is_test = abap_true.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD get_selected.
+
+    r_packages = g_selected_packages.
+
+  ENDMETHOD.
+
 
   METHOD select_packages.
 
@@ -142,6 +165,11 @@ CLASS z2mse_extr3_initial_elements IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD select_specific.
+
+  ENDMETHOD.
+
+
   METHOD _select_sub_packages.
 
     CLEAR r_packages.
@@ -187,19 +215,4 @@ CLASS z2mse_extr3_initial_elements IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-
-  METHOD constructor.
-    IF tdevc_test IS SUPPLIED.
-      g_tdevc_test = tdevc_test.
-      g_is_test = abap_true.
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD get_selected.
-
-    r_packages = g_selected_packages.
-
-  ENDMETHOD.
-
 ENDCLASS.

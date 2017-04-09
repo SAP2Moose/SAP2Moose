@@ -6,6 +6,7 @@ CLASS z2mse_extract3 DEFINITION
 
   PUBLIC SECTION.
     TYPES: ty_s_pack TYPE RANGE OF tadir-devclass .
+    TYPES: ty_string_range TYPE RANGE OF char45.
     CONSTANTS modifier_abapglobalclass TYPE string VALUE 'ABAPGlobalClass' ##NO_TEXT.
     CONSTANTS modifier_abapglobalinterface TYPE string VALUE 'ABAPGlobalInterface' ##NO_TEXT.
     CONSTANTS modifier_webdynpro_component TYPE string VALUE 'ABAPWebDynproComponent'.
@@ -72,8 +73,8 @@ CLASS z2mse_extract3 IMPLEMENTATION.
 
     ENDLOOP.
 
-    model_builder->search( i_search_up   = i_search_up
-                           i_search_down = i_search_down  ).
+    model_builder->search( i_search_up           = i_search_up
+                           i_search_down         = i_search_down ).
 
     CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Write found elements|.
 
