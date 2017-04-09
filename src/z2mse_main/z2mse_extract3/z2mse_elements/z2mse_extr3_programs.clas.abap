@@ -80,7 +80,8 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
       IF is_added EQ abap_true.
 
-        new_element_id = element_manager->add_element( element = me ).
+        new_element_id = element_manager->add_element( element = me
+                                                       is_specific = abap_true ).
         element-element_id = new_element_id.
         element-program = found_program.
         element-external_program_name = _convert_program_2_ext_name( found_program ).

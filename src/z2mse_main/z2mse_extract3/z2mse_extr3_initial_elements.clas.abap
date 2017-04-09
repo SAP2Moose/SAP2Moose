@@ -27,6 +27,8 @@ CLASS z2mse_extr3_initial_elements DEFINITION
     TYPES: ty_filter TYPE c LENGTH 30.
     METHODS select_specific
       IMPORTING
+        model_builder         TYPE REF TO z2mse_extr3_model_builder
+        element_manager       TYPE REF TO z2mse_extr3_element_manager
         i_element_type_filter TYPE ty_filter
         i_parent_name_filter  TYPE ty_filter
         i_name_filter         TYPE ty_filter.
@@ -166,6 +168,25 @@ CLASS z2mse_extr3_initial_elements IMPLEMENTATION.
 
 
   METHOD select_specific.
+
+    model_builder->initial_selection_started( ).
+    model_builder->usage_of_single_element( ).
+
+    CASE i_element_type_filter.
+      WHEN z2mse_extr3_elements=>class_type.
+
+        DATA classes TYPE REF TO z2mse_extr3_classes.
+        classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
+        classes->add_component( EXPORTING clsname        = i_parent_name_filter
+                                          cmpname        = i_name_filter
+                                          is_specific    = abap_true ).
+
+      WHEN z2mse_extr3_elements=>table_type.
+
+        DATA tables TYPE REF TO z2mse_extr3_tables.
+        tables = z2mse_extr3_tables=>get_instance( i_element_manager = element_manager ).
+        tables->add( EXPORTING table          = i_name_filter ).
+    ENDCASE.
 
   ENDMETHOD.
 

@@ -7,18 +7,20 @@ CLASS z2mse_extr3_model_builder DEFINITION
   PUBLIC SECTION.
     METHODS search
       IMPORTING
-        i_search_up           TYPE i
-        i_search_down         TYPE i.
+        i_search_up   TYPE i
+        i_search_down TYPE i.
     "! I am called once to notify that the initial selection of elements is started.
     "! All elements added to the model before my method search is called belong to the level 0
     METHODS initial_selection_started.
     "! Called whenever a new element ID was added to the model.
     METHODS new_element_id
       IMPORTING
-        i_element_id TYPE i.
+        i_element_id  TYPE i
+        i_is_specific TYPE abap_bool.
     METHODS initialize
       IMPORTING i_element_manager TYPE REF TO z2mse_extr3_element_manager.
     METHODS write_found_elements.
+    METHODS usage_of_single_element.
   PROTECTED SECTION.
   PRIVATE SECTION.
     TYPES: BEGIN OF found_in_level_type,
@@ -59,12 +61,13 @@ CLASS z2mse_extr3_model_builder DEFINITION
 
     DATA: tadir_builder      TYPE REF TO z2mse_extr3_tadir_builder,
           where_used_builder TYPE REF TO z2mse_extr3_where_used_builder.
+    DATA: is_usage_of_single_element TYPE abap_bool.
 
 ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
+CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
 
   METHOD initialize.
@@ -93,7 +96,9 @@ CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
     INSERT association_builder INTO TABLE association_builders.
 
   ENDMETHOD.
-
+  METHOD usage_of_single_element.
+    is_usage_of_single_element = abap_true.
+  ENDMETHOD.
 
   METHOD initial_selection_started.
     is_initial_selection = abap_true.
@@ -101,6 +106,12 @@ CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
 
   METHOD new_element_id.
+    IF is_usage_of_single_element EQ abap_true.
+      IF i_is_specific EQ abap_false.
+        EXIT.
+      ENDIF.
+    ENDIF.
+
     DATA: found_in_level TYPE found_in_level_type,
           is_new_line    TYPE abap_bool.
     FIELD-SYMBOLS <found_in_level> TYPE found_in_level_type.
@@ -119,19 +130,19 @@ CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
     ELSEIF is_up_search EQ abap_true.
 
-*      IF <found_in_level>-found_in_level_upsearch IS NOT INITIAL.
+      IF <found_in_level>-found_in_level_upsearch IS INITIAL.
 
-      <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
+        <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
 
-*      ENDIF.
+      ENDIF.
 
     ELSEIF is_down_search EQ abap_true.
 
-*      IF <found_in_level>-found_in_level_downsearch IS NOT INITIAL.
+      IF <found_in_level>-found_in_level_downsearch IS INITIAL.
 
-      <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
+        <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
 
-*      ENDIF.
+      ENDIF.
 
     ELSEIF is_post_selection EQ abap_true.
 
@@ -204,7 +215,14 @@ CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
         CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_up }|.
 
         something_to_be_done_up = abap_false.
+        DATA workload TYPE found_in_levels_type.
+        CLEAR workload.
         LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_upsearch = level_to_search_up.
+          INSERT found_in_level INTO TABLE workload.
+        ENDLOOP.
+
+
+        LOOP AT workload INTO found_in_level.
 
           LOOP AT association_builders INTO association_builder.
 
@@ -250,7 +268,11 @@ CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
         CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_down }|.
 
         something_to_be_done_down = abap_false.
+        CLEAR workload.
         LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_downsearch = level_to_search_down.
+          INSERT found_in_level INTO TABLE workload.
+        ENDLOOP.
+        LOOP AT workload INTO found_in_level.
 
           LOOP AT association_builders INTO association_builder.
 

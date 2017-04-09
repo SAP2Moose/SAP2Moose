@@ -185,6 +185,7 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
                   EXPORTING
                     clsname        = found_class_name
                     cmpname        = found_cmpname
+                    is_specific    = abap_true
                   IMPORTING
                     is_added       = is_added
                     new_element_id = used_by_element_id ).

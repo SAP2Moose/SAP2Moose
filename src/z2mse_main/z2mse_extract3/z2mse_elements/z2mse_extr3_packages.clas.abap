@@ -67,7 +67,8 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
       IF exists EQ abap_true.
         is_added = abap_true.
 
-        new_element_id = element_manager->add_element( element = me ).
+        new_element_id = element_manager->add_element( element = me
+                                                       is_specific = abap_false ).
 
         element-element_id = new_element_id.
         element-devclass = package.

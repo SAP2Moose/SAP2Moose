@@ -38,6 +38,7 @@ CLASS z2mse_extr3_classes DEFINITION
       IMPORTING
         clsname               TYPE seoclsname
         cmpname               TYPE seocmpname
+        is_specific           TYPE abap_bool
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
         VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
@@ -95,6 +96,7 @@ CLASS z2mse_extr3_classes DEFINITION
         cmpname               TYPE seocmpname
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
+        VALUE(is_added_now)   TYPE abap_bool
         VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
 
     METHODS _add_metarel
@@ -115,7 +117,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_classes IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
 
 
   METHOD add.
@@ -142,7 +144,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
       IF is_added EQ abap_true.
 
-        new_element_id = element_manager->add_element( element = me ).
+        new_element_id = element_manager->add_element( element = me
+                                                       is_specific = abap_false ).
         element-element_id = new_element_id.
         element-class_name = class.
         element-clstype = found_class_type.
@@ -179,6 +182,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
   METHOD add_component.
 
+    data: is_added_now TYPE abap_bool.
+
     add( EXPORTING class          = clsname
          IMPORTING is_added       = is_added ).
 
@@ -187,7 +192,16 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       _add_component( EXPORTING clsname        = clsname
                                 cmpname        = cmpname
                       IMPORTING is_added       = is_added
-                                new_element_id = new_element_id ).
+                                new_element_id = new_element_id
+                                is_added_now   = is_added_now ).
+
+      IF is_specific EQ abap_true and
+         is_added_now eq abap_true.
+
+        element_manager->model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
+                                                                  i_is_specific = abap_true ).
+
+      ENDIF.
 
     ENDIF.
 
@@ -331,6 +345,84 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD name.
+    DATA: class_name TYPE seoclsname,
+          clstype    TYPE seoclstype,
+          exists     TYPE abap_bool.
+
+    class_name( EXPORTING element_id = element_id
+                IMPORTING class_name =  class_name
+                          clstype    = clstype
+                          exists     = exists ).
+
+    IF exists EQ abap_true.
+
+      CASE clstype.
+        WHEN is_class_type.
+          element_type = |ABAPClass|.
+        WHEN interface_type.
+          element_type = |ABAPInterface|.
+        WHEN OTHERS.
+          ASSERT 1 = 2.
+      ENDCASE.
+
+      parent_name = ||.
+      name = class_name.
+
+    ELSE.
+
+      DATA: cmpname TYPE seocmpname,
+            cmptype TYPE seocmptype.
+
+      comp_name( EXPORTING element_id = element_id
+                   IMPORTING class_name = class_name
+                             cmpname    = cmpname
+                             cmptype    = cmptype
+                             exists     = exists ).
+
+      ASSERT exists EQ abap_true.
+
+      DATA element TYPE element_type.
+
+      READ TABLE elements_class_name INTO element WITH KEY class_name = class_name.
+      ASSERT sy-subrc EQ 0.
+      clstype = element-clstype.
+
+      CASE clstype.
+        WHEN is_class_type.
+          CASE cmptype.
+            WHEN attribute_type.
+              element_type = |ABAPClassAttribute|.
+            WHEN method_type.
+              element_type = |ABAPClassMethod|.
+            WHEN event_type.
+              element_type = |ABAPClassEvent|.
+            WHEN OTHERS.
+              ASSERT 1 = 2.
+          ENDCASE.
+        WHEN interface_type.
+          CASE cmptype.
+            WHEN attribute_type.
+              element_type = |ABAPInterfaceAttribute|.
+            WHEN method_type.
+              element_type = |ABAPInterfaceMethod|.
+            WHEN event_type.
+              element_type = |ABAPInterfaceEvent|.
+            WHEN OTHERS.
+              ASSERT 1 = 2.
+          ENDCASE.
+        WHEN OTHERS.
+          ASSERT 1 = 2.
+      ENDCASE.
+
+      parent_name = class_name.
+      name = cmpname.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD _add_component.
 
     DATA element_comp TYPE element_comp_type.
@@ -363,7 +455,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                          i_found_cmpname    = found_cmpname
                                                          i_found_cmptype    = found_cmptype
                                                          i_found_mtdtype    = found_mtdtype ).
-
+        is_added_now = abap_true.
       ENDIF.
 
     ENDIF.
@@ -423,6 +515,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
           me->add_component( EXPORTING clsname        = interface_class_component-clsname
                                        cmpname        = interface_class_component-cmpname
+                                       is_specific    = abap_false
                               IMPORTING "*              is_added       =
                                         new_element_id = interface_element_id ).
 
@@ -456,7 +549,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
     DATA element_comp2 TYPE element_comp_type.
 
-    r_new_element_id = element_manager->add_element( element = me ).
+    r_new_element_id = element_manager->add_element( element = me
+                                                     is_specific = abap_false ).
     element_comp2-element_id = r_new_element_id.
     element_comp2-clsname = i_found_class_name.
     element_comp2-cmpname = i_found_cmpname.
@@ -467,81 +561,4 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
     INSERT element_comp2 INTO TABLE elements_comp_clsname_cmpname .
 
   ENDMETHOD.
-  METHOD name.
-    DATA: class_name TYPE seoclsname,
-          clstype    TYPE seoclstype,
-          exists     TYPE abap_bool.
-
-    class_name( EXPORTING element_id = element_id
-                IMPORTING class_name =  class_name
-                          clstype    = clstype
-                          exists     = exists ).
-
-    IF exists EQ abap_true.
-
-      CASE clstype.
-        WHEN is_class_type.
-          element_type = |ABAPClass|.
-        WHEN interface_type.
-          element_type = |ABAPInterface|.
-        WHEN OTHERS.
-          ASSERT 1 = 2.
-      ENDCASE.
-
-      parent_name = ||.
-      name = class_name.
-
-    ELSE.
-
-      DATA: cmpname TYPE seocmpname,
-            cmptype TYPE seocmptype.
-
-      comp_name( EXPORTING element_id = element_id
-                   IMPORTING class_name = class_name
-                             cmpname    = cmpname
-                             cmptype    = cmptype
-                             exists     = exists ).
-
-      ASSERT exists EQ abap_true.
-
-      DATA element TYPE element_type.
-
-      READ TABLE elements_class_name INTO element WITH KEY class_name = class_name.
-      ASSERT sy-subrc EQ 0.
-      clstype = element-clstype.
-
-      CASE clstype.
-        WHEN is_class_type.
-          CASE cmptype.
-            WHEN attribute_type.
-          element_type = |ABAPClassAttribute|.
-            WHEN method_type.
-          element_type = |ABAPClassMethod|.
-            WHEN event_type.
-          element_type = |ABAPClassEvent|.
-            WHEN OTHERS.
-              ASSERT 1 = 2.
-          ENDCASE.
-        WHEN interface_type.
-          CASE cmptype.
-            WHEN attribute_type.
-          element_type = |ABAPInterfaceAttribute|.
-            WHEN method_type.
-          element_type = |ABAPInterfaceMethod|.
-            WHEN event_type.
-          element_type = |ABAPInterfaceEvent|.
-            WHEN OTHERS.
-              ASSERT 1 = 2.
-          ENDCASE.
-        WHEN OTHERS.
-          ASSERT 1 = 2.
-      ENDCASE.
-
-      parent_name = class_name.
-      name = cmpname.
-
-    ENDIF.
-
-  ENDMETHOD.
-
 ENDCLASS.

@@ -29,6 +29,7 @@ CLASS z2mse_extr3_element_manager DEFINITION
     METHODS add_element
       IMPORTING
                 element           TYPE REF TO z2mse_extr3_elements
+                is_specific       TYPE abap_bool
       RETURNING VALUE(element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
     METHODS add_association
       IMPORTING
@@ -47,6 +48,7 @@ CLASS z2mse_extr3_element_manager DEFINITION
       IMPORTING
                 i_element_id        TYPE element_id_type
       RETURNING VALUE(associations) TYPE associations_type.
+    DATA model_builder TYPE REF TO z2mse_extr3_model_builder.
 
 
   PROTECTED SECTION.
@@ -63,12 +65,40 @@ CLASS z2mse_extr3_element_manager DEFINITION
     DATA associations1 TYPE associations1_type.
     DATA associations2 TYPE associations2_type.
     DATA next_element_id TYPE i.
-    DATA model_builder TYPE REF TO z2mse_extr3_model_builder.
 ENDCLASS.
 
 
 
-CLASS z2mse_extr3_element_manager IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
+
+
+  METHOD add_association.
+
+    DATA line TYPE association_type.
+    line-element_id1 = element_1.
+    line-element_id2 = element_2.
+    line-association = association.
+    INSERT line INTO TABLE associations1.
+    INSERT line INTO TABLE associations2.
+
+  ENDMETHOD.
+
+
+  METHOD add_element.
+
+    DATA element_line TYPE element_type.
+    element_line-element_id = next_element_id.
+    element_id = next_element_id.
+    element_line-element =  element.
+    INSERT element_line INTO TABLE elements.
+
+    model_builder->new_element_id( i_element_id  = element_id
+                                   i_is_specific = is_specific ).
+
+    ADD 1 TO next_element_id.
+
+  ENDMETHOD.
+
 
   METHOD constructor.
 
@@ -89,41 +119,6 @@ CLASS z2mse_extr3_element_manager IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD add_element.
-
-    DATA element_line TYPE element_type.
-    element_line-element_id = next_element_id.
-    element_id = next_element_id.
-    element_line-element =  element.
-    INSERT element_line INTO TABLE elements.
-
-    model_builder->new_element_id( element_id ).
-
-    ADD 1 TO next_element_id.
-
-  ENDMETHOD.
-
-  METHOD get_element.
-
-    DATA element TYPE element_type.
-
-    READ TABLE elements INTO element WITH TABLE KEY element_id = i_element_id.
-    ASSERT sy-subrc EQ 0.
-
-    r_result = element-element.
-
-  ENDMETHOD.
-
-  METHOD add_association.
-
-    DATA line TYPE association_type.
-    line-element_id1 = element_1.
-    line-element_id2 = element_2.
-    line-association = association.
-    INSERT line INTO TABLE associations1.
-    INSERT line INTO TABLE associations2.
-
-  ENDMETHOD.
 
   METHOD get_associations.
     DATA association TYPE association_type.
@@ -140,6 +135,19 @@ CLASS z2mse_extr3_element_manager IMPLEMENTATION.
     DELETE ADJACENT DUPLICATES FROM associations.
 
   ENDMETHOD.
+
+
+  METHOD get_element.
+
+    DATA element TYPE element_type.
+
+    READ TABLE elements INTO element WITH TABLE KEY element_id = i_element_id.
+    ASSERT sy-subrc EQ 0.
+
+    r_result = element-element.
+
+  ENDMETHOD.
+
 
   METHOD make_model.
 

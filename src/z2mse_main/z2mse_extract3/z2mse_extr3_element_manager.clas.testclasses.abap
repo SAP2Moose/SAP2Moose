@@ -22,7 +22,8 @@ CLASS ltcl_main IMPLEMENTATION.
 
     DATA element_id_act TYPE z2mse_extr3_element_manager=>element_id_type.
 
-    element_id_act = f_cut->add_element( element = element ).
+    element_id_act = f_cut->add_element( element = element
+                                         is_specific = abap_false ).
 
     cl_abap_unit_assert=>assert_equals( msg = 'New element has to be reported to the model builder'
                                         exp = element_id_act

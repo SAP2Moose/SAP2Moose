@@ -40,7 +40,7 @@ SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE TEXT-002.
 SELECT-OPTIONS s_pack FOR tadir-devclass.
 SELECT-OPTIONS s_spack FOR tadir-devclass.
 DATA: element_filter TYPE string.
-PARAMETERS p_eltyp TYPE c LENGTH 30.
+PARAMETERS p_eltyp TYPE text30.
 PARAMETERS p_elpar TYPE c LENGTH 30.
 PARAMETERS p_elnam TYPE c LENGTH 30.
 PARAMETERS p_sub AS CHECKBOX DEFAULT 'X'.
@@ -235,6 +235,17 @@ START-OF-SELECTION.
     APPEND ls_spack_line TO lt_spack.
   ENDLOOP.
 
+  DATA model_builder TYPE REF TO z2mse_extr3_model_builder.
+  CREATE OBJECT model_builder.
+
+
+  DATA element_manager TYPE REF TO z2mse_extr3_element_manager.
+  CREATE OBJECT element_manager
+    EXPORTING
+      i_model_builder          = model_builder
+      i_exclude_found_sap_intf = p_ex.
+
+    model_builder->initialize( i_element_manager = element_manager ).
 
   DATA: initial_elements TYPE REF TO z2mse_extr3_initial_elements.
   CREATE OBJECT initial_elements.
@@ -248,7 +259,9 @@ START-OF-SELECTION.
   ELSEIF     lt_pack IS INITIAL
          AND ( p_eltyp IS NOT INITIAL OR p_elpar IS NOT INITIAL OR p_elnam IS NOT INITIAL ).
 
-    initial_elements->select_specific( EXPORTING i_element_type_filter = p_eltyp
+    initial_elements->select_specific( EXPORTING model_builder         = model_builder
+                                                 element_manager       = element_manager
+                                                 i_element_type_filter = p_eltyp
                                                  i_parent_name_filter  = p_elpar
                                                  i_name_filter         = p_elnam ).
   ELSE.
@@ -262,7 +275,9 @@ START-OF-SELECTION.
   CREATE OBJECT sap_extractor.
 
   DATA nothing_done TYPE boolean.
-  sap_extractor->extract( EXPORTING initial_elements         = initial_elements
+  sap_extractor->extract( EXPORTING model_builder            = model_builder
+                                    element_manager          = element_manager
+                                    initial_elements         = initial_elements
                                     i_search_up              = p_nup
                                     i_search_down            = p_ndown
                                     i_exclude_found_sap_intf = abap_true

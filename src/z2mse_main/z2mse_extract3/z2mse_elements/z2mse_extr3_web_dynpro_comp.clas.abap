@@ -102,7 +102,8 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
 
       IF is_added EQ abap_true.
 
-        new_element_id = element_manager->add_element( element = me ).
+        new_element_id = element_manager->add_element( element = me
+                                                       is_specific = abap_false ).
         element-element_id = new_element_id.
         element-wdy_component_name = found_wdy_component_name.
         INSERT element INTO TABLE elements_element_id.
@@ -167,7 +168,8 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
 
       IF is_added EQ abap_true.
 
-        new_element_id = element_manager->add_element( element = me ).
+        new_element_id = element_manager->add_element( element = me
+                                                       is_specific = abap_false ).
         element_comp-element_id = new_element_id.
         element_comp-wdy_component_name = found_component_name.
         element_comp-wdy_controller_name = found_controller_name.
@@ -193,6 +195,9 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
                                 wdy_controller_name = wdy_controller_name
                       IMPORTING is_added            = is_added
                                 new_element_id      = new_element_id ).
+
+     element_manager->model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
+                                                               i_is_specific = abap_true ).
 
     ENDIF.
 

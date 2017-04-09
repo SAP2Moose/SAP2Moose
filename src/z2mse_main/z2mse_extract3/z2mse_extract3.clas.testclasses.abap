@@ -31,8 +31,23 @@ CLASS ltcl_main IMPLEMENTATION.
                                                  sub_packages_filter    = sub_packages_filter
                                                  including_sub_packages = abap_true ).
 
+
+  DATA model_builder TYPE REF TO z2mse_extr3_model_builder.
+  CREATE OBJECT model_builder.
+
+
+  DATA element_manager TYPE REF TO z2mse_extr3_element_manager.
+  CREATE OBJECT element_manager
+    EXPORTING
+      i_model_builder          = model_builder
+      i_exclude_found_sap_intf = abap_true.
+
+    model_builder->initialize( i_element_manager = element_manager ).
+
     f_cut = NEW #( ).
-    f_cut->extract( EXPORTING initial_elements         = initial_elements
+    f_cut->extract( EXPORTING model_builder            = model_builder
+                              element_manager          = element_manager
+                              initial_elements         = initial_elements
                               i_search_up              = -1
                               i_search_down            = -1
                               i_exclude_found_sap_intf = abap_true

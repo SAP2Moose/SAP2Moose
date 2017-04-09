@@ -285,6 +285,7 @@ CLASS ltcl_component IMPLEMENTATION.
 
     f_cut->add_component( EXPORTING clsname        = 'CLASS_A'
                                     cmpname        = 'METHOD_A'
+                                    is_specific    = abap_false
                           IMPORTING is_added       = is_found
                                     new_element_id = new_element_id ).
 
@@ -311,6 +312,7 @@ CLASS ltcl_component IMPLEMENTATION.
 
     f_cut->add_component( EXPORTING clsname        = 'CLASS_A'
                                     cmpname        = 'METHOD_A'
+                                    is_specific    = abap_false
                           IMPORTING is_added       = is_found
                                     new_element_id = new_element_id ).
 
