@@ -13,6 +13,8 @@
     <item>/.travis.yml</item>
     <item>/z_moose_extractor.abap</item>
     <item>/z_moose_extractor_texts.txt</item>
+    <item>/changelog.txt</item>
+    <item>/changelog_release_in_preparation.txt</item>
    </IGNORE>
   </DATA>
  </asx:values>
