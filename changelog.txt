@@ -8,6 +8,15 @@ Legend
 + : added
 - : removed
 
+09.04.2017 v0.4.0
+-----------------
+This is a "convenience release". It fixes only a single bug in the core logic. But adds features to simplify using the tool.
+
++ Progress bar displayed
+- Generated mse file is not displayed anymore
++ Display the found elements together with the level where they are found
++ Fix issue 49 "Initial value for upsearch does not prevent upsearch"
+
 07.04.2017 v0.3.0
 -----------------
 Requires commit 374 or higher from RW-Moose-Diagram, otherwise Programs, Functions or BW routines will not be displayed.

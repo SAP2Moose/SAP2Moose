@@ -1,0 +1,15 @@
+SAP2Moose changelog for releases in preparation
+===================
+
+Legend
+------
+* : fixed
+! : changed
++ : added
+- : removed
+
+v0.4.0
++ Progress bar displayed
+- Generated mse file is not displayed anymore
++ Display the found elements together with the level where they are found
++ Fix issue 49 "Initial value for upsearch does not prevent upsearch"
