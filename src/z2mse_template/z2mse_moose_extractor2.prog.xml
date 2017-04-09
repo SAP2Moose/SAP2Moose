@@ -51,6 +51,12 @@
     </item>
     <item>
      <ID>S</ID>
+     <KEY>P_DF</KEY>
+     <ENTRY>Default prefix for file</ENTRY>
+     <LENGTH>31</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
      <KEY>P_DOWN</KEY>
      <ENTRY>Download model to file</ENTRY>
      <LENGTH>30</LENGTH>

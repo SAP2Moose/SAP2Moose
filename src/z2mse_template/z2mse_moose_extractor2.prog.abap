@@ -1,5 +1,5 @@
 *
-* This is version 0.4.0 (in development)
+* This is version 0.4.0
 *
 *The MIT License (MIT)
 *
@@ -41,7 +41,7 @@ SELECT-OPTIONS s_pack FOR tadir-devclass.
 SELECT-OPTIONS s_spack FOR tadir-devclass.
 PARAMETERS p_sub AS CHECKBOX DEFAULT 'X'.
 PARAMETERS p_nup TYPE i DEFAULT -1.
-parameters p_ndown TYPE i DEFAULT -1.
+PARAMETERS p_ndown TYPE i DEFAULT -1.
 "Exclude interfaces in sap name space when found via where used analysis
 PARAMETERS p_ex AS CHECKBOX DEFAULT 'X'.
 
@@ -94,7 +94,9 @@ SELECTION-SCREEN END OF BLOCK block_infos.
 
 SELECTION-SCREEN BEGIN OF BLOCK bl_model_settings WITH FRAME TITLE TEXT-100.
 
-PARAMETERS p_down AS CHECKBOX DEFAULT 'X'.
+PARAMETERS: p_down AS CHECKBOX DEFAULT 'X',
+            " Default filename
+            p_df   TYPE string.
 *"! Download model to file
 *DATA g_parameter_download_file TYPE abap_bool.
 *g_parameter_download_file = p_down.
@@ -254,4 +256,6 @@ START-OF-SELECTION.
 
   DATA model_outputer TYPE REF TO z2mse_output_model.
   CREATE OBJECT model_outputer.
-  model_outputer->make( mse_model = mse_model g_parameter_download_file = p_down ).
+  model_outputer->make( mse_model = mse_model
+                        g_parameter_download_file = p_down
+                        i_default_prefix = p_df ).

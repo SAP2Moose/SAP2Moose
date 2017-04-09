@@ -192,38 +192,42 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
     DATA: level_to_search_up      TYPE i,
           something_to_be_done_up TYPE abap_bool.
 
-    something_to_be_done_up = abap_true.
+    IF i_search_up <> 0.
 
-    WHILE something_to_be_done_up EQ abap_true.
+      something_to_be_done_up = abap_true.
 
-      level_to_search_up = level_for_found_in_upsearch.
-      ADD 1 TO level_for_found_in_upsearch.
+      WHILE something_to_be_done_up EQ abap_true.
 
-      CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_up }|.
+        level_to_search_up = level_for_found_in_upsearch.
+        ADD 1 TO level_for_found_in_upsearch.
 
-      something_to_be_done_up = abap_false.
-      LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_upsearch = level_to_search_up.
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_up }|.
 
-        LOOP AT association_builders INTO association_builder.
+        something_to_be_done_up = abap_false.
+        LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_upsearch = level_to_search_up.
 
-          association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
+          LOOP AT association_builders INTO association_builder.
 
+            association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
+
+          ENDLOOP.
+
+          something_to_be_done_up = abap_true.
         ENDLOOP.
 
-        something_to_be_done_up = abap_true.
-      ENDLOOP.
+        IF i_search_up >= 0.
 
-      IF i_search_up >= 0.
+          IF i_search_up >= level_for_found_in_upsearch.
 
-        IF i_search_up >= level_for_found_in_upsearch.
+            something_to_be_done_up = abap_false.
 
-          something_to_be_done_up = abap_false.
+          ENDIF.
 
         ENDIF.
 
-      ENDIF.
+      ENDWHILE.
 
-    ENDWHILE.
+    ENDIF.
 
     is_up_search = abap_false.
 
@@ -234,38 +238,42 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
     DATA: level_to_search_down      TYPE i,
           something_to_be_done_down TYPE abap_bool.
 
-    something_to_be_done_down = abap_true.
+    IF i_search_down <> 0.
 
-    WHILE something_to_be_done_down EQ abap_true.
+      something_to_be_done_down = abap_true.
 
-      level_to_search_down = level_for_found_in_downsearch.
-      ADD 1 TO level_for_found_in_downsearch.
+      WHILE something_to_be_done_down EQ abap_true.
 
-      CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_down }|.
+        level_to_search_down = level_for_found_in_downsearch.
+        ADD 1 TO level_for_found_in_downsearch.
 
-      something_to_be_done_down = abap_false.
-      LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_downsearch = level_to_search_down.
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_down }|.
 
-        LOOP AT association_builders INTO association_builder.
+        something_to_be_done_down = abap_false.
+        LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_downsearch = level_to_search_down.
 
-          association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
+          LOOP AT association_builders INTO association_builder.
 
+            association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
+
+          ENDLOOP.
+
+          something_to_be_done_down = abap_true.
         ENDLOOP.
 
-        something_to_be_done_down = abap_true.
-      ENDLOOP.
+        IF i_search_down >= 0.
 
-      IF i_search_down >= 0.
+          IF i_search_down >= level_for_found_in_downsearch.
 
-        IF i_search_down >= level_for_found_in_downsearch.
+            something_to_be_done_down = abap_false.
 
-          something_to_be_done_down = abap_false.
+          ENDIF.
 
         ENDIF.
 
-      ENDIF.
+      ENDWHILE.
 
-    ENDWHILE.
+    ENDIF.
 
     is_down_search = abap_false.
 
@@ -355,19 +363,19 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
     SORT temps BY where level alternate_level element_type parent_name name.
 
-    write: / 'Legend:'.
-    write: / 'W - "I" Found in initial search "P" Found in final search (packages that where not initially selected) "S" Found in regular search'.
-    write: / 'L - Level where an element is found'.
-    write: / 'AL - In case an element is found in down and up search, this is the level where it is found in down search'.
-    write: /.
+    WRITE: / 'Legend:'.
+    WRITE: / 'W - "I" Found in initial search "P" Found in final search (packages that where not initially selected) "S" Found in regular search'.
+    WRITE: / 'L - Level where an element is found'.
+    WRITE: / 'AL - In case an element is found in down and up search, this is the level where it is found in down search'.
+    WRITE: /.
     FORMAT COLOR COL_HEADING.
-       WRITE: /(1) 'W',
-              (3) 'L',
-              (3) 'AL',
-              (30) 'Type',
-              (30) 'Name of Parent',
-              (30) 'Name'.
-    format COLOR COL_BACKGROUND.
+    WRITE: /(1) 'W',
+           (3) 'L',
+           (3) 'AL',
+           (30) 'Type',
+           (30) 'Name of Parent',
+           (30) 'Name'.
+    FORMAT COLOR COL_BACKGROUND.
 
     LOOP AT temps INTO temp.
       NEW-LINE.

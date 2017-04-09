@@ -4,8 +4,9 @@ CLASS z2mse_output_model DEFINITION
   PUBLIC SECTION.
     METHODS make
       IMPORTING
-        mse_model TYPE z2mse_model=>lines_type
-        g_parameter_download_file TYPE abap_bool.
+        mse_model                 TYPE z2mse_model=>lines_type
+        g_parameter_download_file TYPE abap_bool
+        i_default_prefix          TYPE string.
 ENDCLASS.
 
 CLASS z2mse_output_model IMPLEMENTATION.
@@ -13,14 +14,18 @@ CLASS z2mse_output_model IMPLEMENTATION.
   METHOD make.
     " Download the file
 
-    DATA: filename    TYPE string,
-          pathname    TYPE string,
-          fullpath    TYPE string,
-          user_action TYPE i.
+    DATA: filename          TYPE string,
+          default_file_name TYPE string,
+          pathname          TYPE string,
+          fullpath          TYPE string,
+          user_action       TYPE i.
+
+    default_file_name = |{ i_default_prefix }_{ sy-sysid }_{ sy-datum }_{ sy-uzeit }|.
 
     IF g_parameter_download_file EQ abap_true.
 
       cl_gui_frontend_services=>file_save_dialog( EXPORTING default_extension = 'mse'
+                                                            default_file_name = default_file_name
                                                   CHANGING  filename    = filename       " File Name to Save
                                                             path        = pathname       " Path to File
                                                             fullpath    = fullpath       " Path + File Name
