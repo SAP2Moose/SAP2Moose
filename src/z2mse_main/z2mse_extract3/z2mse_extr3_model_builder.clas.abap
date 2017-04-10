@@ -13,6 +13,7 @@ CLASS z2mse_extr3_model_builder DEFINITION
     "! All elements added to the model before my method search is called belong to the level 0
     METHODS initial_selection_started.
     "! Called whenever a new element ID was added to the model.
+    "! @parameters i_is_specific | set to true if the element is added due to a specific search. It is for instance to be false, if all components of a class are added.
     METHODS new_element_id
       IMPORTING
         i_element_id  TYPE i
@@ -35,6 +36,10 @@ CLASS z2mse_extr3_model_builder DEFINITION
              "! Also required to determine whether an upward or downward search will be done.
              found_in_level_upsearch     TYPE i,
              found_in_level_downsearch   TYPE i,
+             "! Used to analyze usages of a single element.
+             "! Marks an element that is specifically marked.
+             "! In case a specific search is done, only elements with this flag are used for an where used analysis
+             specific                    TYPE abap_bool,
            END OF found_in_level_type.
     TYPES found_in_levels_type TYPE HASHED TABLE OF found_in_level_type WITH UNIQUE KEY element_id.
 
@@ -61,7 +66,8 @@ CLASS z2mse_extr3_model_builder DEFINITION
 
     DATA: tadir_builder      TYPE REF TO z2mse_extr3_tadir_builder,
           where_used_builder TYPE REF TO z2mse_extr3_where_used_builder.
-    DATA: is_usage_of_single_element TYPE abap_bool.
+    "! A single element is analyzed of usage and using
+    DATA is_usage_of_single_element TYPE abap_bool.
 
 ENDCLASS.
 
@@ -106,11 +112,6 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
 
   METHOD new_element_id.
-    IF is_usage_of_single_element EQ abap_true.
-      IF i_is_specific EQ abap_false.
-        EXIT.
-      ENDIF.
-    ENDIF.
 
     DATA: found_in_level TYPE found_in_level_type,
           is_new_line    TYPE abap_bool.
@@ -118,6 +119,7 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
     READ TABLE found_in_levels ASSIGNING <found_in_level> WITH TABLE KEY element_id = i_element_id.
     IF sy-subrc <> 0.
+
       is_new_line = abap_true.
       ASSIGN found_in_level TO <found_in_level>.
       <found_in_level>-element_id = i_element_id.
@@ -127,6 +129,11 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
     IF is_initial_selection EQ abap_true.
 
       <found_in_level>-found_in_initial_selection = abap_true.
+      IF i_is_specific EQ abap_true.
+
+        <found_in_level>-specific = abap_true.
+
+      ENDIF.
 
     ELSEIF is_up_search EQ abap_true.
 
@@ -134,6 +141,11 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
         <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
 
+      ENDIF.
+
+      IF     <found_in_level>-found_in_level_upsearch EQ level_for_found_in_upsearch
+         AND i_is_specific EQ abap_true.
+        <found_in_level>-specific = abap_true.
       ENDIF.
 
     ELSEIF is_down_search EQ abap_true.
@@ -144,13 +156,19 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
       ENDIF.
 
+      IF     <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch
+         AND i_is_specific EQ abap_true.
+
+        <found_in_level>-specific = abap_true.
+
+      ENDIF.
+
     ELSEIF is_post_selection EQ abap_true.
 
       <found_in_level>-found_in_post_selection = abap_true.
 
     ELSE.
       ASSERT 1 = 2.
-      "Unfinished coding
     ENDIF.
 
     IF is_new_line EQ abap_true.
@@ -188,6 +206,11 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
       LOOP AT first_initial_elements INTO found_in_level.
 
+        IF     is_usage_of_single_element EQ abap_true
+           AND found_in_level-specific EQ abap_false.
+          CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+        ENDIF.
+
         association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
 
       ENDLOOP.
@@ -218,6 +241,12 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
         DATA workload TYPE found_in_levels_type.
         CLEAR workload.
         LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_upsearch = level_to_search_up.
+
+          IF     is_usage_of_single_element EQ abap_true
+             AND found_in_level-specific EQ abap_false.
+            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+          ENDIF.
+
           INSERT found_in_level INTO TABLE workload.
         ENDLOOP.
 
@@ -274,6 +303,11 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
         ENDLOOP.
         LOOP AT workload INTO found_in_level.
 
+          IF     is_usage_of_single_element EQ abap_true
+             AND found_in_level-specific EQ abap_false.
+            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+          ENDIF.
+
           LOOP AT association_builders INTO association_builder.
 
             association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
@@ -313,6 +347,11 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
       LOOP AT all_elements INTO found_in_level.
 
+        IF     is_usage_of_single_element EQ abap_true
+           AND found_in_level-specific EQ abap_false.
+          CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+        ENDIF.
+
         association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
 
       ENDLOOP.
@@ -336,12 +375,14 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
              element_type    TYPE string,
              parent_name     TYPE string,
              name            TYPE string,
+             specific        TYPE abap_bool,
            END OF temp_type.
     DATA: temp  TYPE temp_type,
           temps TYPE STANDARD TABLE OF temp_type.
 
     LOOP AT found_in_levels INTO found_in_level.
       CLEAR temp.
+      temp-specific = found_in_level-specific.
       IF found_in_level-found_in_initial_selection EQ abap_true.
         temp-where = |I|.
         temp-level = 0.
@@ -401,6 +442,11 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
     FORMAT COLOR COL_BACKGROUND.
 
     LOOP AT temps INTO temp.
+      IF temp-specific EQ abap_true.
+        FORMAT COLOR COL_POSITIVE.
+      ELSE.
+        FORMAT COLOR COL_BACKGROUND.
+      ENDIF.
       NEW-LINE.
       WRITE: /(1) temp-where,
               (3) temp-level,

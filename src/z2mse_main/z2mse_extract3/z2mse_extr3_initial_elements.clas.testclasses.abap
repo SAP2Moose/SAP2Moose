@@ -18,13 +18,13 @@ CLASS ltcl_main IMPLEMENTATION.
 
   METHOD simple_no_sub_packages.
 
-    DATA: tdevc_test TYPE z2mse_extr_packages=>ty_t_tdevc_test.
+    DATA: tdevc_test TYPE z2mse_extr3_initial_elements=>ty_t_tdevc_test.
 
     tdevc_test = VALUE #( ( devclass = 'A' parentcl = '' )
                           ( devclass = 'A_A' parentcl = 'A' )
                           ( devclass = 'B' parentcl = '' ) ).
 
-    DATA top_packages_range TYPE z2mse_extr_packages=>ty_s_pack.
+    DATA top_packages_range TYPE z2mse_extr3_initial_elements=>ty_s_pack.
 
     top_packages_range = VALUE #( ( sign = 'I' option = 'EQ' low = 'A' ) ).
 
@@ -32,8 +32,8 @@ CLASS ltcl_main IMPLEMENTATION.
 
     f_cut->select_packages( EXPORTING top_packages = top_packages_range ).
 
-    DATA: selected_packages_act TYPE z2mse_extr_packages=>ty_packages,
-          selected_packages_exp TYPE z2mse_extr_packages=>ty_packages.
+    DATA: selected_packages_act TYPE z2mse_extr3_initial_elements=>ty_packages,
+          selected_packages_exp TYPE z2mse_extr3_initial_elements=>ty_packages.
 
     selected_packages_act = f_cut->g_selected_packages.
     selected_packages_exp = VALUE #( ( package = 'A') ).
@@ -48,13 +48,13 @@ CLASS ltcl_main IMPLEMENTATION.
 
   METHOD simple_wth_sub_packages.
 
-    DATA: tdevc_test TYPE z2mse_extr_packages=>ty_t_tdevc_test.
+    DATA: tdevc_test TYPE z2mse_extr3_initial_elements=>ty_t_tdevc_test.
 
     tdevc_test = VALUE #( ( devclass = 'A' parentcl = '' )
                           ( devclass = 'A_A' parentcl = 'A' )
                           ( devclass = 'B' parentcl = '' ) ).
 
-    DATA top_packages_range TYPE z2mse_extr_packages=>ty_s_pack.
+    DATA top_packages_range TYPE z2mse_extr3_initial_elements=>ty_s_pack.
 
     top_packages_range = VALUE #( ( sign = 'I' option = 'EQ' low = 'A' ) ).
 
@@ -63,8 +63,8 @@ CLASS ltcl_main IMPLEMENTATION.
     f_cut->select_packages( EXPORTING top_packages = top_packages_range
                                       including_sub_packages = abap_true  ).
 
-    DATA: selected_packages_act TYPE z2mse_extr_packages=>ty_packages,
-          selected_packages_exp TYPE z2mse_extr_packages=>ty_packages.
+    DATA: selected_packages_act TYPE z2mse_extr3_initial_elements=>ty_packages,
+          selected_packages_exp TYPE z2mse_extr3_initial_elements=>ty_packages.
 
     selected_packages_act = f_cut->g_selected_packages.
     selected_packages_exp = VALUE #( ( package = 'A' parentpackage = '')
@@ -80,15 +80,15 @@ CLASS ltcl_main IMPLEMENTATION.
 
   METHOD complex_wth_sub_packages.
 
-    DATA: tdevc_test TYPE z2mse_extr_packages=>ty_t_tdevc_test.
+    DATA: tdevc_test TYPE z2mse_extr3_initial_elements=>ty_t_tdevc_test.
 
     tdevc_test = VALUE #( ( devclass = 'A' parentcl = '' )
                           ( devclass = 'A_A' parentcl = 'A' )
                           ( devclass = 'A_A_A' parentcl = 'A_A' )
                           ( devclass = 'B' parentcl = '' ) ).
 
-    DATA: top_packages_range  TYPE z2mse_extr_packages=>ty_s_pack,
-          sub_packages_filter TYPE z2mse_extr_packages=>ty_s_pack.
+    DATA: top_packages_range  TYPE z2mse_extr3_initial_elements=>ty_s_pack,
+          sub_packages_filter TYPE z2mse_extr3_initial_elements=>ty_s_pack.
 
     top_packages_range = VALUE #( ( sign = 'I' option = 'EQ' low = 'A' ) ).
     sub_packages_filter = VALUE #( ( sign = 'E' option = 'EQ' low = 'A_A' ) ).
@@ -99,8 +99,8 @@ CLASS ltcl_main IMPLEMENTATION.
                                       sub_packages_filter = sub_packages_filter
                                       including_sub_packages = abap_true  ).
 
-    DATA: selected_packages_act TYPE z2mse_extr_packages=>ty_packages,
-          selected_packages_exp TYPE z2mse_extr_packages=>ty_packages.
+    DATA: selected_packages_act TYPE z2mse_extr3_initial_elements=>ty_packages,
+          selected_packages_exp TYPE z2mse_extr3_initial_elements=>ty_packages.
 
     selected_packages_act = f_cut->g_selected_packages.
     selected_packages_exp = VALUE #( ( package = 'A' parentpackage = '')

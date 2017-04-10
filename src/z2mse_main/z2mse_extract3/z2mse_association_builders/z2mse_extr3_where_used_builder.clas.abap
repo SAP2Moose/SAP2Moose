@@ -185,12 +185,16 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
                   EXPORTING
                     clsname        = found_class_name
                     cmpname        = found_cmpname
-                    is_specific    = abap_true
+                    is_specific    = abap_false
                   IMPORTING
                     is_added       = is_added
                     new_element_id = used_by_element_id ).
+                IF is_added EQ abap_true.
 
-                IF is_added EQ abap_false.
+                  element_manager->model_builder->new_element_id( EXPORTING i_element_id  = used_by_element_id
+                                                                            i_is_specific = abap_true ).
+
+                ELSE.
                   "TBD what is to be done here?
 
                 ENDIF.

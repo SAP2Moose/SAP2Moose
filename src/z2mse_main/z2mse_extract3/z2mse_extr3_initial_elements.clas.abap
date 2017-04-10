@@ -169,6 +169,8 @@ CLASS z2mse_extr3_initial_elements IMPLEMENTATION.
 
   METHOD select_specific.
 
+  data new_element_id TYPE i.
+
     model_builder->initial_selection_started( ).
     model_builder->usage_of_single_element( ).
 
@@ -179,13 +181,22 @@ CLASS z2mse_extr3_initial_elements IMPLEMENTATION.
         classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
         classes->add_component( EXPORTING clsname        = i_parent_name_filter
                                           cmpname        = i_name_filter
-                                          is_specific    = abap_true ).
+                                          is_specific    = abap_false
+                                IMPORTING new_element_id = new_element_id ).
+
+        model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
+                                                 i_is_specific = abap_true ).
+
 
       WHEN z2mse_extr3_elements=>table_type.
 
         DATA tables TYPE REF TO z2mse_extr3_tables.
         tables = z2mse_extr3_tables=>get_instance( i_element_manager = element_manager ).
-        tables->add( EXPORTING table          = i_name_filter ).
+        tables->add( EXPORTING table          = i_name_filter
+                     IMPORTING new_element_id = new_element_id ).
+
+        model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
+                                                 i_is_specific = abap_true ).
     ENDCASE.
 
   ENDMETHOD.
