@@ -18,7 +18,7 @@ CLASS z2mse_extr3_element_manager DEFINITION
     TYPES: BEGIN OF association_type,
              element_id1 TYPE element_id_type,
              element_id2 TYPE element_id_type,
-             ass_type    TYPE z2mse_extr3_association=>ass_type,
+             ass_type    TYPE c LENGTH 30, "To prevent problem with local classes, better would be: z2mse_extr3_association=>ass_type,
              association TYPE REF TO z2mse_extr3_association,
            END OF association_type.
     TYPES associations_type TYPE STANDARD TABLE OF association_type WITH KEY element_id1 element_id2 ass_type association.

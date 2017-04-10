@@ -63,6 +63,24 @@
     </item>
     <item>
      <ID>S</ID>
+     <KEY>P_ELNAM</KEY>
+     <ENTRY>Speciifc element</ENTRY>
+     <LENGTH>24</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_ELPAR</KEY>
+     <ENTRY>Parent name</ENTRY>
+     <LENGTH>19</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_ELTYP</KEY>
+     <ENTRY>Element name</ENTRY>
+     <LENGTH>20</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
      <KEY>P_EX</KEY>
      <ENTRY>No Where-Used: SAP Interfaces</ENTRY>
      <LENGTH>37</LENGTH>
@@ -84,24 +102,6 @@
      <KEY>P_SUB</KEY>
      <ENTRY>Extract sub packages</ENTRY>
      <LENGTH>29</LENGTH>
-    </item>
-    <item>
-     <ID>S</ID>
-     <KEY>S_ELNAM</KEY>
-     <ENTRY>Limit initial selectn: Name</ENTRY>
-     <LENGTH>35</LENGTH>
-    </item>
-    <item>
-     <ID>S</ID>
-     <KEY>S_ELPAR</KEY>
-     <ENTRY>Limit initial selectn: Parent</ENTRY>
-     <LENGTH>37</LENGTH>
-    </item>
-    <item>
-     <ID>S</ID>
-     <KEY>S_ELTYP</KEY>
-     <ENTRY>Limit initial selectn: Type</ENTRY>
-     <LENGTH>35</LENGTH>
     </item>
     <item>
      <ID>S</ID>
