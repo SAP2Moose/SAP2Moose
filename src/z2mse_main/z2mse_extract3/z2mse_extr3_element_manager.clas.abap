@@ -18,9 +18,10 @@ CLASS z2mse_extr3_element_manager DEFINITION
     TYPES: BEGIN OF association_type,
              element_id1 TYPE element_id_type,
              element_id2 TYPE element_id_type,
+             ass_type    TYPE z2mse_extr3_association=>ass_type,
              association TYPE REF TO z2mse_extr3_association,
            END OF association_type.
-    TYPES associations_type TYPE STANDARD TABLE OF association_type WITH KEY element_id1 element_id2 association.
+    TYPES associations_type TYPE STANDARD TABLE OF association_type WITH KEY element_id1 element_id2 ass_type association.
     METHODS constructor
       IMPORTING i_model_builder TYPE REF TO z2mse_extr3_model_builder
                 i_exclude_found_sap_intf TYPE abap_bool.
@@ -60,8 +61,8 @@ CLASS z2mse_extr3_element_manager DEFINITION
            END OF element_type.
     TYPES elements_type TYPE HASHED TABLE OF element_type WITH UNIQUE KEY element_id.
     DATA elements TYPE elements_type.
-    TYPES associations1_type TYPE SORTED TABLE OF association_type WITH NON-UNIQUE KEY element_id1 element_id2.
-    TYPES associations2_type TYPE SORTED TABLE OF association_type WITH NON-UNIQUE KEY element_id2 element_id1.
+    TYPES associations1_type TYPE SORTED TABLE OF association_type WITH UNIQUE KEY element_id1 element_id2 ass_type.
+    TYPES associations2_type TYPE SORTED TABLE OF association_type WITH UNIQUE KEY element_id2 element_id1 ass_type.
     DATA associations1 TYPE associations1_type.
     DATA associations2 TYPE associations2_type.
     DATA next_element_id TYPE i.
@@ -77,6 +78,7 @@ CLASS Z2MSE_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
     DATA line TYPE association_type.
     line-element_id1 = element_1.
     line-element_id2 = element_2.
+    line-ass_type    = association->type.
     line-association = association.
     INSERT line INTO TABLE associations1.
     INSERT line INTO TABLE associations2.
