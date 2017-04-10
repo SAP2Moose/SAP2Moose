@@ -1,4 +1,4 @@
-* generated on system NPL at 09.04.2017 on 09:43:11
+* generated on system NPL at 10.04.2017 on 07:16:55
 
 *
 * This is version 0.4.0
@@ -41,6 +41,10 @@ SELECTION-SCREEN BEGIN OF BLOCK block_selct_sap_comp WITH FRAME TITLE TEXT-002.
 
 SELECT-OPTIONS s_pack FOR tadir-devclass.
 SELECT-OPTIONS s_spack FOR tadir-devclass.
+DATA: element_filter TYPE string.
+PARAMETERS p_eltyp TYPE text30.
+PARAMETERS p_elpar TYPE c LENGTH 30.
+PARAMETERS p_elnam TYPE c LENGTH 30.
 PARAMETERS p_sub AS CHECKBOX DEFAULT 'X'.
 PARAMETERS p_nup TYPE i DEFAULT -1.
 PARAMETERS p_ndown TYPE i DEFAULT -1.
@@ -1507,6 +1511,7 @@ CLASS cl_extr3_element_manager DEFINITION
     METHODS add_element
       IMPORTING
                 element           TYPE REF TO cl_extr3_elements
+                is_specific       TYPE abap_bool
       RETURNING VALUE(element_id) TYPE cl_extr3_element_manager=>element_id_type.
     METHODS add_association
       IMPORTING
@@ -1525,6 +1530,7 @@ CLASS cl_extr3_element_manager DEFINITION
       IMPORTING
                 i_element_id        TYPE element_id_type
       RETURNING VALUE(associations) TYPE associations_type.
+    DATA model_builder TYPE REF TO cl_extr3_model_builder.
 
 
   PROTECTED SECTION.
@@ -1541,7 +1547,6 @@ CLASS cl_extr3_element_manager DEFINITION
     DATA associations1 TYPE associations1_type.
     DATA associations2 TYPE associations2_type.
     DATA next_element_id TYPE i.
-    DATA model_builder TYPE REF TO cl_extr3_model_builder.
 ENDCLASS.
 "! I am the top superclass for all classes that require the element manager.
 CLASS cl_extr3 DEFINITION
@@ -1626,7 +1631,6 @@ CLASS cl_extr3_elements DEFINITION
     CONSTANTS: package_type          LIKE type VALUE 'package',
                table_type            LIKE type VALUE 'table',
                class_type            LIKE type VALUE 'class',
-               class_components_type LIKE type VALUE 'class_components',
                program_type          LIKE type VALUE 'program',
                web_dynpro_comps_type LIKE type VALUE 'web_dynpro_components'.
 
@@ -1757,6 +1761,7 @@ CLASS cl_extr3_classes DEFINITION
       IMPORTING
         clsname               TYPE seoclsname
         cmpname               TYPE seocmpname
+        is_specific           TYPE abap_bool
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
         VALUE(new_element_id) TYPE cl_extr3_element_manager=>element_id_type.
@@ -1814,6 +1819,7 @@ CLASS cl_extr3_classes DEFINITION
         cmpname               TYPE seocmpname
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
+        VALUE(is_added_now)   TYPE abap_bool
         VALUE(new_element_id) TYPE cl_extr3_element_manager=>element_id_type.
 
     METHODS _add_metarel
@@ -2089,11 +2095,19 @@ CLASS cl_extr3_initial_elements DEFINITION
     TYPES ty_t_tdevc_test TYPE HASHED TABLE OF ty_tdevc_test WITH UNIQUE KEY devclass.
     METHODS select_packages
       IMPORTING
-                !top_packages           TYPE ty_s_pack
-                !sub_packages_filter    TYPE ty_s_pack OPTIONAL
-                !including_sub_packages TYPE abap_bool DEFAULT abap_false.
+        !top_packages           TYPE ty_s_pack
+        !sub_packages_filter    TYPE ty_s_pack OPTIONAL
+        !including_sub_packages TYPE abap_bool DEFAULT abap_false.
+    TYPES: ty_filter TYPE c LENGTH 30.
+    METHODS select_specific
+      IMPORTING
+        model_builder         TYPE REF TO cl_extr3_model_builder
+        element_manager       TYPE REF TO cl_extr3_element_manager
+        i_element_type_filter TYPE ty_filter
+        i_parent_name_filter  TYPE ty_filter
+        i_name_filter         TYPE ty_filter.
     METHODS get_selected
-      RETURNING VALUE(r_packages)       TYPE ty_packages.
+      RETURNING VALUE(r_packages) TYPE ty_packages.
 
     "! @parameter tdevc_test | provide test data for table TDEVC during unit tests.
     METHODS constructor
@@ -2148,10 +2162,12 @@ CLASS cl_extr3_model_builder DEFINITION
     "! Called whenever a new element ID was added to the model.
     METHODS new_element_id
       IMPORTING
-        i_element_id TYPE i.
+        i_element_id  TYPE i
+        i_is_specific TYPE abap_bool.
     METHODS initialize
       IMPORTING i_element_manager TYPE REF TO cl_extr3_element_manager.
     METHODS write_found_elements.
+    METHODS usage_of_single_element.
   PROTECTED SECTION.
   PRIVATE SECTION.
     TYPES: BEGIN OF found_in_level_type,
@@ -2192,6 +2208,7 @@ CLASS cl_extr3_model_builder DEFINITION
 
     DATA: tadir_builder      TYPE REF TO cl_extr3_tadir_builder,
           where_used_builder TYPE REF TO cl_extr3_where_used_builder.
+    DATA: is_usage_of_single_element TYPE abap_bool.
 
 ENDCLASS.
 "! I am the starting point for an extraction. I am called from the main report.
@@ -2201,6 +2218,7 @@ CLASS cl_extract3 DEFINITION
 
   PUBLIC SECTION.
     TYPES: ty_s_pack TYPE RANGE OF tadir-devclass .
+    TYPES: ty_string_range TYPE RANGE OF char45.
     CONSTANTS modifier_abapglobalclass TYPE string VALUE 'ABAPGlobalClass' ##NO_TEXT.
     CONSTANTS modifier_abapglobalinterface TYPE string VALUE 'ABAPGlobalInterface' ##NO_TEXT.
     CONSTANTS modifier_webdynpro_component TYPE string VALUE 'ABAPWebDynproComponent'.
@@ -2214,6 +2232,8 @@ CLASS cl_extract3 DEFINITION
     "! @parameter i_exclude_found_sap_intf | exclude found interfaces in SAP namespace in the where-used analysis
     METHODS extract
       IMPORTING
+        model_builder TYPE REF TO cl_extr3_model_builder
+        element_manager TYPE REF TO cl_extr3_element_manager
         !initial_elements        TYPE REF TO cl_extr3_initial_elements
         i_search_up              TYPE i
         i_search_down            TYPE i
@@ -2807,6 +2827,7 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
                   EXPORTING
                     clsname        = found_class_name
                     cmpname        = found_cmpname
+                    is_specific    = abap_true
                   IMPORTING
                     is_added       = is_added
                     new_element_id = used_by_element_id ).
@@ -2909,7 +2930,8 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
 
       IF is_added EQ abap_true.
 
-        new_element_id = element_manager->add_element( element = me ).
+        new_element_id = element_manager->add_element( element = me
+                                                       is_specific = abap_false ).
         element-element_id = new_element_id.
         element-class_name = class.
         element-clstype = found_class_type.
@@ -3046,6 +3068,8 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
   ENDMETHOD.
   METHOD add_component.
 
+    data: is_added_now TYPE abap_bool.
+
     add( EXPORTING class          = clsname
          IMPORTING is_added       = is_added ).
 
@@ -3054,7 +3078,16 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
       _add_component( EXPORTING clsname        = clsname
                                 cmpname        = cmpname
                       IMPORTING is_added       = is_added
-                                new_element_id = new_element_id ).
+                                new_element_id = new_element_id
+                                is_added_now   = is_added_now ).
+
+      IF is_specific EQ abap_true and
+         is_added_now eq abap_true.
+
+        element_manager->model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
+                                                                  i_is_specific = abap_true ).
+
+      ENDIF.
 
     ENDIF.
 
@@ -3089,7 +3122,7 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
                                                          i_found_cmpname    = found_cmpname
                                                          i_found_cmptype    = found_cmptype
                                                          i_found_mtdtype    = found_mtdtype ).
-
+        is_added_now = abap_true.
       ENDIF.
 
     ENDIF.
@@ -3161,6 +3194,7 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
 
           me->add_component( EXPORTING clsname        = interface_class_component-clsname
                                        cmpname        = interface_class_component-cmpname
+                                       is_specific    = abap_false
                               IMPORTING "*              is_added       =
                                         new_element_id = interface_element_id ).
 
@@ -3192,7 +3226,8 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
 
     DATA element_comp2 TYPE element_comp_type.
 
-    r_new_element_id = element_manager->add_element( element = me ).
+    r_new_element_id = element_manager->add_element( element = me
+                                                     is_specific = abap_false ).
     element_comp2-element_id = r_new_element_id.
     element_comp2-clsname = i_found_class_name.
     element_comp2-cmpname = i_found_cmpname.
@@ -3250,22 +3285,22 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
         WHEN is_class_type.
           CASE cmptype.
             WHEN attribute_type.
-          element_type = |ABAPClassAttribute|.
+              element_type = |ABAPClassAttribute|.
             WHEN method_type.
-          element_type = |ABAPClassMethod|.
+              element_type = |ABAPClassMethod|.
             WHEN event_type.
-          element_type = |ABAPClassEvent|.
+              element_type = |ABAPClassEvent|.
             WHEN OTHERS.
               ASSERT 1 = 2.
           ENDCASE.
         WHEN interface_type.
           CASE cmptype.
             WHEN attribute_type.
-          element_type = |ABAPInterfaceAttribute|.
+              element_type = |ABAPInterfaceAttribute|.
             WHEN method_type.
-          element_type = |ABAPInterfaceMethod|.
+              element_type = |ABAPInterfaceMethod|.
             WHEN event_type.
-          element_type = |ABAPInterfaceEvent|.
+              element_type = |ABAPInterfaceEvent|.
             WHEN OTHERS.
               ASSERT 1 = 2.
           ENDCASE.
@@ -3316,7 +3351,8 @@ CLASS CL_EXTR3_PACKAGES IMPLEMENTATION.
       IF exists EQ abap_true.
         is_added = abap_true.
 
-        new_element_id = element_manager->add_element( element = me ).
+        new_element_id = element_manager->add_element( element = me
+                                                       is_specific = abap_false ).
 
         element-element_id = new_element_id.
         element-devclass = package.
@@ -3403,7 +3439,8 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
 
       IF is_added EQ abap_true.
 
-        new_element_id = element_manager->add_element( element = me ).
+        new_element_id = element_manager->add_element( element = me
+                                                       is_specific = abap_true ).
         element-element_id = new_element_id.
         element-program = found_program.
         element-external_program_name = _convert_program_2_ext_name( found_program ).
@@ -3614,7 +3651,8 @@ CLASS CL_EXTR3_TABLES IMPLEMENTATION.
 
       IF is_added EQ abap_true.
 
-        new_element_id = element_manager->add_element( element = me ).
+        new_element_id = element_manager->add_element( element = me
+                                                       is_specific = abap_true ).
         element-element_id = new_element_id.
         element-tabname = table.
         INSERT element INTO TABLE elements_element_id.
@@ -3730,7 +3768,8 @@ CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
 
       IF is_added EQ abap_true.
 
-        new_element_id = element_manager->add_element( element = me ).
+        new_element_id = element_manager->add_element( element = me
+                                                       is_specific = abap_false ).
         element-element_id = new_element_id.
         element-wdy_component_name = found_wdy_component_name.
         INSERT element INTO TABLE elements_element_id.
@@ -3790,7 +3829,8 @@ CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
 
       IF is_added EQ abap_true.
 
-        new_element_id = element_manager->add_element( element = me ).
+        new_element_id = element_manager->add_element( element = me
+                                                       is_specific = abap_false ).
         element_comp-element_id = new_element_id.
         element_comp-wdy_component_name = found_component_name.
         element_comp-wdy_controller_name = found_controller_name.
@@ -3815,6 +3855,9 @@ CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
                                 wdy_controller_name = wdy_controller_name
                       IMPORTING is_added            = is_added
                                 new_element_id      = new_element_id ).
+
+     element_manager->model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
+                                                               i_is_specific = abap_true ).
 
     ENDIF.
 
@@ -3943,7 +3986,8 @@ CLASS CL_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
     element_line-element =  element.
     INSERT element_line INTO TABLE elements.
 
-    model_builder->new_element_id( element_id ).
+    model_builder->new_element_id( i_element_id  = element_id
+                                   i_is_specific = is_specific ).
 
     ADD 1 TO next_element_id.
 
@@ -4179,6 +4223,28 @@ CLASS CL_EXTR3_INITIAL_ELEMENTS IMPLEMENTATION.
     r_packages = g_selected_packages.
 
   ENDMETHOD.
+  METHOD select_specific.
+
+    model_builder->initial_selection_started( ).
+    model_builder->usage_of_single_element( ).
+
+    CASE i_element_type_filter.
+      WHEN cl_extr3_elements=>class_type.
+
+        DATA classes TYPE REF TO cl_extr3_classes.
+        classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
+        classes->add_component( EXPORTING clsname        = i_parent_name_filter
+                                          cmpname        = i_name_filter
+                                          is_specific    = abap_true ).
+
+      WHEN cl_extr3_elements=>table_type.
+
+        DATA tables TYPE REF TO cl_extr3_tables.
+        tables = cl_extr3_tables=>get_instance( i_element_manager = element_manager ).
+        tables->add( EXPORTING table          = i_name_filter ).
+    ENDCASE.
+
+  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
   METHOD search.
@@ -4233,7 +4299,14 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
         CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_up }|.
 
         something_to_be_done_up = abap_false.
+        DATA workload TYPE found_in_levels_type.
+        CLEAR workload.
         LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_upsearch = level_to_search_up.
+          INSERT found_in_level INTO TABLE workload.
+        ENDLOOP.
+
+
+        LOOP AT workload INTO found_in_level.
 
           LOOP AT association_builders INTO association_builder.
 
@@ -4279,7 +4352,11 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
         CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_down }|.
 
         something_to_be_done_down = abap_false.
+        CLEAR workload.
         LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_downsearch = level_to_search_down.
+          INSERT found_in_level INTO TABLE workload.
+        ENDLOOP.
+        LOOP AT workload INTO found_in_level.
 
           LOOP AT association_builders INTO association_builder.
 
@@ -4333,6 +4410,12 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
     is_initial_selection = abap_true.
   ENDMETHOD.
   METHOD new_element_id.
+    IF is_usage_of_single_element EQ abap_true.
+      IF i_is_specific EQ abap_false.
+        EXIT.
+      ENDIF.
+    ENDIF.
+
     DATA: found_in_level TYPE found_in_level_type,
           is_new_line    TYPE abap_bool.
     FIELD-SYMBOLS <found_in_level> TYPE found_in_level_type.
@@ -4351,19 +4434,19 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
     ELSEIF is_up_search EQ abap_true.
 
-*      IF <found_in_level>-found_in_level_upsearch IS NOT INITIAL.
+      IF <found_in_level>-found_in_level_upsearch IS INITIAL.
 
-      <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
+        <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
 
-*      ENDIF.
+      ENDIF.
 
     ELSEIF is_down_search EQ abap_true.
 
-*      IF <found_in_level>-found_in_level_downsearch IS NOT INITIAL.
+      IF <found_in_level>-found_in_level_downsearch IS INITIAL.
 
-      <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
+        <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
 
-*      ENDIF.
+      ENDIF.
 
     ELSEIF is_post_selection EQ abap_true.
 
@@ -4496,24 +4579,24 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+  METHOD usage_of_single_element.
+    is_usage_of_single_element = abap_true.
+  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTRACT3 IMPLEMENTATION.
   METHOD extract.
 
     CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Collect initial elements|.
 
-    DATA model_builder TYPE REF TO cl_extr3_model_builder.
-    CREATE OBJECT model_builder.
-
     model_builder->initial_selection_started( ).
 
-    DATA element_manager TYPE REF TO cl_extr3_element_manager.
-    CREATE OBJECT element_manager
-      EXPORTING
-        i_model_builder          = model_builder
-        i_exclude_found_sap_intf = i_exclude_found_sap_intf.
+*    DATA element_manager TYPE REF TO cl_extr3_element_manager.
+*    CREATE OBJECT element_manager
+*      EXPORTING
+*        i_model_builder          = model_builder
+*        i_exclude_found_sap_intf = i_exclude_found_sap_intf.
 
-    model_builder->initialize( i_element_manager = element_manager ).
+*    model_builder->initialize( i_element_manager = element_manager ).
 
     DATA packages_elements TYPE REF TO cl_extr3_packages.
 
@@ -4530,8 +4613,8 @@ CLASS CL_EXTRACT3 IMPLEMENTATION.
 
     ENDLOOP.
 
-    model_builder->search( i_search_up   = i_search_up
-                           i_search_down = i_search_down  ).
+    model_builder->search( i_search_up           = i_search_up
+                           i_search_down         = i_search_down ).
 
     CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Write found elements|.
 
@@ -4556,30 +4639,60 @@ START-OF-SELECTION.
   DATA sap_extractor TYPE REF TO cl_extract3.
 
   DATA: ls_pack_line LIKE LINE OF s_pack.
-  DATA: ls_pack TYPE sap_extractor->ty_s_pack.
+  DATA: lt_pack TYPE sap_extractor->ty_s_pack.
   LOOP AT s_pack INTO ls_pack_line.
-    APPEND ls_pack_line TO ls_pack.
+    APPEND ls_pack_line TO lt_pack.
   ENDLOOP.
 
   DATA: ls_spack_line LIKE LINE OF s_pack.
-  DATA: ls_spack TYPE sap_extractor->ty_s_pack.
+  DATA: lt_spack TYPE sap_extractor->ty_s_pack.
   LOOP AT s_spack INTO ls_spack_line.
-    APPEND ls_spack_line TO ls_spack.
+    APPEND ls_spack_line TO lt_spack.
   ENDLOOP.
 
+  DATA model_builder TYPE REF TO cl_extr3_model_builder.
+  CREATE OBJECT model_builder.
 
 
+  DATA element_manager TYPE REF TO cl_extr3_element_manager.
+  CREATE OBJECT element_manager
+    EXPORTING
+      i_model_builder          = model_builder
+      i_exclude_found_sap_intf = p_ex.
+
+    model_builder->initialize( i_element_manager = element_manager ).
 
   DATA: initial_elements TYPE REF TO cl_extr3_initial_elements.
-  initial_elements = NEW #( ).
-  initial_elements->select_packages( EXPORTING top_packages           = ls_pack
-                                               sub_packages_filter    = ls_spack
-                                               including_sub_packages = abap_true ).
+  CREATE OBJECT initial_elements.
+  IF     lt_pack IS NOT INITIAL
+     AND ( p_eltyp IS INITIAL AND p_elpar IS INITIAL AND p_elnam IS INITIAL ).
+
+    initial_elements->select_packages( EXPORTING top_packages           = lt_pack
+                                                 sub_packages_filter    = lt_spack
+                                                 including_sub_packages = abap_true ).
+
+  ELSEIF     lt_pack IS INITIAL
+         AND ( p_eltyp IS NOT INITIAL OR p_elpar IS NOT INITIAL OR p_elnam IS NOT INITIAL ).
+
+    initial_elements->select_specific( EXPORTING model_builder         = model_builder
+                                                 element_manager       = element_manager
+                                                 i_element_type_filter = p_eltyp
+                                                 i_parent_name_filter  = p_elpar
+                                                 i_name_filter         = p_elnam ).
+  ELSE.
+
+    FORMAT COLOR COL_TOTAL.
+    WRITE: / 'Enter either a filter by package or by specific component'.
+    FORMAT COLOR COL_BACKGROUND.
+
+  ENDIF.
 
   CREATE OBJECT sap_extractor.
 
   DATA nothing_done TYPE boolean.
-  sap_extractor->extract( EXPORTING initial_elements         = initial_elements
+  sap_extractor->extract( EXPORTING model_builder            = model_builder
+                                    element_manager          = element_manager
+                                    initial_elements         = initial_elements
                                     i_search_up              = p_nup
                                     i_search_down            = p_ndown
                                     i_exclude_found_sap_intf = abap_true
