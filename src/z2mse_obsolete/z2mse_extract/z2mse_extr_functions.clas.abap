@@ -1,6 +1,6 @@
 CLASS z2mse_extr_functions DEFINITION
   PUBLIC
-  INHERITING FROM z2mse_extr_include
+
   FINAL
   CREATE PUBLIC .
 
@@ -23,14 +23,9 @@ CLASS z2mse_extr_functions DEFINITION
       END OF ty_tadir_test.
     TYPES ty_t_tadir_test TYPE HASHED TABLE OF ty_tadir_test WITH UNIQUE KEY object obj_name.
     "! Call once to select all functions that are in a list of packages
-    METHODS select_by_packages
-      IMPORTING
-        packages TYPE z2mse_extr_packages=>ty_packages.
-    METHODS select_by_includes
-      IMPORTING
-        includes TYPE ty_includes_hashed.
-    METHODS get_to_do_where_used
-      RETURNING VALUE(functions) TYPE ty_function_groups_compts_hash.
+    METHODS select_by_packages.
+    METHODS select_by_includes.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
     CONSTANTS: tadir_function_group TYPE tadir-object VALUE 'FUGR' ##NO_TEXT.
@@ -48,16 +43,8 @@ CLASS z2mse_extr_functions DEFINITION
     DATA g_selected_fugr_comps_new TYPE ty_function_groups_compts_hash.
     "! A list of all components of primarily selected and existing function groups
     DATA g_selected_fugr_comps TYPE ty_function_groups_compts_hash.
-    METHODS _select_from_tadir
-      IMPORTING
-        i_packages                      TYPE z2mse_extr_packages=>ty_packages
-      RETURNING
-        VALUE(selected_function_groups) TYPE ty_function_groups.
-    METHODS add_and_sort
-      IMPORTING
-        i_tadirvalues     TYPE ty_t_tadir_test
-      CHANGING
-        c_selected_tables TYPE ty_function_groups.
+
+
     METHODS _convert_fugr_2_progname
       IMPORTING
         tadirline       TYPE ty_tadir_test
@@ -79,37 +66,16 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr_functions IMPLEMENTATION.
+CLASS Z2MSE_EXTR_FUNCTIONS IMPLEMENTATION.
 
 
-  METHOD add_and_sort.
-
-    DATA tadirline TYPE ty_tadir_test.
-
-    DATA function_group TYPE ty_function_group.
-
-    LOOP AT i_tadirvalues INTO tadirline.
-
-      CLEAR function_group.
-
-      function_group-fugr_program = _convert_fugr_2_progname( tadirline ).
-      function_group-devclass = tadirline-devclass.
-
-      INSERT function_group INTO TABLE c_selected_tables .
-
-    ENDLOOP.
-
-    SORT c_selected_tables BY fugr_program.
+  METHOD select_by_includes.
 
   ENDMETHOD.
 
 
   METHOD select_by_packages.
 
-    g_selected_function_groups = _select_from_tadir( packages ).
-    _check_existence( CHANGING function_groups = g_selected_function_groups ).
-
-    g_selected_fugr_comps_new = _read_function_group_comps( g_selected_function_groups ).
 
     " Determine the name of the include for the function
 
@@ -166,31 +132,12 @@ CLASS z2mse_extr_functions IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD _select_from_tadir.
+  METHOD _convert_fugr_progname_2_fugr.
 
-    DATA: tadirline      TYPE ty_tadir_test,
-          tadirvalues    TYPE ty_t_tadir_test,
-          function_group TYPE ty_function_group.
-
-    IF i_packages IS NOT INITIAL.
-      SELECT object obj_name devclass FROM tadir INTO CORRESPONDING FIELDS OF TABLE tadirvalues FOR ALL ENTRIES IN i_packages  WHERE
-        pgmid = 'R3TR' AND
-        devclass = i_packages-package AND
-        object = tadir_function_group.
-
-      LOOP AT tadirvalues INTO tadirline.
-        function_group-fugr_program = |SAPL| && |{ tadirline-obj_name }|.
-        function_group-devclass = tadirline-devclass.
-        INSERT function_group INTO TABLE selected_function_groups.
-        ASSERT sy-subrc EQ 0.
-      ENDLOOP.
-
-    ENDIF.
-  ENDMETHOD.
-
-  METHOD select_by_includes.
+    fugr = fugr_progname+4.
 
   ENDMETHOD.
+
 
   METHOD _read_function_group_comps.
     " TBD 17.03.2017
@@ -202,47 +149,4 @@ CLASS z2mse_extr_functions IMPLEMENTATION.
              WHERE pname = function_groups-fugr_program.
     ENDIF.
   ENDMETHOD.
-
-  METHOD get_to_do_where_used.
-
-    DATA line LIKE LINE OF g_selected_fugr_comps_new.
-
-    LOOP AT g_selected_fugr_comps_new INTO line.
-      READ TABLE g_selected_fugr_comps TRANSPORTING NO FIELDS WITH KEY fugr_program = line-fugr_program
-                                                                       function = line-function.
-      IF sy-subrc <> 0.
-        INSERT line INTO TABLE functions.
-      ENDIF.
-
-    ENDLOOP.
-
-    LOOP AT g_selected_fugr_comps_new INTO line.
-      INSERT line INTO TABLE g_selected_fugr_comps.
-    ENDLOOP.
-    CLEAR g_selected_fugr_comps_new.
-
-*      DATA line LIKE LINE OF g_selected_components_new.
-*
-*    LOOP AT g_selected_components_new INTO line.
-*      READ TABLE g_selected_components TRANSPORTING NO FIELDS WITH TABLE KEY clsname = line-clsname cmpname = line-cmpname cmptype = line-cmptype.
-*      IF sy-subrc <> 0.
-*        INSERT line INTO TABLE components.
-*      ENDIF.
-*    ENDLOOP.
-*
-*    _exclude_classes_from_where_us( CHANGING c_components = components ).
-*
-*    LOOP AT g_selected_components_new INTO line.
-*      INSERT line INTO TABLE g_selected_components.
-*    ENDLOOP.
-*    CLEAR g_selected_components_new.
-
-  ENDMETHOD.
-
-  METHOD _convert_fugr_progname_2_fugr.
-
-    fugr = fugr_progname+4.
-
-  ENDMETHOD.
-
 ENDCLASS.
