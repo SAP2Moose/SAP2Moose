@@ -143,7 +143,7 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
     element_manager->famix_method->add( EXPORTING name = element-external_program_name
                                         IMPORTING id   = dummy_method_id ).
 
-    element_manager->famix_method->set_signature( element_id = last_id
+    element_manager->famix_method->set_signature( element_id = dummy_method_id
                                                    signature = element-external_program_name ).
 
     element_manager->famix_method->set_parent_type( EXPORTING element_id        = dummy_method_id
