@@ -6,7 +6,7 @@ Last not stable release 0.4.0: [Extractor](../../releases/download/v0.4.0/z_moos
 
 Last release 0.3.0: [Extractor](../../releases/download/v0.3.0/z_moose_extractor.abap) and [Texts for extractor](../../releases/download/v0.3.0/z_moose_extractor_texts.txt).. This is the first release where also usage by SAP BW routines is added to the model.
 
-Last stable release 0.2.1: [Extractor](../../releases/download/v0.2.1/z_moose_extractor.abap) and [Texts for extractor](../../releases/download/v0.2.1/z_moose_extractor_texts.txt). Create a new program in your SAP system. Open file z_moose_extractor.abap with a text editor and paste the coding in your program. Add texts for convenience. Run the program, select a package and download the file (preferable with extension .mse). Open with Moose to analyze it.
+Create a new program in your SAP system. Open file z_moose_extractor.abap with a text editor and paste the coding in your program. Add texts for convenience. Run the program, select a package and download the file (preferable with extension .mse). Open with Moose to analyze it. Or use release 0.4.0 or higher to have features available that do not require Moose.
 
 Should work in ABAP 7.02 SP6, but there is currently only a limited test for this release done.
 
