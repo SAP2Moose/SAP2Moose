@@ -324,7 +324,7 @@ CLASS ltcl_main IMPLEMENTATION.
                                          IMPORTING fes   = fes_act ).
 
     fes_exp = VALUE #(
-( where = |I| level = 0 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST_CL_A| name = |EVENT_A| specific = |X| )
+( where = |I| level = 0 alternate_level = 0 element_type = |ABAPClassEvent| parent_name = |Z2MSE_TEST_CL_A| name = |EVENT_A| specific = |X| )
 ( where = |I| level = 1 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST_CL_A| name = |METHOD_A| specific = |X| )
 ( where = |S| level = 2 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST_CL_B1| name = |METHOD_A| specific = |X| )
 ( where = |S| level = 2 alternate_level = 0 element_type = |ABAPProgramOrFunctionOrSAPBW| parent_name = || name = |BW-ODSO-Z2MSET001-CUBE-Z2MSET002| specific = |X| )
@@ -359,6 +359,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Class Z2MSE_TEST_WDY_A modifiers ABAPWebDynproComponent| )
 ( |FAMIX.Invocation sender BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender F-Z2MSE_TEST_FUNCTION_A>>F-Z2MSE_TEST_FUNCTION_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
+( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>METHOD_A candidates Z2MSE_TEST_CL_A>>EVENT_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_B candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B2>>METHOD_A candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
