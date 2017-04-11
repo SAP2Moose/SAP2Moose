@@ -1,4 +1,4 @@
-* generated on system NPL at 10.04.2017 on 22:52:31
+* generated on system NPL at 11.04.2017 on 07:36:32
 
 *
 * This is version 0.4.0
@@ -4627,9 +4627,12 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
     LOOP AT temps INTO temp.
       IF temp-specific EQ abap_true.
-        FORMAT COLOR COL_POSITIVE.
+        " FORMAT COLOR COL_POSITIVE.
       ELSE.
         FORMAT COLOR COL_BACKGROUND.
+        IF is_usage_of_single_element EQ abap_true.
+          CONTINUE. " List only specific elements if usage of a single element is done. This suppresses elements that are technically required.
+        ENDIF.
       ENDIF.
       NEW-LINE.
       WRITE: /(1) temp-where,
