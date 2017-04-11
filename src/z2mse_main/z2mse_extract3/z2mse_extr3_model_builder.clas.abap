@@ -457,8 +457,11 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
       INSERT fe INTO TABLE fes.
 
     ENDLOOP.
-
-    SORT fes BY where level alternate_level element_type parent_name name.
+    IF is_usage_of_single_element EQ abap_true.
+      SORT fes BY level alternate_level element_type parent_name name.
+    ELSE.
+      SORT fes BY where level alternate_level element_type parent_name name.
+    ENDIF.
 
     IF write EQ abap_true.
 
