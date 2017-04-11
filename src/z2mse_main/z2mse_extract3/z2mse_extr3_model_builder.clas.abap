@@ -161,11 +161,11 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
       ENDIF.
 
-      if i_is_specific EQ abap_true.
-        if <found_in_level>-specific eq abap_false.
+      IF i_is_specific EQ abap_true.
+        IF <found_in_level>-specific EQ abap_false.
 
-        <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
-        <found_in_level>-specific = abap_true.
+          <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
+          <found_in_level>-specific = abap_true.
 
         ENDIF.
       ENDIF.
@@ -185,11 +185,11 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
       ENDIF.
 
-      if i_is_specific EQ abap_true.
-        if <found_in_level>-specific eq abap_false.
+      IF i_is_specific EQ abap_true.
+        IF <found_in_level>-specific EQ abap_false.
 
-        <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
-        <found_in_level>-specific = abap_true.
+          <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
+          <found_in_level>-specific = abap_true.
 
         ENDIF.
       ENDIF.
@@ -243,11 +243,11 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
       LOOP AT association_builders_init INTO association_builder.
 
         LOOP AT first_initial_elements INTO found_in_level.
-
-          IF     is_usage_of_single_element EQ abap_true
-             AND found_in_level-specific EQ abap_false.
-            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-          ENDIF.
+*
+*          IF     is_usage_of_single_element EQ abap_true
+*             AND found_in_level-specific EQ abap_false.
+*            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+*          ENDIF.
 
           association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
 
@@ -272,9 +272,6 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
       WHILE something_to_be_done_up EQ abap_true.
 
-*        level_to_search_up = level_for_found_in_upsearch.
-*        ADD 1 TO level_for_found_in_upsearch.
-
         CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_up }|.
 
         something_to_be_done_up = abap_false.
@@ -297,32 +294,19 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
           something_to_be_done_up = abap_true.
 
-*          INSERT found_in_level INTO TABLE workload.
         ENDLOOP.
 
-
-*        LOOP AT workload INTO found_in_level.
-*
-*          LOOP AT association_builders INTO association_builder.
-*
-*            association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
-*
-*          ENDLOOP.
-*
-*          something_to_be_done_up = abap_true.
-*        ENDLOOP.
+        ADD 1 TO level_to_search_up.
 
         IF i_search_up >= 0.
 
-          IF i_search_up >= level_to_search_up.
+          IF i_search_up <= level_to_search_up.
 
             something_to_be_done_up = abap_false.
 
           ENDIF.
 
         ENDIF.
-
-        add 1 to level_to_search_up.
 
       ENDWHILE.
 
@@ -342,9 +326,6 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
       something_to_be_done_down = abap_true.
 
       WHILE something_to_be_done_down EQ abap_true.
-
-*        level_to_search_down = level_for_found_in_downsearch.
-*        ADD 1 TO level_for_found_in_downsearch.
 
         CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_down }|.
 
@@ -366,36 +347,19 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
           something_to_be_done_down = abap_true.
 
-*          INSERT found_in_level INTO TABLE workload.
-
         ENDLOOP.
-*        LOOP AT workload INTO found_in_level.
-*
-*          IF     is_usage_of_single_element EQ abap_true
-*             AND found_in_level-specific EQ abap_false.
-*            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-*          ENDIF.
-*
-*          LOOP AT association_builders INTO association_builder.
-*
-*            association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
-*
-*          ENDLOOP.
-*
-*          something_to_be_done_down = abap_true.
-*        ENDLOOP.
 
-        IF i_search_down >= 0.
+        ADD 1 TO level_to_search_down.
 
-          IF i_search_down >= level_to_search_down.
+        IF i_search_down <= 0.
+
+          IF i_search_down <= level_to_search_down.
 
             something_to_be_done_down = abap_false.
 
           ENDIF.
 
         ENDIF.
-
-        add 1 to level_to_search_down.
 
       ENDWHILE.
 
@@ -448,31 +412,30 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
       fe-specific = fil-specific.
       IF fil-found_in_initial_selection EQ abap_true.
         fe-where = |I|.
-        fe-level = 0.
 
       ELSEIF fil-found_in_post_selection EQ abap_true.
         fe-where = |P|.
-        fe-level = 0.
 
-      ELSEIF fil-found_in_level_upsearch <> 0
+      ELSE.
+        fe-where = |S|.
+      ENDIF.
+
+      IF fil-found_in_level_upsearch <> 0
          AND fil-found_in_level_downsearch <> 0.
 
-        fe-where = |S|.
         fe-level = fil-found_in_level_upsearch.
         fe-alternate_level = -1 * fil-found_in_level_downsearch.
 
       ELSEIF fil-found_in_level_upsearch <> 0.
 
-        fe-where = |S|.
         fe-level = fil-found_in_level_upsearch.
 
       ELSEIF fil-found_in_level_downsearch <> 0.
 
-        fe-where = |S|.
         fe-level = -1 * fil-found_in_level_downsearch.
 
       ELSE.
-        ASSERT 1 = 2.
+        fe-level = 0.
       ENDIF.
 
       DATA element TYPE REF TO z2mse_extr3_elements.
