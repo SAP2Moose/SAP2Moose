@@ -1,4 +1,4 @@
-* generated on system NPL at 11.04.2017 on 07:36:32
+* generated on system NPL at 11.04.2017 on 21:58:52
 
 *
 * This is version 0.4.0
@@ -1554,6 +1554,8 @@ CLASS cl_extr3 DEFINITION
   CREATE PROTECTED .
 
   PUBLIC SECTION.
+    "! Call once to clear all global variables. This is required before an extraction is repeated
+    CLASS-METHODS clear_all.
   PROTECTED SECTION.
     DATA element_manager TYPE REF TO cl_extr3_element_manager.
     METHODS constructor
@@ -1600,6 +1602,7 @@ CLASS cl_extr3_access DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    CLASS-METHODS clear.
     CLASS-METHODS get_instance
       IMPORTING
                 i_element_manager TYPE REF TO cl_extr3_element_manager
@@ -1658,6 +1661,7 @@ CLASS cl_extr3_invocation DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    CLASS-METHODS clear.
     CLASS-METHODS get_instance
       IMPORTING
                 i_element_manager TYPE REF TO cl_extr3_element_manager
@@ -1685,6 +1689,7 @@ CLASS cl_extr3_parent_package DEFINITION
   CREATE PRIVATE .
 
   PUBLIC SECTION.
+    CLASS-METHODS clear.
     CLASS-METHODS get_instance
       IMPORTING
                 i_element_manager TYPE REF TO cl_extr3_element_manager
@@ -1745,7 +1750,7 @@ CLASS cl_extr3_classes DEFINITION
            END OF ty_class_component.
     TYPES ty_class_components TYPE STANDARD TABLE OF ty_class_component WITH KEY clsname cmpname.
     DATA: class_components TYPE ty_class_components.
-
+    CLASS-METHODS clear.
     CLASS-METHODS get_instance
       IMPORTING
         element_manager   TYPE REF TO cl_extr3_element_manager
@@ -1854,6 +1859,7 @@ CLASS cl_extr3_packages DEFINITION
              parentpackage TYPE parentcl,
            END OF ty_package.
     TYPES ty_packages TYPE HASHED TABLE OF ty_package WITH UNIQUE KEY package.
+    CLASS-METHODS clear.
     CLASS-METHODS get_instance
       IMPORTING
                 i_element_manager TYPE REF TO cl_extr3_element_manager
@@ -1890,6 +1896,7 @@ CLASS cl_extr3_programs DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    CLASS-METHODS clear.
     CLASS-METHODS get_instance
       IMPORTING
         i_element_manager TYPE REF TO cl_extr3_element_manager
@@ -1944,7 +1951,7 @@ CLASS cl_extr3_tables DEFINITION
   CREATE PRIVATE .
 
   PUBLIC SECTION.
-
+    CLASS-METHODS clear.
     CLASS-METHODS get_instance
       IMPORTING
         i_element_manager TYPE REF TO cl_extr3_element_manager
@@ -1979,7 +1986,7 @@ CLASS cl_extr3_web_dynpro_comp DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
-
+    CLASS-METHODS clear.
     CLASS-METHODS get_instance
       IMPORTING
         element_manager   TYPE REF TO cl_extr3_element_manager
@@ -2153,6 +2160,20 @@ CLASS cl_extr3_model_builder DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+
+    TYPES: BEGIN OF found_element_type,
+             where            TYPE c LENGTH 1,
+             level            TYPE i,
+             "! Not zero in case an element is found in up and down search. If filled this is the level for downsearch
+             alternate_level  TYPE i,
+             element_type     TYPE string,
+             parent_name      TYPE string,
+             name             TYPE string,
+             specific         TYPE abap_bool,
+             up_search_done   TYPE abap_bool,
+             down_search_done TYPE abap_bool,
+           END OF found_element_type.
+    TYPES: found_elements_type TYPE STANDARD TABLE OF found_element_type.
     METHODS search
       IMPORTING
         i_search_up   TYPE i
@@ -2168,7 +2189,11 @@ CLASS cl_extr3_model_builder DEFINITION
         i_is_specific TYPE abap_bool.
     METHODS initialize
       IMPORTING i_element_manager TYPE REF TO cl_extr3_element_manager.
-    METHODS write_found_elements.
+    METHODS write_found_elements
+      IMPORTING
+        write TYPE abap_bool OPTIONAL
+      EXPORTING
+        fes   TYPE found_elements_type.
     METHODS usage_of_single_element.
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -2295,6 +2320,9 @@ CLASS CL_EXTR3_ACCESS IMPLEMENTATION.
                                                               accessor_id = using_method_id
                                                               variable_id = used_id ).
 
+  ENDMETHOD.
+  METHOD clear.
+    CLEAR instance.
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_ACCESS_OR_INVOCATN IMPLEMENTATION.
@@ -2456,6 +2484,9 @@ CLASS CL_EXTR3_INVOCATION IMPLEMENTATION.
 
 
   ENDMETHOD.
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_PARENT_PACKAGE IMPLEMENTATION.
   METHOD get_instance.
@@ -2482,6 +2513,9 @@ CLASS CL_EXTR3_PARENT_PACKAGE IMPLEMENTATION.
   ENDMETHOD.
   METHOD make_model.
     " I am added in the elements them self to the model
+  ENDMETHOD.
+  METHOD clear.
+    CLEAR instance.
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_ASSOCIATION_BUILD IMPLEMENTATION.
@@ -3079,7 +3113,7 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
   ENDMETHOD.
   METHOD add_component.
 
-    data: is_added_now TYPE abap_bool.
+    DATA: is_added_now TYPE abap_bool.
 
     add( EXPORTING class          = clsname
          IMPORTING is_added       = is_added ).
@@ -3092,8 +3126,8 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
                                 new_element_id = new_element_id
                                 is_added_now   = is_added_now ).
 
-      IF is_specific EQ abap_true and
-         is_added_now eq abap_true.
+      IF is_specific EQ abap_true AND
+         is_added_now EQ abap_true.
 
         element_manager->model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
                                                                   i_is_specific = abap_true ).
@@ -3325,6 +3359,9 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_ELEMENTS IMPLEMENTATION.
   METHOD make_model.
@@ -3419,6 +3456,9 @@ CLASS CL_EXTR3_PACKAGES IMPLEMENTATION.
 
 
   ENDMETHOD.
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
   METHOD get_instance.
@@ -3508,7 +3548,7 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
     element_manager->famix_method->add( EXPORTING name = element-external_program_name
                                         IMPORTING id   = dummy_method_id ).
 
-    element_manager->famix_method->set_signature( element_id = last_id
+    element_manager->famix_method->set_signature( element_id = dummy_method_id
                                                    signature = element-external_program_name ).
 
     element_manager->famix_method->set_parent_type( EXPORTING element_id        = dummy_method_id
@@ -3630,6 +3670,9 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
     parent_name = ||.
 
   ENDMETHOD.
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_TABLES IMPLEMENTATION.
   METHOD get_instance.
@@ -3653,10 +3696,13 @@ CLASS CL_EXTR3_TABLES IMPLEMENTATION.
 
       " Does table exists?
       DATA found_tabname TYPE tabname.
-        SELECT tabname FROM dd02l INTO found_tabname WHERE tabname = table.
+      DATA found_tabclass TYPE tabclass.
+        SELECT tabname tabclass FROM dd02l INTO ( found_tabname, found_tabclass ) WHERE tabname = table.
 
         ENDSELECT.
-      IF found_tabname IS NOT INITIAL.
+      IF     found_tabname IS NOT INITIAL
+         AND found_tabclass <> 'INTTAB'  " Not structures
+         AND found_tabclass <> 'APPEND'. " Not append structures
         is_added = abap_true.
       ENDIF.
 
@@ -3742,6 +3788,9 @@ CLASS CL_EXTR3_TABLES IMPLEMENTATION.
     parent_name = ||.
     name = table.
 
+  ENDMETHOD.
+  METHOD clear.
+    CLEAR instance.
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
@@ -3867,8 +3916,8 @@ CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
                       IMPORTING is_added            = is_added
                                 new_element_id      = new_element_id ).
 
-     element_manager->model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
-                                                               i_is_specific = abap_true ).
+      element_manager->model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
+                                                                i_is_specific = abap_true ).
 
     ENDIF.
 
@@ -3972,10 +4021,25 @@ CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3 IMPLEMENTATION.
   METHOD constructor.
     element_manager = i_element_manager.
+  ENDMETHOD.
+  METHOD clear_all.
+
+    cl_extr3_access=>clear( ).
+    cl_extr3_invocation=>clear( ).
+    cl_extr3_parent_package=>clear( ).
+    cl_extr3_classes=>clear( ).
+    cl_extr3_packages=>clear( ).
+    cl_extr3_programs=>clear( ).
+    cl_extr3_tables=>clear( ).
+    cl_extr3_web_dynpro_comp=>clear( ).
+
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
@@ -4280,31 +4344,33 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
 
     " found_in_levels will be updated in this method, so add this elements to a new temporary table.
+    IF is_usage_of_single_element EQ abap_false.
+      LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_initial_selection EQ abap_true.
 
-    LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_initial_selection EQ abap_true.
+        <found_in_level>-initially_selected_analyzed = abap_true.
 
-      <found_in_level>-initially_selected_analyzed = abap_true.
-
-      INSERT <found_in_level> INTO TABLE first_initial_elements.
-
-    ENDLOOP.
-
-    DATA association_builder TYPE builder_type.
-
-    LOOP AT association_builders_init INTO association_builder.
-
-      LOOP AT first_initial_elements INTO found_in_level.
-
-        IF     is_usage_of_single_element EQ abap_true
-           AND found_in_level-specific EQ abap_false.
-          CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-        ENDIF.
-
-        association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
+        INSERT <found_in_level> INTO TABLE first_initial_elements.
 
       ENDLOOP.
 
-    ENDLOOP.
+      DATA association_builder TYPE builder_type.
+
+      LOOP AT association_builders_init INTO association_builder.
+
+        LOOP AT first_initial_elements INTO found_in_level.
+*
+*          IF     is_usage_of_single_element EQ abap_true
+*             AND found_in_level-specific EQ abap_false.
+*            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+*          ENDIF.
+
+          association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
+
+        ENDLOOP.
+
+      ENDLOOP.
+
+    ENDIF.
 
     is_initial_selection = abap_false.
 
@@ -4321,39 +4387,35 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
       WHILE something_to_be_done_up EQ abap_true.
 
-        level_to_search_up = level_for_found_in_upsearch.
-        ADD 1 TO level_for_found_in_upsearch.
-
         CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_up }|.
 
         something_to_be_done_up = abap_false.
         DATA workload TYPE found_in_levels_type.
         CLEAR workload.
-        LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_upsearch = level_to_search_up.
+        LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_upsearch = level_to_search_up.
 
           IF     is_usage_of_single_element EQ abap_true
-             AND found_in_level-specific EQ abap_false.
+             AND <found_in_level>-specific EQ abap_false.
             CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
           ENDIF.
 
-          INSERT found_in_level INTO TABLE workload.
-        ENDLOOP.
-
-
-        LOOP AT workload INTO found_in_level.
+          level_for_found_in_upsearch = <found_in_level>-found_in_level_upsearch + 1.
 
           LOOP AT association_builders INTO association_builder.
 
-            association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
+            association_builder-association_builder->search_up( element_id = <found_in_level>-element_id ).
 
           ENDLOOP.
 
           something_to_be_done_up = abap_true.
+
         ENDLOOP.
+
+        ADD 1 TO level_to_search_up.
 
         IF i_search_up >= 0.
 
-          IF i_search_up >= level_for_found_in_upsearch.
+          IF i_search_up <= level_to_search_up.
 
             something_to_be_done_up = abap_false.
 
@@ -4380,35 +4442,33 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
       WHILE something_to_be_done_down EQ abap_true.
 
-        level_to_search_down = level_for_found_in_downsearch.
-        ADD 1 TO level_for_found_in_downsearch.
-
         CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_down }|.
 
         something_to_be_done_down = abap_false.
         CLEAR workload.
-        LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_downsearch = level_to_search_down.
-          INSERT found_in_level INTO TABLE workload.
-        ENDLOOP.
-        LOOP AT workload INTO found_in_level.
-
+        LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_downsearch = level_to_search_down.
           IF     is_usage_of_single_element EQ abap_true
-             AND found_in_level-specific EQ abap_false.
+             AND <found_in_level>-specific EQ abap_false.
             CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
           ENDIF.
 
+          level_for_found_in_downsearch = <found_in_level>-found_in_level_downsearch + 1.
+
           LOOP AT association_builders INTO association_builder.
 
-            association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
+            association_builder-association_builder->search_down( element_id = <found_in_level>-element_id ).
 
           ENDLOOP.
 
           something_to_be_done_down = abap_true.
+
         ENDLOOP.
 
-        IF i_search_down >= 0.
+        ADD 1 TO level_to_search_down.
 
-          IF i_search_down >= level_for_found_in_downsearch.
+        IF i_search_down <= 0.
+
+          IF i_search_down <= level_to_search_down.
 
             something_to_be_done_down = abap_false.
 
@@ -4459,6 +4519,8 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
           is_new_line    TYPE abap_bool.
     FIELD-SYMBOLS <found_in_level> TYPE found_in_level_type.
 
+    ASSERT i_element_id IS NOT INITIAL.
+
     READ TABLE found_in_levels ASSIGNING <found_in_level> WITH TABLE KEY element_id = i_element_id.
     IF sy-subrc <> 0.
 
@@ -4485,10 +4547,21 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
       ENDIF.
 
-      IF     <found_in_level>-found_in_level_upsearch EQ level_for_found_in_upsearch
-         AND i_is_specific EQ abap_true.
-        <found_in_level>-specific = abap_true.
+      IF i_is_specific EQ abap_true.
+        IF <found_in_level>-specific EQ abap_false.
+
+          <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
+          <found_in_level>-specific = abap_true.
+
+        ENDIF.
       ENDIF.
+
+*      IF     <found_in_level>-found_in_level_upsearch EQ level_for_found_in_upsearch
+*         AND i_is_specific EQ abap_true.
+*
+*        <found_in_level>-specific = abap_true.
+*
+*      ENDIF.
 
     ELSEIF is_down_search EQ abap_true.
 
@@ -4498,12 +4571,21 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
       ENDIF.
 
-      IF     <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch
-         AND i_is_specific EQ abap_true.
+      IF i_is_specific EQ abap_true.
+        IF <found_in_level>-specific EQ abap_false.
 
-        <found_in_level>-specific = abap_true.
+          <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
+          <found_in_level>-specific = abap_true.
 
+        ENDIF.
       ENDIF.
+
+*      IF     <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch
+*         AND i_is_specific EQ abap_true.
+*
+*        <found_in_level>-specific = abap_true.
+*
+*      ENDIF.
 
     ELSEIF is_post_selection EQ abap_true.
 
@@ -4549,100 +4631,93 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
   ENDMETHOD.
   METHOD write_found_elements.
 
-    DATA found_in_level TYPE found_in_level_type.
+    DATA fil TYPE found_in_level_type.
+    DATA: fe    TYPE found_element_type.
 
-    TYPES: BEGIN OF temp_type,
-             where           TYPE c LENGTH 1,
-             level           TYPE i,
-             "! Not zero in case an element is found in up and down search. If filled this is the level for downsearch
-             alternate_level TYPE i,
-             element_type    TYPE string,
-             parent_name     TYPE string,
-             name            TYPE string,
-             specific        TYPE abap_bool,
-           END OF temp_type.
-    DATA: temp  TYPE temp_type,
-          temps TYPE STANDARD TABLE OF temp_type.
+    LOOP AT found_in_levels INTO fil.
+      CLEAR fe.
+      fe-specific = fil-specific.
+      IF fil-found_in_initial_selection EQ abap_true.
+        fe-where = |I|.
 
-    LOOP AT found_in_levels INTO found_in_level.
-      CLEAR temp.
-      temp-specific = found_in_level-specific.
-      IF found_in_level-found_in_initial_selection EQ abap_true.
-        temp-where = |I|.
-        temp-level = 0.
-
-      ELSEIF found_in_level-found_in_post_selection EQ abap_true.
-        temp-where = |P|.
-        temp-level = 0.
-
-      ELSEIF found_in_level-found_in_level_upsearch <> 0
-         AND found_in_level-found_in_level_downsearch <> 0.
-
-        temp-where = |S|.
-        temp-level = found_in_level-found_in_level_upsearch.
-        temp-alternate_level = -1 * found_in_level-found_in_level_downsearch.
-
-      ELSEIF found_in_level-found_in_level_upsearch <> 0.
-
-        temp-where = |S|.
-        temp-level = found_in_level-found_in_level_upsearch.
-
-      ELSEIF found_in_level-found_in_level_downsearch <> 0.
-
-        temp-where = |S|.
-        temp-level = -1 * found_in_level-found_in_level_downsearch.
+      ELSEIF fil-found_in_post_selection EQ abap_true.
+        fe-where = |P|.
 
       ELSE.
-        ASSERT 1 = 2.
+        fe-where = |S|.
+      ENDIF.
+
+      IF fil-found_in_level_upsearch <> 0
+         AND fil-found_in_level_downsearch <> 0.
+
+        fe-level = fil-found_in_level_upsearch.
+        fe-alternate_level = -1 * fil-found_in_level_downsearch.
+
+      ELSEIF fil-found_in_level_upsearch <> 0.
+
+        fe-level = fil-found_in_level_upsearch.
+
+      ELSEIF fil-found_in_level_downsearch <> 0.
+
+        fe-level = -1 * fil-found_in_level_downsearch.
+
+      ELSE.
+        fe-level = 0.
       ENDIF.
 
       DATA element TYPE REF TO cl_extr3_elements.
 
-      element = element_manager->get_element( i_element_id = found_in_level-element_id ).
+      element = element_manager->get_element( i_element_id = fil-element_id ).
 
-      element->name( EXPORTING element_id   = found_in_level-element_id
-                     IMPORTING element_type = temp-element_type
-                               parent_name  = temp-parent_name
-                               name         = temp-name ).
+      element->name( EXPORTING element_id   = fil-element_id
+                     IMPORTING element_type = fe-element_type
+                               parent_name  = fe-parent_name
+                               name         = fe-name ).
 
-      INSERT temp INTO TABLE temps.
+      IF      is_usage_of_single_element EQ abap_true
+          AND fe-specific EQ abap_false.
 
-    ENDLOOP.
+        CONTINUE.
 
-    SORT temps BY where level alternate_level element_type parent_name name.
-
-    WRITE: / 'Legend:'.
-    WRITE: / 'W - "I" Found in initial search "P" Found in final search (packages that where not initially selected) "S" Found in regular search'.
-    WRITE: / 'L - Level where an element is found'.
-    WRITE: / 'AL - In case an element is found in down and up search, this is the level where it is found in down search'.
-    WRITE: /.
-    FORMAT COLOR COL_HEADING.
-    WRITE: /(1) 'W',
-           (3) 'L',
-           (3) 'AL',
-           (30) 'Type',
-           (30) 'Name of Parent',
-           (30) 'Name'.
-    FORMAT COLOR COL_BACKGROUND.
-
-    LOOP AT temps INTO temp.
-      IF temp-specific EQ abap_true.
-        " FORMAT COLOR COL_POSITIVE.
-      ELSE.
-        FORMAT COLOR COL_BACKGROUND.
-        IF is_usage_of_single_element EQ abap_true.
-          CONTINUE. " List only specific elements if usage of a single element is done. This suppresses elements that are technically required.
-        ENDIF.
       ENDIF.
-      NEW-LINE.
-      WRITE: /(1) temp-where,
-              (3) temp-level,
-              (3) temp-alternate_level,
-              (30) temp-element_type,
-              (30) temp-parent_name,
-              (30) temp-name.
+
+      INSERT fe INTO TABLE fes.
 
     ENDLOOP.
+    IF is_usage_of_single_element EQ abap_true.
+      SORT fes BY level alternate_level element_type parent_name name.
+    ELSE.
+      SORT fes BY where level alternate_level element_type parent_name name.
+    ENDIF.
+
+    IF write EQ abap_true.
+
+      WRITE: / 'Legend:'.
+      WRITE: / 'W - "I" Found in initial search "P" Found in final search (packages that where not initially selected) "S" Found in regular search'.
+      WRITE: / 'L - Level where an element is found'.
+      WRITE: / 'AL - In case an element is found in down and up search, this is the level where it is found in down search'.
+      WRITE: /.
+      FORMAT COLOR COL_HEADING.
+      WRITE: /(1) 'W',
+             (3) 'L',
+             (3) 'AL',
+             (30) 'Type',
+             (30) 'Name of Parent',
+             (30) 'Name'.
+      FORMAT COLOR COL_BACKGROUND.
+
+      LOOP AT fes INTO fe.
+        NEW-LINE.
+        WRITE: /(1) fe-where,
+                (3) fe-level,
+                (3) fe-alternate_level,
+                (30) fe-element_type,
+                (30) fe-parent_name,
+                (30) fe-name.
+
+      ENDLOOP.
+
+    ENDIF.
 
   ENDMETHOD.
   METHOD usage_of_single_element.
@@ -4682,12 +4757,6 @@ CLASS CL_EXTRACT3 IMPLEMENTATION.
     model_builder->search( i_search_up           = i_search_up
                            i_search_down         = i_search_down ).
 
-    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Write found elements|.
-
-
-      model_builder->write_found_elements( ).
-
-
     CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Make model file|.
 
     mse_model = element_manager->make_model( ).
@@ -4697,6 +4766,9 @@ CLASS CL_EXTRACT3 IMPLEMENTATION.
 
   ENDMETHOD.
 ENDCLASS.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_eltyp.
+  PERFORM fill_f4_eltyp.
 
 START-OF-SELECTION.
 
@@ -4726,7 +4798,7 @@ START-OF-SELECTION.
       i_model_builder          = model_builder
       i_exclude_found_sap_intf = p_ex.
 
-    model_builder->initialize( i_element_manager = element_manager ).
+  model_builder->initialize( i_element_manager = element_manager ).
 
   DATA: initial_elements TYPE REF TO cl_extr3_initial_elements.
   CREATE OBJECT initial_elements.
@@ -4774,3 +4846,31 @@ START-OF-SELECTION.
   model_outputer->make( mse_model = mse_model
                         g_parameter_download_file = p_down
                         i_default_prefix = p_df ).
+
+  model_builder->write_found_elements( EXPORTING write = abap_true ).
+
+FORM fill_f4_eltyp.
+
+  TYPES: BEGIN OF ty_eltyp,
+           eltyp TYPE text30,
+         END OF ty_eltyp.
+
+  DATA: lt_eltyps TYPE STANDARD TABLE OF ty_eltyp,
+        ls_eltyp  TYPE ty_eltyp.
+
+  ls_eltyp-eltyp = 'class'.
+  INSERT ls_eltyp INTO TABLE lt_eltyps.
+  ls_eltyp-eltyp = 'table'.
+  INSERT ls_eltyp INTO TABLE lt_eltyps.
+
+  CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
+    EXPORTING
+      retfield    = 'P_ELTYP'
+      dynpprog    = sy-repid
+      dynpnr      = sy-dynnr
+      dynprofield = 'p_eltyp'
+      value_org   = 'S'
+    TABLES
+      value_tab   = lt_eltyps.
+
+ENDFORM.
