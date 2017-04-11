@@ -5,7 +5,8 @@ CLASS z2mse_extr3_packages_mock DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
-  class-METHODS get_mock_instance
+    CLASS-METHODS clear_mock.
+    CLASS-METHODS get_mock_instance
       IMPORTING
                 i_element_manager TYPE REF TO z2mse_extr3_element_manager
       RETURNING VALUE(instance)   TYPE REF TO z2mse_extr3_packages_mock.
@@ -18,6 +19,11 @@ ENDCLASS.
 
 
 CLASS Z2MSE_EXTR3_PACKAGES_MOCK IMPLEMENTATION.
+
+
+  METHOD clear_mock.
+    CLEAR instance_mock.
+  ENDMETHOD.
 
 
   METHOD get_mock_instance.
@@ -33,7 +39,7 @@ CLASS Z2MSE_EXTR3_PACKAGES_MOCK IMPLEMENTATION.
   ENDMETHOD.
 
 
-  method _does_package_exists.
+  METHOD _does_package_exists.
     exists = abap_true.
   ENDMETHOD.
 ENDCLASS.

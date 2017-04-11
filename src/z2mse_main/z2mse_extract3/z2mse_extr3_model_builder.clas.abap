@@ -5,6 +5,20 @@ CLASS z2mse_extr3_model_builder DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+
+    TYPES: BEGIN OF found_element_type,
+             where            TYPE c LENGTH 1,
+             level            TYPE i,
+             "! Not zero in case an element is found in up and down search. If filled this is the level for downsearch
+             alternate_level  TYPE i,
+             element_type     TYPE string,
+             parent_name      TYPE string,
+             name             TYPE string,
+             specific         TYPE abap_bool,
+             up_search_done   TYPE abap_bool,
+             down_search_done TYPE abap_bool,
+           END OF found_element_type.
+    TYPES: found_elements_type TYPE STANDARD TABLE OF found_element_type.
     METHODS search
       IMPORTING
         i_search_up   TYPE i
@@ -20,7 +34,11 @@ CLASS z2mse_extr3_model_builder DEFINITION
         i_is_specific TYPE abap_bool.
     METHODS initialize
       IMPORTING i_element_manager TYPE REF TO z2mse_extr3_element_manager.
-    METHODS write_found_elements.
+    METHODS write_found_elements
+      IMPORTING
+        write TYPE abap_bool OPTIONAL
+      EXPORTING
+        fes   TYPE found_elements_type.
     METHODS usage_of_single_element.
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -102,9 +120,7 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
     INSERT association_builder INTO TABLE association_builders.
 
   ENDMETHOD.
-  METHOD usage_of_single_element.
-    is_usage_of_single_element = abap_true.
-  ENDMETHOD.
+
 
   METHOD initial_selection_started.
     is_initial_selection = abap_true.
@@ -116,6 +132,8 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
     DATA: found_in_level TYPE found_in_level_type,
           is_new_line    TYPE abap_bool.
     FIELD-SYMBOLS <found_in_level> TYPE found_in_level_type.
+
+    ASSERT i_element_id IS NOT INITIAL.
 
     READ TABLE found_in_levels ASSIGNING <found_in_level> WITH TABLE KEY element_id = i_element_id.
     IF sy-subrc <> 0.
@@ -143,10 +161,21 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
       ENDIF.
 
-      IF     <found_in_level>-found_in_level_upsearch EQ level_for_found_in_upsearch
-         AND i_is_specific EQ abap_true.
+      if i_is_specific EQ abap_true.
+        if <found_in_level>-specific eq abap_false.
+
+        <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
         <found_in_level>-specific = abap_true.
+
+        ENDIF.
       ENDIF.
+
+*      IF     <found_in_level>-found_in_level_upsearch EQ level_for_found_in_upsearch
+*         AND i_is_specific EQ abap_true.
+*
+*        <found_in_level>-specific = abap_true.
+*
+*      ENDIF.
 
     ELSEIF is_down_search EQ abap_true.
 
@@ -156,12 +185,21 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
       ENDIF.
 
-      IF     <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch
-         AND i_is_specific EQ abap_true.
+      if i_is_specific EQ abap_true.
+        if <found_in_level>-specific eq abap_false.
 
+        <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
         <found_in_level>-specific = abap_true.
 
+        ENDIF.
       ENDIF.
+
+*      IF     <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch
+*         AND i_is_specific EQ abap_true.
+*
+*        <found_in_level>-specific = abap_true.
+*
+*      ENDIF.
 
     ELSEIF is_post_selection EQ abap_true.
 
@@ -191,31 +229,33 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
 
     " found_in_levels will be updated in this method, so add this elements to a new temporary table.
+    IF is_usage_of_single_element EQ abap_false.
+      LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_initial_selection EQ abap_true.
 
-    LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_initial_selection EQ abap_true.
+        <found_in_level>-initially_selected_analyzed = abap_true.
 
-      <found_in_level>-initially_selected_analyzed = abap_true.
-
-      INSERT <found_in_level> INTO TABLE first_initial_elements.
-
-    ENDLOOP.
-
-    DATA association_builder TYPE builder_type.
-
-    LOOP AT association_builders_init INTO association_builder.
-
-      LOOP AT first_initial_elements INTO found_in_level.
-
-        IF     is_usage_of_single_element EQ abap_true
-           AND found_in_level-specific EQ abap_false.
-          CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-        ENDIF.
-
-        association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
+        INSERT <found_in_level> INTO TABLE first_initial_elements.
 
       ENDLOOP.
 
-    ENDLOOP.
+      DATA association_builder TYPE builder_type.
+
+      LOOP AT association_builders_init INTO association_builder.
+
+        LOOP AT first_initial_elements INTO found_in_level.
+
+          IF     is_usage_of_single_element EQ abap_true
+             AND found_in_level-specific EQ abap_false.
+            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+          ENDIF.
+
+          association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
+
+        ENDLOOP.
+
+      ENDLOOP.
+
+    ENDIF.
 
     is_initial_selection = abap_false.
 
@@ -232,45 +272,57 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
       WHILE something_to_be_done_up EQ abap_true.
 
-        level_to_search_up = level_for_found_in_upsearch.
-        ADD 1 TO level_for_found_in_upsearch.
+*        level_to_search_up = level_for_found_in_upsearch.
+*        ADD 1 TO level_for_found_in_upsearch.
 
         CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_up }|.
 
         something_to_be_done_up = abap_false.
         DATA workload TYPE found_in_levels_type.
         CLEAR workload.
-        LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_upsearch = level_to_search_up.
+        LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_upsearch = level_to_search_up.
 
           IF     is_usage_of_single_element EQ abap_true
-             AND found_in_level-specific EQ abap_false.
+             AND <found_in_level>-specific EQ abap_false.
             CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
           ENDIF.
 
-          INSERT found_in_level INTO TABLE workload.
-        ENDLOOP.
-
-
-        LOOP AT workload INTO found_in_level.
+          level_for_found_in_upsearch = <found_in_level>-found_in_level_upsearch + 1.
 
           LOOP AT association_builders INTO association_builder.
 
-            association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
+            association_builder-association_builder->search_up( element_id = <found_in_level>-element_id ).
 
           ENDLOOP.
 
           something_to_be_done_up = abap_true.
+
+*          INSERT found_in_level INTO TABLE workload.
         ENDLOOP.
+
+
+*        LOOP AT workload INTO found_in_level.
+*
+*          LOOP AT association_builders INTO association_builder.
+*
+*            association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
+*
+*          ENDLOOP.
+*
+*          something_to_be_done_up = abap_true.
+*        ENDLOOP.
 
         IF i_search_up >= 0.
 
-          IF i_search_up >= level_for_found_in_upsearch.
+          IF i_search_up >= level_to_search_up.
 
             something_to_be_done_up = abap_false.
 
           ENDIF.
 
         ENDIF.
+
+        add 1 to level_to_search_up.
 
       ENDWHILE.
 
@@ -291,41 +343,59 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
       WHILE something_to_be_done_down EQ abap_true.
 
-        level_to_search_down = level_for_found_in_downsearch.
-        ADD 1 TO level_for_found_in_downsearch.
+*        level_to_search_down = level_for_found_in_downsearch.
+*        ADD 1 TO level_for_found_in_downsearch.
 
         CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_down }|.
 
         something_to_be_done_down = abap_false.
         CLEAR workload.
-        LOOP AT found_in_levels INTO found_in_level WHERE found_in_level_downsearch = level_to_search_down.
-          INSERT found_in_level INTO TABLE workload.
-        ENDLOOP.
-        LOOP AT workload INTO found_in_level.
-
+        LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_downsearch = level_to_search_down.
           IF     is_usage_of_single_element EQ abap_true
-             AND found_in_level-specific EQ abap_false.
+             AND <found_in_level>-specific EQ abap_false.
             CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
           ENDIF.
 
+          level_for_found_in_downsearch = <found_in_level>-found_in_level_downsearch + 1.
+
           LOOP AT association_builders INTO association_builder.
 
-            association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
+            association_builder-association_builder->search_down( element_id = <found_in_level>-element_id ).
 
           ENDLOOP.
 
           something_to_be_done_down = abap_true.
+
+*          INSERT found_in_level INTO TABLE workload.
+
         ENDLOOP.
+*        LOOP AT workload INTO found_in_level.
+*
+*          IF     is_usage_of_single_element EQ abap_true
+*             AND found_in_level-specific EQ abap_false.
+*            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+*          ENDIF.
+*
+*          LOOP AT association_builders INTO association_builder.
+*
+*            association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
+*
+*          ENDLOOP.
+*
+*          something_to_be_done_down = abap_true.
+*        ENDLOOP.
 
         IF i_search_down >= 0.
 
-          IF i_search_down >= level_for_found_in_downsearch.
+          IF i_search_down >= level_to_search_down.
 
             something_to_be_done_down = abap_false.
 
           ENDIF.
 
         ENDIF.
+
+        add 1 to level_to_search_down.
 
       ENDWHILE.
 
@@ -363,50 +433,43 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD usage_of_single_element.
+    is_usage_of_single_element = abap_true.
+  ENDMETHOD.
+
+
   METHOD write_found_elements.
 
-    DATA found_in_level TYPE found_in_level_type.
+    DATA fil TYPE found_in_level_type.
+    DATA: fe    TYPE found_element_type.
 
-    TYPES: BEGIN OF temp_type,
-             where           TYPE c LENGTH 1,
-             level           TYPE i,
-             "! Not zero in case an element is found in up and down search. If filled this is the level for downsearch
-             alternate_level TYPE i,
-             element_type    TYPE string,
-             parent_name     TYPE string,
-             name            TYPE string,
-             specific        TYPE abap_bool,
-           END OF temp_type.
-    DATA: temp  TYPE temp_type,
-          temps TYPE STANDARD TABLE OF temp_type.
+    LOOP AT found_in_levels INTO fil.
+      CLEAR fe.
+      fe-specific = fil-specific.
+      IF fil-found_in_initial_selection EQ abap_true.
+        fe-where = |I|.
+        fe-level = 0.
 
-    LOOP AT found_in_levels INTO found_in_level.
-      CLEAR temp.
-      temp-specific = found_in_level-specific.
-      IF found_in_level-found_in_initial_selection EQ abap_true.
-        temp-where = |I|.
-        temp-level = 0.
+      ELSEIF fil-found_in_post_selection EQ abap_true.
+        fe-where = |P|.
+        fe-level = 0.
 
-      ELSEIF found_in_level-found_in_post_selection EQ abap_true.
-        temp-where = |P|.
-        temp-level = 0.
+      ELSEIF fil-found_in_level_upsearch <> 0
+         AND fil-found_in_level_downsearch <> 0.
 
-      ELSEIF found_in_level-found_in_level_upsearch <> 0
-         AND found_in_level-found_in_level_downsearch <> 0.
+        fe-where = |S|.
+        fe-level = fil-found_in_level_upsearch.
+        fe-alternate_level = -1 * fil-found_in_level_downsearch.
 
-        temp-where = |S|.
-        temp-level = found_in_level-found_in_level_upsearch.
-        temp-alternate_level = -1 * found_in_level-found_in_level_downsearch.
+      ELSEIF fil-found_in_level_upsearch <> 0.
 
-      ELSEIF found_in_level-found_in_level_upsearch <> 0.
+        fe-where = |S|.
+        fe-level = fil-found_in_level_upsearch.
 
-        temp-where = |S|.
-        temp-level = found_in_level-found_in_level_upsearch.
+      ELSEIF fil-found_in_level_downsearch <> 0.
 
-      ELSEIF found_in_level-found_in_level_downsearch <> 0.
-
-        temp-where = |S|.
-        temp-level = -1 * found_in_level-found_in_level_downsearch.
+        fe-where = |S|.
+        fe-level = -1 * fil-found_in_level_downsearch.
 
       ELSE.
         ASSERT 1 = 2.
@@ -414,51 +477,54 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
       DATA element TYPE REF TO z2mse_extr3_elements.
 
-      element = element_manager->get_element( i_element_id = found_in_level-element_id ).
+      element = element_manager->get_element( i_element_id = fil-element_id ).
 
-      element->name( EXPORTING element_id   = found_in_level-element_id
-                     IMPORTING element_type = temp-element_type
-                               parent_name  = temp-parent_name
-                               name         = temp-name ).
+      element->name( EXPORTING element_id   = fil-element_id
+                     IMPORTING element_type = fe-element_type
+                               parent_name  = fe-parent_name
+                               name         = fe-name ).
 
-      INSERT temp INTO TABLE temps.
+      IF      is_usage_of_single_element EQ abap_true
+          AND fe-specific EQ abap_false.
 
-    ENDLOOP.
+        CONTINUE.
 
-    SORT temps BY where level alternate_level element_type parent_name name.
-
-    WRITE: / 'Legend:'.
-    WRITE: / 'W - "I" Found in initial search "P" Found in final search (packages that where not initially selected) "S" Found in regular search'.
-    WRITE: / 'L - Level where an element is found'.
-    WRITE: / 'AL - In case an element is found in down and up search, this is the level where it is found in down search'.
-    WRITE: /.
-    FORMAT COLOR COL_HEADING.
-    WRITE: /(1) 'W',
-           (3) 'L',
-           (3) 'AL',
-           (30) 'Type',
-           (30) 'Name of Parent',
-           (30) 'Name'.
-    FORMAT COLOR COL_BACKGROUND.
-
-    LOOP AT temps INTO temp.
-      IF temp-specific EQ abap_true.
-        " FORMAT COLOR COL_POSITIVE.
-      ELSE.
-        FORMAT COLOR COL_BACKGROUND.
-        IF is_usage_of_single_element EQ abap_true.
-          CONTINUE. " List only specific elements if usage of a single element is done. This suppresses elements that are technically required.
-        ENDIF.
       ENDIF.
-      NEW-LINE.
-      WRITE: /(1) temp-where,
-              (3) temp-level,
-              (3) temp-alternate_level,
-              (30) temp-element_type,
-              (30) temp-parent_name,
-              (30) temp-name.
+
+      INSERT fe INTO TABLE fes.
 
     ENDLOOP.
+
+    SORT fes BY where level alternate_level element_type parent_name name.
+
+    IF write EQ abap_true.
+
+      WRITE: / 'Legend:'.
+      WRITE: / 'W - "I" Found in initial search "P" Found in final search (packages that where not initially selected) "S" Found in regular search'.
+      WRITE: / 'L - Level where an element is found'.
+      WRITE: / 'AL - In case an element is found in down and up search, this is the level where it is found in down search'.
+      WRITE: /.
+      FORMAT COLOR COL_HEADING.
+      WRITE: /(1) 'W',
+             (3) 'L',
+             (3) 'AL',
+             (30) 'Type',
+             (30) 'Name of Parent',
+             (30) 'Name'.
+      FORMAT COLOR COL_BACKGROUND.
+
+      LOOP AT fes INTO fe.
+        NEW-LINE.
+        WRITE: /(1) fe-where,
+                (3) fe-level,
+                (3) fe-alternate_level,
+                (30) fe-element_type,
+                (30) fe-parent_name,
+                (30) fe-name.
+
+      ENDLOOP.
+
+    ENDIF.
 
   ENDMETHOD.
 ENDCLASS.

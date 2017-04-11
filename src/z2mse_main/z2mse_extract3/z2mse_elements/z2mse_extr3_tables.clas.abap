@@ -6,7 +6,7 @@ CLASS z2mse_extr3_tables DEFINITION
   CREATE PRIVATE .
 
   PUBLIC SECTION.
-
+    CLASS-METHODS clear.
     CLASS-METHODS get_instance
       IMPORTING
         i_element_manager TYPE REF TO z2mse_extr3_element_manager
@@ -40,6 +40,9 @@ ENDCLASS.
 
 CLASS z2mse_extr3_tables IMPLEMENTATION.
 
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
 
   METHOD add.
 
@@ -53,12 +56,15 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
 
       " Does table exists?
       DATA found_tabname TYPE tabname.
+      DATA found_tabclass TYPE tabclass.
       TEST-SEAM dd02l.
-        SELECT tabname FROM dd02l INTO found_tabname WHERE tabname = table.
+        SELECT tabname tabclass FROM dd02l INTO ( found_tabname, found_tabclass ) WHERE tabname = table.
 
         ENDSELECT.
       END-TEST-SEAM.
-      IF found_tabname IS NOT INITIAL.
+      IF     found_tabname IS NOT INITIAL
+         AND found_tabclass <> 'INTTAB'  " Not structures
+         AND found_tabclass <> 'APPEND'. " Not append structures
         is_added = abap_true.
       ENDIF.
 

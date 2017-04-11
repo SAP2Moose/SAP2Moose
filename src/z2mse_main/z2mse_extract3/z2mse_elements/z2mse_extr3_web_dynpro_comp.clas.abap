@@ -5,7 +5,7 @@ CLASS z2mse_extr3_web_dynpro_comp DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
-
+    CLASS-METHODS clear.
     CLASS-METHODS get_instance
       IMPORTING
         element_manager   TYPE REF TO z2mse_extr3_element_manager
@@ -65,6 +65,11 @@ ENDCLASS.
 
 
 CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
+
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
+
   METHOD get_instance.
     IF instance IS NOT BOUND.
       CREATE OBJECT instance
@@ -196,8 +201,8 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
                       IMPORTING is_added            = is_added
                                 new_element_id      = new_element_id ).
 
-     element_manager->model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
-                                                               i_is_specific = abap_true ).
+      element_manager->model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
+                                                                i_is_specific = abap_true ).
 
     ENDIF.
 

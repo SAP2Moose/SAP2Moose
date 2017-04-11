@@ -75,14 +75,6 @@ CLASS Z2MSE_EXTRACT3 IMPLEMENTATION.
     model_builder->search( i_search_up           = i_search_up
                            i_search_down         = i_search_down ).
 
-    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Write found elements|.
-
-    TEST-SEAM write_found_elements.
-
-      model_builder->write_found_elements( ).
-
-    END-TEST-SEAM.
-
     CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Make model file|.
 
     mse_model = element_manager->make_model( ).

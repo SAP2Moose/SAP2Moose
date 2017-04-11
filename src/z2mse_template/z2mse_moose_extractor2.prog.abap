@@ -217,6 +217,9 @@ SELECTION-SCREEN END OF BLOCK bl_model_settings.
 * REPLACE_IMPLEMENTATION Z2MSE_EXTR3_MODEL_BUILDER
 * REPLACE_IMPLEMENTATION Z2MSE_EXTRACT3
 
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_eltyp.
+  PERFORM fill_f4_eltyp.
+
 START-OF-SELECTION.
 
   DATA: mse_model TYPE z2mse_model=>lines_type.
@@ -245,7 +248,7 @@ START-OF-SELECTION.
       i_model_builder          = model_builder
       i_exclude_found_sap_intf = p_ex.
 
-    model_builder->initialize( i_element_manager = element_manager ).
+  model_builder->initialize( i_element_manager = element_manager ).
 
   DATA: initial_elements TYPE REF TO z2mse_extr3_initial_elements.
   CREATE OBJECT initial_elements.
@@ -293,3 +296,31 @@ START-OF-SELECTION.
   model_outputer->make( mse_model = mse_model
                         g_parameter_download_file = p_down
                         i_default_prefix = p_df ).
+
+  model_builder->write_found_elements( EXPORTING write = abap_true ).
+
+FORM fill_f4_eltyp.
+
+  TYPES: BEGIN OF ty_eltyp,
+           eltyp TYPE text30,
+         END OF ty_eltyp.
+
+  DATA: lt_eltyps TYPE STANDARD TABLE OF ty_eltyp,
+        ls_eltyp  TYPE ty_eltyp.
+
+  ls_eltyp-eltyp = 'class'.
+  INSERT ls_eltyp INTO TABLE lt_eltyps.
+  ls_eltyp-eltyp = 'table'.
+  INSERT ls_eltyp INTO TABLE lt_eltyps.
+
+  CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
+    EXPORTING
+      retfield    = 'P_ELTYP'
+      dynpprog    = sy-repid
+      dynpnr      = sy-dynnr
+      dynprofield = 'p_eltyp'
+      value_org   = 'S'
+    TABLES
+      value_tab   = lt_eltyps.
+
+ENDFORM.

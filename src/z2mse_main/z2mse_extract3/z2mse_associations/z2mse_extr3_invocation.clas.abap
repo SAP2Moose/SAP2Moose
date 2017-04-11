@@ -5,6 +5,7 @@ CLASS z2mse_extr3_invocation DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    CLASS-METHODS clear.
     CLASS-METHODS get_instance
       IMPORTING
                 i_element_manager TYPE REF TO z2mse_extr3_element_manager
@@ -30,6 +31,10 @@ ENDCLASS.
 
 
 CLASS z2mse_extr3_invocation IMPLEMENTATION.
+
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
 
   METHOD get_instance.
     IF instance IS NOT BOUND.

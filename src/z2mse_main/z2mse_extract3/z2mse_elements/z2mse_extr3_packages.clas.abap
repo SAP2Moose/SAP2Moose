@@ -15,6 +15,7 @@ CLASS z2mse_extr3_packages DEFINITION
              parentpackage TYPE parentcl,
            END OF ty_package.
     TYPES ty_packages TYPE HASHED TABLE OF ty_package WITH UNIQUE KEY package.
+    CLASS-METHODS clear.
     CLASS-METHODS get_instance
       IMPORTING
                 i_element_manager TYPE REF TO z2mse_extr3_element_manager
@@ -50,6 +51,9 @@ ENDCLASS.
 
 CLASS z2mse_extr3_packages IMPLEMENTATION.
 
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
 
   METHOD add.
 

@@ -21,7 +21,7 @@ CLASS z2mse_extr3_classes DEFINITION
            END OF ty_class_component.
     TYPES ty_class_components TYPE STANDARD TABLE OF ty_class_component WITH KEY clsname cmpname.
     DATA: class_components TYPE ty_class_components.
-
+    CLASS-METHODS clear.
     CLASS-METHODS get_instance
       IMPORTING
         element_manager   TYPE REF TO z2mse_extr3_element_manager
@@ -117,8 +117,11 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
+CLASS z2mse_extr3_classes IMPLEMENTATION.
 
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
 
   METHOD add.
 
@@ -182,7 +185,7 @@ CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
 
   METHOD add_component.
 
-    data: is_added_now TYPE abap_bool.
+    DATA: is_added_now TYPE abap_bool.
 
     add( EXPORTING class          = clsname
          IMPORTING is_added       = is_added ).
@@ -195,8 +198,8 @@ CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
                                 new_element_id = new_element_id
                                 is_added_now   = is_added_now ).
 
-      IF is_specific EQ abap_true and
-         is_added_now eq abap_true.
+      IF is_specific EQ abap_true AND
+         is_added_now EQ abap_true.
 
         element_manager->model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
                                                                   i_is_specific = abap_true ).

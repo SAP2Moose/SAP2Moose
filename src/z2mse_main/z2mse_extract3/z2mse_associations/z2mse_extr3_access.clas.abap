@@ -5,6 +5,7 @@ CLASS z2mse_extr3_access DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    CLASS-METHODS clear.
     CLASS-METHODS get_instance
       IMPORTING
                 i_element_manager TYPE REF TO z2mse_extr3_element_manager
@@ -28,7 +29,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_access IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_ACCESS IMPLEMENTATION.
 
 
   METHOD add.
@@ -43,6 +44,11 @@ CLASS z2mse_extr3_access IMPLEMENTATION.
                                                 element_2   = association-accessing_element_id2
                                                 association = me ).
 
+  ENDMETHOD.
+
+
+  METHOD clear.
+    CLEAR instance.
   ENDMETHOD.
 
 
