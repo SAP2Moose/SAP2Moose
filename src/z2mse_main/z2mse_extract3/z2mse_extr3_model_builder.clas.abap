@@ -443,9 +443,12 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
     LOOP AT temps INTO temp.
       IF temp-specific EQ abap_true.
-        FORMAT COLOR COL_POSITIVE.
+        " FORMAT COLOR COL_POSITIVE.
       ELSE.
         FORMAT COLOR COL_BACKGROUND.
+        IF is_usage_of_single_element EQ abap_true.
+          CONTINUE. " List only specific elements if usage of a single element is done. This suppresses elements that are technically required.
+        ENDIF.
       ENDIF.
       NEW-LINE.
       WRITE: /(1) temp-where,
