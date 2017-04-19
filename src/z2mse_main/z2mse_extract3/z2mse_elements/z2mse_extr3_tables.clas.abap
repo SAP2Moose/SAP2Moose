@@ -14,7 +14,7 @@ CLASS z2mse_extr3_tables DEFINITION
         VALUE(r_instance) TYPE REF TO z2mse_extr3_tables.
     METHODS add
       IMPORTING
-        table                 TYPE tabname
+        table                 TYPE string
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
         VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type.

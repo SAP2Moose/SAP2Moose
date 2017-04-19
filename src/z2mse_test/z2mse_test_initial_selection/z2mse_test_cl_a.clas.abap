@@ -4,7 +4,7 @@ class Z2MSE_TEST_CL_A definition
 
 public section.
 
-  interfaces Z2MSE_TEST_IF_A .
+  interfaces z2mse_test_if_a_00000000000000 .
 
   events EVENT_A .
 
@@ -44,7 +44,7 @@ CLASS Z2MSE_TEST_CL_A IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD z2mse_test_if_a~method_a.
+  METHOD z2mse_test_if_a_00000000000000~method_a_000000000000000000000.
 
   ENDMETHOD.
 ENDCLASS.

@@ -14,8 +14,8 @@ CLASS z2mse_extr3_classes DEFINITION
 
 
     TYPES: BEGIN OF ty_class_component,
-             clsname TYPE seoclsname,
-             cmpname TYPE seocmpname,
+             clsname TYPE string,
+             cmpname TYPE string,
              cmptype TYPE seocmptype,
              mtdtype TYPE seomtdtype,
            END OF ty_class_component.
@@ -29,15 +29,15 @@ CLASS z2mse_extr3_classes DEFINITION
         VALUE(r_instance) TYPE REF TO z2mse_extr3_classes.
     METHODS add
       IMPORTING
-        class                 TYPE seoclsname
+        class                 TYPE string
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
         VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type
         class_components      TYPE ty_class_components.
     METHODS add_component
       IMPORTING
-        clsname               TYPE seoclsname
-        cmpname               TYPE seocmpname
+        clsname               TYPE string
+        cmpname               TYPE string
         is_specific           TYPE abap_bool
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
@@ -46,15 +46,15 @@ CLASS z2mse_extr3_classes DEFINITION
       IMPORTING
         element_id        TYPE i
       EXPORTING
-        VALUE(class_name) TYPE seoclsname
+        VALUE(class_name) TYPE string
         VALUE(clstype)    TYPE seoclstype
         VALUE(exists)     TYPE abap_bool.
     METHODS comp_name
       IMPORTING
         element_id        TYPE i
       EXPORTING
-        VALUE(class_name) TYPE seoclsname
-        VALUE(cmpname)    TYPE seocmpname
+        VALUE(class_name) TYPE string
+        VALUE(cmpname)    TYPE string
         VALUE(cmptype)    TYPE seocmptype
         VALUE(exists)     TYPE abap_bool.
     METHODS make_model REDEFINITION.
@@ -65,7 +65,7 @@ CLASS z2mse_extr3_classes DEFINITION
 
     TYPES: BEGIN OF element_type,
              element_id TYPE z2mse_extr3_element_manager=>element_id_type,
-             class_name TYPE seoclsname,
+             class_name TYPE string,
              clstype    TYPE seoclstype,
              "is_interface TYPE abap_bool,
            END OF element_type.
@@ -74,8 +74,8 @@ CLASS z2mse_extr3_classes DEFINITION
 
     TYPES: BEGIN OF element_comp_type,
              element_id TYPE z2mse_extr3_element_manager=>element_id_type,
-             clsname    TYPE seoclsname,
-             cmpname    TYPE seocmpname,
+             clsname    TYPE string,
+             cmpname    TYPE string,
              cmptype    TYPE seocmptype,
              mtdtype    TYPE seomtdtype,
            END OF element_comp_type.
@@ -84,7 +84,7 @@ CLASS z2mse_extr3_classes DEFINITION
 
     TYPES: BEGIN OF element_metarel_type,
              element_id TYPE z2mse_extr3_element_manager=>element_id_type,
-             refclsname TYPE seoclsname,
+             refclsname TYPE string,
              reltype    TYPE seoreltype,
            END OF element_metarel_type.
     DATA elements_metarel_element_id TYPE HASHED TABLE OF element_metarel_type WITH UNIQUE KEY element_id.
@@ -92,8 +92,8 @@ CLASS z2mse_extr3_classes DEFINITION
 
     METHODS _add_component
       IMPORTING
-        clsname               TYPE seoclsname
-        cmpname               TYPE seocmpname
+        clsname               TYPE string
+        cmpname               TYPE string
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
         VALUE(is_added_now)   TYPE abap_bool
@@ -101,13 +101,13 @@ CLASS z2mse_extr3_classes DEFINITION
 
     METHODS _add_metarel
       IMPORTING
-        clsname TYPE seoclsname.
+        clsname TYPE string.
 
     "! Call me only after checking that the component to be added is not already added.
     METHODS _add_single_component_to_class
       IMPORTING
-        i_found_class_name      TYPE seoclsname
-        i_found_cmpname         TYPE seocmpname
+        i_found_class_name      TYPE string
+        i_found_cmpname         TYPE string
         i_found_cmptype         TYPE seocmptype
         i_found_mtdtype         TYPE seomtdtype
       RETURNING
@@ -117,11 +117,8 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_classes IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
 
-  METHOD clear.
-    CLEAR instance.
-  ENDMETHOD.
 
   METHOD add.
 
@@ -225,6 +222,11 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
     ENDIF.
 
+  ENDMETHOD.
+
+
+  METHOD clear.
+    CLEAR instance.
   ENDMETHOD.
 
 
@@ -349,7 +351,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
 
   METHOD name.
-    DATA: class_name TYPE seoclsname,
+    DATA: class_name TYPE string,
           clstype    TYPE seoclstype,
           exists     TYPE abap_bool.
 
@@ -374,7 +376,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
     ELSE.
 
-      DATA: cmpname TYPE seocmpname,
+      DATA: cmpname TYPE string,
             cmptype TYPE seocmptype.
 
       comp_name( EXPORTING element_id = element_id
@@ -437,8 +439,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
     ELSE.
 
       " Does component exists?
-      DATA: found_class_name TYPE seoclsname,
-            found_cmpname    TYPE seocmpname,
+      DATA: found_class_name TYPE string,
+            found_cmpname    TYPE string,
             found_cmptype    TYPE seocmptype,
             found_mtdtype    TYPE seomtdtype.
 
@@ -500,9 +502,12 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       IF relation-reltype EQ 1. " Interface
 
         DATA: interface_class_components TYPE ty_class_components,
-              interface_class_component  TYPE ty_class_component.
+              interface_class_component  TYPE ty_class_component,
+              reclsname_string           TYPE string.
 
-        me->add( EXPORTING class            = relation-refclsname
+        reclsname_string = relation-refclsname.
+
+        me->add( EXPORTING class            = reclsname_string
                  IMPORTING is_added         = is_added
                            new_element_id   = new_element_id
                            class_components = interface_class_components ).

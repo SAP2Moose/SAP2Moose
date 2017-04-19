@@ -12,16 +12,16 @@ CLASS z2mse_extr3_tadir_builder DEFINITION
     METHODS search_up REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
-    DATA: tables         TYPE REF TO z2mse_extr3_tables,
-          classes        TYPE REF TO z2mse_extr3_classes,
-          programs       TYPE REF TO z2mse_extr3_programs,
+    DATA: tables                TYPE REF TO z2mse_extr3_tables,
+          classes               TYPE REF TO z2mse_extr3_classes,
+          programs              TYPE REF TO z2mse_extr3_programs,
           web_dynpro_components TYPE REF TO z2mse_extr3_web_dynpro_comp,
-          parent_package TYPE REF TO z2mse_extr3_parent_package.
+          parent_package        TYPE REF TO z2mse_extr3_parent_package.
 ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_TADIR_BUILDER IMPLEMENTATION.
+CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -39,14 +39,14 @@ CLASS Z2MSE_EXTR3_TADIR_BUILDER IMPLEMENTATION.
 
   METHOD search_down.
 
-    DATA: element        TYPE REF TO z2mse_extr3_elements,
-          package        TYPE REF TO z2mse_extr3_packages,
-          is_found       TYPE abap_bool,
-          new_element_id TYPE z2mse_extr3_element_manager=>element_id_type,
-          class_name     TYPE seoclsname,
-          tabname        TYPE tabname,
-          program        TYPE PROGNAME,
-          WDY_COMPONENT_NAME TYPE WDY_COMPONENT_NAME.
+    DATA: element            TYPE REF TO z2mse_extr3_elements,
+          package            TYPE REF TO z2mse_extr3_packages,
+          is_found           TYPE abap_bool,
+          new_element_id     TYPE z2mse_extr3_element_manager=>element_id_type,
+          class_name         TYPE string,
+          tabname            TYPE string,
+          program            TYPE progname,
+          wdy_component_name TYPE wdy_component_name.
 
     element = element_manager->get_element( element_id ).
 
@@ -101,10 +101,10 @@ CLASS Z2MSE_EXTR3_TADIR_BUILDER IMPLEMENTATION.
 
               WHEN 'WDYN'.
 
-              WDY_COMPONENT_NAME = tadir-obj_name.
-              web_dynpro_components->add( EXPORTING wdy_component_name = wdy_component_name
-                                          IMPORTING is_added       = is_found
-                                                    new_element_id = new_element_id ).
+                wdy_component_name = tadir-obj_name.
+                web_dynpro_components->add( EXPORTING wdy_component_name = wdy_component_name
+                                            IMPORTING is_added       = is_found
+                                                      new_element_id = new_element_id ).
 
               WHEN OTHERS.
                 " TBD handle
@@ -135,7 +135,7 @@ CLASS Z2MSE_EXTR3_TADIR_BUILDER IMPLEMENTATION.
           package        TYPE REF TO z2mse_extr3_packages,
           is_found       TYPE abap_bool,
           new_element_id TYPE z2mse_extr3_element_manager=>element_id_type,
-          class_name     TYPE seoclsname,
+          class_name     TYPE string,
           clstype        TYPE seoclstype,
           tabname        TYPE tabname.
 

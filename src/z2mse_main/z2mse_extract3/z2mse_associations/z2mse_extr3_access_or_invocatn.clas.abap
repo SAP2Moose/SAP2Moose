@@ -32,8 +32,8 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
     CASE invoced_element->type.
       WHEN invoced_element->class_type.
         DATA classes TYPE REF TO z2mse_extr3_classes.
-        DATA: invoced_class_name TYPE seoclsname,
-              invoced_cmpname    TYPE seocmpname,
+        DATA: invoced_class_name TYPE string,
+              invoced_cmpname    TYPE string,
               invoced_cmptype    TYPE seocmptype.
 
         classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
@@ -69,8 +69,8 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
     CASE invocing_element->type.
       WHEN invocing_element->class_type.
 
-        DATA: invocing_class_name TYPE seoclsname,
-              invocing_cmpname    TYPE seocmpname.
+        DATA: invocing_class_name TYPE string,
+              invocing_cmpname    TYPE string.
 
         classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
 

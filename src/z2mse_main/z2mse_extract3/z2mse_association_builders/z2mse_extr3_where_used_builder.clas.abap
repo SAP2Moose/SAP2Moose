@@ -42,8 +42,8 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
     CASE element->type.
       WHEN element->class_type.
-        DATA class_name TYPE seoclsname.
-        DATA cmpname TYPE seocmpname.
+        DATA class_name TYPE string.
+        DATA cmpname TYPE string.
         DATA cmptype TYPE seocmptype.
         DATA clstype  TYPE seoclstype.
         DATA exists TYPE abap_bool.
@@ -152,8 +152,8 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
               object   TYPE trobjtype,
               obj_name TYPE trobj_name.
 
-        DATA found_class_name TYPE seoclsname.
-        DATA found_cmpname TYPE seocmpname.
+        DATA found_class_name TYPE string.
+        DATA found_cmpname TYPE string.
 
         cl_oo_include_naming=>get_trkey_by_include(
           EXPORTING

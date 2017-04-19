@@ -24,7 +24,7 @@ CLASS z2mse_extr3_initial_elements DEFINITION
         !top_packages           TYPE ty_s_pack
         !sub_packages_filter    TYPE ty_s_pack OPTIONAL
         !including_sub_packages TYPE abap_bool DEFAULT abap_false.
-    TYPES: ty_filter TYPE c LENGTH 30.
+    TYPES: ty_filter TYPE string.
     METHODS select_specific
       IMPORTING
         model_builder         TYPE REF TO z2mse_extr3_model_builder

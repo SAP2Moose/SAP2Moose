@@ -27,7 +27,7 @@ CLASS ltcl_class IMPLEMENTATION.
 
     DATA r_result TYPE REF TO z2mse_extr3_elements.
 
-    DATA: class_name_act TYPE seoclsname,
+    DATA: class_name_act TYPE string,
           class_name_exp TYPE seoclsname,
           is_found       TYPE abap_bool,
           new_element_id TYPE i.
@@ -162,7 +162,7 @@ CLASS ltcl_interface IMPLEMENTATION.
 
     DATA r_result TYPE REF TO z2mse_extr3_elements.
 
-    DATA: class_name_act TYPE seoclsname,
+    DATA: class_name_act TYPE string,
           class_name_exp TYPE seoclsname,
           is_found       TYPE abap_bool,
           new_element_id TYPE i.
@@ -263,9 +263,9 @@ CLASS ltcl_component IMPLEMENTATION.
 
     DATA r_result TYPE REF TO z2mse_extr3_elements.
 
-    DATA: class_name_act TYPE seoclsname,
+    DATA: class_name_act TYPE string,
           class_name_exp TYPE seoclsname,
-          cmpname_act    TYPE seocmpname,
+          cmpname_act    TYPE string,
           cmpname_exp    TYPE seocmpname,
           cmptype_act    TYPE seocmptype,
           cmptype_exp    TYPE seocmptype,
