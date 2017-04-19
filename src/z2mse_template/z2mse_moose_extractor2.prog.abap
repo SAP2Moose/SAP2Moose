@@ -1,5 +1,5 @@
 *
-* This is version 0.4.0
+* This is version 0.4.1
 *
 *The MIT License (MIT)
 *
@@ -42,7 +42,7 @@ SELECT-OPTIONS s_spack FOR tadir-devclass.
 DATA: element_filter TYPE string.
 PARAMETERS p_eltyp TYPE text30.
 PARAMETERS p_elpar TYPE c LENGTH 30.
-PARAMETERS p_elnam TYPE c LENGTH 30.
+PARAMETERS p_elnam TYPE c LENGTH 61.
 PARAMETERS p_sub AS CHECKBOX DEFAULT 'X'.
 PARAMETERS p_nup TYPE i DEFAULT -1.
 PARAMETERS p_ndown TYPE i DEFAULT -1.
@@ -262,11 +262,19 @@ START-OF-SELECTION.
   ELSEIF     lt_pack IS INITIAL
          AND ( p_eltyp IS NOT INITIAL OR p_elpar IS NOT INITIAL OR p_elnam IS NOT INITIAL ).
 
+    DATA: p_eltyp_string TYPE string,
+          p_elpar_string TYPE string,
+          p_elnam_string TYPE string.
+
+    p_eltyp_string = p_eltyp.
+    p_elpar_string = p_elpar.
+    p_elnam_string = p_elnam.
+
     initial_elements->select_specific( EXPORTING model_builder         = model_builder
                                                  element_manager       = element_manager
-                                                 i_element_type_filter = p_eltyp
-                                                 i_parent_name_filter  = p_elpar
-                                                 i_name_filter         = p_elnam ).
+                                                 i_element_type_filter = p_eltyp_string
+                                                 i_parent_name_filter  = p_elpar_string
+                                                 i_name_filter         = p_elnam_string ).
   ELSE.
 
     FORMAT COLOR COL_TOTAL.
