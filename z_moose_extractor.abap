@@ -1,7 +1,7 @@
-* generated on system NPL at 11.04.2017 on 21:58:52
+* generated on system NPL at 19.04.2017 on 20:20:03
 
 *
-* This is version 0.4.0
+* This is version 0.4.1
 *
 *The MIT License (MIT)
 *
@@ -44,7 +44,7 @@ SELECT-OPTIONS s_spack FOR tadir-devclass.
 DATA: element_filter TYPE string.
 PARAMETERS p_eltyp TYPE text30.
 PARAMETERS p_elpar TYPE c LENGTH 30.
-PARAMETERS p_elnam TYPE c LENGTH 30.
+PARAMETERS p_elnam TYPE c LENGTH 61.
 PARAMETERS p_sub AS CHECKBOX DEFAULT 'X'.
 PARAMETERS p_nup TYPE i DEFAULT -1.
 PARAMETERS p_ndown TYPE i DEFAULT -1.
@@ -1743,8 +1743,8 @@ CLASS cl_extr3_classes DEFINITION
 
 
     TYPES: BEGIN OF ty_class_component,
-             clsname TYPE seoclsname,
-             cmpname TYPE seocmpname,
+             clsname TYPE string,
+             cmpname TYPE string,
              cmptype TYPE seocmptype,
              mtdtype TYPE seomtdtype,
            END OF ty_class_component.
@@ -1758,15 +1758,15 @@ CLASS cl_extr3_classes DEFINITION
         VALUE(r_instance) TYPE REF TO cl_extr3_classes.
     METHODS add
       IMPORTING
-        class                 TYPE seoclsname
+        class                   TYPE string
       EXPORTING
-        VALUE(is_added)       TYPE abap_bool
-        VALUE(new_element_id) TYPE cl_extr3_element_manager=>element_id_type
-        class_components      TYPE ty_class_components.
+        VALUE(is_added)         TYPE abap_bool
+        VALUE(new_element_id)   TYPE cl_extr3_element_manager=>element_id_type
+        VALUE(class_components) TYPE ty_class_components.
     METHODS add_component
       IMPORTING
-        clsname               TYPE seoclsname
-        cmpname               TYPE seocmpname
+        clsname               TYPE string
+        cmpname               TYPE string
         is_specific           TYPE abap_bool
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
@@ -1775,15 +1775,15 @@ CLASS cl_extr3_classes DEFINITION
       IMPORTING
         element_id        TYPE i
       EXPORTING
-        VALUE(class_name) TYPE seoclsname
+        VALUE(class_name) TYPE string
         VALUE(clstype)    TYPE seoclstype
         VALUE(exists)     TYPE abap_bool.
     METHODS comp_name
       IMPORTING
         element_id        TYPE i
       EXPORTING
-        VALUE(class_name) TYPE seoclsname
-        VALUE(cmpname)    TYPE seocmpname
+        VALUE(class_name) TYPE string
+        VALUE(cmpname)    TYPE string
         VALUE(cmptype)    TYPE seocmptype
         VALUE(exists)     TYPE abap_bool.
     METHODS make_model REDEFINITION.
@@ -1794,7 +1794,7 @@ CLASS cl_extr3_classes DEFINITION
 
     TYPES: BEGIN OF element_type,
              element_id TYPE cl_extr3_element_manager=>element_id_type,
-             class_name TYPE seoclsname,
+             class_name TYPE string,
              clstype    TYPE seoclstype,
              "is_interface TYPE abap_bool,
            END OF element_type.
@@ -1803,17 +1803,17 @@ CLASS cl_extr3_classes DEFINITION
 
     TYPES: BEGIN OF element_comp_type,
              element_id TYPE cl_extr3_element_manager=>element_id_type,
-             clsname    TYPE seoclsname,
-             cmpname    TYPE seocmpname,
+             clsname    TYPE string,
+             cmpname    TYPE string,
              cmptype    TYPE seocmptype,
              mtdtype    TYPE seomtdtype,
            END OF element_comp_type.
     DATA elements_comp_element_id TYPE HASHED TABLE OF element_comp_type WITH UNIQUE KEY element_id.
-    DATA elements_comp_clsname_cmpname TYPE HASHED TABLE OF element_comp_type WITH UNIQUE KEY clsname cmpname.
+    DATA elements_comp_clsname_cmpname TYPE SORTED TABLE OF element_comp_type WITH UNIQUE KEY clsname cmpname.
 
     TYPES: BEGIN OF element_metarel_type,
              element_id TYPE cl_extr3_element_manager=>element_id_type,
-             refclsname TYPE seoclsname,
+             refclsname TYPE string,
              reltype    TYPE seoreltype,
            END OF element_metarel_type.
     DATA elements_metarel_element_id TYPE HASHED TABLE OF element_metarel_type WITH UNIQUE KEY element_id.
@@ -1821,8 +1821,8 @@ CLASS cl_extr3_classes DEFINITION
 
     METHODS _add_component
       IMPORTING
-        clsname               TYPE seoclsname
-        cmpname               TYPE seocmpname
+        clsname               TYPE string
+        cmpname               TYPE string
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
         VALUE(is_added_now)   TYPE abap_bool
@@ -1830,13 +1830,13 @@ CLASS cl_extr3_classes DEFINITION
 
     METHODS _add_metarel
       IMPORTING
-        clsname TYPE seoclsname.
+        clsname TYPE string.
 
     "! Call me only after checking that the component to be added is not already added.
     METHODS _add_single_component_to_class
       IMPORTING
-        i_found_class_name      TYPE seoclsname
-        i_found_cmpname         TYPE seocmpname
+        i_found_class_name      TYPE string
+        i_found_cmpname         TYPE string
         i_found_cmptype         TYPE seocmptype
         i_found_mtdtype         TYPE seomtdtype
       RETURNING
@@ -1959,7 +1959,7 @@ CLASS cl_extr3_tables DEFINITION
         VALUE(r_instance) TYPE REF TO cl_extr3_tables.
     METHODS add
       IMPORTING
-        table                 TYPE tabname
+        table                 TYPE string
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
         VALUE(new_element_id) TYPE cl_extr3_element_manager=>element_id_type.
@@ -2055,11 +2055,11 @@ CLASS cl_extr3_tadir_builder DEFINITION
     METHODS search_up REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
-    DATA: tables         TYPE REF TO cl_extr3_tables,
-          classes        TYPE REF TO cl_extr3_classes,
-          programs       TYPE REF TO cl_extr3_programs,
+    DATA: tables                TYPE REF TO cl_extr3_tables,
+          classes               TYPE REF TO cl_extr3_classes,
+          programs              TYPE REF TO cl_extr3_programs,
           web_dynpro_components TYPE REF TO cl_extr3_web_dynpro_comp,
-          parent_package TYPE REF TO cl_extr3_parent_package.
+          parent_package        TYPE REF TO cl_extr3_parent_package.
 ENDCLASS.
 CLASS cl_extr3_where_used_builder DEFINITION
   INHERITING FROM cl_extr3_association_build
@@ -2106,7 +2106,7 @@ CLASS cl_extr3_initial_elements DEFINITION
         !top_packages           TYPE ty_s_pack
         !sub_packages_filter    TYPE ty_s_pack OPTIONAL
         !including_sub_packages TYPE abap_bool DEFAULT abap_false.
-    TYPES: ty_filter TYPE c LENGTH 30.
+    TYPES: ty_filter TYPE string.
     METHODS select_specific
       IMPORTING
         model_builder         TYPE REF TO cl_extr3_model_builder
@@ -2340,8 +2340,8 @@ CLASS CL_EXTR3_ACCESS_OR_INVOCATN IMPLEMENTATION.
     CASE invoced_element->type.
       WHEN invoced_element->class_type.
         DATA classes TYPE REF TO cl_extr3_classes.
-        DATA: invoced_class_name TYPE seoclsname,
-              invoced_cmpname    TYPE seocmpname,
+        DATA: invoced_class_name TYPE string,
+              invoced_cmpname    TYPE string,
               invoced_cmptype    TYPE seocmptype.
 
         classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
@@ -2377,8 +2377,8 @@ CLASS CL_EXTR3_ACCESS_OR_INVOCATN IMPLEMENTATION.
     CASE invocing_element->type.
       WHEN invocing_element->class_type.
 
-        DATA: invocing_class_name TYPE seoclsname,
-              invocing_cmpname    TYPE seocmpname.
+        DATA: invocing_class_name TYPE string,
+              invocing_cmpname    TYPE string.
 
         classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
 
@@ -2531,14 +2531,14 @@ ENDCLASS.
 CLASS CL_EXTR3_TADIR_BUILDER IMPLEMENTATION.
   METHOD search_down.
 
-    DATA: element        TYPE REF TO cl_extr3_elements,
-          package        TYPE REF TO cl_extr3_packages,
-          is_found       TYPE abap_bool,
-          new_element_id TYPE cl_extr3_element_manager=>element_id_type,
-          class_name     TYPE seoclsname,
-          tabname        TYPE tabname,
-          program        TYPE PROGNAME,
-          WDY_COMPONENT_NAME TYPE WDY_COMPONENT_NAME.
+    DATA: element            TYPE REF TO cl_extr3_elements,
+          package            TYPE REF TO cl_extr3_packages,
+          is_found           TYPE abap_bool,
+          new_element_id     TYPE cl_extr3_element_manager=>element_id_type,
+          class_name         TYPE string,
+          tabname            TYPE string,
+          program            TYPE progname,
+          wdy_component_name TYPE wdy_component_name.
 
     element = element_manager->get_element( element_id ).
 
@@ -2593,10 +2593,10 @@ CLASS CL_EXTR3_TADIR_BUILDER IMPLEMENTATION.
 
               WHEN 'WDYN'.
 
-              WDY_COMPONENT_NAME = tadir-obj_name.
-              web_dynpro_components->add( EXPORTING wdy_component_name = wdy_component_name
-                                          IMPORTING is_added       = is_found
-                                                    new_element_id = new_element_id ).
+                wdy_component_name = tadir-obj_name.
+                web_dynpro_components->add( EXPORTING wdy_component_name = wdy_component_name
+                                            IMPORTING is_added       = is_found
+                                                      new_element_id = new_element_id ).
 
               WHEN OTHERS.
                 " TBD handle
@@ -2636,7 +2636,7 @@ CLASS CL_EXTR3_TADIR_BUILDER IMPLEMENTATION.
           package        TYPE REF TO cl_extr3_packages,
           is_found       TYPE abap_bool,
           new_element_id TYPE cl_extr3_element_manager=>element_id_type,
-          class_name     TYPE seoclsname,
+          class_name     TYPE string,
           clstype        TYPE seoclstype,
           tabname        TYPE tabname.
 
@@ -2725,8 +2725,8 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
 
     CASE element->type.
       WHEN element->class_type.
-        DATA class_name TYPE seoclsname.
-        DATA cmpname TYPE seocmpname.
+        DATA class_name TYPE string.
+        DATA cmpname TYPE string.
         DATA cmptype TYPE seocmptype.
         DATA clstype  TYPE seoclstype.
         DATA exists TYPE abap_bool.
@@ -2835,8 +2835,8 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
               object   TYPE trobjtype,
               obj_name TYPE trobj_name.
 
-        DATA found_class_name TYPE seoclsname.
-        DATA found_cmpname TYPE seocmpname.
+        DATA found_class_name TYPE string.
+        DATA found_cmpname TYPE string.
 
         cl_oo_include_naming=>get_trkey_by_include(
           EXPORTING
@@ -2955,12 +2955,21 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
   ENDMETHOD.
   METHOD add.
 
-    DATA element TYPE element_type.
+    DATA: element      TYPE element_type,
+          element_comp TYPE element_comp_type.
 
     READ TABLE elements_class_name INTO element WITH KEY class_name = class.
     IF sy-subrc EQ 0.
       is_added = abap_true.
       new_element_id = element-element_id.
+      LOOP AT elements_comp_clsname_cmpname INTO element_comp WHERE clsname = class.
+        DATA class_component TYPE cl_extr3_classes=>ty_class_component.
+        class_component-clsname = element_comp-clsname.
+        class_component-cmpname = element_comp-cmpname.
+        class_component-cmptype = element_comp-cmptype.
+        class_component-mtdtype = element_comp-mtdtype.
+        INSERT class_component INTO TABLE class_components.
+      ENDLOOP.
     ELSE.
 
       " Does table exists?
@@ -2992,8 +3001,6 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
           WHERE cmptype <> 3 " A type
             AND clsname = class.
 
-
-      DATA class_component  TYPE ty_class_component.
 
       LOOP AT class_components INTO class_component.
 
@@ -3148,8 +3155,8 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
     ELSE.
 
       " Does component exists?
-      DATA: found_class_name TYPE seoclsname,
-            found_cmpname    TYPE seocmpname,
+      DATA: found_class_name TYPE string,
+            found_cmpname    TYPE string,
             found_cmptype    TYPE seocmptype,
             found_mtdtype    TYPE seomtdtype.
 
@@ -3221,9 +3228,12 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
       IF relation-reltype EQ 1. " Interface
 
         DATA: interface_class_components TYPE ty_class_components,
-              interface_class_component  TYPE ty_class_component.
+              interface_class_component  TYPE ty_class_component,
+              reclsname_string           TYPE string.
 
-        me->add( EXPORTING class            = relation-refclsname
+        reclsname_string = relation-refclsname.
+
+        me->add( EXPORTING class            = reclsname_string
                  IMPORTING is_added         = is_added
                            new_element_id   = new_element_id
                            class_components = interface_class_components ).
@@ -3284,7 +3294,7 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
 
   ENDMETHOD.
   METHOD name.
-    DATA: class_name TYPE seoclsname,
+    DATA: class_name TYPE string,
           clstype    TYPE seoclstype,
           exists     TYPE abap_bool.
 
@@ -3309,7 +3319,7 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
 
     ELSE.
 
-      DATA: cmpname TYPE seocmpname,
+      DATA: cmpname TYPE string,
             cmptype TYPE seocmptype.
 
       comp_name( EXPORTING element_id = element_id
@@ -4812,11 +4822,19 @@ START-OF-SELECTION.
   ELSEIF     lt_pack IS INITIAL
          AND ( p_eltyp IS NOT INITIAL OR p_elpar IS NOT INITIAL OR p_elnam IS NOT INITIAL ).
 
+    DATA: p_eltyp_string TYPE string,
+          p_elpar_string TYPE string,
+          p_elnam_string TYPE string.
+
+    p_eltyp_string = p_eltyp.
+    p_elpar_string = p_elpar.
+    p_elnam_string = p_elnam.
+
     initial_elements->select_specific( EXPORTING model_builder         = model_builder
                                                  element_manager       = element_manager
-                                                 i_element_type_filter = p_eltyp
-                                                 i_parent_name_filter  = p_elpar
-                                                 i_name_filter         = p_elnam ).
+                                                 i_element_type_filter = p_eltyp_string
+                                                 i_parent_name_filter  = p_elpar_string
+                                                 i_name_filter         = p_elnam_string ).
   ELSE.
 
     FORMAT COLOR COL_TOTAL.
