@@ -29,11 +29,11 @@ CLASS z2mse_extr3_classes DEFINITION
         VALUE(r_instance) TYPE REF TO z2mse_extr3_classes.
     METHODS add
       IMPORTING
-        class                 TYPE string
+        class                   TYPE string
       EXPORTING
-        VALUE(is_added)       TYPE abap_bool
-        VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type
-        class_components      TYPE ty_class_components.
+        VALUE(is_added)         TYPE abap_bool
+        VALUE(new_element_id)   TYPE z2mse_extr3_element_manager=>element_id_type
+        VALUE(class_components) TYPE ty_class_components.
     METHODS add_component
       IMPORTING
         clsname               TYPE string
@@ -80,7 +80,7 @@ CLASS z2mse_extr3_classes DEFINITION
              mtdtype    TYPE seomtdtype,
            END OF element_comp_type.
     DATA elements_comp_element_id TYPE HASHED TABLE OF element_comp_type WITH UNIQUE KEY element_id.
-    DATA elements_comp_clsname_cmpname TYPE HASHED TABLE OF element_comp_type WITH UNIQUE KEY clsname cmpname.
+    DATA elements_comp_clsname_cmpname TYPE SORTED TABLE OF element_comp_type WITH UNIQUE KEY clsname cmpname.
 
     TYPES: BEGIN OF element_metarel_type,
              element_id TYPE z2mse_extr3_element_manager=>element_id_type,
@@ -117,17 +117,26 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
+CLASS z2mse_extr3_classes IMPLEMENTATION.
 
 
   METHOD add.
 
-    DATA element TYPE element_type.
+    DATA: element      TYPE element_type,
+          element_comp TYPE element_comp_type.
 
     READ TABLE elements_class_name INTO element WITH KEY class_name = class.
     IF sy-subrc EQ 0.
       is_added = abap_true.
       new_element_id = element-element_id.
+      LOOP AT elements_comp_clsname_cmpname INTO element_comp WHERE clsname = class.
+        DATA class_component TYPE z2mse_extr3_classes=>ty_class_component.
+        class_component-clsname = element_comp-clsname.
+        class_component-cmpname = element_comp-cmpname.
+        class_component-cmptype = element_comp-cmptype.
+        class_component-mtdtype = element_comp-mtdtype.
+        INSERT class_component INTO TABLE class_components.
+      ENDLOOP.
     ELSE.
 
       " Does table exists?
@@ -163,8 +172,6 @@ CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
             AND clsname = class.
 
       END-TEST-SEAM.
-
-      DATA class_component  TYPE ty_class_component.
 
       LOOP AT class_components INTO class_component.
 
