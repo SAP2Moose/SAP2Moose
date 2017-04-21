@@ -8,6 +8,10 @@ Legend
 + : added
 - : removed
 
+21.04.2017 v0.4.2
+-----------------
++ Fix issue 58 Too few characters for list of using elements
+
 19.04.2017 v0.4.1
 -----------------
 Fix serious errors if interfaces are used
