@@ -1,7 +1,7 @@
-* generated on system NPL at 19.04.2017 on 20:20:03
+* generated on system NPL at 21.04.2017 on 15:28:57
 
 *
-* This is version 0.4.1
+* This is version 0.4.2
 *
 *The MIT License (MIT)
 *
@@ -4713,7 +4713,7 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
              (3) 'AL',
              (30) 'Type',
              (30) 'Name of Parent',
-             (30) 'Name'.
+             (61) 'Name'.
       FORMAT COLOR COL_BACKGROUND.
 
       LOOP AT fes INTO fe.
@@ -4723,7 +4723,7 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
                 (3) fe-alternate_level,
                 (30) fe-element_type,
                 (30) fe-parent_name,
-                (30) fe-name.
+                (61) fe-name. " Interface method and attributes can yield to very long names. So 2 times 30 plus 1 should be enough.
 
       ENDLOOP.
 
