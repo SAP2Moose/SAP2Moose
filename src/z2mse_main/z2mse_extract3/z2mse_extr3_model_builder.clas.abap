@@ -476,7 +476,7 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
              (3) 'AL',
              (30) 'Type',
              (30) 'Name of Parent',
-             (30) 'Name'.
+             (61) 'Name'.
       FORMAT COLOR COL_BACKGROUND.
 
       LOOP AT fes INTO fe.
@@ -486,7 +486,7 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
                 (3) fe-alternate_level,
                 (30) fe-element_type,
                 (30) fe-parent_name,
-                (30) fe-name.
+                (61) fe-name. " Interface method and attributes can yield to very long names. So 2 times 30 plus 1 should be enough.
 
       ENDLOOP.
 
