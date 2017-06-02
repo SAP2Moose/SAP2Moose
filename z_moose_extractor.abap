@@ -1,7 +1,7 @@
-* generated on system NPL at 21.04.2017 on 15:28:57
+* generated on system NPL at 02.06.2017 on 12:00:58
 
 *
-* This is version 0.4.2
+* This is version 0.4.3
 *
 *The MIT License (MIT)
 *
@@ -2976,7 +2976,8 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
       DATA: found_class_name TYPE seoclsname,
             found_class_type TYPE seoclstype.
 
-        SELECT SINGLE clsname clstype FROM seoclass INTO ( found_class_name , found_class_type ) WHERE clsname = class.
+        " No blank between ( and found... to be 7.02 compatible
+        SELECT SINGLE clsname clstype FROM seoclass INTO (found_class_name , found_class_type ) WHERE clsname = class.
 
       IF found_class_name IS NOT INITIAL.
         is_added = abap_true.
@@ -3161,7 +3162,7 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
             found_mtdtype    TYPE seomtdtype.
 
         SELECT SINGLE clsname cmpname cmptype mtdtype FROM seocompo
-          INTO ( found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = clsname
+          INTO (found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = clsname
                                                                                    AND cmpname = cmpname.
 
       IF found_class_name IS NOT INITIAL.
@@ -3493,7 +3494,8 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
       " Does the program exist?
       DATA found_program TYPE progname.
       DATA found_subc    TYPE subc.
-        SELECT SINGLE name subc FROM progdir INTO ( found_program, found_subc ) WHERE name = program.
+        " No blank between ( and found... to be 7.02 compatible
+        SELECT SINGLE name subc FROM progdir INTO (found_program, found_subc ) WHERE name = program.
       IF found_program IS NOT INITIAL.
         is_added = abap_true.
       ENDIF.
@@ -3707,7 +3709,8 @@ CLASS CL_EXTR3_TABLES IMPLEMENTATION.
       " Does table exists?
       DATA found_tabname TYPE tabname.
       DATA found_tabclass TYPE tabclass.
-        SELECT tabname tabclass FROM dd02l INTO ( found_tabname, found_tabclass ) WHERE tabname = table.
+        " No blank between ( and found... to be 7.02 compatible
+        SELECT tabname tabclass FROM dd02l INTO (found_tabname, found_tabclass ) WHERE tabname = table.
 
         ENDSELECT.
       IF     found_tabname IS NOT INITIAL
@@ -3889,7 +3892,8 @@ CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
             found_controller_name TYPE seocmpname.
 
         SELECT SINGLE component_name controller_name FROM wdy_controller
-          INTO ( found_component_name, found_controller_name ) WHERE component_name  = wdy_component_name
+          " No blank between ( and found to be 7.02 compatible
+          INTO (found_component_name, found_controller_name ) WHERE component_name  = wdy_component_name
                                                                  AND controller_name  = wdy_controller_name
                                                                  AND version = 'A'.
 
@@ -4397,7 +4401,9 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
       WHILE something_to_be_done_up EQ abap_true.
 
-        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_up }|.
+        DATA temp TYPE string.
+        temp = |Search up for level { level_to_search_up }|. "To be 7.02 compatible
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
 
         something_to_be_done_up = abap_false.
         DATA workload TYPE found_in_levels_type.
@@ -4452,7 +4458,8 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
       WHILE something_to_be_done_down EQ abap_true.
 
-        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_down }|.
+        temp = |Search up for level { level_to_search_down }|."To be 7.02 compatible
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
 
         something_to_be_done_down = abap_false.
         CLEAR workload.
@@ -4494,7 +4501,7 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
     " Post search
 
-    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Final actions of search|.
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Final actions of search'.
 
     is_post_selection = abap_true.
 
@@ -4737,7 +4744,7 @@ ENDCLASS.
 CLASS CL_EXTRACT3 IMPLEMENTATION.
   METHOD extract.
 
-    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Collect initial elements|.
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Collect initial elements'.
 
     model_builder->initial_selection_started( ).
 
@@ -4767,7 +4774,7 @@ CLASS CL_EXTRACT3 IMPLEMENTATION.
     model_builder->search( i_search_up           = i_search_up
                            i_search_down         = i_search_down ).
 
-    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Make model file|.
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Make model file'.
 
     mse_model = element_manager->make_model( ).
 
