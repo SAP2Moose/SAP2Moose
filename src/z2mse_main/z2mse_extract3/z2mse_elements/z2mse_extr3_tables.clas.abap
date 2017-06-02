@@ -58,7 +58,8 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
       DATA found_tabname TYPE tabname.
       DATA found_tabclass TYPE tabclass.
       TEST-SEAM dd02l.
-        SELECT tabname tabclass FROM dd02l INTO ( found_tabname, found_tabclass ) WHERE tabname = table.
+        " No blank between ( and found... to be 7.02 compatible
+        SELECT tabname tabclass FROM dd02l INTO (found_tabname, found_tabclass ) WHERE tabname = table.
 
         ENDSELECT.
       END-TEST-SEAM.

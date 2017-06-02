@@ -45,7 +45,7 @@ CLASS Z2MSE_EXTRACT3 IMPLEMENTATION.
 
   METHOD extract.
 
-    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Collect initial elements|.
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Collect initial elements'.
 
     model_builder->initial_selection_started( ).
 
@@ -75,7 +75,7 @@ CLASS Z2MSE_EXTRACT3 IMPLEMENTATION.
     model_builder->search( i_search_up           = i_search_up
                            i_search_down         = i_search_down ).
 
-    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Make model file|.
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Make model file'.
 
     mse_model = element_manager->make_model( ).
 

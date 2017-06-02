@@ -162,7 +162,8 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
 
       TEST-SEAM wdy_controller.
         SELECT SINGLE component_name controller_name FROM wdy_controller
-          INTO ( found_component_name, found_controller_name ) WHERE component_name  = wdy_component_name
+          " No blank between ( and found to be 7.02 compatible
+          INTO (found_component_name, found_controller_name ) WHERE component_name  = wdy_component_name
                                                                  AND controller_name  = wdy_controller_name
                                                                  AND version = 'A'.
       END-TEST-SEAM.

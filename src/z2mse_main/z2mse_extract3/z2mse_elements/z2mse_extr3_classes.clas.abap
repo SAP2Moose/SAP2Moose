@@ -144,7 +144,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
             found_class_type TYPE seoclstype.
 
       TEST-SEAM seoclass.
-        SELECT SINGLE clsname clstype FROM seoclass INTO ( found_class_name , found_class_type ) WHERE clsname = class.
+        " No blank between ( and found... to be 7.02 compatible
+        SELECT SINGLE clsname clstype FROM seoclass INTO (found_class_name , found_class_type ) WHERE clsname = class.
       END-TEST-SEAM.
 
       IF found_class_name IS NOT INITIAL.
@@ -453,7 +454,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
       TEST-SEAM seocompo.
         SELECT SINGLE clsname cmpname cmptype mtdtype FROM seocompo
-          INTO ( found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = clsname
+          INTO (found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = clsname
                                                                                    AND cmpname = cmpname.
       END-TEST-SEAM.
 

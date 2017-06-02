@@ -76,7 +76,8 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
       DATA found_program TYPE progname.
       DATA found_subc    TYPE subc.
       TEST-SEAM progdir.
-        SELECT SINGLE name subc FROM progdir INTO ( found_program, found_subc ) WHERE name = program.
+        " No blank between ( and found... to be 7.02 compatible
+        SELECT SINGLE name subc FROM progdir INTO (found_program, found_subc ) WHERE name = program.
       END-TEST-SEAM.
       IF found_program IS NOT INITIAL.
         is_added = abap_true.

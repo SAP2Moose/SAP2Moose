@@ -272,7 +272,9 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
       WHILE something_to_be_done_up EQ abap_true.
 
-        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_up }|.
+        DATA temp TYPE string.
+        temp = |Search up for level { level_to_search_up }|. "To be 7.02 compatible
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
 
         something_to_be_done_up = abap_false.
         DATA workload TYPE found_in_levels_type.
@@ -327,7 +329,8 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
       WHILE something_to_be_done_down EQ abap_true.
 
-        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Search up for level { level_to_search_down }|.
+        temp = |Search up for level { level_to_search_down }|."To be 7.02 compatible
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
 
         something_to_be_done_down = abap_false.
         CLEAR workload.
@@ -369,7 +372,7 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
     " Post search
 
-    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = |Final actions of search|.
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Final actions of search'.
 
     is_post_selection = abap_true.
 
