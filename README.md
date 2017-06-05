@@ -44,9 +44,9 @@ The logic to display dependency graphs is hosted on Smalltalk Hub [RainerWinkler
 
 It can be used for all suitable Moose models, not only models generated from SAP.
 
-# ABAPGit for development
+# abapGit for development
 
-This repository will use ABAPGit for all objects relevant to the development. The extractor itself is a simple program and can be installed with copy and paste. See wiki for details.
+This repository will use [abapGit](http://abapgit.org) for all objects relevant to the development. The extractor itself is a simple program and can be installed with copy and paste. See wiki for details.
 
 # Further
 
