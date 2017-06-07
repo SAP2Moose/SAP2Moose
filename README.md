@@ -40,7 +40,7 @@ The SAP extractor for this project is hosted in this repository. It is currently
 
 # Adaptable dependency graphs
 
-The logic to display dependency graphs is hosted on Smalltalk Hub [RainerWinkler/RW-Moose-Diagram](http://www.smalltalkhub.com/#!/~RainerWinkler/RW-Moose-Diagram)
+The logic to display dependency graphs is hosted on Smalltalk Hub [RainerWinkler/RW-Moose-Diagram](http://www.smalltalkhub.com/#!/~RainerWinkler/RW-Moose-Diagram) (The link may work only in Firefox).
 
 It can be used for all suitable Moose models, not only models generated from SAP.
 
