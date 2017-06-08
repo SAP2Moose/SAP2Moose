@@ -14,9 +14,42 @@ Create a new program in your SAP system. Open file z_moose_extractor.abap with a
 
 Should work in ABAP 7.02 SP6, but there is currently only a limited test for this release done.
 
-See [YouTube video on how this application is typically used during development](https://youtu.be/0jLN-2AVIvo) for a 2.5 minute demo.
+# Installation
 
 See [YouTube video on how to install this application](https://www.youtube.com/watch?v=_RMeqd5-ZQ4&t=95s) for a complete 14 minute description on how to install and run.
+
+## By downloading Moose 6
+
+Go to [Moose Analysis Installation](http://www.moosetechnology.org/#install) and download an image for Moose 6.0. Extract the zip file, no installer is needed.
+
+## By using the Pharo Launcher
+
+Install the Pharo Launcher from https://ci.inria.fr/pharo/view/Launcher/job/Launcher/ When the installation is done, choose a Moose 6.0 image.
+
+## Add the logic for RW-Moose-Diagram
+
+Execute the Pharo.exe in the extracted folder. Make a left mouseclick into the Pharo desktop and select Playground. Paste the following code into the Playground:
+
+    Gofer new
+        smalltalkhubUser: 'RainerWinkler' project: 'RW-Moose-Diagram';
+        package: 'RWMooseDiagram';
+        load.
+
+Select the complete coding with the mouse. This is mandatory because the Playground will execute only the marked part of the coding. Make a click with the right mouse button and select Do It. 
+
+## A first model
+
+Make a left mouse click in the Pharo desktop and select Moose -> Moose Panel. Click in the upper right on the icon with MSE (Import model from file). Select the mse file that is generated with the SAP extractor. Click on the name of the file. There will now be a list with "All accesses ... All attributes ..."  Make a right click on All classes and choose Visualize -> RW Dependency graph. If the model is very big, it may need some time until the diagram is displayed. See next chapter how to work with it.
+
+## Adaptable dependency graphs
+
+The logic to display dependency graphs is hosted on Smalltalk Hub [RainerWinkler/RW-Moose-Diagram](http://www.smalltalkhub.com/#!/~RainerWinkler/RW-Moose-Diagram) (The link may work only in Firefox).
+
+It can be used for all suitable Moose models, not only models generated from SAP.
+
+# How to use
+
+See [YouTube video on how this application is typically used during development](https://youtu.be/0jLN-2AVIvo) for a 2.5 minute demo.
 
 Make diagrams for real world applications build from classes, methods, attributes, database tables, files, domain specific objects (for instance SAP BW DSO, MultiProvider, transformations, ...). Currently diagrams are often made manually. This is costly, time consuming and error prone. The goal is to generate diagrams like this automatically:
 ![An example of a manually created diagram](../../wiki/figures/DemoApplication2.png)
@@ -37,12 +70,6 @@ See [Moose](http://www.moosetechnology.org/) for further informations on the ana
 # Extract informations to Moose
 
 The SAP extractor for this project is hosted in this repository. It is currently `z_moose_extractor.abap`. The content of this file can be copied into a report and executed.
-
-# Adaptable dependency graphs
-
-The logic to display dependency graphs is hosted on Smalltalk Hub [RainerWinkler/RW-Moose-Diagram](http://www.smalltalkhub.com/#!/~RainerWinkler/RW-Moose-Diagram) (The link may work only in Firefox).
-
-It can be used for all suitable Moose models, not only models generated from SAP.
 
 # abapGit for development
 
