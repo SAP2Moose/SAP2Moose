@@ -1,9 +1,5 @@
 # Dependency graphs
 
-**Support of this project is temporarily suspended.**
-
-Due to license restrictions by SAP, I am currently not able to work with the SAP Minisap I use to maintain this application. I am therefore not able to respond to issues in short time. See for instance https://blogs.sap.com/2016/11/03/sap-nw-as-abap-750-sp02-developer-edition-to-download/#comment-352395 . This may be a shortterm or a longterm problem. Please return to this site for updates. Rainer Winkler
-
 This repository provides a program to extract model data from a SAP system into the analysis platform Moose on Pharo Smalltalk. It uses FAMIX as a flexible enhancable meta model.
 
 Help wanted - Just open an Issue, I (Rainer Winkler) will be happy to answer any question even if the answer may be somewhere to be found here. - Or make a Fork and propose changes or improvements - Or make changes to the Wiki and improve the documentation, the Wiki is open to be edited by everyone.
