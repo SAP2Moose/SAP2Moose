@@ -1,5 +1,9 @@
 # Dependency graphs
 
+**License problems regarding SAP AS ABAP 7.50 SP02 Developer Edition are probably solved**
+
+There is currently a bug fix for the Minisap in preparation that should solve the license issues that occured after 30 June 2017. I will therefore again able to support this application.
+
 This repository provides a program to extract model data from a SAP system into the analysis platform Moose on Pharo Smalltalk. It uses FAMIX as a flexible enhancable meta model.
 
 Help wanted - Just open an Issue, I (Rainer Winkler) will be happy to answer any question even if the answer may be somewhere to be found here. - Or make a Fork and propose changes or improvements - Or make changes to the Wiki and improve the documentation, the Wiki is open to be edited by everyone.
