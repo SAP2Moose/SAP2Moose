@@ -1,7 +1,7 @@
-* generated on system NPL at 02.06.2017 on 12:00:58
+* generated on system NPL at 05.07.2017 on 22:47:22
 
 *
-* This is version 0.4.3
+* This is version 0.4.4
 *
 *The MIT License (MIT)
 *
@@ -2790,10 +2790,22 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
             ASSERT 1 = 2.
         ENDCASE.
 
-        where_used_name = class_name && |\\| && otype && |:| && cmpname.
+        FIND '~' IN cmpname.
 
+        IF sy-subrc <> 0.
 
+          where_used_name = class_name && |\\| && otype && |:| && cmpname.
 
+        ELSE.
+
+          DATA: interface_name TYPE string,
+                method_name    TYPE string.
+
+          SPLIT cmpname AT '~' INTO interface_name method_name.
+
+          where_used_name = class_name && |\\IN:| && interface_name && |\\| && otype && |:| && method_name.
+
+        ENDIF.
 
       WHEN element->table_type.
 
@@ -2857,7 +2869,7 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
             WHEN 'METH'.
               found_class_name = obj_name+0(30).
               " TBD include code here?
-              found_cmpname = obj_name+30(30).
+              found_cmpname = obj_name+30(61).
 
               DATA: temp TYPE seocmpname.
               temp = class_name && |~| && cmpname.
