@@ -25,13 +25,9 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
 
     DATA used_id TYPE i.
 
-    TEST-SEAM get_element.
+    invoced_element = element_manager->get_element( i_element_id = i_association-element_id1 ).
 
-      invoced_element = element_manager->get_element( i_element_id = i_association-element_id1 ).
-
-      invocing_element = element_manager->get_element( i_element_id = i_association-element_id2 ).
-
-    END-TEST-SEAM.
+    invocing_element = element_manager->get_element( i_element_id = i_association-element_id2 ).
 
     CASE invoced_element->type.
       WHEN invoced_element->class_type.

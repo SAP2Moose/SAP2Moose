@@ -45,6 +45,8 @@ CLASS Z2MSE_TEST_CL_A IMPLEMENTATION.
 
 
   METHOD z2mse_test_if_a_00000000000000~method_a_000000000000000000000.
-
+    data: class_b2 TYPE REF TO Z2MSE_TEST_CL_B2.
+    class_b2 = new #( ).
+    class_b2->method_a( ).
   ENDMETHOD.
 ENDCLASS.

@@ -107,10 +107,22 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
             ASSERT 1 = 2.
         ENDCASE.
 
-        where_used_name = class_name && |\\| && otype && |:| && cmpname.
+        FIND '~' IN cmpname.
 
+        IF sy-subrc <> 0.
 
+          where_used_name = class_name && |\\| && otype && |:| && cmpname.
 
+        ELSE.
+
+          DATA: interface_name TYPE string,
+                method_name    TYPE string.
+
+          SPLIT cmpname AT '~' INTO interface_name method_name.
+
+          where_used_name = class_name && |\\IN:| && interface_name && |\\| && otype && |:| && method_name.
+
+        ENDIF.
 
       WHEN element->table_type.
 
