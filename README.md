@@ -10,7 +10,7 @@ Help wanted - Just open an Issue, I (Rainer Winkler) will be happy to answer any
 
 There are currently not many changes in the extractor, just because I am happily using it nearto every day (Rainer Winkler).
 
-Last stable release 0.4.3: [Extractor](../../releases/download/v0.4.3/z_moose_extractor.abap) and [Texts for extractor](../../releases/download/v0.4.3/z_moose_extractor_texts.txt).. This is the first release where data can be analyzed without using Moose. It also provides a Where-Used analysis over multiple levels. This is an early version that is incomplete and should not find all dependencies. ![An example of multi level Where-Used analysis](../../wiki/figures/v0.4.0_MultiLevelWhereUsed.png)
+Last stable release 0.4.4: [Extractor](../../releases/download/v0.4.4/z_moose_extractor.abap) and [Texts for extractor](../../releases/download/v0.4.4/z_moose_extractor_texts.txt).. This is the first release where data can be analyzed without using Moose. It also provides a Where-Used analysis over multiple levels. This is an early version that is incomplete and should not find all dependencies. ![An example of multi level Where-Used analysis](../../wiki/figures/v0.4.0_MultiLevelWhereUsed.png)
 
 Last release 0.3.0: [Extractor](../../releases/download/v0.3.0/z_moose_extractor.abap) and [Texts for extractor](../../releases/download/v0.3.0/z_moose_extractor_texts.txt).. This is the first release where also usage by SAP BW routines is added to the model.
 
