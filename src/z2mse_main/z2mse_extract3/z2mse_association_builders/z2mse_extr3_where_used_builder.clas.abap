@@ -186,7 +186,7 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
             WHEN 'METH'.
               found_class_name = obj_name+0(30).
               " TBD include code here?
-              found_cmpname = obj_name+30(30).
+              found_cmpname = obj_name+30(61).
 
               DATA: temp TYPE seocmpname.
               temp = class_name && |~| && cmpname.
