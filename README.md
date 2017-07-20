@@ -1,12 +1,12 @@
 # Sap2Moose
 
-This is not a tool made or owned by SAP.
-
-## Dependency graphs
-
 This repository provides a program to extract model data from a SAP system into the analysis platform Moose on Pharo Smalltalk. It uses FAMIX as a flexible enhancable meta model.
 
 It allows drawing diagrams that visualize SAP applications with Moose Analysis. It is currently used mainly to generate customizable Dependency Diagrams with the application RW-Moose-Diagram. But it is open to other usages.
+
+This is not a tool made or owned by SAP.
+
+## General
 
 Help wanted - Just open an Issue, I (Rainer Winkler) will be happy to answer any question even if the answer may be somewhere to be found here. - Or make a Fork and propose changes or improvements - Or make changes to the Wiki and improve the documentation, the Wiki is open to be edited by everyone.
 
