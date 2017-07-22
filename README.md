@@ -36,7 +36,7 @@ Install the Pharo Launcher from https://ci.inria.fr/pharo/view/Launcher/job/Laun
 
 Load [RWDiagram Image](http://www.poaceae.de/RWDiagram/Images/Windows/RWDiagram.zip) and run Pharo.exe after downloading. For Mac and Linux load the image and changes and add them to a virtual machine downloaded from http://pharo.org/download. You may have to add the PharoV50.sources if a warning is raised while starting the machine.
 
-## Add the logic for RW-Moose-Diagram
+## Add the logic for RW-Moose-Diagram (NEW)
 
 Execute the Pharo.exe in the extracted folder. Make a left mouseclick into the Pharo desktop and select Playground. Paste the following code into the Playground:
 
