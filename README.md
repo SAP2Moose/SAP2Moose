@@ -32,6 +32,10 @@ Go to [Moose Analysis Installation](http://www.moosetechnology.org/#install) and
 
 Install the Pharo Launcher from https://ci.inria.fr/pharo/view/Launcher/job/Launcher/ When the installation is done, choose a Moose 6.0 image.
 
+## By downloading an Image for Windows
+
+Load [RWDiagram Image](http://www.poaceae.de/RWDiagram/Images/Windows/RWDiagram.zip)
+
 ## Add the logic for RW-Moose-Diagram
 
 Execute the Pharo.exe in the extracted folder. Make a left mouseclick into the Pharo desktop and select Playground. Paste the following code into the Playground:
