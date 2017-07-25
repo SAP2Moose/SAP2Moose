@@ -84,6 +84,8 @@ I would like to thank especially:
 
 *Enno Wulff* for making a 7.31 version available and many discussions to improve the extractor and to give hints on what can be done
 
-My company *CubeServ* for encouraging and supporting this project.
-
 And all *colleagues* that made this tool possible!
+
+# Funding
+
+*CubeServ* is encouraging and supporting this project.
