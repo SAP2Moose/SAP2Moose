@@ -16,36 +16,19 @@ Last stable release 0.4.4: [Extractor](../../releases/download/v0.4.4/z_moose_ex
 
 Last release 0.3.0: [Extractor](../../releases/download/v0.3.0/z_moose_extractor.abap) and [Texts for extractor](../../releases/download/v0.3.0/z_moose_extractor_texts.txt).. This is the first release where also usage by SAP BW routines is added to the model.
 
-Create a new program in your SAP system. Open file z_moose_extractor.abap with a text editor and paste the coding in your program. Add texts for convenience. Run the program, select a package and download the file (preferable with extension .mse). Open with Moose to analyze it. Or use release 0.4.0 or higher to have features available that do not require Moose.
-
 Should work in ABAP 7.02 SP6, but there is currently only a limited test for this release done.
 
 # Installation
 
-See [YouTube video on how to install this application](https://www.youtube.com/watch?v=_RMeqd5-ZQ4&t=95s) for a complete 14 minute description on how to install and run.
+See [YouTube video on how to install this application](https://www.youtube.com/watch?v=_RMeqd5-ZQ4&t=95s) for a complete 14 minute description on how to install and run. This describes the installation using the Pharo Launcher, you may prefer to download a preconfigured image.
 
-## By downloading Moose 6
+## Installing the extractor SAP2Moose
 
-Go to [Moose Analysis Installation](http://www.moosetechnology.org/#install) and download an image for Moose 6.0. Extract the zip file, no installer is needed.
+Create a new program in your SAP system. Open file z_moose_extractor.abap with a text editor and paste the coding in your program. Add texts for convenience. Run the program, select a package and download the file (preferable with extension .mse). Open with Moose to analyze it. Or use release 0.4.0 or higher to have features available that do not require Moose.
 
-## By using the Pharo Launcher
+## Installing the Smalltalk application Moose2Model
 
-Install the Pharo Launcher from https://ci.inria.fr/pharo/view/Launcher/job/Launcher/ When the installation is done, choose a Moose 6.0 image.
-
-## By downloading an Image for Windows
-
-Load [RWDiagram Image](http://www.poaceae.de/RWDiagram/Images/Windows/RWDiagram.zip) and run Pharo.exe after downloading. For Mac and Linux load the image and changes and add them to a virtual machine downloaded from http://pharo.org/download. You may have to add the PharoV50.sources if a warning is raised while starting the machine.
-
-## Add the logic for RW-Moose-Diagram (NEW)
-
-Execute the Pharo.exe in the extracted folder. Make a left mouseclick into the Pharo desktop and select Playground. Paste the following code into the Playground:
-
-    Gofer new
-        smalltalkhubUser: 'RainerWinkler' project: 'RW-Moose-Diagram';
-        package: 'RWMooseDiagram';
-        load.
-
-Select the complete coding with the mouse. This is mandatory because the Playground will execute only the marked part of the coding. Make a click with the right mouse button and select Do It. 
+Please see [github repository for Moose2Model](https://github.com/RainerWinkler/Moose-Diagram)
 
 ## A first model
 
