@@ -28,7 +28,7 @@ Create a new program in your SAP system. Open file z_moose_extractor.abap with a
 
 ## Installing the Smalltalk application Moose2Model
 
-Please see [github repository for Moose2Model](https://github.com/RainerWinkler/Moose-Diagram)
+Please see [github repository for Moose2Model](https://github.com/RainerWinkler/Moose2Model)
 
 ## A first model
 
@@ -72,7 +72,7 @@ This repository will use [abapGit](http://abapgit.org) for all objects relevant 
 
 The local classes of the extractor are now generated using global classes. This allows ABAP Unit to be used to improve the quality and reduce the time needed for implementation. There is now also a new program z_moose_translate_to_local for this conversion. This program can also be used for other projects.
 
-See [Blog on SAP developer network](https://scn.sap.com/community/abap/custom-code-management/blog/2016/03/13/solving-sap-problems-without-reading-code--extract-a-famix-model-to-moose).
+See [Blog on SAP developer network](https://blogs.sap.com/2017/07/23/software-exploration-tool-next-steps/).
 
 # Thanks
 
