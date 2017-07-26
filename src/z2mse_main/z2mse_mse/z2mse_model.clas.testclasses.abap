@@ -614,54 +614,77 @@ CLASS ltcl_test IMPLEMENTATION.
 
     f_cut = NEW #( ).
 
-    f_cut->add_entity( EXPORTING elementname               = 'Type1'
+    f_cut->add_entity( EXPORTING elementname               = 'FAMIX.Type1'
                                  name_group                = 'Group1'
                                  is_named_entity           = abap_true
                                  can_be_referenced_by_name = abap_true
                                  name                      = 'Name1'
                        IMPORTING exists_already_with_id    = DATA(id)
                                  processed_id              = DATA(processed_id) ).
-    f_cut->add_entity( EXPORTING elementname               = 'Type1'
+
+    f_cut->add_entity( EXPORTING elementname               = 'FAMIX.Type1'
                                  name_group                = 'Group1'
                                  is_named_entity           = abap_true
                                  can_be_referenced_by_name = abap_true
                                  name                      = 'Name2'
                        IMPORTING exists_already_with_id    = id
                                  processed_id              = processed_id ).
+
     f_cut->add_reference_by_name( EXPORTING element_id              = 1
 *                                           element_type            =
 *                                           element_name_group      =
 *                                           element_name            =
                                             attribute_name          = 'attribute1'
-                                            type_of_reference       = 'Type1'
+                                            type_of_reference       = 'FAMIX.Type1'
                                             name_group_of_reference = 'Group1'
                                             name_of_reference       = 'Name2' ).
 
     f_cut->add_boolean( EXPORTING element_id         = 0
-                                  element_type       = 'Type1'
+                                  element_type       = 'FAMIX.Type1'
                                   element_name_group = 'Group1'
                                   element_name       = 'Name1'
                                   attribute_name     = 'attr'
                                   is_true            = abap_true ).
 
     f_cut->add_boolean( EXPORTING element_id         = 0
-                                  element_type       = 'Type1'
+                                  element_type       = 'FAMIX.Type1'
                                   element_name_group = 'Group1'
                                   element_name       = 'Name2'
                                   attribute_name     = 'attr'
                                   is_true            = abap_false ).
 
+    f_cut->add_entity( EXPORTING elementname               = 'FAMIX.Type2'
+                                 name_group                = 'Group2'
+                                 is_named_entity           = abap_false
+                                 is_id_required            = abap_true
+                                 can_be_referenced_by_name = abap_false
+                       IMPORTING exists_already_with_id    = id
+                                 processed_id              = processed_id ).
+
+    f_cut->add_reference_by_id( EXPORTING  element_id         = 3
+                                           attribute_name     = 'attribute2'
+                                           reference_id       = 2 ).
+
+    f_cut->add_string( EXPORTING element_id         = 3
+                                 attribute_name     = 'attribute3'
+                                 string             = 'A String' ).
+
     data(model) = f_cut->get_model( ).
 
     data model_exp TYPE f_cut->public_elements_type.
 
-    model_exp = value #( ( element_id = 1 element_type = 'Type1' is_named_entity = abap_true
+    model_exp = value #( ( element_id = 1 element_type = 'FAMIX.Type1' is_named_entity = abap_true
                            public_attributes = value #( ( attribute_id = 1 attribute_type = 'name' string = 'Name1' )
                                                         ( attribute_id = 2 attribute_type = 'attribute1' reference = 2  )
                                                         ( attribute_id = 3 attribute_type = 'attr' boolean = abap_true ) ) )
-                         ( element_id = 2 element_type = 'Type1' is_named_entity = abap_true
+                         ( element_id = 2 element_type = 'FAMIX.Type1' is_named_entity = abap_true
                            public_attributes = value #( ( attribute_id = 1 attribute_type = 'name' string = 'Name2' )
-                                                        ( attribute_id = 4 attribute_type = 'attr' ) ) ) ).
+                                                        ( attribute_id = 4 attribute_type = 'attr' ) ) )
+                         ( element_id = 3 element_type = 'FAMIX.Type2' is_named_entity = abap_false is_id_required = abap_true
+                           public_attributes = value #( "( attribute_id = 1 attribute_type = 'name' string = 'Name1' )
+                                                        ( attribute_id = 1 attribute_type = 'attribute2' reference = 2  )
+                                                        ( attribute_id = 2 attribute_type = 'attribute3' string = |A String| ) ) )
+                                                        ).
 
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
@@ -673,13 +696,16 @@ CLASS ltcl_test IMPLEMENTATION.
 
     DATA lt_mse_mode_exp TYPE f_cut->lines_type.
 
-    lt_mse_mode_exp = VALUE #( ( line = |( (Type1 (id: 1 )| )
+    lt_mse_mode_exp = VALUE #( ( line = |( (FAMIX.Type1 (id: 1 )| )
                                ( line = |  (name 'Name1')| )
                                ( line = |  (attribute1 (ref: 2))| )
                                ( line = |  (attr true))| )
-                               ( line = |(Type1 (id: 2 )| )
+                               ( line = |(FAMIX.Type1 (id: 2 )| )
                                ( line = |  (name 'Name2')| )
-                               ( line = |  (attr false)))| ) ).
+                               ( line = |  (attr false))| )
+                               ( line = |(FAMIX.Type2 (id: 3 )| )
+                               ( line = |  (attribute2 (ref: 2))| )
+                               ( line = |  (attribute3 'A String')))| ) ).
 
     cl_abap_unit_assert=>assert_equals(
       EXPORTING

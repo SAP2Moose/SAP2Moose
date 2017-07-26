@@ -18,6 +18,7 @@ CLASS z2mse_model DEFINITION
     "! @parameter elementname | The name of the FAMIX Element. Like FAMIX.NamedEntity
     "! @parameter name_group | optional to handle cases where names may be duplicates
     "! @parameter is_named_entity | True if the entity has a name
+    "! @parameter is_id_required  | Set true if (id: ...) is always required
     "! @parameter can_be_referenced_by_name | True if referencing by name is possible (For this the name has to be unique)
     "! @parameter name | the name of a FAMIX Entity that inherits from FAMIX.NamedEntity leave empty is is_named_entity is false
     "! @parameter exists_already_with_id | only if can_be_referenced_by_name true. Zero if it does not yet exist, otherwise filled with id
@@ -26,6 +27,7 @@ CLASS z2mse_model DEFINITION
       IMPORTING elementname                   TYPE clike
                 name_group                    TYPE clike DEFAULT ''
                 is_named_entity               TYPE abap_bool
+                is_id_required                TYPE abap_bool DEFAULT ''
                 can_be_referenced_by_name     TYPE abap_bool
                 name                          TYPE clike OPTIONAL
       EXPORTING VALUE(exists_already_with_id) TYPE i
@@ -133,6 +135,7 @@ CLASS z2mse_model DEFINITION
         element_id        TYPE i,
         element_type      TYPE string,
         is_named_entity   TYPE abap_bool,
+        is_id_required    TYPE abap_bool,
         public_attributes TYPE public_attributes_type,
       END OF public_element_type.
     TYPES:
@@ -150,6 +153,7 @@ CLASS z2mse_model DEFINITION
     TYPES: BEGIN OF element_in_model_type,
              element_id      TYPE i,
              is_named_entity TYPE abap_bool,
+             is_id_required  TYPE abap_bool,
              element_type    TYPE string,
            END OF element_in_model_type.
     "! A table with all Elements in the model
@@ -210,11 +214,33 @@ CLASS z2mse_model DEFINITION
 
 ENDCLASS.
 
-CLASS z2mse_model IMPLEMENTATION.
 
-  METHOD constructor.
-    g_processed_id = 0.
+
+CLASS Z2MSE_MODEL IMPLEMENTATION.
+
+
+  METHOD add_boolean.
+
+    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_attribute.
+    ls_attribute-element_id             =  _get_element_id( element_id         = element_id
+                                                   element_type       = element_type
+                                                   element_name_group = element_name_group
+                                                   element_name       = element_name ).
+    ls_attribute-attribute_type = attribute_name.
+    ls_attribute-value_type     = boolean_value.
+    ls_attribute-boolean        = is_true.
+
+    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
+
+    IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
+      ADD 1 TO g_attribute_id.
+      ls_attribute-attribute_id   = g_attribute_id.
+      INSERT ls_attribute INTO TABLE g_attributes.
+    ENDIF.
+
   ENDMETHOD.
+
 
   METHOD add_entity.
 
@@ -249,6 +275,7 @@ CLASS z2mse_model IMPLEMENTATION.
     CLEAR ls_elements_in_model.
     ls_elements_in_model-element_id = g_processed_id.
     ls_elements_in_model-is_named_entity = is_named_entity.
+    ls_elements_in_model-is_id_required = is_id_required.
     ls_elements_in_model-element_type = elementname.
     INSERT ls_elements_in_model INTO TABLE g_elements_in_model.
 
@@ -259,6 +286,129 @@ CLASS z2mse_model IMPLEMENTATION.
     processed_id = g_processed_id.
 
   ENDMETHOD.
+
+
+  METHOD add_reference_by_id.
+
+    DATA ls_attribute TYPE attribute_type. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_attribute.
+    ls_attribute-element_id     =  _get_element_id( element_id         = element_id
+                                                   element_type       = element_type
+                                                   element_name_group = element_name_group
+                                                   element_name       = element_name ).
+    ls_attribute-attribute_type = attribute_name.
+    ls_attribute-value_type     = reference_value.
+    ls_attribute-reference      = reference_id.
+
+    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
+
+    IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
+      ADD 1 TO g_attribute_id.
+      ls_attribute-attribute_id   = g_attribute_id.
+      INSERT ls_attribute INTO TABLE g_attributes.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD add_reference_by_name.
+
+    FIELD-SYMBOLS <named_entity> LIKE LINE OF g_named_entities.
+
+    READ TABLE g_named_entities ASSIGNING <named_entity> WITH TABLE KEY element_type = type_of_reference
+                                                                        element_name_group = name_group_of_reference
+                                                                        element_name = name_of_reference.
+    ASSERT sy-subrc EQ 0. "OK
+
+    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_attribute.
+    ls_attribute-element_id     = _get_element_id( element_id         = element_id
+                                                   element_type       = element_type
+                                                   element_name_group = element_name_group
+                                                   element_name       = element_name ).
+    ls_attribute-attribute_type = attribute_name.
+    ls_attribute-value_type     = reference_value.
+    ls_attribute-reference      = <named_entity>-element_id.
+
+    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
+
+    IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
+      ADD 1 TO g_attribute_id.
+      ls_attribute-attribute_id   = g_attribute_id.
+      INSERT ls_attribute INTO TABLE g_attributes.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD add_string.
+
+    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_attribute.
+    ls_attribute-element_id             =  _get_element_id( element_id         = element_id
+                                                            element_type       = element_type
+                                                            element_name_group = element_name_group
+                                                            element_name       = element_name ).
+    ls_attribute-attribute_type = attribute_name.
+    ls_attribute-value_type     = string_value.
+    ls_attribute-name         = string.
+
+    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
+
+    IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
+      ADD 1 TO g_attribute_id.
+      ls_attribute-attribute_id   = g_attribute_id.
+      INSERT ls_attribute INTO TABLE g_attributes.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD constructor.
+    g_processed_id = 0.
+  ENDMETHOD.
+
+
+  METHOD get_model.
+
+    DATA ls_public_element TYPE public_element_type.
+    DATA ls_public_attribute TYPE public_attribute_type.
+    DATA lt_public_attributes TYPE public_attributes_type.
+
+    CLEAR public_elements.
+
+    DATA ls_elements_in_model LIKE LINE OF g_elements_in_model.
+    LOOP AT g_elements_in_model INTO ls_elements_in_model.
+
+
+
+      CLEAR lt_public_attributes.
+
+      DATA ls_attributes LIKE LINE OF g_attributes.
+      LOOP AT g_attributes INTO ls_attributes WHERE element_id = ls_elements_in_model-element_id.
+
+        CLEAR ls_public_attribute.
+        ls_public_attribute-attribute_id = ls_attributes-attribute_id.
+        ls_public_attribute-attribute_type = ls_attributes-attribute_type.
+        ls_public_attribute-boolean = ls_attributes-boolean.
+        ls_public_attribute-reference = ls_attributes-reference.
+        ls_public_attribute-string = ls_attributes-name.
+        INSERT ls_public_attribute INTO TABLE lt_public_attributes.
+
+      ENDLOOP.
+
+      CLEAR ls_public_element.
+      ls_public_element-element_type = ls_elements_in_model-element_type.
+      ls_public_element-element_id = ls_elements_in_model-element_id.
+      ls_public_element-is_named_entity = ls_elements_in_model-is_named_entity.
+      ls_public_element-is_id_required = ls_elements_in_model-is_id_required.
+      ls_public_element-public_attributes = lt_public_attributes.
+
+      INSERT ls_public_element INTO TABLE public_elements.
+
+    ENDLOOP.
+  ENDMETHOD.
+
 
   METHOD make_mse.
 
@@ -282,7 +432,8 @@ CLASS z2mse_model IMPLEMENTATION.
       ENDIF.
 
       mse_model_line-line = mse_model_line-line && |(| && <element_in_model>-element_type.
-      IF <element_in_model>-is_named_entity EQ abap_true.
+      IF    <element_in_model>-is_named_entity EQ abap_true
+         OR <element_in_model>-is_id_required EQ abap_true.
 
         mse_model_line-line = mse_model_line-line && | (id: | && <element_in_model>-element_id && | )|.
       ENDIF.
@@ -324,140 +475,6 @@ CLASS z2mse_model IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD add_reference_by_name.
-
-    FIELD-SYMBOLS <named_entity> LIKE LINE OF g_named_entities.
-
-    READ TABLE g_named_entities ASSIGNING <named_entity> WITH TABLE KEY element_type = type_of_reference
-                                                                        element_name_group = name_group_of_reference
-                                                                        element_name = name_of_reference.
-    ASSERT sy-subrc EQ 0. "OK
-
-    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-    CLEAR ls_attribute.
-    ls_attribute-element_id     = _get_element_id( element_id         = element_id
-                                                   element_type       = element_type
-                                                   element_name_group = element_name_group
-                                                   element_name       = element_name ).
-    ls_attribute-attribute_type = attribute_name.
-    ls_attribute-value_type     = reference_value.
-    ls_attribute-reference      = <named_entity>-element_id.
-
-    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
-
-    IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
-      ADD 1 TO g_attribute_id.
-      ls_attribute-attribute_id   = g_attribute_id.
-      INSERT ls_attribute INTO TABLE g_attributes.
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD add_reference_by_id.
-
-    DATA ls_attribute TYPE attribute_type. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-    CLEAR ls_attribute.
-    ls_attribute-element_id     =  _get_element_id( element_id         = element_id
-                                                   element_type       = element_type
-                                                   element_name_group = element_name_group
-                                                   element_name       = element_name ).
-    ls_attribute-attribute_type = attribute_name.
-    ls_attribute-value_type     = reference_value.
-    ls_attribute-reference      = reference_id.
-
-    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
-
-    IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
-      ADD 1 TO g_attribute_id.
-      ls_attribute-attribute_id   = g_attribute_id.
-      INSERT ls_attribute INTO TABLE g_attributes.
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD add_string.
-
-    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-    CLEAR ls_attribute.
-    ls_attribute-element_id             =  _get_element_id( element_id         = element_id
-                                                            element_type       = element_type
-                                                            element_name_group = element_name_group
-                                                            element_name       = element_name ).
-    ls_attribute-attribute_type = attribute_name.
-    ls_attribute-value_type     = string_value.
-    ls_attribute-name         = string.
-
-    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
-
-    IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
-      ADD 1 TO g_attribute_id.
-      ls_attribute-attribute_id   = g_attribute_id.
-      INSERT ls_attribute INTO TABLE g_attributes.
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD add_boolean.
-
-    DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-    CLEAR ls_attribute.
-    ls_attribute-element_id             =  _get_element_id( element_id         = element_id
-                                                   element_type       = element_type
-                                                   element_name_group = element_name_group
-                                                   element_name       = element_name ).
-    ls_attribute-attribute_type = attribute_name.
-    ls_attribute-value_type     = boolean_value.
-    ls_attribute-boolean        = is_true.
-
-    " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
-
-    IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
-      ADD 1 TO g_attribute_id.
-      ls_attribute-attribute_id   = g_attribute_id.
-      INSERT ls_attribute INTO TABLE g_attributes.
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD get_model.
-
-    DATA ls_public_element TYPE public_element_type.
-    DATA ls_public_attribute TYPE public_attribute_type.
-    DATA lt_public_attributes TYPE public_attributes_type.
-
-    CLEAR public_elements.
-
-    DATA ls_elements_in_model LIKE LINE OF g_elements_in_model.
-    LOOP AT g_elements_in_model INTO ls_elements_in_model.
-
-
-
-      CLEAR lt_public_attributes.
-
-      DATA ls_attributes LIKE LINE OF g_attributes.
-      LOOP AT g_attributes INTO ls_attributes WHERE element_id = ls_elements_in_model-element_id.
-
-        CLEAR ls_public_attribute.
-        ls_public_attribute-attribute_id = ls_attributes-attribute_id.
-        ls_public_attribute-attribute_type = ls_attributes-attribute_type.
-        ls_public_attribute-boolean = ls_attributes-boolean.
-        ls_public_attribute-reference = ls_attributes-reference.
-        ls_public_attribute-string = ls_attributes-name.
-        INSERT ls_public_attribute INTO TABLE lt_public_attributes.
-
-      ENDLOOP.
-
-      CLEAR ls_public_element.
-      ls_public_element-element_type = ls_elements_in_model-element_type.
-      ls_public_element-element_id = ls_elements_in_model-element_id.
-      ls_public_element-is_named_entity = ls_elements_in_model-is_named_entity.
-      ls_public_element-public_attributes = lt_public_attributes.
-
-      INSERT ls_public_element INTO TABLE public_elements.
-
-    ENDLOOP.
-  ENDMETHOD.
-
 
   METHOD _check_if_attr_already_there.
 
@@ -496,5 +513,4 @@ CLASS z2mse_model IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-
 ENDCLASS.
