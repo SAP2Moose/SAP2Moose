@@ -108,6 +108,8 @@ CLASS ltcl_class IMPLEMENTATION.
 
     DATA: mse_model_act TYPE z2mse_model=>lines_type.
 
+    element_manager->collect_infos( |SYS| ).
+
     mse_model_act = element_manager->make_model( ).
 
     DATA: equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
@@ -345,6 +347,50 @@ CLASS ltcl_component IMPLEMENTATION.
     cl_abap_unit_assert=>assert_equals( msg = 'Expect a reference to an element of type class'
                                         exp = z2mse_extr3_elements=>class_type
                                         act = r_result->type ).
+
+  ENDMETHOD.
+
+ENDCLASS.
+CLASS ltcl_infos DEFINITION DEFERRED.
+CLASS z2mse_extr3_classes DEFINITION LOCAL FRIENDS ltcl_infos.
+CLASS ltcl_infos DEFINITION FINAL FOR TESTING
+  DURATION SHORT
+  RISK LEVEL HARMLESS.
+
+  PRIVATE SECTION.
+    DATA: model_builder   TYPE REF TO z2mse_extr3_model_builder,
+          element_manager TYPE REF TO z2mse_extr3_element_manager,
+          f_cut           TYPE REF TO z2mse_extr3_classes.
+    METHODS:
+      setup,
+      adt_link FOR TESTING RAISING cx_static_check.
+ENDCLASS.
+
+CLASS ltcl_infos IMPLEMENTATION.
+
+  METHOD setup.
+    model_builder = NEW #( ).
+    model_builder->initial_selection_started( ).
+    element_manager = NEW #( i_model_builder = model_builder
+                             i_exclude_found_sap_intf = abap_true ).
+    model_builder->initialize( i_element_manager = element_manager ).
+    f_cut = z2mse_extr3_classes=>get_instance( element_manager ).
+  ENDMETHOD.
+
+  METHOD adt_link.
+
+    f_cut->elements_element_id = VALUE #( ( element_id = 1 clstype = 0 class_name = |CLASS_A| )
+                                          ( element_id = 2 clstype = 1 class_name = |INTF_A| ) ).
+
+    f_cut->collect_infos( sysid = |SYS| ).
+    data: elements_element_id_exp  type hashed table of z2mse_extr3_classes=>element_type WITH UNIQUE KEY element_id.
+
+    elements_element_id_exp = value #( ( element_id = 1 clstype = 0 class_name = |CLASS_A|
+                                         adt_link = |adt://SYS/sap/bc/adt/oo/classes/class_a/source/main| )
+                                       ( element_id = 2 clstype = 1 class_name = |INTF_A|
+                                         adt_link = |adt://SYS/sap/bc/adt/oo/interfaces/intf_a/source/main| ) ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Expect correct adt link' exp = elements_element_id_exp act = f_cut->elements_element_id ).
 
   ENDMETHOD.
 

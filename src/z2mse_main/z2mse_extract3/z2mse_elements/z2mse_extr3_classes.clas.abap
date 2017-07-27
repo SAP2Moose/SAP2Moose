@@ -337,6 +337,10 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       ELSE.
         ASSERT 1 = 2.
       ENDIF.
+
+        element_manager->famix_file_anchor->add( EXPORTING element_id = last_id
+                                                           file_name  = element-adt_link ).
+
       DATA association TYPE z2mse_extr3_element_manager=>association_type.
       LOOP AT associations INTO association WHERE element_id1 = element_id
                                               AND association->type = z2mse_extr3_association=>parent_package_ass.
