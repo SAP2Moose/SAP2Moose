@@ -59,6 +59,7 @@ CLASS z2mse_extr3_classes DEFINITION
         VALUE(exists)     TYPE abap_bool.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
+    METHODS collect_infos REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO z2mse_extr3_classes.
@@ -67,7 +68,7 @@ CLASS z2mse_extr3_classes DEFINITION
              element_id TYPE z2mse_extr3_element_manager=>element_id_type,
              class_name TYPE string,
              clstype    TYPE seoclstype,
-             "is_interface TYPE abap_bool,
+             adt_link   TYPE string,
            END OF element_type.
     DATA elements_element_id TYPE HASHED TABLE OF element_type WITH UNIQUE KEY element_id.
     DATA elements_class_name TYPE HASHED TABLE OF element_type WITH UNIQUE KEY class_name.
@@ -78,6 +79,7 @@ CLASS z2mse_extr3_classes DEFINITION
              cmpname    TYPE string,
              cmptype    TYPE seocmptype,
              mtdtype    TYPE seomtdtype,
+             adt_link   TYPE string,
            END OF element_comp_type.
     DATA elements_comp_element_id TYPE HASHED TABLE OF element_comp_type WITH UNIQUE KEY element_id.
     DATA elements_comp_clsname_cmpname TYPE SORTED TABLE OF element_comp_type WITH UNIQUE KEY clsname cmpname.
@@ -267,6 +269,46 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD collect_infos.
+
+    DATA: part1            TYPE string,
+          part2_classes    TYPE string,
+          part2_interfaces TYPE string,
+          name             TYPE string,
+          part3            TYPE string.
+    "      NPL classes/z2mse_extr3_access/source/main
+    CONCATENATE 'adt://' sysid '/sap/bc/adt/oo/' INTO part1.
+
+    part2_classes = 'classes/'.
+
+    part2_interfaces = 'interfaces/'.
+
+    part3 = '/source/main'.
+
+    FIELD-SYMBOLS: <element> TYPE element_type.
+
+    LOOP AT elements_element_id ASSIGNING <element>.
+
+      name = <element>-class_name.
+
+      TRANSLATE name TO LOWER CASE.
+
+      IF <element>-clstype EQ is_class_type.
+
+        CONCATENATE part1 part2_classes name part3 INTO <element>-adt_link.
+
+      ELSEIF <element>-clstype EQ interface_type.
+
+        CONCATENATE part1 part2_interfaces name part3 INTO <element>-adt_link.
+
+      ELSE.
+        ASSERT 1 = 2.
+      ENDIF.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
   METHOD make_model.
 
     DATA element TYPE element_type.
@@ -295,6 +337,10 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       ELSE.
         ASSERT 1 = 2.
       ENDIF.
+
+        element_manager->famix_file_anchor->add( EXPORTING element_id = last_id
+                                                           file_name  = element-adt_link ).
+
       DATA association TYPE z2mse_extr3_element_manager=>association_type.
       LOOP AT associations INTO association WHERE element_id1 = element_id
                                               AND association->type = z2mse_extr3_association=>parent_package_ass.

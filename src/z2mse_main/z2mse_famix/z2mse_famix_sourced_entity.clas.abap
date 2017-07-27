@@ -1,5 +1,5 @@
 
-CLASS z2mse_famix_sourced_entity DEFINITION ABSTRACT INHERITING FROM Z2MSE_famix_entity
+CLASS z2mse_famix_sourced_entity DEFINITION ABSTRACT INHERITING FROM z2mse_famix_entity
   PUBLIC
   CREATE PUBLIC.
   PUBLIC SECTION.
@@ -21,7 +21,10 @@ CLASS z2mse_famix_sourced_entity DEFINITION ABSTRACT INHERITING FROM Z2MSE_famix
         source_language_name    TYPE clike.
 ENDCLASS.
 
-CLASS z2mse_famix_sourced_entity IMPLEMENTATION.
+
+
+CLASS Z2MSE_FAMIX_SOURCED_ENTITY IMPLEMENTATION.
+
 
   METHOD set_declared_source_language.
     g_model->add_reference_by_name( EXPORTING element_id = element_id
@@ -32,5 +35,4 @@ CLASS z2mse_famix_sourced_entity IMPLEMENTATION.
                                               type_of_reference       = source_language_element
                                               name_of_reference = source_language_name ).
   ENDMETHOD.
-
 ENDCLASS.

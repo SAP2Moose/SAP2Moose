@@ -37,6 +37,7 @@ CLASS z2mse_extr3_web_dynpro_comp DEFINITION
         VALUE(wdy_controller_name) TYPE wdy_controller_name.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
+    METHODS collect_infos REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO z2mse_extr3_web_dynpro_comp.
@@ -207,6 +208,10 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
 
     ENDIF.
 
+  ENDMETHOD.
+
+
+  METHOD collect_infos.
   ENDMETHOD.
 
   METHOD make_model.

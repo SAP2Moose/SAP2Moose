@@ -6,6 +6,11 @@ CLASS z2mse_extr3_elements DEFINITION
 
   PUBLIC SECTION.
 
+    "! True if further informations are collected
+    DATA infos_are_collected TYPE abap_bool.
+    "! Collect further informations
+    METHODS collect_infos IMPORTING sysid TYPE string.
+
     DATA type TYPE c LENGTH 30.
 
     CONSTANTS: package_type          LIKE type VALUE 'package',
@@ -35,6 +40,12 @@ ENDCLASS.
 
 
 CLASS Z2MSE_EXTR3_ELEMENTS IMPLEMENTATION.
+
+
+  METHOD COLLECT_INFOS.
+    " Redefine me
+    ASSERT 1 = 2.
+  ENDMETHOD.
 
 
   METHOD make_model.

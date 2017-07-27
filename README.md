@@ -1,10 +1,12 @@
-# Dependency graphs
-
-**License problems regarding SAP AS ABAP 7.50 SP02 Developer Edition are probably solved**
-
-There is currently a bug fix for the Minisap in preparation that should solve the license issues that occured after 30 June 2017. I will therefore again able to support this application.
+# SAP2Moose
 
 This repository provides a program to extract model data from a SAP system into the analysis platform Moose on Pharo Smalltalk. It uses FAMIX as a flexible enhancable meta model.
+
+It allows drawing diagrams that visualize SAP applications with Moose Analysis. It is currently used mainly to generate customizable Dependency Diagrams with the application RW-Moose-Diagram. But it is open to other usages.
+
+This is not a tool made or owned by SAP.
+
+## General
 
 Help wanted - Just open an Issue, I (Rainer Winkler) will be happy to answer any question even if the answer may be somewhere to be found here. - Or make a Fork and propose changes or improvements - Or make changes to the Wiki and improve the documentation, the Wiki is open to be edited by everyone.
 
@@ -14,32 +16,19 @@ Last stable release 0.4.4: [Extractor](../../releases/download/v0.4.4/z_moose_ex
 
 Last release 0.3.0: [Extractor](../../releases/download/v0.3.0/z_moose_extractor.abap) and [Texts for extractor](../../releases/download/v0.3.0/z_moose_extractor_texts.txt).. This is the first release where also usage by SAP BW routines is added to the model.
 
-Create a new program in your SAP system. Open file z_moose_extractor.abap with a text editor and paste the coding in your program. Add texts for convenience. Run the program, select a package and download the file (preferable with extension .mse). Open with Moose to analyze it. Or use release 0.4.0 or higher to have features available that do not require Moose.
-
 Should work in ABAP 7.02 SP6, but there is currently only a limited test for this release done.
 
 # Installation
 
-See [YouTube video on how to install this application](https://www.youtube.com/watch?v=_RMeqd5-ZQ4&t=95s) for a complete 14 minute description on how to install and run.
+See [YouTube video on how to install this application](https://www.youtube.com/watch?v=_RMeqd5-ZQ4&t=95s) for a complete 14 minute description on how to install and run. This describes the installation using the Pharo Launcher, you may prefer to download a preconfigured image.
 
-## By downloading Moose 6
+## Installing the extractor SAP2Moose
 
-Go to [Moose Analysis Installation](http://www.moosetechnology.org/#install) and download an image for Moose 6.0. Extract the zip file, no installer is needed.
+Create a new program in your SAP system. Open file z_moose_extractor.abap with a text editor and paste the coding in your program. Add texts for convenience. Run the program, select a package and download the file (preferable with extension .mse). Open with Moose to analyze it. Or use release 0.4.0 or higher to have features available that do not require Moose.
 
-## By using the Pharo Launcher
+## Installing the Smalltalk application Moose2Model
 
-Install the Pharo Launcher from https://ci.inria.fr/pharo/view/Launcher/job/Launcher/ When the installation is done, choose a Moose 6.0 image.
-
-## Add the logic for RW-Moose-Diagram
-
-Execute the Pharo.exe in the extracted folder. Make a left mouseclick into the Pharo desktop and select Playground. Paste the following code into the Playground:
-
-    Gofer new
-        smalltalkhubUser: 'RainerWinkler' project: 'RW-Moose-Diagram';
-        package: 'RWMooseDiagram';
-        load.
-
-Select the complete coding with the mouse. This is mandatory because the Playground will execute only the marked part of the coding. Make a click with the right mouse button and select Do It. 
+Please see [github repository for Moose2Model](https://github.com/RainerWinkler/Moose2Model)
 
 ## A first model
 
@@ -83,7 +72,7 @@ This repository will use [abapGit](http://abapgit.org) for all objects relevant 
 
 The local classes of the extractor are now generated using global classes. This allows ABAP Unit to be used to improve the quality and reduce the time needed for implementation. There is now also a new program z_moose_translate_to_local for this conversion. This program can also be used for other projects.
 
-See [Blog on SAP developer network](https://scn.sap.com/community/abap/custom-code-management/blog/2016/03/13/solving-sap-problems-without-reading-code--extract-a-famix-model-to-moose).
+See [Blog on SAP developer network](https://blogs.sap.com/2017/07/23/software-exploration-tool-next-steps/).
 
 # Thanks
 
@@ -95,6 +84,8 @@ I would like to thank especially:
 
 *Enno Wulff* for making a 7.31 version available and many discussions to improve the extractor and to give hints on what can be done
 
-My company *CubeServ* for encouraging and supporting this project.
-
 And all *colleagues* that made this tool possible!
+
+# Funding
+
+*CubeServ* is encouraging and supporting this project.

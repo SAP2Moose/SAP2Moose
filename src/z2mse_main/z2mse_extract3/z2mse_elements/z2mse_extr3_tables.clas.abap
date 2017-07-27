@@ -25,6 +25,7 @@ CLASS z2mse_extr3_tables DEFINITION
         VALUE(r_result) TYPE tabname.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
+    METHODS collect_infos REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO z2mse_extr3_tables.
@@ -92,6 +93,10 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
     ENDIF.
     instance->type = table_type.
     r_instance = instance.
+  ENDMETHOD.
+
+
+  METHOD collect_infos.
   ENDMETHOD.
 
 

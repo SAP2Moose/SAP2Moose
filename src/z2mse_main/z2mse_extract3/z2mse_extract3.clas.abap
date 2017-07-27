@@ -20,8 +20,8 @@ CLASS z2mse_extract3 DEFINITION
     "! @parameter i_exclude_found_sap_intf | exclude found interfaces in SAP namespace in the where-used analysis
     METHODS extract
       IMPORTING
-        model_builder TYPE REF TO z2mse_extr3_model_builder
-        element_manager TYPE REF TO z2mse_extr3_element_manager
+        model_builder            TYPE REF TO z2mse_extr3_model_builder
+        element_manager          TYPE REF TO z2mse_extr3_element_manager
         !initial_elements        TYPE REF TO z2mse_extr3_initial_elements
         i_search_up              TYPE i
         i_search_down            TYPE i
@@ -35,7 +35,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTRACT3 IMPLEMENTATION.
+CLASS z2mse_extract3 IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -76,6 +76,12 @@ CLASS Z2MSE_EXTRACT3 IMPLEMENTATION.
                            i_search_down         = i_search_down ).
 
     CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Make model file'.
+
+    DATA sysid TYPE string.
+
+    sysid = sy-sysid.
+
+    element_manager->collect_infos( sysid ).
 
     mse_model = element_manager->make_model( ).
 

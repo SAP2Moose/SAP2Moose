@@ -26,6 +26,7 @@ CLASS z2mse_extr3_programs DEFINITION
         VALUE(subc)                  TYPE subc.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
+    METHODS collect_infos REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO z2mse_extr3_programs.
@@ -109,6 +110,10 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
     ENDIF.
     instance->type = program_type.
     r_instance = instance.
+  ENDMETHOD.
+
+
+  METHOD collect_infos.
   ENDMETHOD.
 
 
