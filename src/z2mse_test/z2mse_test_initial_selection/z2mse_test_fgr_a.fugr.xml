@@ -14,8 +14,6 @@
      <SHORT_TEXT>Test Function A</SHORT_TEXT>
     </item>
    </FUNCTIONS>
-   <DYNPROS/>
-   <CUA/>
   </asx:values>
  </asx:abap>
 </abapGit>
