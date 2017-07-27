@@ -23,7 +23,7 @@ CLASS z2mse_extr3_element_manager DEFINITION
            END OF association_type.
     TYPES associations_type TYPE STANDARD TABLE OF association_type WITH KEY element_id1 element_id2 ass_type association.
     METHODS constructor
-      IMPORTING i_model_builder TYPE REF TO z2mse_extr3_model_builder
+      IMPORTING i_model_builder          TYPE REF TO z2mse_extr3_model_builder
                 i_exclude_found_sap_intf TYPE abap_bool.
     "! Call if an element might be added.
     "! Add the element if it is not already part of the model.
@@ -37,6 +37,11 @@ CLASS z2mse_extr3_element_manager DEFINITION
         element_1   TYPE element_id_type
         element_2   TYPE element_id_type
         association TYPE REF TO z2mse_extr3_association.
+    "! Call so that the classes that contain the collected elements determine further informations that are required for the model.
+    METHODS collect_infos
+      IMPORTING
+        sysid TYPE string OPTIONAL.
+    "! Call to build the mse model
     METHODS make_model
       RETURNING
         VALUE(r_result) TYPE z2mse_model=>lines_type.
@@ -98,6 +103,25 @@ CLASS Z2MSE_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
                                    i_is_specific = is_specific ).
 
     ADD 1 TO next_element_id.
+
+  ENDMETHOD.
+
+
+  METHOD collect_infos.
+
+    DATA: element      TYPE element_type.
+
+    LOOP AT elements INTO element.
+
+      IF element-element->infos_are_collected EQ abap_false.
+
+        element-element->collect_infos( sysid ).
+
+        element-element->infos_are_collected = abap_true.
+
+      ENDIF.
+
+    ENDLOOP.
 
   ENDMETHOD.
 

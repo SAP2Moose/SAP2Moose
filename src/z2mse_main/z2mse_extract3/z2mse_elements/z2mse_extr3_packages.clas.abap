@@ -31,6 +31,7 @@ CLASS z2mse_extr3_packages DEFINITION
         VALUE(r_result) TYPE devclass.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
+    METHODS collect_infos REDEFINITION.
   PROTECTED SECTION.
     METHODS _does_package_exists
       IMPORTING
@@ -106,6 +107,10 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
     ENDIF.
     instance->type = package_type.
     r_instance = instance.
+  ENDMETHOD.
+
+
+  METHOD collect_infos.
   ENDMETHOD.
 
 

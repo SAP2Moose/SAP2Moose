@@ -16,10 +16,9 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3 IMPLEMENTATION.
-  METHOD constructor.
-    element_manager = i_element_manager.
-  ENDMETHOD.
+CLASS Z2MSE_EXTR3 IMPLEMENTATION.
+
+
   METHOD clear_all.
 
     z2mse_extr3_access=>clear( ).
@@ -33,4 +32,8 @@ CLASS z2mse_extr3 IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD constructor.
+    element_manager = i_element_manager.
+  ENDMETHOD.
 ENDCLASS.
