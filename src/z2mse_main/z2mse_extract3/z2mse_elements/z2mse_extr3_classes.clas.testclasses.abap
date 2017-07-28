@@ -121,6 +121,8 @@ CLASS ltcl_class IMPLEMENTATION.
                                             ( |FAMIX.Class CLASS_A modifiers ABAPGlobalClass| )
                                             ( |FAMIX.Class CLASS_A parentPackage PACKAGE1| )
                                             ( |FAMIX.Class INTERFACE_A modifiers ABAPGlobalClass| )
+                                            ( |FAMIX.FileAnchor CLASS_A fileName adt://SYS/sap/bc/adt/oo/classes/class_a/source/main| )
+                                            ( |FAMIX.FileAnchor INTERFACE_A fileName adt://SYS/sap/bc/adt/oo/classes/interface_a/source/main| )
                                             ( |FAMIX.Attribute CLASS_A>>METHOD_A| )
                                             ( |FAMIX.Package PACKAGE1| ) ).
 
@@ -212,6 +214,8 @@ CLASS ltcl_interface IMPLEMENTATION.
 
     DATA: mse_model_act TYPE z2mse_model=>lines_type.
 
+    element_manager->collect_infos( |SYS| ).
+
     mse_model_act = element_manager->make_model( ).
 
     DATA: equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
@@ -223,6 +227,7 @@ CLASS ltcl_interface IMPLEMENTATION.
                                             ( |FAMIX.Class INTERFACE_A modifiers ABAPGlobalInterface| )
                                             ( |FAMIX.Class INTERFACE_A parentPackage PACKAGE1| )
                                             ( |FAMIX.Class INTERFACE_A isInterface true| )
+                                            ( |FAMIX.FileAnchor INTERFACE_A fileName adt://SYS/sap/bc/adt/oo/interfaces/interface_a/source/main| )
                                             ( |FAMIX.Package PACKAGE1| ) ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).

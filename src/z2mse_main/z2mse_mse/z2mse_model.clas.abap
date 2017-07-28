@@ -216,7 +216,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_MODEL IMPLEMENTATION.
+CLASS z2mse_model IMPLEMENTATION.
 
 
   METHOD add_boolean.
@@ -234,9 +234,12 @@ CLASS Z2MSE_MODEL IMPLEMENTATION.
     " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
 
     IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
-      ADD 1 TO g_attribute_id.
-      ls_attribute-attribute_id   = g_attribute_id.
-      INSERT ls_attribute INTO TABLE g_attributes.
+      sy-subrc = 1.
+      WHILE sy-subrc <> 0.
+        ADD 1 TO g_attribute_id.
+        ls_attribute-attribute_id   = g_attribute_id.
+        INSERT ls_attribute INTO TABLE g_attributes.
+      ENDWHILE.
     ENDIF.
 
   ENDMETHOD.
@@ -303,9 +306,12 @@ CLASS Z2MSE_MODEL IMPLEMENTATION.
     " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
 
     IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
-      ADD 1 TO g_attribute_id.
-      ls_attribute-attribute_id   = g_attribute_id.
-      INSERT ls_attribute INTO TABLE g_attributes.
+      sy-subrc = 1.
+      WHILE sy-subrc <> 0.
+        ADD 1 TO g_attribute_id.
+        ls_attribute-attribute_id   = g_attribute_id.
+        INSERT ls_attribute INTO TABLE g_attributes.
+      ENDWHILE.
     ENDIF.
 
   ENDMETHOD.
@@ -333,9 +339,12 @@ CLASS Z2MSE_MODEL IMPLEMENTATION.
     " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
 
     IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
-      ADD 1 TO g_attribute_id.
-      ls_attribute-attribute_id   = g_attribute_id.
-      INSERT ls_attribute INTO TABLE g_attributes.
+      sy-subrc = 1.
+      WHILE sy-subrc <> 0.
+        ADD 1 TO g_attribute_id.
+        ls_attribute-attribute_id   = g_attribute_id.
+        INSERT ls_attribute INTO TABLE g_attributes.
+      ENDWHILE.
     ENDIF.
 
   ENDMETHOD.
@@ -356,9 +365,12 @@ CLASS Z2MSE_MODEL IMPLEMENTATION.
     " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
 
     IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
-      ADD 1 TO g_attribute_id.
-      ls_attribute-attribute_id   = g_attribute_id.
-      INSERT ls_attribute INTO TABLE g_attributes.
+      sy-subrc = 1.
+      WHILE sy-subrc <> 0.
+        ADD 1 TO g_attribute_id.
+        ls_attribute-attribute_id   = g_attribute_id.
+        INSERT ls_attribute INTO TABLE g_attributes.
+      ENDWHILE.
     ENDIF.
 
   ENDMETHOD.
@@ -443,7 +455,7 @@ CLASS Z2MSE_MODEL IMPLEMENTATION.
 
         APPEND mse_model_line TO mse_model.
         mse_model_line-line = |  (| && <attribute>-attribute_type.
-        assert ( <attribute>-value_type eq string_value ) or ( <attribute>-value_type eq reference_value ) or ( <attribute>-value_type eq boolean_value ).
+        ASSERT ( <attribute>-value_type EQ string_value ) OR ( <attribute>-value_type EQ reference_value ) OR ( <attribute>-value_type EQ boolean_value ).
         CASE <attribute>-value_type.
           WHEN string_value.
 
