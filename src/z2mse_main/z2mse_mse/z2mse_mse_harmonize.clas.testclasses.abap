@@ -19,6 +19,7 @@ CLASS ltcl_main DEFINITION FINAL FOR TESTING
       _ext_serial_attribute_nodes2 FOR TESTING RAISING cx_static_check,
       _ext_valuenodes FOR TESTING RAISING cx_static_check,
       _remove_apostroph FOR TESTING RAISING cx_static_check,
+      _handlefileanchor for testing RAISING cx_static_check,
       mse_2_harmonized_empty_package FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
@@ -298,6 +299,9 @@ CLASS ltcl_main IMPLEMENTATION.
                    ( |  (name 'Z2MSE_TEST_CL_A')| )
                    ( |  (modifiers 'ABAPGlobalClass')| )
                    ( |  (parentPackage (ref: 1)))| )
+                   ( |(FAMIX.FileAnchor (id: 7)| )
+                   ( |  (element (ref: 2))| )
+                   ( |  (fileName 'adt://NPL/sap/bc/adt/oo/classes/z2mse_extr3_access/source/main'))| )
                    ( |(FAMIX.Attribute (id: 4 )| )
                    ( |  (name 'Z2MSE_TEST_IF_A~ATTRIBUTE_A')| )
                    ( |  (parentType (ref: 2)))| )
@@ -305,6 +309,9 @@ CLASS ltcl_main IMPLEMENTATION.
                    ( |  (name 'Z2MSE_TEST_IF_A~METHOD_A')| )
                    ( |  (signature 'Z2MSE_TEST_IF_A~METHOD_A')| )
                    ( |  (parentType (ref: 2)))| )
+                   ( |(FAMIX.FileAnchor (id: 8)| )
+                   ( |  (element (ref: 5))| )
+                   ( |  (fileName 'adt://NPL/sap/bc/adt/oo/classes/z2mse_extr3_access/source/main#start=27,5'))| )
                    ( |(FAMIX.Method (id: 6 )| )
                    ( |  (name 'METHOD_B')| )
                    ( |  (signature 'METHOD_B')| )
@@ -324,6 +331,8 @@ CLASS ltcl_main IMPLEMENTATION.
     equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.Attribute Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~ATTRIBUTE_A| )
                                             ( | FAMIX.Access accessor  Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~METHOD_A  variable   Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~ATTRIBUTE_A | )
                                             ( |FAMIX.Class Z2MSE_TEST_CL_A modifiers ABAPGlobalClass| )
+                                            ( |FAMIX.FileAnchor Z2MSE_TEST_CL_A fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_extr3_access/source/main| )
+                                            ( |FAMIX.FileAnchor Z2MSE_TEST_IF_A~METHOD_A fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_extr3_access/source/main#start=27,5| )
                                             ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>METHOD_B candidates Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~METHOD_A signature DUMMY| )
                                             ( |FAMIX.Method Z2MSE_TEST_CL_A>>METHOD_B signature METHOD_B| )
                                             ( |FAMIX.Method Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~METHOD_A signature Z2MSE_TEST_IF_A~METHOD_A| )
@@ -477,6 +486,26 @@ CLASS ltcl_main IMPLEMENTATION.
     cl_abap_unit_assert=>assert_equals( EXPORTING act = value_act
                                                   exp = value_exp
                                                   msg = 'Apostrophs are to be removed' ).
+
+
+  ENDMETHOD.
+
+  METHOD _handlefileanchor.
+
+    data: elements_act TYPE  z2mse_mse_harmonize=>ty_elements_1,
+          elements_exp TYPE  z2mse_mse_harmonize=>ty_elements_1.
+
+          elements_act = value #( ( elementname = |FAMIX.Class| element_id = 2 )
+                                  ( elementname = |FAMIX.FileAnchor| element_id = 7 attribute = |element| integer_reference = 2 )
+                                  ( elementname = |FAMIX.FileAnchor| element_id = 7 attribute = |fileName| value = |String| ) ).
+
+          elements_exp = value #( ( elementname = |FAMIX.Class| element_id = 2 )
+                                  ( elementname = |FAMIX.FileAnchor| element_id = 2 attribute = |fileName| value = |String| ) ).
+
+
+    z2mse_mse_harmonize=>_handlefileanchor( CHANGING elements = elements_act ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Replace element_id for FAMIX.FileAnchor with the reference of element and delete line with element.' exp = elements_exp act = elements_act ).
 
 
   ENDMETHOD.

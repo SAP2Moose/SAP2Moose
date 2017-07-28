@@ -86,7 +86,7 @@ CLASS z2mse_mse_harmonize DEFINITION
     CLASS-METHODS _build_result
       IMPORTING
         id_to_names                       TYPE ty_id_to_names
-        elements                        TYPE ty_elements
+        elements                          TYPE ty_elements
       RETURNING
         VALUE(r_equalized_harmonized_mse) TYPE z2mse_mse_harmonize=>harmonized_mse.
     TYPES:
@@ -96,11 +96,11 @@ CLASS z2mse_mse_harmonize DEFINITION
       IMPORTING
         id_to_names TYPE ty_id_to_names_1
       CHANGING
-        elements  TYPE ty_elements_1.
+        elements    TYPE ty_elements_1.
     TYPES:
       ty_id_to_names_2 TYPE HASHED TABLE OF id_to_name WITH UNIQUE KEY id,
-      ty_elements_2 TYPE STANDARD TABLE OF element WITH DEFAULT KEY.
-     CLASS-METHODS _analyze_attribute_value
+      ty_elements_2    TYPE STANDARD TABLE OF element WITH DEFAULT KEY.
+    CLASS-METHODS _analyze_attribute_value
       IMPORTING
         i_attributename TYPE string
         i_valuenodes    TYPE z2mse_mse_harmonize=>string_table
@@ -113,11 +113,15 @@ CLASS z2mse_mse_harmonize DEFINITION
     CLASS-METHODS _get_concatenated_names
       CHANGING
         id_to_names TYPE ty_id_to_names_2.
+    "! FileAnchors reference to elements using the attribute element, so replace element_id with the element they are referencing to.
+    CLASS-METHODS _handlefileanchor
+      CHANGING
+        elements TYPE  ty_elements_1.
 ENDCLASS.
 
 
 
-CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
+CLASS z2mse_mse_harmonize IMPLEMENTATION.
 
 
   METHOD equalize_harmonized.
@@ -227,6 +231,8 @@ CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
       ENDIF.
 
     ENDLOOP.
+
+    _handlefileanchor( CHANGING elements = elements ).
 
     _get_concatenated_names( CHANGING id_to_names = id_to_names ).
 
@@ -641,7 +647,9 @@ CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name3>) WITH TABLE KEY id = <element>-element_id.
         IF sy-subrc EQ 0.
           IF <id_to_name3>-simple_name IS NOT INITIAL
-          AND <element>-elementname EQ 'FAMIX.Class' OR <element>-elementname EQ 'FAMIX.Package'.
+          AND    <element>-elementname EQ 'FAMIX.Class'
+              OR <element>-elementname EQ 'FAMIX.Package'
+              OR <element>-elementname EQ 'FAMIX.FileAnchor'.
             <element>-concatenated_name = <id_to_name3>-simple_name.
           ELSE.
             <element>-concatenated_name = <id_to_name3>-concatenated_name.
@@ -728,4 +736,28 @@ CLASS Z2MSE_MSE_HARMONIZE IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF |'| IN string WITH ||.
 
   ENDMETHOD.
+
+  METHOD _handlefileanchor.
+
+    TYPES: BEGIN OF ty_map,
+             from TYPE i,
+             to   TYPE i,
+           END OF ty_map.
+    DATA: mapping TYPE HASHED TABLE OF ty_map WITH UNIQUE KEY from.
+
+    LOOP AT elements INTO DATA(element) WHERE elementname = |FAMIX.FileAnchor| AND attribute = 'element'.
+      mapping = VALUE #( BASE mapping ( from = element-element_id to = element-integer_reference ) ).
+    ENDLOOP.
+
+    LOOP AT elements ASSIGNING FIELD-SYMBOL(<element>) WHERE elementname = |FAMIX.FileAnchor|.
+      IF     <element>-elementname = |FAMIX.FileAnchor|
+         AND <element>-attribute = 'element'.
+        DELETE elements.
+      ELSE.
+        <element>-element_id = mapping[ from = <element>-element_id ]-to.
+      ENDIF.
+    ENDLOOP.
+
+  ENDMETHOD.
+
 ENDCLASS.
