@@ -306,27 +306,140 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       ELSE.
         ASSERT 1 = 2.
       ENDIF.
+
+
+      " Get ADT Link to components
+
+      DATA: cifkey           TYPE seoclskey,
+            cifref           TYPE REF TO if_oo_clif_incl_naming,
+            clsref           TYPE REF TO if_oo_class_incl_naming,
+            intref           TYPE REF TO if_oo_interface_incl_naming,
+            source           TYPE seop_source_string,
+            source_protected TYPE seop_source_string,
+            source_private   TYPE seop_source_string,
+            source_line      TYPE LINE OF seop_source_string.
+
+      cifkey-clsname = <element>-class_name.
+
+      CLEAR source.
+      CLEAR source_protected.
+      CLEAR source_private.
+
+      CALL METHOD cl_oo_include_naming=>get_instance_by_cifkey
+        EXPORTING
+          cifkey = cifkey
+        RECEIVING
+          cifref = cifref
+        EXCEPTIONS
+          OTHERS = 1.
+      IF sy-subrc <> 0.
+        " :-(
+      ELSE.
+        CASE cifref->clstype.
+          WHEN seoc_clstype_class.
+            clsref ?= cifref.
+            READ REPORT clsref->public_section
+              INTO source.
+            READ REPORT clsref->protected_section
+              INTO source_protected.
+            READ REPORT clsref->private_section
+              INTO source_private.
+          WHEN seoc_clstype_interface.
+            intref ?= cifref.
+            READ REPORT intref->public_section
+              INTO source.
+          WHEN OTHERS.
+            " What is to be done?
+        ENDCASE.
+      ENDIF.
+
+      APPEND LINES OF source_protected TO source.
+      APPEND LINES OF source_private TO source.
+
+      DATA: line_no TYPE i,
+            line    TYPE string.
+
+      line_no = 0.
+
+*      LOOP AT source INTO source_line.
+*        add 1 to line_no.
+*        line = source_line.
+*        condense line.
+*        split line at ' ' into
+*      ENDLOOP.
+      DATA: tokens         TYPE STANDARD TABLE OF stokes,
+            token          LIKE LINE OF tokens,
+            next_component TYPE seocmptype,
+            next_line      TYPE i.
+
+      DATA: sorted_tokens TYPE z2mse_ep_analyze_other_keywrd=>sorted_tokens_type.
+
+      DATA statements TYPE STANDARD TABLE OF sstmnt.
+
+      SCAN ABAP-SOURCE source TOKENS INTO tokens STATEMENTS INTO statements.
+
+      LOOP AT tokens INTO token.
+        ADD 1 TO line_no.
+        IF line_no EQ next_line.
+
+          DATA: element_comp TYPE element_comp_type.
+
+          READ TABLE elements_comp_clsname_cmpname INTO element_comp
+            WITH TABLE KEY
+              clsname = <element>-class_name
+              cmpname = token-str.
+
+          IF sy-subrc <> 0.
+            " What to do?
+          ELSE.
+
+            FIELD-SYMBOLS <element_comp> TYPE element_comp_type.
+
+            READ TABLE elements_comp_element_id ASSIGNING <element_comp>
+              WITH TABLE KEY element_id = element_comp-element_id.
+
+            IF sy-subrc <> 0.
+              " What to do?
+            ELSE.
+
+              DATA: row TYPE string.
+              row = token-row.
+
+              DATA: adt_link TYPE string.
+
+              CONCATENATE <element>-adt_link '#start=' row ',1' INTO adt_link.
+
+              CONDENSE adt_link NO-GAPS.
+
+              IF <element_comp>-adt_link IS INITIAL. " Are there further hits?
+
+                <element_comp>-adt_link = adt_link.
+
+              ENDIF.
+
+            ENDIF.
+
+          ENDIF.
+
+        ELSE.
+          CLEAR next_line.
+          CLEAR next_component.
+          CASE token-str.
+            WHEN 'CLASS-DATA' OR 'DATA'.
+              next_component = attribute_type.
+              next_line = line_no + 1.
+            WHEN 'CLASS-METHODS' OR 'METHODS'.
+              next_component = method_type.
+              next_line = line_no + 1.
+            WHEN 'CLASS-EVENTS' OR 'EVENTS'.
+              next_component = event_type.
+              next_line = line_no + 1.
+          ENDCASE.
+        ENDIF.
+
+      ENDLOOP.
+
     ENDLOOP.
-
-    " Get ADT Link to components
-
-    data: cifkey      TYPE seoclskey,
-          cifref      TYPE REF TO if_oo_clif_incl_naming.
-
-    cifkey-clsname = <element>-class_name.
-
-    CALL METHOD cl_oo_include_naming=>get_instance_by_cifkey
-      EXPORTING
-        cifkey = cifkey
-      RECEIVING
-        cifref = cifref
-      EXCEPTIONS
-        OTHERS = 1.
-    IF sy-subrc <> 0.
-      " :-(
-    ELSE.
-
-    ENDIF.
 
   ENDMETHOD.
 
@@ -360,8 +473,12 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
         ASSERT 1 = 2.
       ENDIF.
 
-      element_manager->famix_file_anchor->add( EXPORTING element_id = last_id
-                                                         file_name  = element-adt_link ).
+      IF element-adt_link IS NOT INITIAL.
+
+        element_manager->famix_file_anchor->add( EXPORTING element_id = last_id
+                                                           file_name  = element-adt_link ).
+
+      ENDIF.
 
       DATA association TYPE z2mse_extr3_element_manager=>association_type.
       LOOP AT associations INTO association WHERE element_id1 = element_id

@@ -1,3 +1,5 @@
+
+"! Test
 class Z2MSE_TEST_CL_B2 definition
   public
   final
