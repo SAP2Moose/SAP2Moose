@@ -507,6 +507,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                         parent_name_group = 'ABAP_CLASS'
                                                         parent_name    = element_comp-clsname ).
 
+
           element_manager->famix_attribute->store_id( EXPORTING class     = element_comp-clsname
                                                attribute = element_comp-cmpname ).
 
@@ -537,6 +538,13 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
         WHEN OTHERS.
           ASSERT 1 = 2.
       ENDCASE.
+
+      if element_comp-adt_link is NOT INITIAL.
+
+        element_manager->famix_file_anchor->add( EXPORTING element_id = last_id
+                                                           file_name  = element_comp-adt_link ).
+
+      ENDIF.
 
     ENDIF.
 
