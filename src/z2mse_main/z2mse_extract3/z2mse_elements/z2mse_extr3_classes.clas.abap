@@ -449,7 +449,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
     IF sy-subrc EQ 0.
 
-      DATA last_id TYPE i.
+      DATA: last_id        TYPE i,
+            file_anchor_id TYPE i.
 
       IF element-clstype EQ is_class_type.
         " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
@@ -458,6 +459,24 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                      name       = element-class_name
                                                      modifiers  = z2mse_extract3=>modifier_abapglobalclass
                                            IMPORTING id         = last_id ).
+
+        IF element-adt_link IS NOT INITIAL.
+
+          element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                             file_name  = element-adt_link
+                                                   IMPORTING id         = file_anchor_id ).
+
+          IF file_anchor_id IS NOT INITIAL.
+            element_manager->famix_class->set_source_anchor_by_id(
+              EXPORTING
+                element_id         = last_id
+                source_anchor_id   = file_anchor_id
+            ).
+
+          ENDIF.
+
+        ENDIF.
+
       ELSEIF element-clstype EQ interface_type.
         " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
         " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
@@ -467,15 +486,25 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                            IMPORTING id         = last_id ).
         " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
         element_manager->famix_class->is_interface( element_id = last_id ).
+
+        IF element-adt_link IS NOT INITIAL.
+
+          element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                             file_name  = element-adt_link
+                                                   IMPORTING id         = file_anchor_id ).
+
+          IF file_anchor_id IS NOT INITIAL.
+            element_manager->famix_class->set_source_anchor_by_id(
+              EXPORTING
+                element_id         = last_id
+                source_anchor_id   = file_anchor_id
+            ).
+
+          ENDIF.
+
+        ENDIF.
       ELSE.
         ASSERT 1 = 2.
-      ENDIF.
-
-      IF element-adt_link IS NOT INITIAL.
-
-        element_manager->famix_file_anchor->add( EXPORTING element_id = last_id
-                                                           file_name  = element-adt_link ).
-
       ENDIF.
 
       DATA association TYPE z2mse_extr3_element_manager=>association_type.
@@ -505,6 +534,22 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                         parent_name_group = 'ABAP_CLASS'
                                                         parent_name    = element_comp-clsname ).
 
+          IF element_comp-adt_link IS NOT INITIAL.
+
+            element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                               file_name  = element_comp-adt_link
+                                                       IMPORTING id         = file_anchor_id ).
+
+          IF file_anchor_id IS NOT INITIAL.
+            element_manager->famix_attribute->set_source_anchor_by_id(
+              EXPORTING
+                element_id         = last_id
+                source_anchor_id   = file_anchor_id
+            ).
+
+          ENDIF.
+
+          ENDIF.
 
           element_manager->famix_attribute->store_id( EXPORTING class     = element_comp-clsname
                                                attribute = element_comp-cmpname ).
@@ -526,6 +571,22 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                      parent_name_group = 'ABAP_CLASS'
                                                      parent_name    = element_comp-clsname ).
 
+          IF element_comp-adt_link IS NOT INITIAL.
+
+            element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                               file_name  = element_comp-adt_link
+                                                       IMPORTING id         = file_anchor_id ).
+
+          IF file_anchor_id IS NOT INITIAL.
+            element_manager->famix_method->set_source_anchor_by_id(
+              EXPORTING
+                element_id         = last_id
+                source_anchor_id   = file_anchor_id
+            ).
+
+          ENDIF.
+
+          ENDIF.
 
           element_manager->famix_method->store_id( EXPORTING class  = element_comp-clsname
                                               method = element_comp-cmpname ).
@@ -536,13 +597,6 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
         WHEN OTHERS.
           ASSERT 1 = 2.
       ENDCASE.
-
-      if element_comp-adt_link is NOT INITIAL.
-
-        element_manager->famix_file_anchor->add( EXPORTING element_id = last_id
-                                                           file_name  = element_comp-adt_link ).
-
-      ENDIF.
 
     ENDIF.
 

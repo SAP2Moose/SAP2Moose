@@ -121,6 +121,8 @@ CLASS ltcl_class IMPLEMENTATION.
                                             ( |FAMIX.Class CLASS_A modifiers ABAPGlobalClass| )
                                             ( |FAMIX.Class CLASS_A parentPackage PACKAGE1| )
                                             ( |FAMIX.Class INTERFACE_A modifiers ABAPGlobalClass| )
+                                            ( |FAMIX.Class CLASS_A sourceAnchor| )
+                                            ( |FAMIX.Class INTERFACE_A sourceAnchor| )
                                             ( |FAMIX.FileAnchor CLASS_A fileName adt://SYS/sap/bc/adt/oo/classes/class_a/source/main| )
                                             ( |FAMIX.FileAnchor INTERFACE_A fileName adt://SYS/sap/bc/adt/oo/classes/interface_a/source/main| )
                                             ( |FAMIX.Attribute CLASS_A>>METHOD_A| )
@@ -227,6 +229,7 @@ CLASS ltcl_interface IMPLEMENTATION.
                                             ( |FAMIX.Class INTERFACE_A modifiers ABAPGlobalInterface| )
                                             ( |FAMIX.Class INTERFACE_A parentPackage PACKAGE1| )
                                             ( |FAMIX.Class INTERFACE_A isInterface true| )
+                                            ( |FAMIX.Class INTERFACE_A sourceAnchor| )
                                             ( |FAMIX.FileAnchor INTERFACE_A fileName adt://SYS/sap/bc/adt/oo/interfaces/interface_a/source/main| )
                                             ( |FAMIX.Package PACKAGE1| ) ).
 
