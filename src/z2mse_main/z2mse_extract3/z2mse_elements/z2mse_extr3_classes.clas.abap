@@ -276,7 +276,9 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
           part2_interfaces TYPE string,
           name             TYPE string,
           part3            TYPE string.
-    "      NPL classes/z2mse_extr3_access/source/main
+
+    " Get ADT Link to class or interface
+
     CONCATENATE 'adt://' sysid '/sap/bc/adt/oo/' INTO part1.
 
     part2_classes = 'classes/'.
@@ -305,6 +307,26 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
         ASSERT 1 = 2.
       ENDIF.
     ENDLOOP.
+
+    " Get ADT Link to components
+
+    data: cifkey      TYPE seoclskey,
+          cifref      TYPE REF TO if_oo_clif_incl_naming.
+
+    cifkey-clsname = <element>-class_name.
+
+    CALL METHOD cl_oo_include_naming=>get_instance_by_cifkey
+      EXPORTING
+        cifkey = cifkey
+      RECEIVING
+        cifref = cifref
+      EXCEPTIONS
+        OTHERS = 1.
+    IF sy-subrc <> 0.
+      " :-(
+    ELSE.
+
+    ENDIF.
 
   ENDMETHOD.
 
@@ -338,8 +360,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
         ASSERT 1 = 2.
       ENDIF.
 
-        element_manager->famix_file_anchor->add( EXPORTING element_id = last_id
-                                                           file_name  = element-adt_link ).
+      element_manager->famix_file_anchor->add( EXPORTING element_id = last_id
+                                                         file_name  = element-adt_link ).
 
       DATA association TYPE z2mse_extr3_element_manager=>association_type.
       LOOP AT associations INTO association WHERE element_id1 = element_id

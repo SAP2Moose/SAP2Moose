@@ -13,7 +13,6 @@
     <LDBNAME>D$S</LDBNAME>
     <UCCHECK>X</UCCHECK>
    </PROGDIR>
-   <TPOOL/>
   </asx:values>
  </asx:abap>
 </abapGit>
