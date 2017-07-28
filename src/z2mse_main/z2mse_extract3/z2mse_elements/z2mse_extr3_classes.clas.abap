@@ -372,8 +372,6 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
             next_component TYPE seocmptype,
             next_line      TYPE i.
 
-      DATA: sorted_tokens TYPE z2mse_ep_analyze_other_keywrd=>sorted_tokens_type.
-
       DATA statements TYPE STANDARD TABLE OF sstmnt.
 
       SCAN ABAP-SOURCE source TOKENS INTO tokens STATEMENTS INTO statements.
