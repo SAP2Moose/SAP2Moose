@@ -12,6 +12,8 @@
     <FIXPT>X</FIXPT>
     <UCCHECK>X</UCCHECK>
    </PROGDIR>
+   <DYNPROS/>
+   <TPOOL/>
   </asx:values>
  </asx:abap>
 </abapGit>
