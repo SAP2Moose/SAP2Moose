@@ -8,6 +8,10 @@ Legend
 + : added
 - : removed
 
+28.07.2017 v0.5.0
+-----------------
++ Issue 63 Add adt link to attribute sourceAnchor for classes and class components. This allows to use ADT links on Windows to jump from Moose2Model into Eclipse ADT (After adt links are activated, see https://blogs.sap.com/2013/05/10/how-adt-links-change-the-way-you-work/). Links work only in Moose2Model v0.2.0. It is mandatory that the Pharo component OSProcess is installed.
+
 05.07.2017 v0.4.4
 -----------------
 + Add issue 48 Add usage of interface components

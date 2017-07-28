@@ -1,7 +1,7 @@
-* generated on system NPL at 05.07.2017 on 22:47:22
+* generated on system NPL at 28.07.2017 on 22:42:53
 
 *
-* This is version 0.4.4
+* This is version 0.5.0
 *
 *The MIT License (MIT)
 *
@@ -128,6 +128,7 @@ CLASS cl_model DEFINITION
     "! @parameter elementname | The name of the FAMIX Element. Like FAMIX.NamedEntity
     "! @parameter name_group | optional to handle cases where names may be duplicates
     "! @parameter is_named_entity | True if the entity has a name
+    "! @parameter is_id_required  | Set true if (id: ...) is always required
     "! @parameter can_be_referenced_by_name | True if referencing by name is possible (For this the name has to be unique)
     "! @parameter name | the name of a FAMIX Entity that inherits from FAMIX.NamedEntity leave empty is is_named_entity is false
     "! @parameter exists_already_with_id | only if can_be_referenced_by_name true. Zero if it does not yet exist, otherwise filled with id
@@ -136,6 +137,7 @@ CLASS cl_model DEFINITION
       IMPORTING elementname                   TYPE clike
                 name_group                    TYPE clike DEFAULT ''
                 is_named_entity               TYPE abap_bool
+                is_id_required                TYPE abap_bool DEFAULT ''
                 can_be_referenced_by_name     TYPE abap_bool
                 name                          TYPE clike OPTIONAL
       EXPORTING VALUE(exists_already_with_id) TYPE i
@@ -243,6 +245,7 @@ CLASS cl_model DEFINITION
         element_id        TYPE i,
         element_type      TYPE string,
         is_named_entity   TYPE abap_bool,
+        is_id_required    TYPE abap_bool,
         public_attributes TYPE public_attributes_type,
       END OF public_element_type.
     TYPES:
@@ -261,6 +264,7 @@ CLASS cl_model DEFINITION
     TYPES: BEGIN OF element_in_model_type,
              element_id      TYPE i,
              is_named_entity TYPE abap_bool,
+             is_id_required  TYPE abap_bool,
              element_type    TYPE string,
            END OF element_in_model_type.
     "! A table with all Elements in the model
@@ -336,9 +340,12 @@ CLASS CL_MODEL IMPLEMENTATION.
     " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
 
     IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
-      ADD 1 TO g_attribute_id.
-      ls_attribute-attribute_id   = g_attribute_id.
-      INSERT ls_attribute INTO TABLE g_attributes.
+      sy-subrc = 1.
+      WHILE sy-subrc <> 0.
+        ADD 1 TO g_attribute_id.
+        ls_attribute-attribute_id   = g_attribute_id.
+        INSERT ls_attribute INTO TABLE g_attributes.
+      ENDWHILE.
     ENDIF.
 
   ENDMETHOD.
@@ -375,6 +382,7 @@ CLASS CL_MODEL IMPLEMENTATION.
     CLEAR ls_elements_in_model.
     ls_elements_in_model-element_id = g_processed_id.
     ls_elements_in_model-is_named_entity = is_named_entity.
+    ls_elements_in_model-is_id_required = is_id_required.
     ls_elements_in_model-element_type = elementname.
     INSERT ls_elements_in_model INTO TABLE g_elements_in_model.
 
@@ -400,9 +408,12 @@ CLASS CL_MODEL IMPLEMENTATION.
     " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
 
     IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
-      ADD 1 TO g_attribute_id.
-      ls_attribute-attribute_id   = g_attribute_id.
-      INSERT ls_attribute INTO TABLE g_attributes.
+      sy-subrc = 1.
+      WHILE sy-subrc <> 0.
+        ADD 1 TO g_attribute_id.
+        ls_attribute-attribute_id   = g_attribute_id.
+        INSERT ls_attribute INTO TABLE g_attributes.
+      ENDWHILE.
     ENDIF.
 
   ENDMETHOD.
@@ -428,9 +439,12 @@ CLASS CL_MODEL IMPLEMENTATION.
     " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
 
     IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
-      ADD 1 TO g_attribute_id.
-      ls_attribute-attribute_id   = g_attribute_id.
-      INSERT ls_attribute INTO TABLE g_attributes.
+      sy-subrc = 1.
+      WHILE sy-subrc <> 0.
+        ADD 1 TO g_attribute_id.
+        ls_attribute-attribute_id   = g_attribute_id.
+        INSERT ls_attribute INTO TABLE g_attributes.
+      ENDWHILE.
     ENDIF.
 
   ENDMETHOD.
@@ -449,9 +463,12 @@ CLASS CL_MODEL IMPLEMENTATION.
     " SAP_2_FAMIX_52        Do not attributes twice if they are added with identical attributes
 
     IF _check_if_attr_already_there( ls_attribute ) EQ abap_false.
-      ADD 1 TO g_attribute_id.
-      ls_attribute-attribute_id   = g_attribute_id.
-      INSERT ls_attribute INTO TABLE g_attributes.
+      sy-subrc = 1.
+      WHILE sy-subrc <> 0.
+        ADD 1 TO g_attribute_id.
+        ls_attribute-attribute_id   = g_attribute_id.
+        INSERT ls_attribute INTO TABLE g_attributes.
+      ENDWHILE.
     ENDIF.
 
   ENDMETHOD.
@@ -490,6 +507,7 @@ CLASS CL_MODEL IMPLEMENTATION.
       ls_public_element-element_type = ls_elements_in_model-element_type.
       ls_public_element-element_id = ls_elements_in_model-element_id.
       ls_public_element-is_named_entity = ls_elements_in_model-is_named_entity.
+      ls_public_element-is_id_required = ls_elements_in_model-is_id_required.
       ls_public_element-public_attributes = lt_public_attributes.
 
       INSERT ls_public_element INTO TABLE public_elements.
@@ -518,7 +536,8 @@ CLASS CL_MODEL IMPLEMENTATION.
       ENDIF.
 
       mse_model_line-line = mse_model_line-line && |(| && <element_in_model>-element_type.
-      IF <element_in_model>-is_named_entity EQ abap_true.
+      IF    <element_in_model>-is_named_entity EQ abap_true
+         OR <element_in_model>-is_id_required EQ abap_true.
 
         mse_model_line-line = mse_model_line-line && | (id: | && <element_in_model>-element_id && | )|.
       ENDIF.
@@ -528,7 +547,7 @@ CLASS CL_MODEL IMPLEMENTATION.
 
         APPEND mse_model_line TO mse_model.
         mse_model_line-line = |  (| && <attribute>-attribute_type.
-        assert ( <attribute>-value_type eq string_value ) or ( <attribute>-value_type eq reference_value ) or ( <attribute>-value_type eq boolean_value ).
+        ASSERT ( <attribute>-value_type EQ string_value ) OR ( <attribute>-value_type EQ reference_value ) OR ( <attribute>-value_type EQ boolean_value ).
         CASE <attribute>-value_type.
           WHEN string_value.
 
@@ -690,7 +709,7 @@ CLASS CL_FAMIX_ENTITY IMPLEMENTATION.
 ENDCLASS.
 
 
-CLASS cl_famix_sourced_entity DEFINITION ABSTRACT INHERITING FROM CL_famix_entity
+CLASS cl_famix_sourced_entity DEFINITION ABSTRACT INHERITING FROM cl_famix_entity
   CREATE PUBLIC.
   PUBLIC SECTION.
     "! Declare source language
@@ -721,6 +740,45 @@ CLASS CL_FAMIX_SOURCED_ENTITY IMPLEMENTATION.
                                               attribute_name    = 'declaredSourceLanguage'
                                               type_of_reference       = source_language_element
                                               name_of_reference = source_language_name ).
+  ENDMETHOD.
+ENDCLASS.
+
+class CL_FAMIX_FILE_ANCHOR definition
+  inheriting from CL_FAMIX_ENTITY
+  create public .
+
+public section.
+
+    "! Call once to create a new file anchor entiry
+    "! @parameter element_id | The ID of the element for which a source is specified
+    "! @parameter file_name | The path or link to the source
+  methods ADD
+    importing
+      !ELEMENT_ID type I
+      !FILE_NAME type CLIKE
+    exporting
+      value(ID) type I .
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+CLASS CL_FAMIX_FILE_ANCHOR IMPLEMENTATION.
+  METHOD add.
+    g_model->add_entity( EXPORTING elementname = |FAMIX.FileAnchor|
+                                   name_group = |FILE_ANCHOR|
+                                   is_named_entity = abap_false
+                                   is_id_required            = abap_true
+                                   can_be_referenced_by_name = abap_false
+                         IMPORTING processed_id = id ).
+
+    g_model->add_reference_by_id( EXPORTING element_id         = id
+                                            attribute_name     = 'element'
+                                            reference_id       = element_id ).
+
+    g_model->add_string( EXPORTING element_id     = id
+                                   attribute_name = 'fileName'
+                                   string         = file_name ).
+
+    g_last_used_id = id.
   ENDMETHOD.
 ENDCLASS.
 
@@ -1493,6 +1551,7 @@ CLASS cl_extr3_element_manager DEFINITION
     DATA famix_attribute     TYPE REF TO cl_famix_attribute.
     DATA famix_invocation     TYPE REF TO cl_famix_invocation.
     DATA famix_access     TYPE REF TO cl_famix_access.
+    data famix_file_anchor TYPE REF TO cl_famix_file_anchor.
     DATA exclude_found_sap_intf TYPE abap_bool READ-ONLY.
     "! A unique identifier for each object extracted
     TYPES element_id_type TYPE i.
@@ -1505,7 +1564,7 @@ CLASS cl_extr3_element_manager DEFINITION
            END OF association_type.
     TYPES associations_type TYPE STANDARD TABLE OF association_type WITH KEY element_id1 element_id2 ass_type association.
     METHODS constructor
-      IMPORTING i_model_builder TYPE REF TO cl_extr3_model_builder
+      IMPORTING i_model_builder          TYPE REF TO cl_extr3_model_builder
                 i_exclude_found_sap_intf TYPE abap_bool.
     "! Call if an element might be added.
     "! Add the element if it is not already part of the model.
@@ -1519,6 +1578,11 @@ CLASS cl_extr3_element_manager DEFINITION
         element_1   TYPE element_id_type
         element_2   TYPE element_id_type
         association TYPE REF TO cl_extr3_association.
+    "! Call so that the classes that contain the collected elements determine further informations that are required for the model.
+    METHODS collect_infos
+      IMPORTING
+        sysid TYPE string OPTIONAL.
+    "! Call to build the mse model
     METHODS make_model
       RETURNING
         VALUE(r_result) TYPE cl_model=>lines_type.
@@ -1629,6 +1693,11 @@ CLASS cl_extr3_elements DEFINITION
   INHERITING FROM cl_extr3.
 
   PUBLIC SECTION.
+
+    "! True if further informations are collected
+    DATA infos_are_collected TYPE abap_bool.
+    "! Collect further informations
+    METHODS collect_infos IMPORTING sysid TYPE string.
 
     DATA type TYPE c LENGTH 30.
 
@@ -1788,6 +1857,7 @@ CLASS cl_extr3_classes DEFINITION
         VALUE(exists)     TYPE abap_bool.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
+    METHODS collect_infos REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO cl_extr3_classes.
@@ -1796,7 +1866,7 @@ CLASS cl_extr3_classes DEFINITION
              element_id TYPE cl_extr3_element_manager=>element_id_type,
              class_name TYPE string,
              clstype    TYPE seoclstype,
-             "is_interface TYPE abap_bool,
+             adt_link   TYPE string,
            END OF element_type.
     DATA elements_element_id TYPE HASHED TABLE OF element_type WITH UNIQUE KEY element_id.
     DATA elements_class_name TYPE HASHED TABLE OF element_type WITH UNIQUE KEY class_name.
@@ -1807,6 +1877,7 @@ CLASS cl_extr3_classes DEFINITION
              cmpname    TYPE string,
              cmptype    TYPE seocmptype,
              mtdtype    TYPE seomtdtype,
+             adt_link   TYPE string,
            END OF element_comp_type.
     DATA elements_comp_element_id TYPE HASHED TABLE OF element_comp_type WITH UNIQUE KEY element_id.
     DATA elements_comp_clsname_cmpname TYPE SORTED TABLE OF element_comp_type WITH UNIQUE KEY clsname cmpname.
@@ -1875,6 +1946,7 @@ CLASS cl_extr3_packages DEFINITION
         VALUE(r_result) TYPE devclass.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
+    METHODS collect_infos REDEFINITION.
   PROTECTED SECTION.
     METHODS _does_package_exists
       IMPORTING
@@ -1917,6 +1989,7 @@ CLASS cl_extr3_programs DEFINITION
         VALUE(subc)                  TYPE subc.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
+    METHODS collect_infos REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO cl_extr3_programs.
@@ -1970,6 +2043,7 @@ CLASS cl_extr3_tables DEFINITION
         VALUE(r_result) TYPE tabname.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
+    METHODS collect_infos REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO cl_extr3_tables.
@@ -2018,6 +2092,7 @@ CLASS cl_extr3_web_dynpro_comp DEFINITION
         VALUE(wdy_controller_name) TYPE wdy_controller_name.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
+    METHODS collect_infos REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO cl_extr3_web_dynpro_comp.
@@ -2264,8 +2339,8 @@ CLASS cl_extract3 DEFINITION
     "! @parameter i_exclude_found_sap_intf | exclude found interfaces in SAP namespace in the where-used analysis
     METHODS extract
       IMPORTING
-        model_builder TYPE REF TO cl_extr3_model_builder
-        element_manager TYPE REF TO cl_extr3_element_manager
+        model_builder            TYPE REF TO cl_extr3_model_builder
+        element_manager          TYPE REF TO cl_extr3_element_manager
         !initial_elements        TYPE REF TO cl_extr3_initial_elements
         i_search_up              TYPE i
         i_search_down            TYPE i
@@ -3070,6 +3145,14 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
       ELSE.
         ASSERT 1 = 2.
       ENDIF.
+
+      IF element-adt_link IS NOT INITIAL.
+
+        element_manager->famix_file_anchor->add( EXPORTING element_id = last_id
+                                                           file_name  = element-adt_link ).
+
+      ENDIF.
+
       DATA association TYPE cl_extr3_element_manager=>association_type.
       LOOP AT associations INTO association WHERE element_id1 = element_id
                                               AND association->type = cl_extr3_association=>parent_package_ass.
@@ -3096,6 +3179,7 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
                                                         parent_element = 'FAMIX.Class'
                                                         parent_name_group = 'ABAP_CLASS'
                                                         parent_name    = element_comp-clsname ).
+
 
           element_manager->famix_attribute->store_id( EXPORTING class     = element_comp-clsname
                                                attribute = element_comp-cmpname ).
@@ -3127,6 +3211,13 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
         WHEN OTHERS.
           ASSERT 1 = 2.
       ENDCASE.
+
+      if element_comp-adt_link is NOT INITIAL.
+
+        element_manager->famix_file_anchor->add( EXPORTING element_id = last_id
+                                                           file_name  = element_comp-adt_link ).
+
+      ENDIF.
 
     ENDIF.
 
@@ -3385,6 +3476,177 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
   METHOD clear.
     CLEAR instance.
   ENDMETHOD.
+  METHOD collect_infos.
+
+    DATA: part1            TYPE string,
+          part2_classes    TYPE string,
+          part2_interfaces TYPE string,
+          name             TYPE string,
+          part3            TYPE string.
+
+    " Get ADT Link to class or interface
+
+    CONCATENATE 'adt://' sysid '/sap/bc/adt/oo/' INTO part1.
+
+    part2_classes = 'classes/'.
+
+    part2_interfaces = 'interfaces/'.
+
+    part3 = '/source/main'.
+
+    FIELD-SYMBOLS: <element> TYPE element_type.
+
+    LOOP AT elements_element_id ASSIGNING <element>.
+
+      name = <element>-class_name.
+
+      TRANSLATE name TO LOWER CASE.
+
+      IF <element>-clstype EQ is_class_type.
+
+        CONCATENATE part1 part2_classes name part3 INTO <element>-adt_link.
+
+      ELSEIF <element>-clstype EQ interface_type.
+
+        CONCATENATE part1 part2_interfaces name part3 INTO <element>-adt_link.
+
+      ELSE.
+        ASSERT 1 = 2.
+      ENDIF.
+
+
+      " Get ADT Link to components
+
+      DATA: cifkey           TYPE seoclskey,
+            cifref           TYPE REF TO if_oo_clif_incl_naming,
+            clsref           TYPE REF TO if_oo_class_incl_naming,
+            intref           TYPE REF TO if_oo_interface_incl_naming,
+            source           TYPE seop_source_string,
+            source_protected TYPE seop_source_string,
+            source_private   TYPE seop_source_string,
+            source_line      TYPE LINE OF seop_source_string.
+
+      cifkey-clsname = <element>-class_name.
+
+      CLEAR source.
+      CLEAR source_protected.
+      CLEAR source_private.
+
+      CALL METHOD cl_oo_include_naming=>get_instance_by_cifkey
+        EXPORTING
+          cifkey = cifkey
+        RECEIVING
+          cifref = cifref
+        EXCEPTIONS
+          OTHERS = 1.
+      IF sy-subrc <> 0.
+        " :-(
+      ELSE.
+        CASE cifref->clstype.
+          WHEN seoc_clstype_class.
+            clsref ?= cifref.
+            READ REPORT clsref->public_section
+              INTO source.
+            READ REPORT clsref->protected_section
+              INTO source_protected.
+            READ REPORT clsref->private_section
+              INTO source_private.
+          WHEN seoc_clstype_interface.
+            intref ?= cifref.
+            READ REPORT intref->public_section
+              INTO source.
+          WHEN OTHERS.
+            " What is to be done?
+        ENDCASE.
+      ENDIF.
+
+      APPEND LINES OF source_protected TO source.
+      APPEND LINES OF source_private TO source.
+
+      DATA: line_no TYPE i,
+            line    TYPE string.
+
+      line_no = 0.
+
+*      LOOP AT source INTO source_line.
+*        add 1 to line_no.
+*        line = source_line.
+*        condense line.
+*        split line at ' ' into
+*      ENDLOOP.
+      DATA: tokens         TYPE STANDARD TABLE OF stokes,
+            token          LIKE LINE OF tokens,
+            next_component TYPE seocmptype,
+            next_line      TYPE i.
+
+      DATA statements TYPE STANDARD TABLE OF sstmnt.
+
+      SCAN ABAP-SOURCE source TOKENS INTO tokens STATEMENTS INTO statements.
+
+      LOOP AT tokens INTO token.
+        ADD 1 TO line_no.
+        IF line_no EQ next_line.
+
+          DATA: element_comp TYPE element_comp_type.
+
+          READ TABLE elements_comp_clsname_cmpname INTO element_comp
+            WITH TABLE KEY
+              clsname = <element>-class_name
+              cmpname = token-str.
+
+          IF sy-subrc <> 0.
+            " What to do?
+          ELSE.
+
+            FIELD-SYMBOLS <element_comp> TYPE element_comp_type.
+
+            READ TABLE elements_comp_element_id ASSIGNING <element_comp>
+              WITH TABLE KEY element_id = element_comp-element_id.
+
+            IF sy-subrc <> 0.
+              " What to do?
+            ELSE.
+
+              DATA: row TYPE string.
+              row = token-row.
+
+              DATA: adt_link TYPE string.
+
+              CONCATENATE <element>-adt_link '#start=' row ',1' INTO adt_link.
+
+              CONDENSE adt_link NO-GAPS.
+
+              IF <element_comp>-adt_link IS INITIAL. " Are there further hits?
+
+                <element_comp>-adt_link = adt_link.
+
+              ENDIF.
+
+            ENDIF.
+
+          ENDIF.
+
+        ELSE.
+          CLEAR next_line.
+          CLEAR next_component.
+          CASE token-str.
+            WHEN 'CLASS-DATA' OR 'DATA'.
+              next_component = attribute_type.
+              next_line = line_no + 1.
+            WHEN 'CLASS-METHODS' OR 'METHODS'.
+              next_component = method_type.
+              next_line = line_no + 1.
+            WHEN 'CLASS-EVENTS' OR 'EVENTS'.
+              next_component = event_type.
+              next_line = line_no + 1.
+          ENDCASE.
+        ENDIF.
+
+      ENDLOOP.
+
+    ENDLOOP.
+
+  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_ELEMENTS IMPLEMENTATION.
   METHOD make_model.
@@ -3392,6 +3654,10 @@ CLASS CL_EXTR3_ELEMENTS IMPLEMENTATION.
     ASSERT 1 = 2.
   ENDMETHOD.
   METHOD NAME.
+    " Redefine me
+    ASSERT 1 = 2.
+  ENDMETHOD.
+  METHOD COLLECT_INFOS.
     " Redefine me
     ASSERT 1 = 2.
   ENDMETHOD.
@@ -3481,6 +3747,8 @@ CLASS CL_EXTR3_PACKAGES IMPLEMENTATION.
   ENDMETHOD.
   METHOD clear.
     CLEAR instance.
+  ENDMETHOD.
+  METHOD collect_infos.
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
@@ -3697,6 +3965,8 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
   METHOD clear.
     CLEAR instance.
   ENDMETHOD.
+  METHOD collect_infos.
+  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_TABLES IMPLEMENTATION.
   METHOD get_instance.
@@ -3816,6 +4086,8 @@ CLASS CL_EXTR3_TABLES IMPLEMENTATION.
   ENDMETHOD.
   METHOD clear.
     CLEAR instance.
+  ENDMETHOD.
+  METHOD collect_infos.
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
@@ -4050,6 +4322,8 @@ CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
   METHOD clear.
     CLEAR instance.
   ENDMETHOD.
+  METHOD collect_infos.
+  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3 IMPLEMENTATION.
   METHOD constructor.
@@ -4110,6 +4384,7 @@ CLASS CL_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
     CREATE OBJECT famix_attribute EXPORTING model = model.
     CREATE OBJECT famix_invocation EXPORTING model = model.
     CREATE OBJECT famix_access EXPORTING model = model.
+    create OBJECT famix_file_anchor EXPORTING model = model.
 
   ENDMETHOD.
   METHOD make_model.
@@ -4195,6 +4470,23 @@ CLASS CL_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
 
     SORT associations.
     DELETE ADJACENT DUPLICATES FROM associations.
+
+  ENDMETHOD.
+  METHOD collect_infos.
+
+    DATA: element      TYPE element_type.
+
+    LOOP AT elements INTO element.
+
+      IF element-element->infos_are_collected EQ abap_false.
+
+        element-element->collect_infos( sysid ).
+
+        element-element->infos_are_collected = abap_true.
+
+      ENDIF.
+
+    ENDLOOP.
 
   ENDMETHOD.
 ENDCLASS.
@@ -4787,6 +5079,12 @@ CLASS CL_EXTRACT3 IMPLEMENTATION.
                            i_search_down         = i_search_down ).
 
     CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Make model file'.
+
+    DATA sysid TYPE string.
+
+    sysid = sy-sysid.
+
+    element_manager->collect_infos( sysid ).
 
     mse_model = element_manager->make_model( ).
 
