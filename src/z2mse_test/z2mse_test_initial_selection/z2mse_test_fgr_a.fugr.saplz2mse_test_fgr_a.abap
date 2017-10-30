@@ -13,3 +13,5 @@
 * INCLUDE LZ2MSE_TEST_FGR_AE...              " Events
 * INCLUDE LZ2MSE_TEST_FGR_AP...              " Local class implement.
 * INCLUDE LZ2MSE_TEST_FGR_AT99.              " ABAP Unit tests
+
+INCLUDE lz2mse_test_fgr_af01.
