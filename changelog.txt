@@ -9,6 +9,10 @@ Legend
 - : removed
 
 
+31.10.2017 v0.5.2
+-----------------
+* Issue 68 For functions a duplicate "method" is created
+
 29.07.2017 v0.5.1
 -----------------
 + Issue 65 Support ADT links also for Moose 6.0. This fix is required to use ADT links in the preconfigured image.
