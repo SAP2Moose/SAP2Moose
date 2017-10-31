@@ -1,5 +1,5 @@
 *
-* This is version 0.5.1
+* This is version 0.5.2
 *
 *The MIT License (MIT)
 *
@@ -23,7 +23,7 @@
 *OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 *SOFTWARE.
 
-"! The latest version are available on https://github.com/RainerWinkler/Moose-FAMIX-SAP-Extractor
+"! The latest version is available on https://github.com/SAP2Moose/SAP2Moose
 "!
 "! Thanks to Enno Wulff for providing the initial ABAP 7.31 version
 "!

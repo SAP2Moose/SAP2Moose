@@ -1,3 +1,5 @@
+CLASS ltcl_main DEFINITION DEFERRED.
+CLASS z2mse_extr3_programs DEFINITION LOCAL FRIENDS ltcl_main.
 CLASS ltcl_main DEFINITION FINAL FOR TESTING
   DURATION SHORT
   RISK LEVEL HARMLESS.
@@ -8,13 +10,19 @@ CLASS ltcl_main DEFINITION FINAL FOR TESTING
           f_cut           TYPE REF TO z2mse_extr3_programs.
     METHODS:
       setup,
-      simple FOR TESTING RAISING cx_static_check.
+      simple FOR TESTING RAISING cx_static_check,
+      _extract_function_name FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
 
 CLASS ltcl_main IMPLEMENTATION.
 
   METHOD setup.
+
+    TEST-INJECTION tfdir.
+      cl_abap_unit_assert=>fail( EXPORTING msg = |Redefine me| ).
+    END-TEST-INJECTION.
+
     model_builder = NEW #( ).
     model_builder->initial_selection_started( ).
     element_manager = NEW #( i_model_builder = model_builder
@@ -31,8 +39,8 @@ CLASS ltcl_main IMPLEMENTATION.
           program_name_exp TYPE progname,
           subc_act         TYPE subc,
           subc_exp         TYPE subc,
-          is_found       TYPE abap_bool,
-          new_element_id TYPE i.
+          is_found         TYPE abap_bool,
+          new_element_id   TYPE i.
 
     TEST-INJECTION progdir.
       found_program = 'PROGRAM_A'.
@@ -111,6 +119,41 @@ CLASS ltcl_main IMPLEMENTATION.
         act                  = equalized_harmonized_mse_act
         exp                  = equalized_harmonized_mse_exp
         msg                  = 'Expect mse with correct package' ).
+  ENDMETHOD.
+
+  METHOD _extract_function_name.
+
+    DATA(function_name) = f_cut->_extract_function_name( i_element_program = |ABC| ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Return name unchanged if it very short'
+                                        exp = |ABC| act = function_name ).
+
+    function_name = f_cut->_extract_function_name( i_element_program = |AF01| ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Return name unchanged thirdlast character is not U'
+                                        exp = |AF01| act = function_name ).
+
+    TEST-INJECTION tfdir.
+
+      IF pname EQ |SAPA| AND include = |01|.
+        funcname = |MY_FUNCTION|.
+        sy-subrc = 0.
+      ELSE.
+        sy-subrc = 4.
+      ENDIF.
+
+    END-TEST-INJECTION.
+
+    function_name = f_cut->_extract_function_name( i_element_program = |AU01| ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Read Function if thirdlast character is U'
+                                        exp = |F-MY_FUNCTION| act = function_name ).
+
+    function_name = f_cut->_extract_function_name( i_element_program = |BU01| ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Return the include name if nothing is found in table TFDIR'
+                                        exp = |BU01| act = function_name ).
+
   ENDMETHOD.
 
 ENDCLASS.

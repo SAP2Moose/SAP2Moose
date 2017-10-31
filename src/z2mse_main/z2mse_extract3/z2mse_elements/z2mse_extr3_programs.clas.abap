@@ -204,32 +204,58 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
     " Extract function name
 
-    DATA: length           TYPE i,
-          postfix_position TYPE i,
-          include          TYPE includenr,
-          temp             TYPE string,
-          pname            TYPE pname,
-          funcname         TYPE rs38l_fnam.
+    DATA: length                TYPE i,
+          postfix_position      TYPE i,
+          include_type_position TYPE i,
+          include_type          TYPE string,
+          include               TYPE includenr,
+          temp                  TYPE string,
+          pname                 TYPE pname,
+          funcname              TYPE rs38l_fnam.
 
     length = strlen( i_element_program ).
 
-    postfix_position = length - 2.
+    IF length < 4.
 
-    include = i_element_program+postfix_position(2).
-
-    postfix_position = length - 3.
-
-    temp = i_element_program+0(postfix_position).
-
-    CONCATENATE 'SAP' temp INTO pname.
-
-    SELECT SINGLE funcname FROM tfdir INTO funcname WHERE pname = pname
-                                                      AND include = include.
-
-    IF sy-subrc <> 0.
       r_result = i_element_program.
+
     ELSE.
-      r_result = |F-| && funcname.
+
+      postfix_position = length - 2.
+
+      include_type_position = length - 3.
+
+      include = i_element_program+postfix_position(2).
+
+      include_type = i_element_program+include_type_position(1).
+
+      IF include_type <> |U|.
+
+        r_result = i_element_program.
+
+      ELSE.
+
+        postfix_position = length - 3.
+
+        temp = i_element_program+0(postfix_position).
+
+        CONCATENATE 'SAP' temp INTO pname.
+
+        TEST-SEAM tfdir.
+
+          SELECT SINGLE funcname FROM tfdir INTO funcname WHERE pname = pname
+                                                            AND include = include.
+
+        END-TEST-SEAM.
+
+        IF sy-subrc <> 0.
+          r_result = i_element_program.
+        ELSE.
+          r_result = |F-| && funcname.
+        ENDIF.
+
+      ENDIF.
+
     ENDIF.
 
   ENDMETHOD.

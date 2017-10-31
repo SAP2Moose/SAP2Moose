@@ -6,7 +6,7 @@ CLASS ltcl_main DEFINITION FINAL FOR TESTING
 
   PRIVATE SECTION.
     METHODS:
-      setup FOR TESTING,
+      setup,
       z2mse_test_initial_selection FOR TESTING RAISING cx_static_check,
       specific_search FOR TESTING RAISING cx_static_check.
 ENDCLASS.
@@ -158,8 +158,11 @@ CLASS ltcl_main IMPLEMENTATION.
 " New in 0.3.0 Functions are displayed as external name of the found include program
 " The parent package of functions is not yet found, because the include is not in the TADIR
 ( |FAMIX.Class F-Z2MSE_TEST_FUNCTION_A modifiers ABAPProgram| )
+( |FAMIX.Class LZ2MSE_TEST_FGR_AF01 modifiers ABAPProgram| )
 ( |FAMIX.Method F-Z2MSE_TEST_FUNCTION_A>>F-Z2MSE_TEST_FUNCTION_A signature F-Z2MSE_TEST_FUNCTION_A| )
+( |FAMIX.Method LZ2MSE_TEST_FGR_AF01>>LZ2MSE_TEST_FGR_AF01 signature LZ2MSE_TEST_FGR_AF01| )
 ( |FAMIX.Invocation sender F-Z2MSE_TEST_FUNCTION_A>>F-Z2MSE_TEST_FUNCTION_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
+( |FAMIX.Invocation sender LZ2MSE_TEST_FGR_AF01>>LZ2MSE_TEST_FGR_AF01 candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
 " New in 0.3.0 SAP BW transformations are partly extracted.
 " Currently only if a usage to the generated program is found.
 ( |FAMIX.Class BW-ODSO-Z2MSET001-CUBE-Z2MSET002 modifiers ABAPProgram| )
@@ -257,6 +260,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( where = |S| level = 2 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST_CL_B1| name = |METHOD_A| specific = |X| )
 ( where = |S| level = 2 alternate_level = 0 element_type = |ABAPProgramOrFunctionOrSAPBW| parent_name = || name = |BW-ODSO-Z2MSET001-CUBE-Z2MSET002| specific = |X| )
 ( where = |S| level = 2 alternate_level = 0 element_type = |ABAPProgramOrFunctionOrSAPBW| parent_name = || name = |F-Z2MSE_TEST_FUNCTION_A| specific = |X| )
+( where = |S| level = 3 alternate_level = 0 element_type = |ABAPProgramOrFunctionOrSAPBW| parent_name = || name = |LZ2MSE_TEST_FGR_AF01| specific = |X| )
 ( where = |S| level = 2 alternate_level = 0 element_type = |ABAPProgramOrFunctionOrSAPBW| parent_name = || name = |Z2MSE_TEST_PROGRAM_A| specific = |X| )
 ( where = |S| level = 2 alternate_level = 0 element_type = |WebDynproController| parent_name = |Z2MSE_TEST_WDY_A| name = |COMPONENTCONTROLLER| specific = |X| )
 ( where = |S| level = 3 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST_CL_B1| name = |METHOD_B| specific = |X| )
@@ -280,6 +284,7 @@ CLASS ltcl_main IMPLEMENTATION.
 "( |FAMIX.Attribute Z2MSE_TEST_IF_A_00000000000000>>ATTRIBUTE_A_000000000000000000| )
 ( |FAMIX.Class BW-ODSO-Z2MSET001-CUBE-Z2MSET002 modifiers ABAPProgram| )
 ( |FAMIX.Class F-Z2MSE_TEST_FUNCTION_A modifiers ABAPProgram| )
+( |FAMIX.Class LZ2MSE_TEST_FGR_AF01 modifiers ABAPProgram| )
 ( |FAMIX.Class Z2MSE_TEST_CL_A modifiers ABAPGlobalClass| )
 ( |FAMIX.Class Z2MSE_TEST_CL_B1 modifiers ABAPGlobalClass| )
 ( |FAMIX.Class Z2MSE_TEST_CL_B2 modifiers ABAPGlobalClass| )
@@ -306,6 +311,7 @@ CLASS ltcl_main IMPLEMENTATION.
 
 ( |FAMIX.Invocation sender BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender F-Z2MSE_TEST_FUNCTION_A>>F-Z2MSE_TEST_FUNCTION_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
+( |FAMIX.Invocation sender LZ2MSE_TEST_FGR_AF01>>LZ2MSE_TEST_FGR_AF01 candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>METHOD_A candidates Z2MSE_TEST_CL_A>>EVENT_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 candidates Z2MSE_TEST_CL_B2>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
@@ -320,6 +326,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Invocation sender Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 ( |FAMIX.Method BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 signature BW-ODSO-Z2MSET001-CUBE-Z2MSET002| )
 ( |FAMIX.Method F-Z2MSE_TEST_FUNCTION_A>>F-Z2MSE_TEST_FUNCTION_A signature F-Z2MSE_TEST_FUNCTION_A| )
+( |FAMIX.Method LZ2MSE_TEST_FGR_AF01>>LZ2MSE_TEST_FGR_AF01 signature LZ2MSE_TEST_FGR_AF01| )
 ( |FAMIX.Method Z2MSE_TEST_CL_A>>CONSTRUCTOR signature CONSTRUCTOR| )
 ( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENTHANDLER_A signature EVENTHANDLER_A| )
 ( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENT_A signature EVENT_A| )
