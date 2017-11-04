@@ -100,6 +100,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.FileAnchor Z2MSE_TEST_CL_B2 fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_b2/source/main| )
 ( |FAMIX.FileAnchor Z2MSE_TEST_IF_A_00000000000000 fileName adt://NPL/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main| )
 ( |FAMIX.FileAnchor ZIWCI_2MSE_TEST_WDY_A fileName adt://NPL/sap/bc/adt/oo/interfaces/ziwci_2mse_test_wdy_a/source/main| )
+( |FAMIX.FileAnchor BW-ODSO-Z2MSET001-CUBE-Z2MSET002 fileName bwmt://NPL/sap/bw/modeling/trfn/123| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_A>>METHOD_A variable Z2MSE_TEST_A>>Z2MSE_TEST_A| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_B1>>METHOD_A variable Z2MSE_TEST_A>>Z2MSE_TEST_A| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_B1>>METHOD_A variable Z2MSE_TEST_IF_A_00000000000000>>ATTRIBUTE_A_000000000000000000| )
@@ -128,6 +129,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Invocation sender Z2MSE_TEST_IF_A_00000000000000>>EVENT_A_0000000000000000000000 candidates Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000 signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 candidates Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
+( |FAMIX.Invocation sender Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER candidates Z2MSE_TEST_CL_A>>CONSTRUCTOR signature DUMMY| ) " Suddenly needed 04.11.2017 after regenerating WebDynpro
 ( |FAMIX.Invocation sender Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER candidates ZIWCI_2MSE_TEST_WDY_A>>WD_GET_API signature DUMMY| )
 ( |FAMIX.Method Z2MSE_TEST_CL_A>>CONSTRUCTOR signature CONSTRUCTOR| )
 ( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENTHANDLER_A signature EVENTHANDLER_A| )
@@ -187,7 +189,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Method Z2MSE_TEST_IF_A_00000000000000>>EVENT_A_0000000000000000000000 sourceAnchor| )
 ( |FAMIX.Method Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 sourceAnchor| )
 ( |FAMIX.Method ZIWCI_2MSE_TEST_WDY_A>>WD_GET_API sourceAnchor| )
-
+( |FAMIX.Method BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 sourceAnchor| )
 
     ).
 
@@ -308,7 +310,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.FileAnchor METHOD_A fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_b2/source/main#start=12,1| )
 ( |FAMIX.FileAnchor METHOD_A_000000000000000000000 fileName adt://NPL/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main#start=9,1| )
 ( |FAMIX.FileAnchor METHOD_B fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_b1/source/main#start=13,1| )
-
+( |FAMIX.FileAnchor BW-ODSO-Z2MSET001-CUBE-Z2MSET002 fileName bwmt://NPL/sap/bw/modeling/trfn/123| )
 ( |FAMIX.Invocation sender BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender F-Z2MSE_TEST_FUNCTION_A>>F-Z2MSE_TEST_FUNCTION_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender LZ2MSE_TEST_FGR_AF01>>LZ2MSE_TEST_FGR_AF01 candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
@@ -361,6 +363,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Method Z2MSE_TEST_CL_B2>>METHOD_A sourceAnchor| )
 ( |FAMIX.Method Z2MSE_TEST_IF_A_00000000000000>>EVENT_A_0000000000000000000000 sourceAnchor| )
 ( |FAMIX.Method Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 sourceAnchor| )
+( |FAMIX.Method BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 sourceAnchor| )
     ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).

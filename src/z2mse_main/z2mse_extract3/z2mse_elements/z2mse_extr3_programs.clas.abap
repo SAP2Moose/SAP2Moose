@@ -35,12 +35,18 @@ CLASS z2mse_extr3_programs DEFINITION
              program               TYPE progname,
              external_program_name TYPE string,
              subc                  TYPE subc,
+             program_type          TYPE string,
+             program_attribute_1   TYPE string,
+             adt_or_bwmt_link      TYPE string,
            END OF element_type.
     DATA elements_element_id TYPE HASHED TABLE OF element_type WITH UNIQUE KEY element_id.
     DATA elements_program TYPE HASHED TABLE OF element_type WITH UNIQUE KEY program.
     METHODS _convert_program_2_ext_name
       IMPORTING
         i_element_program TYPE progname
+      EXPORTING
+        program_type TYPE string
+        program_attribute_1 TYPE string
       RETURNING
         VALUE(r_result)   TYPE string.
     METHODS _extract_function_name
@@ -51,6 +57,8 @@ CLASS z2mse_extr3_programs DEFINITION
     METHODS _extract_sap_bw_logic
       IMPORTING
         i_element_program TYPE progname
+      EXPORTING
+        tranid            TYPE rstranid
       RETURNING
         VALUE(r_result)   TYPE string.
 ENDCLASS.
@@ -90,7 +98,9 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
                                                        is_specific = abap_true ).
         element-element_id = new_element_id.
         element-program = found_program.
-        element-external_program_name = _convert_program_2_ext_name( found_program ).
+        element-external_program_name = _convert_program_2_ext_name( EXPORTING i_element_program = found_program
+                                                                     IMPORTING program_type = element-program_type
+                                                                               program_attribute_1 = element-program_attribute_1 ).
         element-subc = found_subc.
         INSERT element INTO TABLE elements_element_id.
         INSERT element INTO TABLE elements_program.
@@ -114,6 +124,29 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
 
   METHOD collect_infos.
+
+    FIELD-SYMBOLS: <p> TYPE element_type,
+                   <e> TYPE element_type.
+
+    LOOP AT elements_program ASSIGNING <p>.
+
+      IF <p>-program_type EQ 'BW_TRAN'.
+
+        CONCATENATE 'bwmt://' sysid '/sap/bw/modeling/trfn/' <p>-program_attribute_1 INTO <p>-adt_or_bwmt_link.
+
+      ENDIF.
+
+      IF <p>-adt_or_bwmt_link IS NOT INITIAL.
+
+        READ TABLE elements_element_id ASSIGNING <e> WITH TABLE KEY element_id = <p>-element_id.
+        ASSERT sy-subrc EQ 0.
+
+        <e>-adt_or_bwmt_link = <p>-adt_or_bwmt_link.
+
+      ENDIF.
+
+    ENDLOOP.
+
   ENDMETHOD.
 
 
@@ -124,7 +157,8 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
     ASSERT sy-subrc EQ 0.
 
-    DATA last_id TYPE i.
+    DATA: last_id        TYPE i,
+          file_anchor_id TYPE i.
 *      famix_package->add( name = table-devclass ).
 
     " SAP_2_FAMIX_54        Map database tables to FAMIX Class
@@ -161,6 +195,23 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
     element_manager->famix_method->store_id( EXPORTING class  = element-external_program_name
                                                        method = element-external_program_name ).
 
+    IF element-adt_or_bwmt_link IS NOT INITIAL.
+
+      element_manager->famix_file_anchor->add( EXPORTING element_id = dummy_method_id " Required for Moose 6.1
+                                                         file_name  = element-adt_or_bwmt_link
+                                                 IMPORTING id         = file_anchor_id ).
+
+      IF file_anchor_id IS NOT INITIAL.
+        element_manager->famix_method->set_source_anchor_by_id(
+          EXPORTING
+            element_id         = dummy_method_id
+            source_anchor_id   = file_anchor_id
+        ).
+
+      ENDIF.
+
+    ENDIF.
+
   ENDMETHOD.
 
 
@@ -180,17 +231,30 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
   METHOD _convert_program_2_ext_name.
 
+    clear program_type.
+    clear program_attribute_1.
+
+    data tranid type RSTRANID.
+
     IF i_element_program+0(1) EQ |L|.
 
       r_result = _extract_function_name( i_element_program ).
 
     ELSEIF sy-sysid EQ 'NPL' AND i_element_program+0(3) EQ |ZGP|. "Only on test system, currently no SAP BW working there
 
-      r_result = _extract_sap_bw_logic( i_element_program ).
+      r_result = _extract_sap_bw_logic( EXPORTING i_element_program = i_element_program
+                                        IMPORTING tranid = tranid ).
+
+      program_type = |BW_TRAN|.
+      program_attribute_1 = tranid.
 
     ELSEIF i_element_program+0(2) EQ |GP|.
 
-      r_result = _extract_sap_bw_logic( i_element_program ).
+      r_result = _extract_sap_bw_logic( EXPORTING i_element_program = i_element_program
+                                        IMPORTING tranid = tranid ).
+
+      program_type = |BW_TRAN|.
+      program_attribute_1 = tranid.
 
     ELSE.
 
@@ -271,6 +335,8 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
           id_length               TYPE i,
           transformation          TYPE rstran.
 
+    CLEAR tranid.
+
     element_program = i_element_program.
 
     IF sy-sysid EQ 'NPL' AND element_program+0(3) = 'ZGP'.
@@ -284,6 +350,7 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
     IF sy-sysid EQ 'NPL' AND element_program = 'GP003N8S45LS1FG375G2BN69Q4G'.
       CLEAR transformation.
+      transformation-tranid = |123|.
       transformation-sourcetype = |ODSO|.
       transformation-sourcename = |Z2MSET001|.
       transformation-targettype = |CUBE|.
@@ -305,6 +372,9 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
       " In case of InfoSources there are multiple blanks in the field SOURCENAME
       " Remove all but a single blank
       CONDENSE r_result.
+
+      tranid = transformation-tranid.
+
     ENDIF.
 
   ENDMETHOD.

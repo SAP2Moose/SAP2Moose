@@ -7,7 +7,7 @@
     <STATE>A</STATE>
     <VARCL>X</VARCL>
     <SUBC>1</SUBC>
-    <APPL>B</APPL>
+    <RSTAT>K</RSTAT>
     <RLOAD>E</RLOAD>
     <FIXPT>X</FIXPT>
     <UCCHECK>X</UCCHECK>
@@ -15,7 +15,7 @@
    <TPOOL>
     <item>
      <ID>R</ID>
-     <ENTRY>Simulate GP003N8S45LS1FG375G2BN69Q4G</ENTRY>
+     <ENTRY>Program ZGP003N8S45LS1FG375G2BN69Q4G</ENTRY>
      <LENGTH>36</LENGTH>
     </item>
    </TPOOL>
