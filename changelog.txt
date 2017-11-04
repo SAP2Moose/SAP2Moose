@@ -9,6 +9,10 @@ Legend
 - : removed
 
 
+05.11.2017 v0.5.3
+-----------------
++ Issue 70 Support now BWMT links for transformations
+
 31.10.2017 v0.5.2
 -----------------
 * Issue 68 For functions a duplicate "method" is created
