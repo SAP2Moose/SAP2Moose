@@ -123,18 +123,20 @@ CLASS ltcl_main IMPLEMENTATION.
 
   METHOD _extract_function_name.
 
-    DATA: function_group_act TYPE rs38l_area,
-          function_act       TYPE rs38l_fnam,
-          function_include_act   TYPE string.
+    DATA: function_group_act   TYPE rs38l_area,
+          function_act         TYPE rs38l_fnam,
+          function_include_act TYPE string,
+          function_name        TYPE string.
 
-   function_group_act = |DUMMY|.
-   function_act = |DUMMY|.
-   function_include_act = |DUMMY|.
+    function_group_act = |DUMMY|.
+    function_act = |DUMMY|.
+    function_include_act = |DUMMY|.
 
-    DATA(function_name) = f_cut->_extract_function_name( EXPORTING i_element_program = |ABC|
+    f_cut->_extract_function_name( EXPORTING i_element_program = |ABC|
                                                          IMPORTING function_group    = function_group_act
                                                                    function          = function_act
-                                                                   function_include  = function_include_act ).
+                                                                   function_include  = function_include_act
+                                                                   r_result          = function_name ).
 
     cl_abap_unit_assert=>assert_equals( msg = 'Return name unchanged if it very short'
                                         exp = |ABC| act = function_name ).
@@ -148,10 +150,11 @@ CLASS ltcl_main IMPLEMENTATION.
     cl_abap_unit_assert=>assert_equals( msg = 'Initial function include if name is very short'
                                         exp = || act = function_include_act ).
 
-    function_name = f_cut->_extract_function_name( EXPORTING i_element_program = |LAF01|
+    f_cut->_extract_function_name( EXPORTING i_element_program = |LAF01|
                                                    IMPORTING function_group    = function_group_act
                                                              function          = function_act
-                                                             function_include  = function_include_act ).
+                                                             function_include  = function_include_act
+                                                             r_result          = function_name ).
 
     cl_abap_unit_assert=>assert_equals( msg = 'Return name unchanged thirdlast character is not U'
                                         exp = |LAF01| act = function_name ).
@@ -176,10 +179,11 @@ CLASS ltcl_main IMPLEMENTATION.
 
     END-TEST-INJECTION.
 
-    function_name = f_cut->_extract_function_name( EXPORTING i_element_program = |LAU01|
+    f_cut->_extract_function_name( EXPORTING i_element_program = |LAU01|
                                                    IMPORTING function_group    = function_group_act
                                                              function          = function_act
-                                                             function_include  = function_include_act ).
+                                                             function_include  = function_include_act
+                                                             r_result = function_name ).
 
     cl_abap_unit_assert=>assert_equals( msg = 'Read Function if thirdlast character is U'
                                         exp = |F-MY_FUNCTION| act = function_name ).
@@ -193,10 +197,11 @@ CLASS ltcl_main IMPLEMENTATION.
     cl_abap_unit_assert=>assert_equals( msg = 'Initial function include if thirdlast character is U'
                                         exp = || act = function_include_act ).
 
-    function_name = f_cut->_extract_function_name( EXPORTING i_element_program = |BU01|
+    f_cut->_extract_function_name( EXPORTING i_element_program = |BU01|
                                                    IMPORTING function_group    = function_group_act
                                                              function          = function_act
-                                                             function_include  = function_include_act ).
+                                                             function_include  = function_include_act
+                                                             r_result = function_name ).
 
     cl_abap_unit_assert=>assert_equals( msg = 'Return the include name if nothing is found in table TFDIR'
                                         exp = |BU01| act = function_name ).
