@@ -15,6 +15,18 @@ ENDCLASS.
 CLASS ltcl_class IMPLEMENTATION.
 
   METHOD setup.
+    TEST-INJECTION seoredef.
+      cl_abap_unit_assert=>fail( msg = 'Redefine me' ).
+    END-TEST-INJECTION.
+    TEST-INJECTION seocompo_3.
+      cl_abap_unit_assert=>fail( msg = 'Redefine me' ).
+    END-TEST-INJECTION.
+*    TEST-INJECTION seoredef_2.
+*      cl_abap_unit_assert=>fail( msg = 'Redefine me' ).
+*    END-TEST-INJECTION.
+*    TEST-INJECTION seocompo_4.
+*      cl_abap_unit_assert=>fail( msg = 'Redefine me' ).
+*    END-TEST-INJECTION.
     model_builder = NEW #( ).
     model_builder->initial_selection_started( ).
     element_manager = NEW #( i_model_builder = model_builder
@@ -41,6 +53,19 @@ CLASS ltcl_class IMPLEMENTATION.
         found_class_type = 0.
       ENDIF.
     END-TEST-INJECTION.
+    TEST-INJECTION seocompo_3.
+      cl_abap_unit_assert=>fail( msg = 'Redefine me' ).
+    END-TEST-INJECTION.
+
+    TEST-INJECTION seoredef.
+      CLEAR redefined_components.
+      sy-subrc = 4.
+    END-TEST-INJECTION.
+
+*    TEST-INJECTION seoredef_2.
+*      CLEAR redefined_component.
+*      sy-subrc = 4.
+*    END-TEST-INJECTION.
 
     TEST-INJECTION seocompo_2.
       IF class EQ 'CLASS_A'.
@@ -391,9 +416,9 @@ CLASS ltcl_infos IMPLEMENTATION.
                                           ( element_id = 2 clstype = 1 class_name = |INTF_A| ) ).
 
     f_cut->collect_infos( sysid = |SYS| ).
-    data: elements_element_id_exp  type hashed table of z2mse_extr3_classes=>element_type WITH UNIQUE KEY element_id.
+    DATA: elements_element_id_exp  TYPE HASHED TABLE OF z2mse_extr3_classes=>element_type WITH UNIQUE KEY element_id.
 
-    elements_element_id_exp = value #( ( element_id = 1 clstype = 0 class_name = |CLASS_A|
+    elements_element_id_exp = VALUE #( ( element_id = 1 clstype = 0 class_name = |CLASS_A|
                                          adt_link = |adt://SYS/sap/bc/adt/oo/classes/class_a/source/main| )
                                        ( element_id = 2 clstype = 1 class_name = |INTF_A|
                                          adt_link = |adt://SYS/sap/bc/adt/oo/interfaces/intf_a/source/main| ) ).

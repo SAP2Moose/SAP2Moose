@@ -92,6 +92,11 @@ CLASS z2mse_extr3_classes DEFINITION
     DATA elements_metarel_element_id TYPE HASHED TABLE OF element_metarel_type WITH UNIQUE KEY element_id.
     DATA elements_metarel_refclsname TYPE HASHED TABLE OF element_metarel_type WITH UNIQUE KEY refclsname.
 
+    TYPES: BEGIN OF redefined_type,
+             clsname    TYPE seoclsname,
+             refclsname TYPE seoclsname,
+             mtdname    TYPE seocpdname,
+           END OF redefined_type.
     METHODS _add_component
       IMPORTING
         clsname               TYPE string
@@ -114,6 +119,12 @@ CLASS z2mse_extr3_classes DEFINITION
         i_found_mtdtype         TYPE seomtdtype
       RETURNING
         VALUE(r_new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
+
+    METHODS _get_redefined
+      IMPORTING
+        class           TYPE string
+      RETURNING
+        VALUE(r_result) TYPE z2mse_extr3_classes=>ty_class_components.
 
 ENDCLASS.
 
@@ -176,6 +187,54 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
       END-TEST-SEAM.
 
+      DATA: redefined_class_components TYPE ty_class_components,
+            redefined_class_component  TYPE ty_class_component.
+
+      redefined_class_components = _get_redefined( class ).
+
+*      DATA: redefined_components TYPE STANDARD TABLE OF redefined_type WITH DEFAULT KEY,
+*            redefined_component  TYPE redefined_type.
+*
+*      TEST-SEAM seoredef.
+*
+*        SELECT clsname refclsname mtdname FROM seoredef INTO TABLE redefined_components
+*          WHERE clsname = class
+*            AND version = 1.
+*
+*      END-TEST-SEAM.
+*
+*      IF sy-subrc EQ 0.
+*
+*        DATA: referenced_class_component TYPE z2mse_extr3_classes=>ty_class_component.
+*
+*        LOOP AT redefined_components INTO redefined_component.
+*
+*          TEST-SEAM seocompo_3.
+*
+*            SELECT SINGLE clsname cmpname cmptype mtdtype
+*              FROM seocompo
+*              INTO CORRESPONDING FIELDS OF referenced_class_component
+*              WHERE cmptype <> 3 " A type
+*                AND clsname = class
+*                AND cmpname = redefined_component-mtdname.
+*
+*          END-TEST-SEAM.
+*
+*          IF sy-subrc <> 0.
+*            "Inconsistency
+*          ELSE.
+*            INSERT referenced_class_component INTO TABLE class_components.
+*            ASSERT sy-subrc EQ 0.
+*          ENDIF.
+*
+*        ENDLOOP.
+*
+*      ENDIF.
+
+      LOOP AT redefined_class_components INTO redefined_class_component.
+        INSERT redefined_class_component INTO TABLE class_components.
+      ENDLOOP.
+
       LOOP AT class_components INTO class_component.
 
         _add_component( EXPORTING clsname        = class_component-clsname
@@ -237,35 +296,6 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
   METHOD clear.
     CLEAR instance.
-  ENDMETHOD.
-
-
-  METHOD comp_name.
-
-    DATA element_comp TYPE element_comp_type.
-
-    READ TABLE elements_comp_element_id INTO element_comp WITH KEY element_id = element_id.
-
-    IF sy-subrc EQ 0.
-
-      class_name = element_comp-clsname.
-      cmpname = element_comp-cmpname.
-      cmptype = element_comp-cmptype.
-      exists = abap_true.
-
-    ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD get_instance.
-    IF instance IS NOT BOUND.
-      CREATE OBJECT instance
-        EXPORTING
-          i_element_manager = element_manager.
-    ENDIF.
-    instance->type = class_type.
-    r_instance = instance.
   ENDMETHOD.
 
 
@@ -442,6 +472,35 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD comp_name.
+
+    DATA element_comp TYPE element_comp_type.
+
+    READ TABLE elements_comp_element_id INTO element_comp WITH KEY element_id = element_id.
+
+    IF sy-subrc EQ 0.
+
+      class_name = element_comp-clsname.
+      cmpname = element_comp-cmpname.
+      cmptype = element_comp-cmptype.
+      exists = abap_true.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD get_instance.
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = element_manager.
+    ENDIF.
+    instance->type = class_type.
+    r_instance = instance.
+  ENDMETHOD.
+
+
   METHOD make_model.
 
     DATA element TYPE element_type.
@@ -540,14 +599,14 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                                file_name  = element_comp-adt_link
                                                        IMPORTING id         = file_anchor_id ).
 
-          IF file_anchor_id IS NOT INITIAL.
-            element_manager->famix_attribute->set_source_anchor_by_id(
-              EXPORTING
-                element_id         = last_id
-                source_anchor_id   = file_anchor_id
-            ).
+            IF file_anchor_id IS NOT INITIAL.
+              element_manager->famix_attribute->set_source_anchor_by_id(
+                EXPORTING
+                  element_id         = last_id
+                  source_anchor_id   = file_anchor_id
+              ).
 
-          ENDIF.
+            ENDIF.
 
           ENDIF.
 
@@ -577,14 +636,14 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                                file_name  = element_comp-adt_link
                                                        IMPORTING id         = file_anchor_id ).
 
-          IF file_anchor_id IS NOT INITIAL.
-            element_manager->famix_method->set_source_anchor_by_id(
-              EXPORTING
-                element_id         = last_id
-                source_anchor_id   = file_anchor_id
-            ).
+            IF file_anchor_id IS NOT INITIAL.
+              element_manager->famix_method->set_source_anchor_by_id(
+                EXPORTING
+                  element_id         = last_id
+                  source_anchor_id   = file_anchor_id
+              ).
 
-          ENDIF.
+            ENDIF.
 
           ENDIF.
 
@@ -704,7 +763,54 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       END-TEST-SEAM.
 
       IF found_class_name IS NOT INITIAL.
+
         is_added = abap_true.
+
+        else.
+
+      DATA: redefined_class_components TYPE ty_class_components,
+            redefined_class_component  TYPE ty_class_component.
+
+      redefined_class_components = _get_redefined( clsname ).
+
+      READ TABLE redefined_class_components INTO redefined_class_component WITH KEY clsname = clsname cmpname = cmpname.
+
+      if sy-subrc eq 0.
+
+        found_class_name = redefined_class_component-clsname.
+        found_cmpname = redefined_class_component-cmpname.
+        found_cmptype = redefined_class_component-cmptype.
+        found_mtdtype = redefined_class_component-mtdtype.
+
+        is_added = abap_true.
+
+      endif.
+
+*      ELSE.
+*
+*        " Is it a redefined component?
+*
+*        DATA: redefined_component  TYPE redefined_type.
+*
+*        TEST-SEAM seoredef_2.
+*
+*          SELECT SINGLE clsname refclsname mtdname FROM seoredef INTO redefined_component
+*            WHERE clsname = clsname
+*              AND version = 1
+*              AND mtdname = cmpname.
+*
+*        END-TEST-SEAM.
+*
+*        IF sy-subrc EQ 0.
+*
+*          TEST-SEAM seocompo_4.
+*            SELECT SINGLE clsname cmpname cmptype mtdtype FROM seocompo
+*              INTO (found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = redefined_component-refclsname
+*                                                                                       AND cmpname = cmpname.
+*          END-TEST-SEAM.
+*          found_class_name = clsname. "As it is redefined
+*          is_added = abap_true.
+*        ENDIF.
       ENDIF.
 
       IF is_added EQ abap_true.
@@ -810,6 +916,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
     DATA element_comp2 TYPE element_comp_type.
 
+    ASSERT i_found_cmpname IS NOT INITIAL.
+
     r_new_element_id = element_manager->add_element( element = me
                                                      is_specific = abap_false ).
     element_comp2-element_id = r_new_element_id.
@@ -820,6 +928,64 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
     INSERT element_comp2 INTO TABLE elements_comp_element_id .
     INSERT element_comp2 INTO TABLE elements_comp_clsname_cmpname .
+
+  ENDMETHOD.
+
+
+  METHOD _get_redefined.
+
+    DATA: redefined_components TYPE STANDARD TABLE OF redefined_type WITH DEFAULT KEY,
+          redefined_component  TYPE redefined_type,
+          found                TYPE abap_bool,
+          superclass           TYPE seoclsname,
+          component            TYPE z2mse_extr3_classes=>ty_class_component.
+
+    TEST-SEAM seoredef.
+
+      SELECT * FROM  seoredef INTO CORRESPONDING FIELDS OF TABLE redefined_components
+        WHERE clsname = class
+          AND version = 1.
+
+    END-TEST-SEAM.
+
+    LOOP AT redefined_components INTO redefined_component.
+      superclass = redefined_component-refclsname.
+      found = ''.
+      WHILE found EQ ''.
+
+        CLEAR component.
+
+        TEST-SEAM seocompo_3.
+
+          SELECT SINGLE clsname cmpname cmptype mtdtype
+            FROM seocompo
+            INTO component
+            WHERE cmptype <> 3 " A type
+              AND clsname = superclass.
+
+        END-TEST-SEAM.
+
+        IF sy-subrc EQ 0.
+          found = 'X'.
+          component-clsname = class .
+          INSERT component INTO TABLE r_result.
+        ELSE.
+
+          " Find next superclass
+
+          TEST-SEAM seometarel_2.
+
+            SELECT SINGLE refclsname FROM seometarel INTO superclass
+              WHERE clsname = superclass
+                AND version = 1.
+
+          END-TEST-SEAM.
+
+        ENDIF.
+
+      ENDWHILE.
+
+    ENDLOOP.
 
   ENDMETHOD.
 ENDCLASS.
