@@ -1,7 +1,7 @@
-* generated on system NPL at 05.11.2017 on 16:07:48
+* generated on system NPL at 05.11.2017 on 21:01:47
 
 *
-* This is version 0.5.5
+* This is version 0.5.6
 *
 *The MIT License (MIT)
 *
@@ -1879,6 +1879,12 @@ CLASS cl_extr3_classes DEFINITION
         VALUE(cmpname)    TYPE string
         VALUE(cmptype)    TYPE seocmptype
         VALUE(exists)     TYPE abap_bool.
+    METHODS is_redefinition_of_method
+      IMPORTING
+        invoced_element_id1  TYPE i
+        invocing_element_id2 TYPE i
+      RETURNING
+        VALUE(r_result)      TYPE abap_bool.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
     METHODS collect_infos REDEFINITION.
@@ -1914,6 +1920,18 @@ CLASS cl_extr3_classes DEFINITION
     DATA elements_metarel_element_id TYPE HASHED TABLE OF element_metarel_type WITH UNIQUE KEY element_id.
     DATA elements_metarel_refclsname TYPE HASHED TABLE OF element_metarel_type WITH UNIQUE KEY refclsname.
 
+    TYPES: BEGIN OF redefined_type,
+             clsname    TYPE seoclsname,
+             refclsname TYPE seoclsname,
+             mtdname    TYPE seocpdname,
+           END OF redefined_type.
+
+    TYPES: BEGIN OF redefined_method_type,
+             clsname            TYPE seoclsname,
+             defined_in_clsname TYPE seoclsname,
+             method             TYPE seocpdname,
+           END OF redefined_method_type.
+    DATA redefined_methods TYPE HASHED TABLE OF redefined_method_type WITH UNIQUE KEY method clsname defined_in_clsname.
     METHODS _add_component
       IMPORTING
         clsname               TYPE string
@@ -1936,6 +1954,12 @@ CLASS cl_extr3_classes DEFINITION
         i_found_mtdtype         TYPE seomtdtype
       RETURNING
         VALUE(r_new_element_id) TYPE cl_extr3_element_manager=>element_id_type.
+
+    METHODS _get_redefined
+      IMPORTING
+        class           TYPE string
+      RETURNING
+        VALUE(r_result) TYPE cl_extr3_classes=>ty_class_components.
 
 ENDCLASS.
 "! I describe an element of type package
@@ -3057,8 +3081,22 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
 
           ELSE.
 
+            data: is_redefinition_of_method TYPE abap_bool.
+
+            is_redefinition_of_method = classes->is_redefinition_of_method( EXPORTING invoced_element_id1  = element_id
+                                                                                      invocing_element_id2 = used_by_element_id ).
+
+            if is_redefinition_of_method eq ''.
+
             invocation->add( EXPORTING invoced_element_id1  = element_id
                                        invocing_element_id2 = used_by_element_id ).
+
+                                       else.
+
+            invocation->add( EXPORTING invoced_element_id1  = used_by_element_id
+                                       invocing_element_id2 = element_id ).
+
+                                       endif.
 
           ENDIF.
 
@@ -3129,6 +3167,54 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
           WHERE cmptype <> 3 " A type
             AND clsname = class.
 
+
+      DATA: redefined_class_components TYPE ty_class_components,
+            redefined_class_component  TYPE ty_class_component.
+
+      redefined_class_components = _get_redefined( class ).
+
+*      DATA: redefined_components TYPE STANDARD TABLE OF redefined_type WITH DEFAULT KEY,
+*            redefined_component  TYPE redefined_type.
+*
+*      TEST-SEAM seoredef.
+*
+*        SELECT clsname refclsname mtdname FROM seoredef INTO TABLE redefined_components
+*          WHERE clsname = class
+*            AND version = 1.
+*
+*      END-TEST-SEAM.
+*
+*      IF sy-subrc EQ 0.
+*
+*        DATA: referenced_class_component TYPE cl_extr3_classes=>ty_class_component.
+*
+*        LOOP AT redefined_components INTO redefined_component.
+*
+*          TEST-SEAM seocompo_3.
+*
+*            SELECT SINGLE clsname cmpname cmptype mtdtype
+*              FROM seocompo
+*              INTO CORRESPONDING FIELDS OF referenced_class_component
+*              WHERE cmptype <> 3 " A type
+*                AND clsname = class
+*                AND cmpname = redefined_component-mtdname.
+*
+*          END-TEST-SEAM.
+*
+*          IF sy-subrc <> 0.
+*            "Inconsistency
+*          ELSE.
+*            INSERT referenced_class_component INTO TABLE class_components.
+*            ASSERT sy-subrc EQ 0.
+*          ENDIF.
+*
+*        ENDLOOP.
+*
+*      ENDIF.
+
+      LOOP AT redefined_class_components INTO redefined_class_component.
+        INSERT redefined_class_component INTO TABLE class_components.
+      ENDLOOP.
 
       LOOP AT class_components INTO class_component.
 
@@ -3255,14 +3341,14 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
                                                                file_name  = element_comp-adt_link
                                                        IMPORTING id         = file_anchor_id ).
 
-          IF file_anchor_id IS NOT INITIAL.
-            element_manager->famix_attribute->set_source_anchor_by_id(
-              EXPORTING
-                element_id         = last_id
-                source_anchor_id   = file_anchor_id
-            ).
+            IF file_anchor_id IS NOT INITIAL.
+              element_manager->famix_attribute->set_source_anchor_by_id(
+                EXPORTING
+                  element_id         = last_id
+                  source_anchor_id   = file_anchor_id
+              ).
 
-          ENDIF.
+            ENDIF.
 
           ENDIF.
 
@@ -3292,14 +3378,14 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
                                                                file_name  = element_comp-adt_link
                                                        IMPORTING id         = file_anchor_id ).
 
-          IF file_anchor_id IS NOT INITIAL.
-            element_manager->famix_method->set_source_anchor_by_id(
-              EXPORTING
-                element_id         = last_id
-                source_anchor_id   = file_anchor_id
-            ).
+            IF file_anchor_id IS NOT INITIAL.
+              element_manager->famix_method->set_source_anchor_by_id(
+                EXPORTING
+                  element_id         = last_id
+                  source_anchor_id   = file_anchor_id
+              ).
 
-          ENDIF.
+            ENDIF.
 
           ENDIF.
 
@@ -3363,7 +3449,54 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
                                                                                    AND cmpname = cmpname.
 
       IF found_class_name IS NOT INITIAL.
+
         is_added = abap_true.
+
+      ELSE.
+
+        DATA: redefined_class_components TYPE ty_class_components,
+              redefined_class_component  TYPE ty_class_component.
+
+        redefined_class_components = _get_redefined( clsname ).
+
+        READ TABLE redefined_class_components INTO redefined_class_component WITH KEY clsname = clsname cmpname = cmpname.
+
+        IF sy-subrc EQ 0.
+
+          found_class_name = redefined_class_component-clsname.
+          found_cmpname = redefined_class_component-cmpname.
+          found_cmptype = redefined_class_component-cmptype.
+          found_mtdtype = redefined_class_component-mtdtype.
+
+          is_added = abap_true.
+
+        ENDIF.
+
+*      ELSE.
+*
+*        " Is it a redefined component?
+*
+*        DATA: redefined_component  TYPE redefined_type.
+*
+*        TEST-SEAM seoredef_2.
+*
+*          SELECT SINGLE clsname refclsname mtdname FROM seoredef INTO redefined_component
+*            WHERE clsname = clsname
+*              AND version = 1
+*              AND mtdname = cmpname.
+*
+*        END-TEST-SEAM.
+*
+*        IF sy-subrc EQ 0.
+*
+*          TEST-SEAM seocompo_4.
+*            SELECT SINGLE clsname cmpname cmptype mtdtype FROM seocompo
+*              INTO (found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = redefined_component-refclsname
+*                                                                                       AND cmpname = cmpname.
+*          END-TEST-SEAM.
+*          found_class_name = clsname. "As it is redefined
+*          is_added = abap_true.
+*        ENDIF.
       ENDIF.
 
       IF is_added EQ abap_true.
@@ -3478,6 +3611,8 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
     " Add single component to class
 
     DATA element_comp2 TYPE element_comp_type.
+
+    ASSERT i_found_cmpname IS NOT INITIAL.
 
     r_new_element_id = element_manager->add_element( element = me
                                                      is_specific = abap_false ).
@@ -3739,6 +3874,102 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
       ENDLOOP.
 
     ENDLOOP.
+
+  ENDMETHOD.
+  METHOD _get_redefined.
+
+    DATA: redefined_components TYPE STANDARD TABLE OF redefined_type WITH DEFAULT KEY,
+          redefined_component  TYPE redefined_type,
+          found                TYPE abap_bool,
+          superclass           TYPE seoclsname,
+          component            TYPE cl_extr3_classes=>ty_class_component.
+
+
+      SELECT * FROM  seoredef INTO CORRESPONDING FIELDS OF TABLE redefined_components
+        WHERE clsname = class
+          AND version = 1.
+
+
+    LOOP AT redefined_components INTO redefined_component.
+      superclass = redefined_component-refclsname.
+      found = ''.
+      WHILE found EQ ''.
+
+        CLEAR component.
+
+
+          SELECT SINGLE clsname cmpname cmptype mtdtype
+            FROM seocompo
+            INTO component
+            WHERE cmptype <> 3 " A type
+              AND clsname = superclass
+              AND cmpname = redefined_component-mtdname.
+
+
+        IF sy-subrc EQ 0.
+          found = 'X'.
+
+
+          DATA redefined_method TYPE redefined_method_type.
+          redefined_method-method = component-cmpname.
+          redefined_method-clsname = class.
+          redefined_method-defined_in_clsname = component-clsname.
+
+          INSERT redefined_method INTO TABLE redefined_methods. "Allow duplicate inserting here
+
+          component-clsname = class .
+          INSERT component INTO TABLE r_result.
+        ELSE.
+
+          " Find next superclass
+
+
+            SELECT SINGLE refclsname FROM seometarel INTO superclass
+              WHERE clsname = superclass
+                AND version = 1.
+
+
+          IF sy-subrc <> 0.
+            found = 'X'.
+            " Nothing found
+          ENDIF.
+
+        ENDIF.
+
+      ENDWHILE.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+  METHOD is_redefinition_of_method.
+
+    DATA: invoced  TYPE element_comp_type,
+          invocing TYPE element_comp_type.
+
+    READ TABLE elements_comp_element_id INTO invoced WITH KEY element_id = invoced_element_id1.
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
+    READ TABLE elements_comp_element_id INTO invocing WITH KEY element_id = invocing_element_id2.
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
+    IF invoced-cmpname <> invocing-cmpname.
+      RETURN.
+    ENDIF.
+
+    DATA: r TYPE redefined_method_type.
+
+    READ TABLE redefined_methods INTO r WITH TABLE KEY method = invocing-cmpname
+                                                       clsname = invocing-clsname
+                                                       defined_in_clsname = invoced-clsname.
+
+    IF sy-subrc EQ 0.
+      r_result = 'X'.
+    ENDIF.
+
 
   ENDMETHOD.
 ENDCLASS.

@@ -8,6 +8,13 @@ Legend
 + : added
 - : removed
 
+05.11.2017 v0.5.6
+-----------------
+
++ Methods that are redefined are not part of the extracted model #67
+  The method of the superclass has an invocation that "uses" the redefined method. This is done to make dependencies clear
+  in cases where the method of the superclass is called from another application but the execution is done in redefined methods.
+
 05.11.2017 v0.5.5
 -----------------
 
