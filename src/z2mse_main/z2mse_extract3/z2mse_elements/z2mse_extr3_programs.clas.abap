@@ -193,14 +193,30 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
     ASSERT sy-subrc EQ 0.
 
     DATA: last_id        TYPE i,
-          file_anchor_id TYPE i.
+          file_anchor_id TYPE i,
+          name_group     TYPE string,
+          modifier TYPE string.
 *      famix_package->add( name = table-devclass ).
+
+    if element-program_type eq |PROGRAM|.
+      name_group = 'ABAP_PROGRAM'.
+      modifier = z2mse_extract3=>modifier_program.
+    elseif element-program_type eq |BW_TRAN|.
+      name_group = 'BW_TRANSFORMATION'.
+      modifier = z2mse_extract3=>modifier_bw_transformation.
+    elseif element-program_type eq |FUNCTION| OR element-program_type = |FUNCTION_INCLUDE|.
+      name_group = 'ABAP_FUNCTIONGROUP'.
+      modifier = z2mse_extract3=>modifier_function_group.
+    else.
+      name_group = 'UNKNOWN'.
+      modifier = z2mse_extract3=>modifier_unknown.
+    ENDIF.
 
     " SAP_2_FAMIX_54        Map database tables to FAMIX Class
     " SAP_2_FAMIX_58        Mark the FAMIX Class with the attribute modifiers = 'DBTable'
-    element_manager->famix_class->add( EXPORTING name_group             = 'ABAP_PROGRAM'
+    element_manager->famix_class->add( EXPORTING name_group             = name_group
                                                  name                   = element-external_program_name
-                                                 modifiers              = z2mse_extract3=>modifier_program
+                                                 modifiers              = modifier
                                        IMPORTING id         = last_id ).
     DATA association TYPE z2mse_extr3_element_manager=>association_type.
     LOOP AT associations INTO association WHERE element_id1 = element_id
@@ -223,7 +239,7 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
 
     element_manager->famix_method->set_parent_type( EXPORTING element_id        = dummy_method_id
                                                               parent_element    = 'FAMIX.Class'
-                                                              parent_name_group = 'ABAP_PROGRAM'
+                                                              parent_name_group = name_group
                                                               parent_name       = element-external_program_name ).
 
 

@@ -162,15 +162,15 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Invocation sender Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 " New in 0.3.0 Functions are displayed as external name of the found include program
 " The parent package of functions is not yet found, because the include is not in the TADIR
-( |FAMIX.Class F-Z2MSE_TEST_FUNCTION_A modifiers ABAPProgram| )
-( |FAMIX.Class LZ2MSE_TEST_FGR_AF01 modifiers ABAPProgram| )
+( |FAMIX.Class F-Z2MSE_TEST_FUNCTION_A modifiers ABAPFunktionGroup| )
+( |FAMIX.Class LZ2MSE_TEST_FGR_AF01 modifiers ABAPFunktionGroup| )
 ( |FAMIX.Method F-Z2MSE_TEST_FUNCTION_A>>F-Z2MSE_TEST_FUNCTION_A signature F-Z2MSE_TEST_FUNCTION_A| )
 ( |FAMIX.Method LZ2MSE_TEST_FGR_AF01>>LZ2MSE_TEST_FGR_AF01 signature LZ2MSE_TEST_FGR_AF01| )
 ( |FAMIX.Invocation sender F-Z2MSE_TEST_FUNCTION_A>>F-Z2MSE_TEST_FUNCTION_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender LZ2MSE_TEST_FGR_AF01>>LZ2MSE_TEST_FGR_AF01 candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
 " New in 0.3.0 SAP BW transformations are partly extracted.
 " Currently only if a usage to the generated program is found.
-( |FAMIX.Class BW-ODSO-Z2MSET001-CUBE-Z2MSET002 modifiers ABAPProgram| )
+( |FAMIX.Class BW-ODSO-Z2MSET001-CUBE-Z2MSET002 modifiers BWTransformation| )
 ( |FAMIX.Method BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 signature BW-ODSO-Z2MSET001-CUBE-Z2MSET002| )
 ( |FAMIX.Invocation sender BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 candidates Z2MSE_TEST_CL_A>>CONSTRUCTOR signature DUMMY| )
 ( |FAMIX.Invocation sender BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
@@ -289,9 +289,9 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Attribute Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000| )
 ( |FAMIX.Attribute Z2MSE_TEST_CL_B2>>Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000| )
 "( |FAMIX.Attribute Z2MSE_TEST_IF_A_00000000000000>>ATTRIBUTE_A_000000000000000000| )
-( |FAMIX.Class BW-ODSO-Z2MSET001-CUBE-Z2MSET002 modifiers ABAPProgram| )
-( |FAMIX.Class F-Z2MSE_TEST_FUNCTION_A modifiers ABAPProgram| )
-( |FAMIX.Class LZ2MSE_TEST_FGR_AF01 modifiers ABAPProgram| )
+( |FAMIX.Class BW-ODSO-Z2MSET001-CUBE-Z2MSET002 modifiers BWTransformation| )
+( |FAMIX.Class F-Z2MSE_TEST_FUNCTION_A modifiers ABAPFunktionGroup| )
+( |FAMIX.Class LZ2MSE_TEST_FGR_AF01 modifiers ABAPFunktionGroup| )
 ( |FAMIX.Class Z2MSE_TEST_CL_A modifiers ABAPGlobalClass| )
 ( |FAMIX.Class Z2MSE_TEST_CL_B1 modifiers ABAPGlobalClass| )
 ( |FAMIX.Class Z2MSE_TEST_CL_B2 modifiers ABAPGlobalClass| )
