@@ -57,6 +57,12 @@ CLASS z2mse_extr3_classes DEFINITION
         VALUE(cmpname)    TYPE string
         VALUE(cmptype)    TYPE seocmptype
         VALUE(exists)     TYPE abap_bool.
+    METHODS is_redefinition_of_method
+      IMPORTING
+        invoced_element_id1  TYPE i
+        invocing_element_id2 TYPE i
+      RETURNING
+        VALUE(r_result)      TYPE abap_bool.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
     METHODS collect_infos REDEFINITION.
@@ -97,6 +103,13 @@ CLASS z2mse_extr3_classes DEFINITION
              refclsname TYPE seoclsname,
              mtdname    TYPE seocpdname,
            END OF redefined_type.
+
+    TYPES: BEGIN OF redefined_method_type,
+             clsname            TYPE seoclsname,
+             defined_in_clsname TYPE seoclsname,
+             method             TYPE seocpdname,
+           END OF redefined_method_type.
+    DATA redefined_methods TYPE HASHED TABLE OF redefined_method_type WITH UNIQUE KEY method clsname defined_in_clsname.
     METHODS _add_component
       IMPORTING
         clsname               TYPE string
@@ -968,6 +981,15 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
         IF sy-subrc EQ 0.
           found = 'X'.
+
+
+          DATA redefined_method TYPE redefined_method_type.
+          redefined_method-method = component-cmpname.
+          redefined_method-clsname = class.
+          redefined_method-defined_in_clsname = component-clsname.
+
+          INSERT redefined_method INTO TABLE redefined_methods. "Allow duplicate inserting here
+
           component-clsname = class .
           INSERT component INTO TABLE r_result.
         ELSE.
@@ -994,4 +1016,37 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+
+  METHOD is_redefinition_of_method.
+
+    DATA: invoced  TYPE element_comp_type,
+          invocing TYPE element_comp_type.
+
+    READ TABLE elements_comp_element_id INTO invoced WITH KEY element_id = invoced_element_id1.
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
+    READ TABLE elements_comp_element_id INTO invocing WITH KEY element_id = invocing_element_id2.
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
+    IF invoced-cmpname <> invocing-cmpname.
+      RETURN.
+    ENDIF.
+
+    DATA: r TYPE redefined_method_type.
+
+    READ TABLE redefined_methods INTO r WITH TABLE KEY method = invocing-cmpname
+                                                       clsname = invocing-clsname
+                                                       defined_in_clsname = invoced-clsname.
+
+    IF sy-subrc EQ 0.
+      r_result = 'X'.
+    ENDIF.
+
+
+  ENDMETHOD.
+
 ENDCLASS.
