@@ -1,7 +1,7 @@
-* generated on system NPL at 05.11.2017 on 15:28:03
+* generated on system NPL at 05.11.2017 on 16:07:48
 
 *
-* This is version 0.5.4
+* This is version 0.5.5
 *
 *The MIT License (MIT)
 *
@@ -2037,8 +2037,7 @@ CLASS cl_extr3_programs DEFINITION
         program_type TYPE string
         program_attribute_1 TYPE string
         program_attribute_2 TYPE string
-      RETURNING
-        VALUE(r_result)   TYPE string.
+        value(r_result)   TYPE string.
     METHODS _extract_function_name
       IMPORTING
         i_element_program TYPE progname
@@ -2046,14 +2045,12 @@ CLASS cl_extr3_programs DEFINITION
         function_group    TYPE rs38l_area
         function          TYPE rs38l_fnam
         function_include  TYPE string
-      RETURNING
         VALUE(r_result)   TYPE string.
     METHODS _extract_sap_bw_logic
       IMPORTING
         i_element_program TYPE progname
       EXPORTING
         tranid            TYPE rstranid
-      RETURNING
         VALUE(r_result)   TYPE string.
     METHODS _get_names_for_function_groups
       IMPORTING
@@ -3883,10 +3880,11 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
                                                        is_specific = abap_true ).
         element-element_id = new_element_id.
         element-program = found_program.
-        element-external_program_name = _convert_program_2_ext_name( EXPORTING i_element_program = found_program
-                                                                     IMPORTING program_type = element-program_type
-                                                                               program_attribute_1 = element-program_attribute_1
-                                                                               program_attribute_2 = element-program_attribute_2 ).
+        _convert_program_2_ext_name( EXPORTING i_element_program = found_program
+                                     IMPORTING program_type = element-program_type
+                                               program_attribute_1 = element-program_attribute_1
+                                               program_attribute_2 = element-program_attribute_2
+                                               r_result = element-external_program_name ).
         element-subc = found_subc.
         INSERT element INTO TABLE elements_element_id.
         INSERT element INTO TABLE elements_program.
@@ -4014,10 +4012,11 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
 
     IF i_element_program+0(1) EQ |L|.
 
-      r_result = _extract_function_name( EXPORTING i_element_program = i_element_program
-                                         IMPORTING function_group = function_group
-                                                   function = function
-                                                   function_include = function_include ).
+      _extract_function_name( EXPORTING i_element_program = i_element_program
+                              IMPORTING function_group = function_group
+                                        function = function
+                                        function_include = function_include
+                                        r_result = r_result ).
 
       IF function IS NOT INITIAL.
 
@@ -4035,16 +4034,18 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
 
     ELSEIF sy-sysid EQ 'NPL' AND i_element_program+0(3) EQ |ZGP|. "Only on test system, currently no SAP BW working there
 
-      r_result = _extract_sap_bw_logic( EXPORTING i_element_program = i_element_program
-                                        IMPORTING tranid = tranid ).
+      _extract_sap_bw_logic( EXPORTING i_element_program = i_element_program
+                             IMPORTING tranid = tranid
+                                       r_result = r_result ).
 
       program_type = |BW_TRAN|.
       program_attribute_1 = tranid.
 
     ELSEIF i_element_program+0(2) EQ |GP|.
 
-      r_result = _extract_sap_bw_logic( EXPORTING i_element_program = i_element_program
-                                        IMPORTING tranid = tranid ).
+      _extract_sap_bw_logic( EXPORTING i_element_program = i_element_program
+                             IMPORTING tranid = tranid
+                                       r_result = r_result ).
 
       program_type = |BW_TRAN|.
       program_attribute_1 = tranid.

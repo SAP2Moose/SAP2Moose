@@ -8,6 +8,11 @@ Legend
 + : added
 - : removed
 
+05.11.2017 v0.5.5
+-----------------
+
+* Issue 75 Release v0.5.4 is not compatible to ABAP 7.0.2
+
 05.11.2017 v0.5.4
 -----------------
 
