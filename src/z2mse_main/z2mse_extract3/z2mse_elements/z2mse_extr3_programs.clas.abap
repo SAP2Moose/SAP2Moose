@@ -37,6 +37,7 @@ CLASS z2mse_extr3_programs DEFINITION
              subc                  TYPE subc,
              program_type          TYPE string,
              program_attribute_1   TYPE string,
+             program_attribute_2   TYPE string,
              adt_or_bwmt_link      TYPE string,
            END OF element_type.
     DATA elements_element_id TYPE HASHED TABLE OF element_type WITH UNIQUE KEY element_id.
@@ -47,11 +48,16 @@ CLASS z2mse_extr3_programs DEFINITION
       EXPORTING
         program_type TYPE string
         program_attribute_1 TYPE string
+        program_attribute_2 TYPE string
       RETURNING
         VALUE(r_result)   TYPE string.
     METHODS _extract_function_name
       IMPORTING
         i_element_program TYPE progname
+      EXPORTING
+        function_group    TYPE rs38l_area
+        function          TYPE rs38l_fnam
+        function_include  TYPE string
       RETURNING
         VALUE(r_result)   TYPE string.
     METHODS _extract_sap_bw_logic
@@ -65,11 +71,8 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_programs IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
 
-  METHOD clear.
-    CLEAR instance.
-  ENDMETHOD.
 
   METHOD add.
 
@@ -100,7 +103,8 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
         element-program = found_program.
         element-external_program_name = _convert_program_2_ext_name( EXPORTING i_element_program = found_program
                                                                      IMPORTING program_type = element-program_type
-                                                                               program_attribute_1 = element-program_attribute_1 ).
+                                                                               program_attribute_1 = element-program_attribute_1
+                                                                               program_attribute_2 = element-program_attribute_2 ).
         element-subc = found_subc.
         INSERT element INTO TABLE elements_element_id.
         INSERT element INTO TABLE elements_program.
@@ -112,14 +116,8 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_instance.
-    IF instance IS NOT BOUND.
-      CREATE OBJECT instance
-        EXPORTING
-          i_element_manager = i_element_manager.
-    ENDIF.
-    instance->type = program_type.
-    r_instance = instance.
+  METHOD clear.
+    CLEAR instance.
   ENDMETHOD.
 
 
@@ -129,6 +127,32 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
                    <e> TYPE element_type.
 
     LOOP AT elements_program ASSIGNING <p>.
+
+     IF <p>-program_type EQ |PROGRAM|.
+
+        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
+
+        CONCATENATE 'adt://' sysid '/sap/bc/adt/programs/programs/' <p>-program_attribute_1 INTO <p>-adt_or_bwmt_link.
+
+     ENDIF.
+
+     IF <p>-program_type EQ |FUNCTION|.
+
+        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
+        TRANSLATE <p>-program_attribute_2 to LOWER CASE.
+
+        CONCATENATE 'adt://' sysid '/sap/bc/adt/functions/groups/' <p>-program_attribute_1 '/fmodules/' <p>-program_attribute_2 INTO <p>-adt_or_bwmt_link.
+
+     ENDIF.
+
+     IF <p>-program_type EQ |FUNCTION_INCLUDE|.
+
+        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
+        TRANSLATE <p>-program_attribute_2 to LOWER CASE.
+
+        CONCATENATE 'adt://' sysid '/sap/bc/adt/functions/groups/' <p>-program_attribute_1 '/includes/' <p>-program_attribute_2 INTO <p>-adt_or_bwmt_link.
+
+     ENDIF.
 
       IF <p>-program_type EQ 'BW_TRAN'.
 
@@ -147,6 +171,17 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
     ENDLOOP.
 
+  ENDMETHOD.
+
+
+  METHOD get_instance.
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = i_element_manager.
+    ENDIF.
+    instance->type = program_type.
+    r_instance = instance.
   ENDMETHOD.
 
 
@@ -215,6 +250,16 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD name.
+
+    element_type = |ABAPProgramOrFunctionOrSAPBW|.
+    program_name( EXPORTING i_element_id          = element_id
+                  IMPORTING external_program_name = name ).
+    parent_name = ||.
+
+  ENDMETHOD.
+
+
   METHOD program_name.
 
     DATA element TYPE element_type.
@@ -234,11 +279,35 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
     clear program_type.
     clear program_attribute_1.
 
-    data tranid type RSTRANID.
+    data: tranid           type RSTRANID,
+          function_group   type rs38l_area,
+          function         type rs38l_fnam,
+          function_include type string.
+
+    CLEAR program_type.
+    CLEAR program_attribute_1.
+    CLEAR program_attribute_2.
 
     IF i_element_program+0(1) EQ |L|.
 
-      r_result = _extract_function_name( i_element_program ).
+      r_result = _extract_function_name( EXPORTING i_element_program = i_element_program
+                                         IMPORTING function_group = function_group
+                                                   function = function
+                                                   function_include = function_include ).
+
+      IF function IS NOT INITIAL.
+
+        program_type = |FUNCTION|.
+        program_attribute_1 = function_group.
+        program_attribute_2 = function.
+
+      ELSEIF function_include IS NOT INITIAL.
+
+        program_type = |FUNCTION_INCLUDE|.
+        program_attribute_1 = function_group.
+        program_attribute_2 = function_include.
+
+      ENDIF.
 
     ELSEIF sy-sysid EQ 'NPL' AND i_element_program+0(3) EQ |ZGP|. "Only on test system, currently no SAP BW working there
 
@@ -260,9 +329,13 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
       r_result = i_element_program.
 
+      program_type = |PROGRAM|.
+      program_attribute_1 = i_element_program.
+
     ENDIF.
 
   ENDMETHOD.
+
 
   METHOD _extract_function_name.
 
@@ -271,15 +344,20 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
     DATA: length                TYPE i,
           postfix_position      TYPE i,
           include_type_position TYPE i,
+          function_group_length TYPE i,
           include_type          TYPE string,
           include               TYPE includenr,
           temp                  TYPE string,
           pname                 TYPE pname,
           funcname              TYPE rs38l_fnam.
 
+    CLEAR function.
+    CLEAR function_group.
+    CLEAR function_include.
+
     length = strlen( i_element_program ).
 
-    IF length < 4.
+    IF length < 5.
 
       r_result = i_element_program.
 
@@ -289,19 +367,29 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
       include_type_position = length - 3.
 
+      function_group_length = length - 4.
+
       include = i_element_program+postfix_position(2).
 
       include_type = i_element_program+include_type_position(1).
 
-      IF include_type <> |U|.
+      temp = i_element_program+0(include_type_position).
+
+      IF include_type EQ |F| OR include_type EQ |U|.
+
+        function_group = temp+1(function_group_length).
+
+      ENDIF.
+
+      IF include_type EQ |F|.
 
         r_result = i_element_program.
 
-      ELSE.
+        function_include = i_element_program.
+
+      ELSEIF include_type EQ |U|.
 
         postfix_position = length - 3.
-
-        temp = i_element_program+0(postfix_position).
 
         CONCATENATE 'SAP' temp INTO pname.
 
@@ -316,7 +404,13 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
           r_result = i_element_program.
         ELSE.
           r_result = |F-| && funcname.
+
+          function = funcname.
+
         ENDIF.
+      ELSE.
+
+        r_result = i_element_program.
 
       ENDIF.
 
@@ -378,14 +472,4 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-
-  METHOD name.
-
-    element_type = |ABAPProgramOrFunctionOrSAPBW|.
-    program_name( EXPORTING i_element_id          = element_id
-                  IMPORTING external_program_name = name ).
-    parent_name = ||.
-
-  ENDMETHOD.
-
 ENDCLASS.
