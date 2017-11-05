@@ -195,10 +195,8 @@ CLASS Z2MSE_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
           IF element-element->type <> element-element->package_type.
             CONTINUE.
           ENDIF.
-        ELSE.
-          IF element-element->type EQ element-element->package_type.
-            CONTINUE.
-          ENDIF.
+        ELSEIF element-element->type EQ element-element->package_type.
+          CONTINUE.
         ENDIF.
 
         associations = get_associations( i_element_id = element-element_id ).
