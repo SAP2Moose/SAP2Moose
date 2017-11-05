@@ -1,21 +1,21 @@
-CLASS z2mse_test_cl_b1 DEFINITION
-  PUBLIC
-  FINAL
-  CREATE PUBLIC .
+class Z2MSE_TEST_CL_B1 definition
+  public
+  final
+  create public .
 
-  PUBLIC SECTION.
+public section.
 
-    EVENTS event_a .
+  events EVENT_A .
 
-    METHODS method_a .
+  methods METHOD_A .
+  methods METHOD_B .
   PROTECTED SECTION.
-  PRIVATE SECTION.
-    METHODS method_b.
+private section.
 ENDCLASS.
 
 
 
-CLASS z2mse_test_cl_b1 IMPLEMENTATION.
+CLASS Z2MSE_TEST_CL_B1 IMPLEMENTATION.
 
 
   METHOD method_a.
@@ -31,11 +31,11 @@ CLASS z2mse_test_cl_b1 IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD method_b.
 
     method_a( ).
 
 
   ENDMETHOD.
-
 ENDCLASS.
