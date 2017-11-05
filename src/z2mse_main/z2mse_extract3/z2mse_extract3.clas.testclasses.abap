@@ -101,6 +101,9 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.FileAnchor Z2MSE_TEST_IF_A_00000000000000 fileName adt://NPL/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main| )
 ( |FAMIX.FileAnchor ZIWCI_2MSE_TEST_WDY_A fileName adt://NPL/sap/bc/adt/oo/interfaces/ziwci_2mse_test_wdy_a/source/main| )
 ( |FAMIX.FileAnchor BW-ODSO-Z2MSET001-CUBE-Z2MSET002 fileName bwmt://NPL/sap/bw/modeling/trfn/123| )
+( |FAMIX.FileAnchor F-Z2MSE_TEST_FUNCTION_A fileName adt://NPL/sap/bc/adt/functions/groups/z2mse_test_fgr_a/fmodules/z2mse_test_function_a| )
+( |FAMIX.FileAnchor LZ2MSE_TEST_FGR_AF01 fileName adt://NPL/sap/bc/adt/functions/groups/z2mse_test_fgr_a/includes/lz2mse_test_fgr_af01| )
+( |FAMIX.FileAnchor Z2MSE_TEST_PROGRAM_A fileName adt://NPL/sap/bc/adt/programs/programs/z2mse_test_program_a| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_A>>METHOD_A variable Z2MSE_TEST_A>>Z2MSE_TEST_A| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_B1>>METHOD_A variable Z2MSE_TEST_A>>Z2MSE_TEST_A| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_B1>>METHOD_A variable Z2MSE_TEST_IF_A_00000000000000>>ATTRIBUTE_A_000000000000000000| )
@@ -190,7 +193,9 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Method Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 sourceAnchor| )
 ( |FAMIX.Method ZIWCI_2MSE_TEST_WDY_A>>WD_GET_API sourceAnchor| )
 ( |FAMIX.Method BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 sourceAnchor| )
-
+( |FAMIX.Method F-Z2MSE_TEST_FUNCTION_A>>F-Z2MSE_TEST_FUNCTION_A sourceAnchor| )
+( |FAMIX.Method LZ2MSE_TEST_FGR_AF01>>LZ2MSE_TEST_FGR_AF01 sourceAnchor| )
+( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A sourceAnchor| )
     ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
@@ -311,6 +316,9 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.FileAnchor METHOD_A_000000000000000000000 fileName adt://NPL/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main#start=9,1| )
 ( |FAMIX.FileAnchor METHOD_B fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_b1/source/main#start=13,1| )
 ( |FAMIX.FileAnchor BW-ODSO-Z2MSET001-CUBE-Z2MSET002 fileName bwmt://NPL/sap/bw/modeling/trfn/123| )
+( |FAMIX.FileAnchor F-Z2MSE_TEST_FUNCTION_A fileName adt://NPL/sap/bc/adt/functions/groups/z2mse_test_fgr_a/fmodules/z2mse_test_function_a| )
+( |FAMIX.FileAnchor LZ2MSE_TEST_FGR_AF01 fileName adt://NPL/sap/bc/adt/functions/groups/z2mse_test_fgr_a/includes/lz2mse_test_fgr_af01| )
+( |FAMIX.FileAnchor Z2MSE_TEST_PROGRAM_A fileName adt://NPL/sap/bc/adt/programs/programs/z2mse_test_program_a| )
 ( |FAMIX.Invocation sender BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender F-Z2MSE_TEST_FUNCTION_A>>F-Z2MSE_TEST_FUNCTION_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender LZ2MSE_TEST_FGR_AF01>>LZ2MSE_TEST_FGR_AF01 candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
@@ -361,9 +369,12 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Method Z2MSE_TEST_CL_B1>>METHOD_A sourceAnchor| )
 ( |FAMIX.Method Z2MSE_TEST_CL_B1>>METHOD_B sourceAnchor| )
 ( |FAMIX.Method Z2MSE_TEST_CL_B2>>METHOD_A sourceAnchor| )
+( |FAMIX.Method F-Z2MSE_TEST_FUNCTION_A>>F-Z2MSE_TEST_FUNCTION_A sourceAnchor| )
 ( |FAMIX.Method Z2MSE_TEST_IF_A_00000000000000>>EVENT_A_0000000000000000000000 sourceAnchor| )
 ( |FAMIX.Method Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 sourceAnchor| )
 ( |FAMIX.Method BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 sourceAnchor| )
+( |FAMIX.Method LZ2MSE_TEST_FGR_AF01>>LZ2MSE_TEST_FGR_AF01 sourceAnchor| )
+( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A sourceAnchor| )
     ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
