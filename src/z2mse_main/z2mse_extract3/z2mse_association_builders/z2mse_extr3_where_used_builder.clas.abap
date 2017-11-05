@@ -263,8 +263,8 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
             data: is_redefinition_of_method TYPE abap_bool.
 
-            is_redefinition_of_method = classes->is_redefinition_of_method( EXPORTING invoced_element_id1  = element_id
-                                                                                      invocing_element_id2 = used_by_element_id ).
+            is_redefinition_of_method = classes->is_redefinition_of_method( invoced_element_id1  = element_id
+                                                                            invocing_element_id2 = used_by_element_id ).
 
             if is_redefinition_of_method eq ''.
 

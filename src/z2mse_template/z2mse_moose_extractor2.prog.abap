@@ -1,5 +1,5 @@
 *
-* This is version 0.5.6
+* This is version 0.5.7
 *
 *The MIT License (MIT)
 *
