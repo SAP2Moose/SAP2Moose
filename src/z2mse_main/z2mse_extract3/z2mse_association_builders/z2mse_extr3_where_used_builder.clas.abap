@@ -22,7 +22,17 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
+
+
+  METHOD search_down.
+
+    DATA: element TYPE REF TO z2mse_extr3_elements.
+
+    element = element_manager->get_element( element_id ).
+
+  ENDMETHOD.
+
 
   METHOD search_up.
 
@@ -79,14 +89,10 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
                                       cmpname    = cmpname
                                       cmptype = cmptype ).
 
-        IF element_manager->exclude_found_sap_intf EQ abap_true.
+        IF element_manager->exclude_found_sap_intf EQ abap_true AND class_name CP 'IF*'.
 
-          IF class_name CP 'IF*'.
-
-            " Do not collect, it should be OK just to leave the method here
-            RETURN.
-
-          ENDIF.
+          " Do not collect, it should be OK just to leave the method here
+          RETURN.
 
         ENDIF.
 
@@ -287,13 +293,4 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-
-  METHOD search_down.
-
-    DATA: element TYPE REF TO z2mse_extr3_elements.
-
-    element = element_manager->get_element( element_id ).
-
-  ENDMETHOD.
-
 ENDCLASS.
