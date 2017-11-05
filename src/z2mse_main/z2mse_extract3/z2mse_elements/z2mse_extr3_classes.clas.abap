@@ -766,25 +766,25 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
         is_added = abap_true.
 
-        else.
+      ELSE.
 
-      DATA: redefined_class_components TYPE ty_class_components,
-            redefined_class_component  TYPE ty_class_component.
+        DATA: redefined_class_components TYPE ty_class_components,
+              redefined_class_component  TYPE ty_class_component.
 
-      redefined_class_components = _get_redefined( clsname ).
+        redefined_class_components = _get_redefined( clsname ).
 
-      READ TABLE redefined_class_components INTO redefined_class_component WITH KEY clsname = clsname cmpname = cmpname.
+        READ TABLE redefined_class_components INTO redefined_class_component WITH KEY clsname = clsname cmpname = cmpname.
 
-      if sy-subrc eq 0.
+        IF sy-subrc EQ 0.
 
-        found_class_name = redefined_class_component-clsname.
-        found_cmpname = redefined_class_component-cmpname.
-        found_cmptype = redefined_class_component-cmptype.
-        found_mtdtype = redefined_class_component-mtdtype.
+          found_class_name = redefined_class_component-clsname.
+          found_cmpname = redefined_class_component-cmpname.
+          found_cmptype = redefined_class_component-cmptype.
+          found_mtdtype = redefined_class_component-mtdtype.
 
-        is_added = abap_true.
+          is_added = abap_true.
 
-      endif.
+        ENDIF.
 
 *      ELSE.
 *
@@ -961,7 +961,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
             FROM seocompo
             INTO component
             WHERE cmptype <> 3 " A type
-              AND clsname = superclass.
+              AND clsname = superclass
+              AND cmpname = redefined_component-mtdname.
 
         END-TEST-SEAM.
 
@@ -980,6 +981,11 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                 AND version = 1.
 
           END-TEST-SEAM.
+
+          IF sy-subrc <> 0.
+            found = 'X'.
+            " Nothing found
+          ENDIF.
 
         ENDIF.
 

@@ -124,7 +124,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 candidates Z2MSE_TEST_CL_B2>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 candidates Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 signature DUMMY| )
 " End new with #62
-( |FAMIX.Invocation sender Z2MSE_TEST_CL_A2>>METHOD_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| ) " Switch order
+( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>METHOD_A candidates Z2MSE_TEST_CL_A2>>METHOD_A signature DUMMY| ) " Correct order
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A2>>METHOD_A candidates Z2MSE_TEST_CL_B1>>METHOD_B signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_A candidates Z2MSE_TEST_CL_A>>CONSTRUCTOR signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
@@ -337,7 +337,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Invocation sender FGR-Z2MSE_TEST_FGR_A>>LZ2MSE_TEST_FGR_AF01 candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>METHOD_A candidates Z2MSE_TEST_CL_A>>EVENT_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 candidates Z2MSE_TEST_CL_B2>>METHOD_A signature DUMMY| )
-( |FAMIX.Invocation sender Z2MSE_TEST_CL_A2>>METHOD_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| ) " Switch arrow here
+( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>METHOD_A candidates Z2MSE_TEST_CL_A2>>METHOD_A signature DUMMY| ) " Correct arrow here
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A2>>METHOD_A candidates Z2MSE_TEST_CL_B1>>METHOD_B signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_A candidates Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 signature DUMMY| )
