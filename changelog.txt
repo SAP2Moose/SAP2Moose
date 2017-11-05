@@ -8,6 +8,12 @@ Legend
 + : added
 - : removed
 
+05.11.2017 v0.5.4
+-----------------
+
++ Issue 73 Make modifiers for programs, function groups and SAP BW transformation specific
++ Issue 72 Map functions to classes with name of function group
++ Issue 71 Support ADT links to programs, functions and includes of function groups
 
 05.11.2017 v0.5.3
 -----------------
