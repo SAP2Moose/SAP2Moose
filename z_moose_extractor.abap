@@ -1,7 +1,7 @@
-* generated on system NPL at 05.11.2017 on 00:07:41
+* generated on system NPL at 05.11.2017 on 15:28:03
 
 *
-* This is version 0.5.3
+* This is version 0.5.4
 *
 *The MIT License (MIT)
 *
@@ -2009,7 +2009,8 @@ CLASS cl_extr3_programs DEFINITION
         i_element_id                 TYPE i
       EXPORTING
         VALUE(program)               TYPE progname
-        VALUE(external_program_name) TYPE string
+        VALUE(external_program_name_class) TYPE string
+        VALUE(external_program_name_method) TYPE string
         VALUE(subc)                  TYPE subc.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
@@ -2024,6 +2025,7 @@ CLASS cl_extr3_programs DEFINITION
              subc                  TYPE subc,
              program_type          TYPE string,
              program_attribute_1   TYPE string,
+             program_attribute_2   TYPE string,
              adt_or_bwmt_link      TYPE string,
            END OF element_type.
     DATA elements_element_id TYPE HASHED TABLE OF element_type WITH UNIQUE KEY element_id.
@@ -2034,11 +2036,16 @@ CLASS cl_extr3_programs DEFINITION
       EXPORTING
         program_type TYPE string
         program_attribute_1 TYPE string
+        program_attribute_2 TYPE string
       RETURNING
         VALUE(r_result)   TYPE string.
     METHODS _extract_function_name
       IMPORTING
         i_element_program TYPE progname
+      EXPORTING
+        function_group    TYPE rs38l_area
+        function          TYPE rs38l_fnam
+        function_include  TYPE string
       RETURNING
         VALUE(r_result)   TYPE string.
     METHODS _extract_sap_bw_logic
@@ -2048,6 +2055,11 @@ CLASS cl_extr3_programs DEFINITION
         tranid            TYPE rstranid
       RETURNING
         VALUE(r_result)   TYPE string.
+    METHODS _get_names_for_function_groups
+      IMPORTING
+        i_element TYPE cl_extr3_programs=>element_type
+      RETURNING
+        VALUE(name_of_mapped_class) TYPE string.
 ENDCLASS.
 "! I describe elements of type table
 CLASS cl_extr3_tables DEFINITION
@@ -2363,6 +2375,9 @@ CLASS cl_extract3 DEFINITION
     CONSTANTS modifier_webdynpro_component TYPE string VALUE 'ABAPWebDynproComponent'.
     CONSTANTS modifier_dbtable TYPE string VALUE 'DBTable' ##NO_TEXT.
     CONSTANTS modifier_program TYPE string VALUE 'ABAPProgram' ##NO_TEXT.
+    CONSTANTS modifier_function_group TYPE string VALUE 'ABAPFunktionGroup' ##NO_TEXT.
+    CONSTANTS modifier_BW_TRANSFORMATION TYPE string VALUE 'BWTransformation' ##NO_TEXT.
+    CONSTANTS modifier_unknown TYPE string VALUE 'UNKNOWN' ##NO_TEXT.
 
     METHODS constructor.
 
@@ -2517,15 +2532,11 @@ CLASS CL_EXTR3_ACCESS_OR_INVOCATN IMPLEMENTATION.
 
         DATA programs TYPE REF TO cl_extr3_programs.
 
-        DATA: invoicing_program TYPE string.
-
         programs = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
 
         programs->program_name( EXPORTING i_element_id          = i_association-element_id2
-                                IMPORTING external_program_name = invoicing_program ).
-
-        invoicing_famix_class = invoicing_program.
-        invoicing_famix_method = invoicing_program.
+                                IMPORTING external_program_name_class = invoicing_famix_class
+                                          external_program_name_method = invoicing_famix_method ).
 
       WHEN OTHERS.
         ASSERT 1 = 2.
@@ -3874,7 +3885,8 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
         element-program = found_program.
         element-external_program_name = _convert_program_2_ext_name( EXPORTING i_element_program = found_program
                                                                      IMPORTING program_type = element-program_type
-                                                                               program_attribute_1 = element-program_attribute_1 ).
+                                                                               program_attribute_1 = element-program_attribute_1
+                                                                               program_attribute_2 = element-program_attribute_2 ).
         element-subc = found_subc.
         INSERT element INTO TABLE elements_element_id.
         INSERT element INTO TABLE elements_program.
@@ -3892,7 +3904,12 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
     ASSERT sy-subrc EQ 0.
 
     program = element-program.
-    external_program_name = element-external_program_name.
+    IF element-program_type EQ |FUNCTION| OR element-program_type = |FUNCTION_INCLUDE|.
+      external_program_name_class = _get_names_for_function_groups( i_element = element ).
+    ELSE.
+      external_program_name_class = element-external_program_name.
+    ENDIF.
+      external_program_name_method = element-external_program_name.
     subc = element-subc.
 
   ENDMETHOD.
@@ -3903,15 +3920,37 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
     ASSERT sy-subrc EQ 0.
 
-    DATA: last_id        TYPE i,
-          file_anchor_id TYPE i.
+    DATA: last_id              TYPE i,
+          file_anchor_id       TYPE i,
+          name_group           TYPE string,
+          modifier             TYPE string,
+          name_of_mapped_class TYPE string.
 *      famix_package->add( name = table-devclass ).
+
+    IF element-program_type EQ |PROGRAM|.
+      name_group = 'ABAP_PROGRAM'.
+      modifier = cl_extract3=>modifier_program.
+      name_of_mapped_class = element-external_program_name.
+    ELSEIF element-program_type EQ |BW_TRAN|.
+      name_group = 'BW_TRANSFORMATION'.
+      modifier = cl_extract3=>modifier_bw_transformation.
+      name_of_mapped_class = element-external_program_name.
+    ELSEIF element-program_type EQ |FUNCTION| OR element-program_type = |FUNCTION_INCLUDE|.
+      name_group = 'ABAP_FUNCTIONGROUP'.
+      modifier = cl_extract3=>modifier_function_group.
+*      name_of_mapped_class = element-external_program_name.
+      name_of_mapped_class = _get_names_for_function_groups( element ).
+    ELSE.
+      name_group = 'UNKNOWN'.
+      modifier = cl_extract3=>modifier_unknown.
+      name_of_mapped_class = element-external_program_name.
+    ENDIF.
 
     " SAP_2_FAMIX_54        Map database tables to FAMIX Class
     " SAP_2_FAMIX_58        Mark the FAMIX Class with the attribute modifiers = 'DBTable'
-    element_manager->famix_class->add( EXPORTING name_group             = 'ABAP_PROGRAM'
-                                                 name                   = element-external_program_name
-                                                 modifiers              = cl_extract3=>modifier_program
+    element_manager->famix_class->add( EXPORTING name_group             = name_group
+                                                 name                   = name_of_mapped_class
+                                                 modifiers              = modifier
                                        IMPORTING id         = last_id ).
     DATA association TYPE cl_extr3_element_manager=>association_type.
     LOOP AT associations INTO association WHERE element_id1 = element_id
@@ -3934,11 +3973,11 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
 
     element_manager->famix_method->set_parent_type( EXPORTING element_id        = dummy_method_id
                                                               parent_element    = 'FAMIX.Class'
-                                                              parent_name_group = 'ABAP_PROGRAM'
-                                                              parent_name       = element-external_program_name ).
+                                                              parent_name_group = name_group
+                                                              parent_name       = name_of_mapped_class ).
 
 
-    element_manager->famix_method->store_id( EXPORTING class  = element-external_program_name
+    element_manager->famix_method->store_id( EXPORTING class  = name_of_mapped_class
                                                        method = element-external_program_name ).
 
     IF element-adt_or_bwmt_link IS NOT INITIAL.
@@ -3964,11 +4003,35 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
     clear program_type.
     clear program_attribute_1.
 
-    data tranid type RSTRANID.
+    data: tranid           type RSTRANID,
+          function_group   type rs38l_area,
+          function         type rs38l_fnam,
+          function_include type string.
+
+    CLEAR program_type.
+    CLEAR program_attribute_1.
+    CLEAR program_attribute_2.
 
     IF i_element_program+0(1) EQ |L|.
 
-      r_result = _extract_function_name( i_element_program ).
+      r_result = _extract_function_name( EXPORTING i_element_program = i_element_program
+                                         IMPORTING function_group = function_group
+                                                   function = function
+                                                   function_include = function_include ).
+
+      IF function IS NOT INITIAL.
+
+        program_type = |FUNCTION|.
+        program_attribute_1 = function_group.
+        program_attribute_2 = function.
+
+      ELSEIF function_include IS NOT INITIAL.
+
+        program_type = |FUNCTION_INCLUDE|.
+        program_attribute_1 = function_group.
+        program_attribute_2 = function_include.
+
+      ENDIF.
 
     ELSEIF sy-sysid EQ 'NPL' AND i_element_program+0(3) EQ |ZGP|. "Only on test system, currently no SAP BW working there
 
@@ -3990,6 +4053,9 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
 
       r_result = i_element_program.
 
+      program_type = |PROGRAM|.
+      program_attribute_1 = i_element_program.
+
     ENDIF.
 
   ENDMETHOD.
@@ -4000,15 +4066,20 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
     DATA: length                TYPE i,
           postfix_position      TYPE i,
           include_type_position TYPE i,
+          function_group_length TYPE i,
           include_type          TYPE string,
           include               TYPE includenr,
           temp                  TYPE string,
           pname                 TYPE pname,
           funcname              TYPE rs38l_fnam.
 
+    CLEAR function.
+    CLEAR function_group.
+    CLEAR function_include.
+
     length = strlen( i_element_program ).
 
-    IF length < 4.
+    IF length < 5.
 
       r_result = i_element_program.
 
@@ -4018,19 +4089,29 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
 
       include_type_position = length - 3.
 
+      function_group_length = length - 4.
+
       include = i_element_program+postfix_position(2).
 
       include_type = i_element_program+include_type_position(1).
 
-      IF include_type <> |U|.
+      temp = i_element_program+0(include_type_position).
+
+      IF include_type EQ |F| OR include_type EQ |U|.
+
+        function_group = temp+1(function_group_length).
+
+      ENDIF.
+
+      IF include_type EQ |F|.
 
         r_result = i_element_program.
 
-      ELSE.
+        function_include = i_element_program.
+
+      ELSEIF include_type EQ |U|.
 
         postfix_position = length - 3.
-
-        temp = i_element_program+0(postfix_position).
 
         CONCATENATE 'SAP' temp INTO pname.
 
@@ -4043,7 +4124,13 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
           r_result = i_element_program.
         ELSE.
           r_result = |F-| && funcname.
+
+          function = funcname.
+
         ENDIF.
+      ELSE.
+
+        r_result = i_element_program.
 
       ENDIF.
 
@@ -4107,7 +4194,7 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
 
     element_type = |ABAPProgramOrFunctionOrSAPBW|.
     program_name( EXPORTING i_element_id          = element_id
-                  IMPORTING external_program_name = name ).
+                  IMPORTING external_program_name_method = name ).
     parent_name = ||.
 
   ENDMETHOD.
@@ -4120,6 +4207,32 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
                    <e> TYPE element_type.
 
     LOOP AT elements_program ASSIGNING <p>.
+
+     IF <p>-program_type EQ |PROGRAM|.
+
+        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
+
+        CONCATENATE 'adt://' sysid '/sap/bc/adt/programs/programs/' <p>-program_attribute_1 INTO <p>-adt_or_bwmt_link.
+
+     ENDIF.
+
+     IF <p>-program_type EQ |FUNCTION|.
+
+        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
+        TRANSLATE <p>-program_attribute_2 to LOWER CASE.
+
+        CONCATENATE 'adt://' sysid '/sap/bc/adt/functions/groups/' <p>-program_attribute_1 '/fmodules/' <p>-program_attribute_2 INTO <p>-adt_or_bwmt_link.
+
+     ENDIF.
+
+     IF <p>-program_type EQ |FUNCTION_INCLUDE|.
+
+        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
+        TRANSLATE <p>-program_attribute_2 to LOWER CASE.
+
+        CONCATENATE 'adt://' sysid '/sap/bc/adt/functions/groups/' <p>-program_attribute_1 '/includes/' <p>-program_attribute_2 INTO <p>-adt_or_bwmt_link.
+
+     ENDIF.
 
       IF <p>-program_type EQ 'BW_TRAN'.
 
@@ -4137,6 +4250,11 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
       ENDIF.
 
     ENDLOOP.
+
+  ENDMETHOD.
+  METHOD _get_names_for_function_groups.
+
+    CONCATENATE 'FGR-' i_element-program_attribute_1 INTO name_of_mapped_class.
 
   ENDMETHOD.
 ENDCLASS.
