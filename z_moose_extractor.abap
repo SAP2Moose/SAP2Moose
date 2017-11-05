@@ -1,7 +1,7 @@
-* generated on system NPL at 05.11.2017 on 21:01:47
+* generated on system NPL at 05.11.2017 on 21:20:02
 
 *
-* This is version 0.5.6
+* This is version 0.5.7
 *
 *The MIT License (MIT)
 *
@@ -3083,8 +3083,8 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
 
             data: is_redefinition_of_method TYPE abap_bool.
 
-            is_redefinition_of_method = classes->is_redefinition_of_method( EXPORTING invoced_element_id1  = element_id
-                                                                                      invocing_element_id2 = used_by_element_id ).
+            is_redefinition_of_method = classes->is_redefinition_of_method( invoced_element_id1  = element_id
+                                                                            invocing_element_id2 = used_by_element_id ).
 
             if is_redefinition_of_method eq ''.
 
