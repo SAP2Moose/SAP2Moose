@@ -22,7 +22,8 @@ CLASS z2mse_extr3_programs DEFINITION
         i_element_id                 TYPE i
       EXPORTING
         VALUE(program)               TYPE progname
-        VALUE(external_program_name) TYPE string
+        VALUE(external_program_name_class) TYPE string
+        VALUE(external_program_name_method) TYPE string
         VALUE(subc)                  TYPE subc.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
@@ -67,6 +68,11 @@ CLASS z2mse_extr3_programs DEFINITION
         tranid            TYPE rstranid
       RETURNING
         VALUE(r_result)   TYPE string.
+    METHODS _get_names_for_function_groups
+      IMPORTING
+        i_element TYPE z2mse_extr3_programs=>element_type
+      RETURNING
+        VALUE(name_of_mapped_class) TYPE string.
 ENDCLASS.
 
 
@@ -192,30 +198,36 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
     ASSERT sy-subrc EQ 0.
 
-    DATA: last_id        TYPE i,
-          file_anchor_id TYPE i,
-          name_group     TYPE string,
-          modifier TYPE string.
+    DATA: last_id              TYPE i,
+          file_anchor_id       TYPE i,
+          name_group           TYPE string,
+          modifier             TYPE string,
+          name_of_mapped_class TYPE string.
 *      famix_package->add( name = table-devclass ).
 
-    if element-program_type eq |PROGRAM|.
+    IF element-program_type EQ |PROGRAM|.
       name_group = 'ABAP_PROGRAM'.
       modifier = z2mse_extract3=>modifier_program.
-    elseif element-program_type eq |BW_TRAN|.
+      name_of_mapped_class = element-external_program_name.
+    ELSEIF element-program_type EQ |BW_TRAN|.
       name_group = 'BW_TRANSFORMATION'.
       modifier = z2mse_extract3=>modifier_bw_transformation.
-    elseif element-program_type eq |FUNCTION| OR element-program_type = |FUNCTION_INCLUDE|.
+      name_of_mapped_class = element-external_program_name.
+    ELSEIF element-program_type EQ |FUNCTION| OR element-program_type = |FUNCTION_INCLUDE|.
       name_group = 'ABAP_FUNCTIONGROUP'.
       modifier = z2mse_extract3=>modifier_function_group.
-    else.
+*      name_of_mapped_class = element-external_program_name.
+      name_of_mapped_class = _get_names_for_function_groups( element ).
+    ELSE.
       name_group = 'UNKNOWN'.
       modifier = z2mse_extract3=>modifier_unknown.
+      name_of_mapped_class = element-external_program_name.
     ENDIF.
 
     " SAP_2_FAMIX_54        Map database tables to FAMIX Class
     " SAP_2_FAMIX_58        Mark the FAMIX Class with the attribute modifiers = 'DBTable'
     element_manager->famix_class->add( EXPORTING name_group             = name_group
-                                                 name                   = element-external_program_name
+                                                 name                   = name_of_mapped_class
                                                  modifiers              = modifier
                                        IMPORTING id         = last_id ).
     DATA association TYPE z2mse_extr3_element_manager=>association_type.
@@ -240,10 +252,10 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
     element_manager->famix_method->set_parent_type( EXPORTING element_id        = dummy_method_id
                                                               parent_element    = 'FAMIX.Class'
                                                               parent_name_group = name_group
-                                                              parent_name       = element-external_program_name ).
+                                                              parent_name       = name_of_mapped_class ).
 
 
-    element_manager->famix_method->store_id( EXPORTING class  = element-external_program_name
+    element_manager->famix_method->store_id( EXPORTING class  = name_of_mapped_class
                                                        method = element-external_program_name ).
 
     IF element-adt_or_bwmt_link IS NOT INITIAL.
@@ -270,7 +282,7 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
 
     element_type = |ABAPProgramOrFunctionOrSAPBW|.
     program_name( EXPORTING i_element_id          = element_id
-                  IMPORTING external_program_name = name ).
+                  IMPORTING external_program_name_method = name ).
     parent_name = ||.
 
   ENDMETHOD.
@@ -284,7 +296,12 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
     ASSERT sy-subrc EQ 0.
 
     program = element-program.
-    external_program_name = element-external_program_name.
+    IF element-program_type EQ |FUNCTION| OR element-program_type = |FUNCTION_INCLUDE|.
+      external_program_name_class = _get_names_for_function_groups( i_element = element ).
+    ELSE.
+      external_program_name_class = element-external_program_name.
+    ENDIF.
+      external_program_name_method = element-external_program_name.
     subc = element-subc.
 
   ENDMETHOD.
@@ -488,4 +505,11 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+
+  METHOD _get_names_for_function_groups.
+
+    CONCATENATE 'FGR-' i_element-program_attribute_1 INTO name_of_mapped_class.
+
+  ENDMETHOD.
+
 ENDCLASS.
