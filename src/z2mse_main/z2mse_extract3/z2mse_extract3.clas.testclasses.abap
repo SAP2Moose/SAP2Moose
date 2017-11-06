@@ -122,7 +122,11 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>METHOD_A candidates Z2MSE_TEST_CL_A>>EVENT_A signature DUMMY| )
 " New with #62
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 candidates Z2MSE_TEST_CL_B2>>METHOD_A signature DUMMY| )
+
+" Outcomment the next to prepare issue #76
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 candidates Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 signature DUMMY| )
+
+
 " End new with #62
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>METHOD_A candidates Z2MSE_TEST_CL_A2>>METHOD_A signature DUMMY| ) " Correct order
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A2>>METHOD_A candidates Z2MSE_TEST_CL_B1>>METHOD_B signature DUMMY| )
