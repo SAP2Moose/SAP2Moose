@@ -194,7 +194,7 @@ CLASS Z2MSE_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
               " TBD include code here?
               found_cmpname = obj_name+30(61).
 
-              DATA: temp TYPE seocmpname.
+              DATA: temp TYPE string.
               temp = class_name && |~| && cmpname.
 
               IF found_cmpname <> temp. " Implementation of interface methods are in the where used list. These are added explicitely in the class coding. So filter here.
