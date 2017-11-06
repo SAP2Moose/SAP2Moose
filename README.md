@@ -19,7 +19,7 @@ The documentation is in the Wiki of this repository
 
 There are currently not many changes in the extractor, just because I am happily using it nearto every day (Rainer Winkler).
 
-Last stable release v0.5.7: [Extractor](../../releases/download/v0.5.7/z_moose_extractor.abap) and [Texts for extractor](../../releases/download/v0.5.7/z_moose_extractor_texts.txt).. This is the first release where ADT links to ABAP classes and class components are extracted. Moose2Model v0.2.0 is required to use this links.
+Last stable release v0.5.8: [Extractor](../../releases/download/v0.5.8/z_moose_extractor.abap) and [Texts for extractor](../../releases/download/v0.5.8/z_moose_extractor_texts.txt).. This is the first release where ADT links to ABAP classes and class components are extracted. Moose2Model v0.2.0 is required to use this links.
 
 Earlier release v0.4.4: [Extractor](../../releases/download/v0.4.4/z_moose_extractor.abap) and [Texts for extractor](../../releases/download/v0.4.4/z_moose_extractor_texts.txt).. This is the first release where data can be analyzed without using Moose. It also provides a Where-Used analysis over multiple levels. This is an early version that is incomplete and should not find all dependencies. ![An example of multi level Where-Used analysis](../../wiki/figures/v0.4.0_MultiLevelWhereUsed.png)
 
