@@ -1,7 +1,7 @@
-* generated on system NPL at 05.11.2017 on 21:20:02
+* generated on system NPL at 06.11.2017 on 22:01:51
 
 *
-* This is version 0.5.7
+* This is version 0.5.8
 *
 *The MIT License (MIT)
 *
@@ -2901,14 +2901,10 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
                                       cmpname    = cmpname
                                       cmptype = cmptype ).
 
-        IF element_manager->exclude_found_sap_intf EQ abap_true.
+        IF element_manager->exclude_found_sap_intf EQ abap_true AND class_name CP 'IF*'.
 
-          IF class_name CP 'IF*'.
-
-            " Do not collect, it should be OK just to leave the method here
-            RETURN.
-
-          ENDIF.
+          " Do not collect, it should be OK just to leave the method here
+          RETURN.
 
         ENDIF.
 
@@ -3010,7 +3006,7 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
               " TBD include code here?
               found_cmpname = obj_name+30(61).
 
-              DATA: temp TYPE seocmpname.
+              DATA: temp TYPE string.
               temp = class_name && |~| && cmpname.
 
               IF found_cmpname <> temp. " Implementation of interface methods are in the where used list. These are added explicitely in the class coding. So filter here.
@@ -4927,10 +4923,8 @@ CLASS CL_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
           IF element-element->type <> element-element->package_type.
             CONTINUE.
           ENDIF.
-        ELSE.
-          IF element-element->type EQ element-element->package_type.
-            CONTINUE.
-          ENDIF.
+        ELSEIF element-element->type EQ element-element->package_type.
+          CONTINUE.
         ENDIF.
 
         associations = get_associations( i_element_id = element-element_id ).
@@ -5255,13 +5249,9 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
         ADD 1 TO level_to_search_up.
 
-        IF i_search_up >= 0.
-
-          IF i_search_up <= level_to_search_up.
+        IF i_search_up >= 0 AND i_search_up <= level_to_search_up.
 
             something_to_be_done_up = abap_false.
-
-          ENDIF.
 
         ENDIF.
 
@@ -5309,13 +5299,9 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
         ADD 1 TO level_to_search_down.
 
-        IF i_search_down <= 0.
-
-          IF i_search_down <= level_to_search_down.
+        IF i_search_down <= 0 AND i_search_down <= level_to_search_down.
 
             something_to_be_done_down = abap_false.
-
-          ENDIF.
 
         ENDIF.
 
@@ -5390,13 +5376,11 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
       ENDIF.
 
-      IF i_is_specific EQ abap_true.
-        IF <found_in_level>-specific EQ abap_false.
+      IF i_is_specific EQ abap_true AND <found_in_level>-specific EQ abap_false.
 
-          <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
-          <found_in_level>-specific = abap_true.
+        <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
+        <found_in_level>-specific = abap_true.
 
-        ENDIF.
       ENDIF.
 
 *      IF     <found_in_level>-found_in_level_upsearch EQ level_for_found_in_upsearch
@@ -5414,13 +5398,11 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
       ENDIF.
 
-      IF i_is_specific EQ abap_true.
-        IF <found_in_level>-specific EQ abap_false.
+      IF i_is_specific EQ abap_true AND <found_in_level>-specific EQ abap_false.
 
-          <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
-          <found_in_level>-specific = abap_true.
+        <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
+        <found_in_level>-specific = abap_true.
 
-        ENDIF.
       ENDIF.
 
 *      IF     <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch
