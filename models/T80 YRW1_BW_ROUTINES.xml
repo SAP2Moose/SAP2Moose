@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<!--Moose Diagram Layout data, see "https://github.com/RainerWinkler/Moose-FAMIX-SAP-Extractor" on how to use this file-->
+<elements>
+    <version>v0.4.4</version>
+    <scope>method</scope>
+    <element>
+        <type>RWDiagramNoPackage</type>
+        <x>246.0</x>
+        <y>47.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>BW-RSDS-YRW1_D2_VBAKVBAP T80CLNT100-ODSO-PRW1VBAP</class>
+        <x>-657.0</x>
+        <y>48.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>BW-RSDS-YRW1_D2_VBAKVBAP T80CLNT100-ODSO-PRW1VBAP</class>
+        <method>BW-RSDS-YRW1_D2_VBAKVBAP T80CLNT100-ODSO-PRW1VBAP</method>
+        <x>-667.0</x>
+        <y>37.0</y>
+        <comment><![CDATA[This is a SAP BW Transformation<br>The BWMT link is now stored in the model<br>so that it is possible to open the transformation in the BW-Project in Eclipse ]]>
+        </comment>
+        <commentx>-512.0</commentx>
+        <commenty>-20.0</commenty>
+    </element>
+    <element>
+        <type>FAMIXPackage</type>
+        <package>YRW1_BW_ROUTINES</package>
+        <x>614.0</x>
+        <y>41.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>YRW1_CL_BW_USAGE</class>
+        <x>-668.0</x>
+        <y>140.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>YRW1_CL_BW_USAGE</class>
+        <method>MATNR_CHECK</method>
+        <x>-668.0</x>
+        <y>130.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>YRW1_BW_ROUTINE_DEMO</class>
+        <x>-675.0</x>
+        <y>239.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>YRW1_BW_ROUTINE_DEMO</class>
+        <method>YRW1_BW_ROUTINE_DEMO</method>
+        <x>-674.0</x>
+        <y>229.0</y>
+    </element>
+</elements>
