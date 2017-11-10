@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
-<!--Moose2Model Layout data, see www.moose2model.org on how to use this file-->
+<!--Moose Diagram Layout data, see "https://github.com/RainerWinkler/Moose-FAMIX-SAP-Extractor" on how to use this file-->
 <elements>
     <version>v0.4.5</version>
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
-        <x>336.0</x>
-        <y>16.0</y>
+        <x>453.0</x>
+        <y>228.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -79,8 +79,8 @@
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_FAMIX_NAMED_ENTITY</class>
-        <x>-621.0</x>
-        <y>-283.0</y>
+        <x>-632.0</x>
+        <y>-213.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -165,17 +165,17 @@
         <y>-211.0</y>
     </element>
     <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_FAMIX_BEHAVIOURAL_ENTTY</class>
+        <x>-161.0</x>
+        <y>-142.0</y>
+    </element>
+    <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_FAMIX_MODULE</class>
         <method>ADD</method>
         <x>-176.0</x>
         <y>262.0</y>
-    </element>
-    <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_FAMIX_BEHAVIOURAL_ENTTY</class>
-        <x>-161.0</x>
-        <y>-142.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -214,8 +214,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_FAMIX_NAMED_ENTITY</class>
         <method>ADD</method>
-        <x>-664.0</x>
-        <y>-305.0</y>
+        <x>-631.0</x>
+        <y>-223.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -321,6 +321,30 @@
             <usedByLayers>1</usedByLayers>
             <usingLayers>1</usingLayers>
         </ACTSuppressOthers>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -371,6 +395,12 @@
             <usedByLayers>1</usedByLayers>
             <usingLayers>1</usingLayers>
         </ACTSuppressOthers>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -382,8 +412,8 @@
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_EXTR3_ELEMENT_MANAGER</class>
-        <x>-656.0</x>
-        <y>-231.0</y>
+        <x>-638.0</x>
+        <y>-299.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -405,18 +435,18 @@
         <y>150.0</y>
     </element>
     <element>
-        <type>FAMIXAttribute</type>
-        <class>Z2MSE_MODEL</class>
-        <attribute>G_ATTRIBUTE_ID</attribute>
-        <x>-540.0</x>
-        <y>233.0</y>
-    </element>
-    <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_MODEL</class>
         <method>ADD_STRING</method>
         <x>-429.0</x>
         <y>256.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_MODEL</class>
+        <attribute>G_ATTRIBUTE_ID</attribute>
+        <x>-540.0</x>
+        <y>233.0</y>
     </element>
     <element>
         <type>FAMIXPackage</type>
@@ -488,8 +518,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_ELEMENT_MANAGER</class>
         <method>MAKE_MODEL</method>
-        <x>-656.0</x>
-        <y>-241.0</y>
+        <x>-638.0</x>
+        <y>-308.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -561,6 +591,18 @@
             <usedByLayers>1</usedByLayers>
             <usingLayers>1</usingLayers>
         </ACTSuppressOthers>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -581,6 +623,18 @@
         <method>MAKE_MODEL</method>
         <x>-417.0</x>
         <y>-202.0</y>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
@@ -643,7 +697,7 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_FAMIX_METHOD</class>
         <method>ADD</method>
-        <x>125.0</x>
+        <x>116.0</x>
         <y>-273.0</y>
     </element>
     <element>
