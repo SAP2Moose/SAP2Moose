@@ -13,7 +13,7 @@ Currently diagrams like this can be generated (With methods, attributes, classes
 
 # Documentation
 
-The documentation is in the Wiki of this repository
+The documentation is in the Wiki of this repository (Switch to the tab Wiki).
 
 ## General
 
