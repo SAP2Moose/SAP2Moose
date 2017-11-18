@@ -3,7 +3,7 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <DEVC>
-    <CTEXT>Obsolete or planned to be obsolete</CTEXT>
+    <CTEXT>Z2MSE_Z2MSE_OBSOLETE</CTEXT>
    </DEVC>
   </asx:values>
  </asx:abap>
