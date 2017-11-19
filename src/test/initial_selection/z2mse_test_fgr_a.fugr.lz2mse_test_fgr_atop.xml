@@ -5,6 +5,7 @@
    <PROGDIR>
     <NAME>LZ2MSE_TEST_FGR_ATOP</NAME>
     <STATE>A</STATE>
+    <VARCL>X</VARCL>
     <DBAPL>S</DBAPL>
     <DBNA>D$</DBNA>
     <SUBC>I</SUBC>
