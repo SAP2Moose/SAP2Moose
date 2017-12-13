@@ -1,5 +1,6 @@
 CLASS ltcl_main DEFINITION DEFERRED.
 CLASS z2mse_extract3 DEFINITION LOCAL FRIENDS ltcl_main.
+"! Contains the main integration test of SAP2Moose
 CLASS ltcl_main DEFINITION FINAL FOR TESTING
   DURATION SHORT
   RISK LEVEL HARMLESS.
