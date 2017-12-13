@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
-<!--Moose2Model Layout data, see www.moose2model.org on how to use this file-->
+<!--Moose Diagram Layout data, see "https://github.com/RainerWinkler/Moose-FAMIX-SAP-Extractor" on how to use this file-->
 <elements>
     <version>v0.4.5</version>
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
         <x>107.0</x>
-        <y>749.0</y>
+        <y>410.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -74,6 +74,12 @@
         <class>Z2MSE_TEST_A</class>
         <x>-875.47153683</x>
         <y>536.9128552</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_DEMO_LONG_PREFIX_CL_C</class>
+        <x>588.0</x>
+        <y>463.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -482,6 +488,8 @@
         <class>Z2MSE_EXTRACT3</class>
         <x>-2667.0</x>
         <y>1284.0</y>
+        <comment><![CDATA[The integration tests of SAP2Moose<br>are called in the test classes of this class]]>
+        </comment>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -956,6 +964,13 @@
     </element>
     <element>
         <type>FAMIXMethod</type>
+        <class>Z2MSE_DEMO_LONG_PREFIX_CL_A</class>
+        <method>LONG_MEANINGLESS_METHOD_NAME</method>
+        <x>344.0</x>
+        <y>396.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR_FUNCTIONS</class>
         <method>SELECT_BY_INCLUDES</method>
         <x>130.0</x>
@@ -988,6 +1003,12 @@
         <method>SEARCH_UP</method>
         <x>-1767.0</x>
         <y>813.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_DEMO_LONG_PREFIX_CL_A</class>
+        <x>344.0</x>
+        <y>407.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -1024,18 +1045,18 @@
         <y>263.0</y>
     </element>
     <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_MSE_HARMONIZE</class>
-        <method>_ANALYZE_ATTRIBUTE_VALUE</method>
-        <x>-475.0</x>
-        <y>1269.0</y>
-    </element>
-    <element>
         <type>FAMIXAttribute</type>
         <class>Z2MSE_TEST_CL_B2</class>
         <attribute>Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000</attribute>
         <x>-972.0</x>
         <y>827.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_MSE_HARMONIZE</class>
+        <method>_ANALYZE_ATTRIBUTE_VALUE</method>
+        <x>-475.0</x>
+        <y>1269.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -1070,6 +1091,12 @@
         <class>Z2MSE_FAMIX_ATTRIBUTE</class>
         <x>-2439.0</x>
         <y>640.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_DEMO_LONG_PREFIX_CL_D</class>
+        <x>589.0</x>
+        <y>407.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -1122,6 +1149,12 @@
         <class>Z2MSE_TEST_CL_A</class>
         <x>-945.0</x>
         <y>530.0</y>
+    </element>
+    <element>
+        <type>FAMIXPackage</type>
+        <package>Z2MSE_DEMO</package>
+        <x>589.0</x>
+        <y>424.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -1741,6 +1774,13 @@
         <y>968.0</y>
     </element>
     <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_DEMO_LONG_PREFIX_CL_D</class>
+        <method>LONG_MEANINGLESS_METHOD_NAME</method>
+        <x>589.0</x>
+        <y>396.0</y>
+    </element>
+    <element>
         <type>FAMIXPackage</type>
         <package>Z2MSE_FAMIX</package>
         <x>1752.0</x>
@@ -1800,6 +1840,13 @@
         <attribute>ELEMENTS_COMP_ELEMENT_ID</attribute>
         <x>-2467.0</x>
         <y>969.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_DEMO_LONG_PREFIX_CL_E</class>
+        <method>LONG_MEANINGLESS_METHOD_NAME</method>
+        <x>344.0</x>
+        <y>452.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -1972,6 +2019,12 @@
         <y>839.0</y>
     </element>
     <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_DEMO_LONG_PREFIX_CL_B</class>
+        <x>834.0</x>
+        <y>407.0</y>
+    </element>
+    <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_TEST_WDY_A</class>
         <method>EMPTYVIEW</method>
@@ -2053,6 +2106,12 @@
         <method>CONSTRUCTOR</method>
         <x>-2222.0</x>
         <y>263.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_DEMO_LONG_PREFIX_CL_E</class>
+        <x>343.0</x>
+        <y>463.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -2700,10 +2759,10 @@
     </element>
     <element>
         <type>FAMIXMethod</type>
-        <class>Z2MSE_TEST_WDY_A</class>
-        <method>W_MAIN</method>
-        <x>-929.0</x>
-        <y>376.0</y>
+        <class>Z2MSE_DEMO_LONG_PREFIX_CL_B</class>
+        <method>LONG_MEANINGLESS_METHOD_NAME</method>
+        <x>834.0</x>
+        <y>396.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -2711,6 +2770,13 @@
         <attribute>ATTRIBUTE_A_000000000000000000</attribute>
         <x>-1251.0</x>
         <y>734.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_TEST_WDY_A</class>
+        <method>W_MAIN</method>
+        <x>-929.0</x>
+        <y>376.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -2800,6 +2866,13 @@
         <method>CONSTRUCTOR</method>
         <x>-2033.0</x>
         <y>635.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_DEMO_LONG_PREFIX_CL_C</class>
+        <method>LONG_MEANINGLESS_METHOD_NAME</method>
+        <x>588.0</x>
+        <y>452.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>

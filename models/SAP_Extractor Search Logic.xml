@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <!--Moose Diagram Layout data, see "https://github.com/RainerWinkler/Moose-FAMIX-SAP-Extractor" on how to use this file-->
 <elements>
-    <version>v0.4.4</version>
+    <version>v0.4.5</version>
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
-        <x>84.0</x>
-        <y>16.0</y>
+        <x>565.0</x>
+        <y>234.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -25,15 +25,15 @@
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_EXTR3_PROGRAMS</class>
-        <x>-1120.0</x>
-        <y>363.0</y>
+        <x>-1134.0</x>
+        <y>374.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <method>GET_INSTANCE</method>
-        <x>-1035.0</x>
-        <y>500.0</y>
+        <x>-1020.0</x>
+        <y>512.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -48,6 +48,8 @@
         <method>SEARCH_UP</method>
         <x>-1057.0</x>
         <y>207.0</y>
+        <comment><![CDATA[Improve, currently only tables<br>and classes are handled]]>
+        </comment>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
@@ -59,15 +61,15 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <method>IS_REDEFINITION_OF_METHOD</method>
-        <x>-942.0</x>
-        <y>450.0</y>
+        <x>-950.0</x>
+        <y>445.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <attribute>IS_CLASS_TYPE</attribute>
-        <x>-911.0</x>
-        <y>475.0</y>
+        <x>-897.0</x>
+        <y>487.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -80,8 +82,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_PROGRAMS</class>
         <method>GET_INSTANCE</method>
-        <x>-1132.0</x>
-        <y>354.0</y>
+        <x>-1165.0</x>
+        <y>364.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -93,7 +95,7 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_PARENT_PACKAGE</class>
         <method>ADD</method>
-        <x>-1484.0</x>
+        <x>-1458.0</x>
         <y>386.0</y>
     </element>
     <element>
@@ -107,8 +109,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_PACKAGES</class>
         <method>DEVCLASS</method>
-        <x>-1637.0</x>
-        <y>436.0</y>
+        <x>-1610.0</x>
+        <y>438.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -135,8 +137,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <method>COMP_NAME</method>
-        <x>-1097.0</x>
-        <y>525.0</y>
+        <x>-1082.0</x>
+        <y>537.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -156,15 +158,15 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <attribute>INTERFACE_TYPE</attribute>
-        <x>-973.0</x>
-        <y>499.0</y>
+        <x>-959.0</x>
+        <y>511.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <method>ADD</method>
-        <x>-1136.0</x>
-        <y>459.0</y>
+        <x>-1152.0</x>
+        <y>479.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -191,20 +193,20 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_PROGRAMS</class>
         <method>ADD</method>
-        <x>-1090.0</x>
-        <y>354.0</y>
+        <x>-1113.0</x>
+        <y>367.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <attribute>EVENT_TYPE</attribute>
-        <x>-1032.0</x>
-        <y>475.0</y>
+        <x>-1018.0</x>
+        <y>487.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_EXTR3_PARENT_PACKAGE</class>
-        <x>-1484.0</x>
+        <x>-1458.0</x>
         <y>397.0</y>
     </element>
     <element>
@@ -217,8 +219,8 @@
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
-        <x>-1002.0</x>
-        <y>510.0</y>
+        <x>-987.0</x>
+        <y>521.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -269,15 +271,15 @@
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_EXTR3_PACKAGES</class>
-        <x>-1617.0</x>
-        <y>435.0</y>
+        <x>-1590.0</x>
+        <y>437.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <method>ADD_COMPONENT</method>
-        <x>-1059.0</x>
-        <y>448.0</y>
+        <x>-1044.0</x>
+        <y>460.0</y>
     </element>
     <element>
         <type>FAMIXPackage</type>
@@ -289,8 +291,8 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <attribute>METHOD_TYPE</attribute>
-        <x>-1022.0</x>
-        <y>541.0</y>
+        <x>-1008.0</x>
+        <y>553.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -391,8 +393,8 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <attribute>ATTRIBUTE_TYPE</attribute>
-        <x>-1144.0</x>
-        <y>503.0</y>
+        <x>-1130.0</x>
+        <y>515.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -404,8 +406,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <method>CLASS_NAME</method>
-        <x>-903.0</x>
-        <y>451.0</y>
+        <x>-862.0</x>
+        <y>458.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -430,8 +432,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_PACKAGES</class>
         <method>GET_INSTANCE</method>
-        <x>-1629.0</x>
-        <y>411.0</y>
+        <x>-1602.0</x>
+        <y>413.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -445,6 +447,8 @@
         <method>SEARCH_DOWN</method>
         <x>-1242.0</x>
         <y>224.0</y>
+        <comment><![CDATA[Improve, add also FUGR<br>to the elements that are handled]]>
+        </comment>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
@@ -484,8 +488,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_PACKAGES</class>
         <method>ADD</method>
-        <x>-1587.0</x>
-        <y>411.0</y>
+        <x>-1560.0</x>
+        <y>413.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
