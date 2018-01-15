@@ -33,6 +33,9 @@ CLASS ltcl_test IMPLEMENTATION.
           act TYPE z2mse_extr3_where_used_builder=>wbcrossgts_type.
 
     exp = VALUE #( ( otype = 'ME'
+                     name = 'Z2MSE_TEST_CL_A\ME:CONSTRUCTOR'
+                     include = 'Z2MSE_TEST_CL_B1==============CM002' )
+                   ( otype = 'ME'
                      name = 'Z2MSE_TEST_CL_A\ME:METHOD_A'
                      include = 'Z2MSE_TEST_CL_B1==============CM002' ) ).
 
