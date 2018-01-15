@@ -1,7 +1,7 @@
 * generated on system NPL at 15.01.2018 on 20:45:05
 
 *
-* This is version 0.6.0
+* This is version 1.0.0
 *
 *The MIT License (MIT)
 *
