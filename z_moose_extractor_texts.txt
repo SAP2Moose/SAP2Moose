@@ -2,6 +2,7 @@
 Selection texts:
 P_DF	Default prefix for file
 P_DOWN	Download model to file
+P_DYN	Classes to read dynamic usages
 P_ELNAM	Speciifc element
 P_ELPAR	Parent name
 P_ELTYP	Element name

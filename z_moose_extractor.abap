@@ -1,7 +1,7 @@
-* generated on system NPL at 06.11.2017 on 22:01:51
+* generated on system NPL at 15.01.2018 on 20:45:05
 
 *
-* This is version 0.5.8
+* This is version 0.6.0
 *
 *The MIT License (MIT)
 *
@@ -50,6 +50,7 @@ PARAMETERS p_nup TYPE i DEFAULT -1.
 PARAMETERS p_ndown TYPE i DEFAULT -1.
 "Exclude interfaces in sap name space when found via where used analysis
 PARAMETERS p_ex AS CHECKBOX DEFAULT 'X'.
+PARAMETERS p_dyn TYPE string. "Classes to determine dynamic accesses
 
 *SELECT-OPTIONS s_compsn FOR tadir-obj_name.
 
@@ -2206,8 +2207,15 @@ CLASS cl_extr3_where_used_builder DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
-    METHODS search_up REDEFINITION.
-    METHODS search_down REDEFINITION.
+
+    METHODS set_dynamic_read
+      IMPORTING
+        !i_dynamic_read TYPE string OPTIONAL .
+
+    METHODS search_down
+        REDEFINITION .
+    METHODS search_up
+        REDEFINITION .
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -2220,6 +2228,7 @@ CLASS cl_extr3_where_used_builder DEFINITION
         indirect TYPE sgrade,
       END OF wbcrossgt_type ,
       wbcrossgts_type TYPE SORTED TABLE OF wbcrossgt_type WITH UNIQUE KEY otype name include.
+    DATA: g_dynamic_usage TYPE SORTED TABLE OF wbcrossgt WITH UNIQUE KEY otype name include.
 ENDCLASS.
 "! I build all initial elements that are the starting point for searching further elements.
 CLASS cl_extr3_initial_elements DEFINITION
@@ -2328,7 +2337,8 @@ CLASS cl_extr3_model_builder DEFINITION
         i_element_id  TYPE i
         i_is_specific TYPE abap_bool.
     METHODS initialize
-      IMPORTING i_element_manager TYPE REF TO cl_extr3_element_manager.
+      IMPORTING i_element_manager TYPE REF TO cl_extr3_element_manager
+                i_dynamic_read    TYPE string OPTIONAL.
     METHODS write_found_elements
       IMPORTING
         write TYPE abap_bool OPTIONAL
@@ -2422,15 +2432,6 @@ ENDCLASS.
 
 
 CLASS CL_EXTR3_ACCESS IMPLEMENTATION.
-  METHOD get_instance.
-    IF instance IS NOT BOUND.
-      CREATE OBJECT instance
-        EXPORTING
-          i_element_manager = i_element_manager.
-    ENDIF.
-    instance->type = access_ass..
-    r_instance = instance.
-  ENDMETHOD.
   METHOD add.
 
     DATA association TYPE association_type.
@@ -2443,6 +2444,18 @@ CLASS CL_EXTR3_ACCESS IMPLEMENTATION.
                                                 element_2   = association-accessing_element_id2
                                                 association = me ).
 
+  ENDMETHOD.
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
+  METHOD get_instance.
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = i_element_manager.
+    ENDIF.
+    instance->type = access_ass..
+    r_instance = instance.
   ENDMETHOD.
   METHOD make_model.
 
@@ -2463,9 +2476,6 @@ CLASS CL_EXTR3_ACCESS IMPLEMENTATION.
                                                               accessor_id = using_method_id
                                                               variable_id = used_id ).
 
-  ENDMETHOD.
-  METHOD clear.
-    CLEAR instance.
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_ACCESS_OR_INVOCATN IMPLEMENTATION.
@@ -2578,15 +2588,6 @@ CLASS CL_EXTR3_ASSOCIATION IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_INVOCATION IMPLEMENTATION.
-  METHOD get_instance.
-    IF instance IS NOT BOUND.
-      CREATE OBJECT instance
-        EXPORTING
-          i_element_manager = i_element_manager.
-    ENDIF.
-    instance->type = invocation_ass.
-    r_instance = instance.
-  ENDMETHOD.
   METHOD add.
 
     DATA association TYPE association_type.
@@ -2599,6 +2600,18 @@ CLASS CL_EXTR3_INVOCATION IMPLEMENTATION.
                                                 element_2   = association-invocing_element_id2
                                                 association = me ).
 
+  ENDMETHOD.
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
+  METHOD get_instance.
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = i_element_manager.
+    ENDIF.
+    instance->type = invocation_ass.
+    r_instance = instance.
   ENDMETHOD.
   METHOD make_model.
 
@@ -2623,20 +2636,8 @@ CLASS CL_EXTR3_INVOCATION IMPLEMENTATION.
 
 
   ENDMETHOD.
-  METHOD clear.
-    CLEAR instance.
-  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_PARENT_PACKAGE IMPLEMENTATION.
-  METHOD get_instance.
-    IF instance IS NOT BOUND.
-      CREATE OBJECT instance
-        EXPORTING
-          i_element_manager = i_element_manager.
-    ENDIF.
-    instance->type = parent_package_ass.
-    r_instance = instance.
-  ENDMETHOD.
   METHOD add.
 
     DATA association TYPE association_type.
@@ -2650,11 +2651,20 @@ CLASS CL_EXTR3_PARENT_PACKAGE IMPLEMENTATION.
                                                 association = me ).
 
   ENDMETHOD.
-  METHOD make_model.
-    " I am added in the elements them self to the model
-  ENDMETHOD.
   METHOD clear.
     CLEAR instance.
+  ENDMETHOD.
+  METHOD get_instance.
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = i_element_manager.
+    ENDIF.
+    instance->type = parent_package_ass.
+    r_instance = instance.
+  ENDMETHOD.
+  METHOD make_model.
+    " I am added in the elements them self to the model
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_ASSOCIATION_BUILD IMPLEMENTATION.
@@ -2668,6 +2678,17 @@ CLASS CL_EXTR3_ASSOCIATION_BUILD IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_TADIR_BUILDER IMPLEMENTATION.
+  METHOD constructor.
+
+    super->constructor( i_element_manager = i_element_manager ).
+
+    parent_package = cl_extr3_parent_package=>get_instance( i_element_manager = element_manager ).
+    classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
+    programs = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
+    tables = cl_extr3_tables=>get_instance( i_element_manager = element_manager ).
+    web_dynpro_components = cl_extr3_web_dynpro_comp=>get_instance( element_manager = element_manager ).
+
+  ENDMETHOD.
   METHOD search_down.
 
     DATA: element            TYPE REF TO cl_extr3_elements,
@@ -2756,17 +2777,6 @@ CLASS CL_EXTR3_TADIR_BUILDER IMPLEMENTATION.
       ENDLOOP.
 
     ENDIF.
-
-  ENDMETHOD.
-  METHOD constructor.
-
-    super->constructor( i_element_manager = i_element_manager ).
-
-    parent_package = cl_extr3_parent_package=>get_instance( i_element_manager = element_manager ).
-    classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
-    programs = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
-    tables = cl_extr3_tables=>get_instance( i_element_manager = element_manager ).
-    web_dynpro_components = cl_extr3_web_dynpro_comp=>get_instance( element_manager = element_manager ).
 
   ENDMETHOD.
   METHOD search_up.
@@ -2970,6 +2980,16 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
         WHERE otype = otype
           AND name = where_used_name.
 
+      " Read dynamic usages
+
+      DATA: w TYPE wbcrossgt.
+      LOOP AT g_dynamic_usage INTO w
+        WHERE otype = otype
+          AND name = where_used_name.
+        MOVE-CORRESPONDING w TO wbcrossgt.
+        INSERT wbcrossgt INTO TABLE wbcrossgts.
+      ENDLOOP.
+
       LOOP AT wbcrossgts INTO wbcrossgt.
 
         DATA: is_added           TYPE abap_bool,
@@ -3077,22 +3097,22 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
 
           ELSE.
 
-            data: is_redefinition_of_method TYPE abap_bool.
+            DATA: is_redefinition_of_method TYPE abap_bool.
 
             is_redefinition_of_method = classes->is_redefinition_of_method( invoced_element_id1  = element_id
                                                                             invocing_element_id2 = used_by_element_id ).
 
-            if is_redefinition_of_method eq ''.
+            IF is_redefinition_of_method EQ ''.
 
-            invocation->add( EXPORTING invoced_element_id1  = element_id
-                                       invocing_element_id2 = used_by_element_id ).
+              invocation->add( EXPORTING invoced_element_id1  = element_id
+                                         invocing_element_id2 = used_by_element_id ).
 
-                                       else.
+            ELSE.
 
-            invocation->add( EXPORTING invoced_element_id1  = used_by_element_id
-                                       invocing_element_id2 = element_id ).
+              invocation->add( EXPORTING invoced_element_id1  = used_by_element_id
+                                         invocing_element_id2 = element_id ).
 
-                                       endif.
+            ENDIF.
 
           ENDIF.
 
@@ -3103,17 +3123,39 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+  METHOD set_dynamic_read.
+
+    DATA: s     TYPE string,
+          class TYPE string,
+          t     TYPE TABLE OF string,
+          w2    TYPE wbcrossgt.
+
+    CLEAR g_dynamic_usage.
+
+    s =  i_dynamic_read.
+    TRANSLATE s TO UPPER CASE.
+    CONDENSE s.
+    SPLIT s AT space INTO TABLE t.
+
+    LOOP AT t INTO class.
+
+      DATA dyn_usage TYPE STANDARD TABLE OF wbcrossgt WITH DEFAULT KEY.
+
+      CALL METHOD (class)=>where_used
+        IMPORTING
+          data = dyn_usage.
+
+      LOOP AT dyn_usage INTO w2.
+
+        INSERT w2 INTO TABLE g_dynamic_usage.
+
+      ENDLOOP.
+
+    ENDLOOP.
+
+  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
-  METHOD get_instance.
-    IF instance IS NOT BOUND.
-      CREATE OBJECT instance
-        EXPORTING
-          i_element_manager = element_manager.
-    ENDIF.
-    instance->type = class_type.
-    r_instance = instance.
-  ENDMETHOD.
   METHOD add.
 
     DATA: element      TYPE element_type,
@@ -3224,180 +3266,6 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD class_name.
-
-    DATA element TYPE element_type.
-
-    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
-
-    IF sy-subrc EQ 0.
-
-      class_name = element-class_name.
-      clstype = element-clstype.
-      exists = abap_true.
-
-    ENDIF.
-
-  ENDMETHOD.
-  METHOD make_model.
-
-    DATA element TYPE element_type.
-
-    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
-    IF sy-subrc EQ 0.
-
-      DATA: last_id        TYPE i,
-            file_anchor_id TYPE i.
-
-      IF element-clstype EQ is_class_type.
-        " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
-        " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
-        element_manager->famix_class->add( EXPORTING name_group = 'ABAP_CLASS'
-                                                     name       = element-class_name
-                                                     modifiers  = cl_extract3=>modifier_abapglobalclass
-                                           IMPORTING id         = last_id ).
-
-        IF element-adt_link IS NOT INITIAL.
-
-          element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
-                                                             file_name  = element-adt_link
-                                                   IMPORTING id         = file_anchor_id ).
-
-          IF file_anchor_id IS NOT INITIAL.
-            element_manager->famix_class->set_source_anchor_by_id(
-              EXPORTING
-                element_id         = last_id
-                source_anchor_id   = file_anchor_id
-            ).
-
-          ENDIF.
-
-        ENDIF.
-
-      ELSEIF element-clstype EQ interface_type.
-        " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
-        " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
-        element_manager->famix_class->add( EXPORTING name_group = 'ABAP_CLASS'
-                                                     name       = element-class_name
-                                                     modifiers  = cl_extract3=>modifier_abapglobalinterface
-                                           IMPORTING id         = last_id ).
-        " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
-        element_manager->famix_class->is_interface( element_id = last_id ).
-
-        IF element-adt_link IS NOT INITIAL.
-
-          element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
-                                                             file_name  = element-adt_link
-                                                   IMPORTING id         = file_anchor_id ).
-
-          IF file_anchor_id IS NOT INITIAL.
-            element_manager->famix_class->set_source_anchor_by_id(
-              EXPORTING
-                element_id         = last_id
-                source_anchor_id   = file_anchor_id
-            ).
-
-          ENDIF.
-
-        ENDIF.
-      ELSE.
-        ASSERT 1 = 2.
-      ENDIF.
-
-      DATA association TYPE cl_extr3_element_manager=>association_type.
-      LOOP AT associations INTO association WHERE element_id1 = element_id
-                                              AND association->type = cl_extr3_association=>parent_package_ass.
-        DATA package TYPE REF TO cl_extr3_packages.
-        package ?= element_manager->get_element( i_element_id = association-element_id2 ).
-        element_manager->famix_class->set_parent_package( element_id     = last_id
-                                                          parent_package = package->devclass( i_element_id = association-element_id2 ) ).
-
-      ENDLOOP.
-
-    ELSE.
-
-      DATA element_comp TYPE element_comp_type.
-
-      READ TABLE elements_comp_element_id INTO element_comp WITH KEY element_id = element_id.
-      ASSERT sy-subrc EQ 0.
-      CASE element_comp-cmptype.
-        WHEN attribute_type.
-
-
-*    DATA last_id TYPE i.!
-          element_manager->famix_attribute->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
-          element_manager->famix_attribute->set_parent_type( EXPORTING element_id = last_id
-                                                        parent_element = 'FAMIX.Class'
-                                                        parent_name_group = 'ABAP_CLASS'
-                                                        parent_name    = element_comp-clsname ).
-
-          IF element_comp-adt_link IS NOT INITIAL.
-
-            element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
-                                                               file_name  = element_comp-adt_link
-                                                       IMPORTING id         = file_anchor_id ).
-
-            IF file_anchor_id IS NOT INITIAL.
-              element_manager->famix_attribute->set_source_anchor_by_id(
-                EXPORTING
-                  element_id         = last_id
-                  source_anchor_id   = file_anchor_id
-              ).
-
-            ENDIF.
-
-          ENDIF.
-
-          element_manager->famix_attribute->store_id( EXPORTING class     = element_comp-clsname
-                                               attribute = element_comp-cmpname ).
-
-*            sap_attribute->add( EXPORTING class     = class-clsname
-*                                          attribute = component-cmpname ).
-        WHEN method_type OR event_type.
-          " SAP_2_FAMIX_15        Map methods of classes to FAMIX.Method
-          " SAP_2_FAMIX_16        Map methods of interfaces to FAMIX.Method
-          element_manager->famix_method->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
-
-          " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
-          " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
-          element_manager->famix_method->set_signature( element_id = last_id
-                                         signature = element_comp-cmpname ).
-
-          element_manager->famix_method->set_parent_type( EXPORTING element_id = last_id
-                                                     parent_element = 'FAMIX.Class'
-                                                     parent_name_group = 'ABAP_CLASS'
-                                                     parent_name    = element_comp-clsname ).
-
-          IF element_comp-adt_link IS NOT INITIAL.
-
-            element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
-                                                               file_name  = element_comp-adt_link
-                                                       IMPORTING id         = file_anchor_id ).
-
-            IF file_anchor_id IS NOT INITIAL.
-              element_manager->famix_method->set_source_anchor_by_id(
-                EXPORTING
-                  element_id         = last_id
-                  source_anchor_id   = file_anchor_id
-              ).
-
-            ENDIF.
-
-          ENDIF.
-
-          element_manager->famix_method->store_id( EXPORTING class  = element_comp-clsname
-                                              method = element_comp-cmpname ).
-
-
-*            sap_method->add( EXPORTING class  = class-clsname
-*                                       method = component-cmpname ).
-        WHEN OTHERS.
-          ASSERT 1 = 2.
-      ENDCASE.
-
-    ENDIF.
-
-  ENDMETHOD.
   METHOD add_component.
 
     DATA: is_added_now TYPE abap_bool.
@@ -3424,276 +3292,17 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD _add_component.
+  METHOD class_name.
 
-    DATA element_comp TYPE element_comp_type.
+    DATA element TYPE element_type.
 
-    READ TABLE elements_comp_clsname_cmpname INTO element_comp WITH KEY clsname  = clsname cmpname = cmpname.
-    IF sy-subrc EQ 0.
-      is_added = abap_true.
-      new_element_id = element_comp-element_id.
-    ELSE.
-
-      " Does component exists?
-      DATA: found_class_name TYPE string,
-            found_cmpname    TYPE string,
-            found_cmptype    TYPE seocmptype,
-            found_mtdtype    TYPE seomtdtype.
-
-        SELECT SINGLE clsname cmpname cmptype mtdtype FROM seocompo
-          INTO (found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = clsname
-                                                                                   AND cmpname = cmpname.
-
-      IF found_class_name IS NOT INITIAL.
-
-        is_added = abap_true.
-
-      ELSE.
-
-        DATA: redefined_class_components TYPE ty_class_components,
-              redefined_class_component  TYPE ty_class_component.
-
-        redefined_class_components = _get_redefined( clsname ).
-
-        READ TABLE redefined_class_components INTO redefined_class_component WITH KEY clsname = clsname cmpname = cmpname.
-
-        IF sy-subrc EQ 0.
-
-          found_class_name = redefined_class_component-clsname.
-          found_cmpname = redefined_class_component-cmpname.
-          found_cmptype = redefined_class_component-cmptype.
-          found_mtdtype = redefined_class_component-mtdtype.
-
-          is_added = abap_true.
-
-        ENDIF.
-
-*      ELSE.
-*
-*        " Is it a redefined component?
-*
-*        DATA: redefined_component  TYPE redefined_type.
-*
-*        TEST-SEAM seoredef_2.
-*
-*          SELECT SINGLE clsname refclsname mtdname FROM seoredef INTO redefined_component
-*            WHERE clsname = clsname
-*              AND version = 1
-*              AND mtdname = cmpname.
-*
-*        END-TEST-SEAM.
-*
-*        IF sy-subrc EQ 0.
-*
-*          TEST-SEAM seocompo_4.
-*            SELECT SINGLE clsname cmpname cmptype mtdtype FROM seocompo
-*              INTO (found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = redefined_component-refclsname
-*                                                                                       AND cmpname = cmpname.
-*          END-TEST-SEAM.
-*          found_class_name = clsname. "As it is redefined
-*          is_added = abap_true.
-*        ENDIF.
-      ENDIF.
-
-      IF is_added EQ abap_true.
-
-        new_element_id = _add_single_component_to_class( i_found_class_name = found_class_name
-                                                         i_found_cmpname    = found_cmpname
-                                                         i_found_cmptype    = found_cmptype
-                                                         i_found_mtdtype    = found_mtdtype ).
-        is_added_now = abap_true.
-      ENDIF.
-
-    ENDIF.
-
-  ENDMETHOD.
-  METHOD comp_name.
-
-    DATA element_comp TYPE element_comp_type.
-
-    READ TABLE elements_comp_element_id INTO element_comp WITH KEY element_id = element_id.
+    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
 
     IF sy-subrc EQ 0.
 
-      class_name = element_comp-clsname.
-      cmpname = element_comp-cmpname.
-      cmptype = element_comp-cmptype.
-      exists = abap_true.
-
-    ENDIF.
-
-  ENDMETHOD.
-  METHOD _add_metarel.
-
-    DATA: relation        TYPE seometarel,
-          relations       TYPE STANDARD TABLE OF seometarel,
-          element_metarel TYPE element_metarel_type,
-          is_added        TYPE abap_bool,
-          new_element_id  TYPE i.
-
-    DATA access TYPE REF TO cl_extr3_access.
-    access = cl_extr3_access=>get_instance( i_element_manager = element_manager ).
-
-    DATA invocation TYPE REF TO cl_extr3_invocation.
-    invocation = cl_extr3_invocation=>get_instance( i_element_manager = element_manager ).
-
-
-      SELECT * FROM seometarel INTO TABLE relations WHERE clsname = clsname
-                                                      AND version = 1
-                                                      AND state   = 1.
-
-
-    LOOP AT relations INTO relation WHERE reltype = 1 OR reltype = 2.
-
-      element_metarel-element_id = new_element_id.
-      element_metarel-refclsname = relation-refclsname.
-      element_metarel-reltype = relation-reltype.
-
-      INSERT element_metarel INTO TABLE elements_metarel_element_id.
-      INSERT element_metarel INTO TABLE elements_metarel_refclsname.
-
-      IF relation-reltype EQ 1. " Interface
-
-        DATA: interface_class_components TYPE ty_class_components,
-              interface_class_component  TYPE ty_class_component,
-              reclsname_string           TYPE string.
-
-        reclsname_string = relation-refclsname.
-
-        me->add( EXPORTING class            = reclsname_string
-                 IMPORTING is_added         = is_added
-                           new_element_id   = new_element_id
-                           class_components = interface_class_components ).
-
-        LOOP AT interface_class_components INTO interface_class_component.
-
-          new_element_id = _add_single_component_to_class( i_found_class_name = clsname
-                                                           i_found_cmpname    = |{ interface_class_component-clsname }~{ interface_class_component-cmpname }|
-                                                           i_found_cmptype    = interface_class_component-cmptype
-                                                           i_found_mtdtype    = interface_class_component-mtdtype ).
-
-          DATA interface_element_id TYPE cl_extr3_element_manager=>element_id_type .
-
-          me->add_component( EXPORTING clsname        = interface_class_component-clsname
-                                       cmpname        = interface_class_component-cmpname
-                                       is_specific    = abap_false
-                              IMPORTING "*              is_added       =
-                                        new_element_id = interface_element_id ).
-
-          IF interface_class_component-cmptype EQ attribute_type.
-
-            " Connections between attributes are not expressible in FAMIX, or?
-
-*            access->add( EXPORTING accessed_element_id1  = new_element_id
-*                                   accessing_element_id2 = interface_element_id ).
-
-          ELSE.
-
-            invocation->add( EXPORTING invoced_element_id1  = new_element_id
-                                       invocing_element_id2 = interface_element_id ).
-
-          ENDIF.
-
-
-        ENDLOOP.
-
-      ENDIF.
-
-    ENDLOOP.
-
-  ENDMETHOD.
-  METHOD _add_single_component_to_class.
-
-    " Add single component to class
-
-    DATA element_comp2 TYPE element_comp_type.
-
-    ASSERT i_found_cmpname IS NOT INITIAL.
-
-    r_new_element_id = element_manager->add_element( element = me
-                                                     is_specific = abap_false ).
-    element_comp2-element_id = r_new_element_id.
-    element_comp2-clsname = i_found_class_name.
-    element_comp2-cmpname = i_found_cmpname.
-    element_comp2-cmptype = i_found_cmptype.
-    element_comp2-mtdtype = i_found_mtdtype.
-
-    INSERT element_comp2 INTO TABLE elements_comp_element_id .
-    INSERT element_comp2 INTO TABLE elements_comp_clsname_cmpname .
-
-  ENDMETHOD.
-  METHOD name.
-    DATA: class_name TYPE string,
-          clstype    TYPE seoclstype,
-          exists     TYPE abap_bool.
-
-    class_name( EXPORTING element_id = element_id
-                IMPORTING class_name =  class_name
-                          clstype    = clstype
-                          exists     = exists ).
-
-    IF exists EQ abap_true.
-
-      CASE clstype.
-        WHEN is_class_type.
-          element_type = |ABAPClass|.
-        WHEN interface_type.
-          element_type = |ABAPInterface|.
-        WHEN OTHERS.
-          ASSERT 1 = 2.
-      ENDCASE.
-
-      parent_name = ||.
-      name = class_name.
-
-    ELSE.
-
-      DATA: cmpname TYPE string,
-            cmptype TYPE seocmptype.
-
-      comp_name( EXPORTING element_id = element_id
-                   IMPORTING class_name = class_name
-                             cmpname    = cmpname
-                             cmptype    = cmptype
-                             exists     = exists ).
-
-      ASSERT exists EQ abap_true.
-
-      DATA element TYPE element_type.
-
-      READ TABLE elements_class_name INTO element WITH KEY class_name = class_name.
-      ASSERT sy-subrc EQ 0.
+      class_name = element-class_name.
       clstype = element-clstype.
-
-      CASE clstype.
-        WHEN is_class_type.
-          CASE cmptype.
-            WHEN attribute_type.
-              element_type = |ABAPClassAttribute|.
-            WHEN method_type.
-              element_type = |ABAPClassMethod|.
-            WHEN event_type.
-              element_type = |ABAPClassEvent|.
-            WHEN OTHERS.
-              ASSERT 1 = 2.
-          ENDCASE.
-        WHEN interface_type.
-          CASE cmptype.
-            WHEN attribute_type.
-              element_type = |ABAPInterfaceAttribute|.
-            WHEN method_type.
-              element_type = |ABAPInterfaceMethod|.
-            WHEN event_type.
-              element_type = |ABAPInterfaceEvent|.
-            WHEN OTHERS.
-              ASSERT 1 = 2.
-          ENDCASE.
-        WHEN OTHERS.
-          ASSERT 1 = 2.
-      ENDCASE.
-
-      parent_name = class_name.
-      name = cmpname.
+      exists = abap_true.
 
     ENDIF.
 
@@ -3872,6 +3481,479 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+  METHOD comp_name.
+
+    DATA element_comp TYPE element_comp_type.
+
+    READ TABLE elements_comp_element_id INTO element_comp WITH KEY element_id = element_id.
+
+    IF sy-subrc EQ 0.
+
+      class_name = element_comp-clsname.
+      cmpname = element_comp-cmpname.
+      cmptype = element_comp-cmptype.
+      exists = abap_true.
+
+    ENDIF.
+
+  ENDMETHOD.
+  METHOD get_instance.
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = element_manager.
+    ENDIF.
+    instance->type = class_type.
+    r_instance = instance.
+  ENDMETHOD.
+  METHOD is_redefinition_of_method.
+
+    DATA: invoced  TYPE element_comp_type,
+          invocing TYPE element_comp_type.
+
+    READ TABLE elements_comp_element_id INTO invoced WITH KEY element_id = invoced_element_id1.
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
+    READ TABLE elements_comp_element_id INTO invocing WITH KEY element_id = invocing_element_id2.
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
+    IF invoced-cmpname <> invocing-cmpname.
+      RETURN.
+    ENDIF.
+
+    DATA: r TYPE redefined_method_type.
+
+    READ TABLE redefined_methods INTO r WITH TABLE KEY method = invocing-cmpname
+                                                       clsname = invocing-clsname
+                                                       defined_in_clsname = invoced-clsname.
+
+    IF sy-subrc EQ 0.
+      r_result = 'X'.
+    ENDIF.
+
+
+  ENDMETHOD.
+  METHOD make_model.
+
+    DATA element TYPE element_type.
+
+    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
+    IF sy-subrc EQ 0.
+
+      DATA: last_id        TYPE i,
+            file_anchor_id TYPE i.
+
+      IF element-clstype EQ is_class_type.
+        " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
+        " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
+        element_manager->famix_class->add( EXPORTING name_group = 'ABAP_CLASS'
+                                                     name       = element-class_name
+                                                     modifiers  = cl_extract3=>modifier_abapglobalclass
+                                           IMPORTING id         = last_id ).
+
+        IF element-adt_link IS NOT INITIAL.
+
+          element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                             file_name  = element-adt_link
+                                                   IMPORTING id         = file_anchor_id ).
+
+          IF file_anchor_id IS NOT INITIAL.
+            element_manager->famix_class->set_source_anchor_by_id(
+              EXPORTING
+                element_id         = last_id
+                source_anchor_id   = file_anchor_id
+            ).
+
+          ENDIF.
+
+        ENDIF.
+
+      ELSEIF element-clstype EQ interface_type.
+        " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
+        " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
+        element_manager->famix_class->add( EXPORTING name_group = 'ABAP_CLASS'
+                                                     name       = element-class_name
+                                                     modifiers  = cl_extract3=>modifier_abapglobalinterface
+                                           IMPORTING id         = last_id ).
+        " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
+        element_manager->famix_class->is_interface( element_id = last_id ).
+
+        IF element-adt_link IS NOT INITIAL.
+
+          element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                             file_name  = element-adt_link
+                                                   IMPORTING id         = file_anchor_id ).
+
+          IF file_anchor_id IS NOT INITIAL.
+            element_manager->famix_class->set_source_anchor_by_id(
+              EXPORTING
+                element_id         = last_id
+                source_anchor_id   = file_anchor_id
+            ).
+
+          ENDIF.
+
+        ENDIF.
+      ELSE.
+        ASSERT 1 = 2.
+      ENDIF.
+
+      DATA association TYPE cl_extr3_element_manager=>association_type.
+      LOOP AT associations INTO association WHERE element_id1 = element_id
+                                              AND association->type = cl_extr3_association=>parent_package_ass.
+        DATA package TYPE REF TO cl_extr3_packages.
+        package ?= element_manager->get_element( i_element_id = association-element_id2 ).
+        element_manager->famix_class->set_parent_package( element_id     = last_id
+                                                          parent_package = package->devclass( i_element_id = association-element_id2 ) ).
+
+      ENDLOOP.
+
+    ELSE.
+
+      DATA element_comp TYPE element_comp_type.
+
+      READ TABLE elements_comp_element_id INTO element_comp WITH KEY element_id = element_id.
+      ASSERT sy-subrc EQ 0.
+      CASE element_comp-cmptype.
+        WHEN attribute_type.
+
+
+*    DATA last_id TYPE i.!
+          element_manager->famix_attribute->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
+          element_manager->famix_attribute->set_parent_type( EXPORTING element_id = last_id
+                                                        parent_element = 'FAMIX.Class'
+                                                        parent_name_group = 'ABAP_CLASS'
+                                                        parent_name    = element_comp-clsname ).
+
+          IF element_comp-adt_link IS NOT INITIAL.
+
+            element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                               file_name  = element_comp-adt_link
+                                                       IMPORTING id         = file_anchor_id ).
+
+            IF file_anchor_id IS NOT INITIAL.
+              element_manager->famix_attribute->set_source_anchor_by_id(
+                EXPORTING
+                  element_id         = last_id
+                  source_anchor_id   = file_anchor_id
+              ).
+
+            ENDIF.
+
+          ENDIF.
+
+          element_manager->famix_attribute->store_id( EXPORTING class     = element_comp-clsname
+                                               attribute = element_comp-cmpname ).
+
+*            sap_attribute->add( EXPORTING class     = class-clsname
+*                                          attribute = component-cmpname ).
+        WHEN method_type OR event_type.
+          " SAP_2_FAMIX_15        Map methods of classes to FAMIX.Method
+          " SAP_2_FAMIX_16        Map methods of interfaces to FAMIX.Method
+          element_manager->famix_method->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
+
+          " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
+          " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
+          element_manager->famix_method->set_signature( element_id = last_id
+                                         signature = element_comp-cmpname ).
+
+          element_manager->famix_method->set_parent_type( EXPORTING element_id = last_id
+                                                     parent_element = 'FAMIX.Class'
+                                                     parent_name_group = 'ABAP_CLASS'
+                                                     parent_name    = element_comp-clsname ).
+
+          IF element_comp-adt_link IS NOT INITIAL.
+
+            element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                               file_name  = element_comp-adt_link
+                                                       IMPORTING id         = file_anchor_id ).
+
+            IF file_anchor_id IS NOT INITIAL.
+              element_manager->famix_method->set_source_anchor_by_id(
+                EXPORTING
+                  element_id         = last_id
+                  source_anchor_id   = file_anchor_id
+              ).
+
+            ENDIF.
+
+          ENDIF.
+
+          element_manager->famix_method->store_id( EXPORTING class  = element_comp-clsname
+                                              method = element_comp-cmpname ).
+
+
+*            sap_method->add( EXPORTING class  = class-clsname
+*                                       method = component-cmpname ).
+        WHEN OTHERS.
+          ASSERT 1 = 2.
+      ENDCASE.
+
+    ENDIF.
+
+  ENDMETHOD.
+  METHOD name.
+    DATA: class_name TYPE string,
+          clstype    TYPE seoclstype,
+          exists     TYPE abap_bool.
+
+    class_name( EXPORTING element_id = element_id
+                IMPORTING class_name =  class_name
+                          clstype    = clstype
+                          exists     = exists ).
+
+    IF exists EQ abap_true.
+
+      CASE clstype.
+        WHEN is_class_type.
+          element_type = |ABAPClass|.
+        WHEN interface_type.
+          element_type = |ABAPInterface|.
+        WHEN OTHERS.
+          ASSERT 1 = 2.
+      ENDCASE.
+
+      parent_name = ||.
+      name = class_name.
+
+    ELSE.
+
+      DATA: cmpname TYPE string,
+            cmptype TYPE seocmptype.
+
+      comp_name( EXPORTING element_id = element_id
+                   IMPORTING class_name = class_name
+                             cmpname    = cmpname
+                             cmptype    = cmptype
+                             exists     = exists ).
+
+      ASSERT exists EQ abap_true.
+
+      DATA element TYPE element_type.
+
+      READ TABLE elements_class_name INTO element WITH KEY class_name = class_name.
+      ASSERT sy-subrc EQ 0.
+      clstype = element-clstype.
+
+      CASE clstype.
+        WHEN is_class_type.
+          CASE cmptype.
+            WHEN attribute_type.
+              element_type = |ABAPClassAttribute|.
+            WHEN method_type.
+              element_type = |ABAPClassMethod|.
+            WHEN event_type.
+              element_type = |ABAPClassEvent|.
+            WHEN OTHERS.
+              ASSERT 1 = 2.
+          ENDCASE.
+        WHEN interface_type.
+          CASE cmptype.
+            WHEN attribute_type.
+              element_type = |ABAPInterfaceAttribute|.
+            WHEN method_type.
+              element_type = |ABAPInterfaceMethod|.
+            WHEN event_type.
+              element_type = |ABAPInterfaceEvent|.
+            WHEN OTHERS.
+              ASSERT 1 = 2.
+          ENDCASE.
+        WHEN OTHERS.
+          ASSERT 1 = 2.
+      ENDCASE.
+
+      parent_name = class_name.
+      name = cmpname.
+
+    ENDIF.
+
+  ENDMETHOD.
+  METHOD _add_component.
+
+    DATA element_comp TYPE element_comp_type.
+
+    READ TABLE elements_comp_clsname_cmpname INTO element_comp WITH KEY clsname  = clsname cmpname = cmpname.
+    IF sy-subrc EQ 0.
+      is_added = abap_true.
+      new_element_id = element_comp-element_id.
+    ELSE.
+
+      " Does component exists?
+      DATA: found_class_name TYPE string,
+            found_cmpname    TYPE string,
+            found_cmptype    TYPE seocmptype,
+            found_mtdtype    TYPE seomtdtype.
+
+        SELECT SINGLE clsname cmpname cmptype mtdtype FROM seocompo
+          INTO (found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = clsname
+                                                                                   AND cmpname = cmpname.
+
+      IF found_class_name IS NOT INITIAL.
+
+        is_added = abap_true.
+
+      ELSE.
+
+        DATA: redefined_class_components TYPE ty_class_components,
+              redefined_class_component  TYPE ty_class_component.
+
+        redefined_class_components = _get_redefined( clsname ).
+
+        READ TABLE redefined_class_components INTO redefined_class_component WITH KEY clsname = clsname cmpname = cmpname.
+
+        IF sy-subrc EQ 0.
+
+          found_class_name = redefined_class_component-clsname.
+          found_cmpname = redefined_class_component-cmpname.
+          found_cmptype = redefined_class_component-cmptype.
+          found_mtdtype = redefined_class_component-mtdtype.
+
+          is_added = abap_true.
+
+        ENDIF.
+
+*      ELSE.
+*
+*        " Is it a redefined component?
+*
+*        DATA: redefined_component  TYPE redefined_type.
+*
+*        TEST-SEAM seoredef_2.
+*
+*          SELECT SINGLE clsname refclsname mtdname FROM seoredef INTO redefined_component
+*            WHERE clsname = clsname
+*              AND version = 1
+*              AND mtdname = cmpname.
+*
+*        END-TEST-SEAM.
+*
+*        IF sy-subrc EQ 0.
+*
+*          TEST-SEAM seocompo_4.
+*            SELECT SINGLE clsname cmpname cmptype mtdtype FROM seocompo
+*              INTO (found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = redefined_component-refclsname
+*                                                                                       AND cmpname = cmpname.
+*          END-TEST-SEAM.
+*          found_class_name = clsname. "As it is redefined
+*          is_added = abap_true.
+*        ENDIF.
+      ENDIF.
+
+      IF is_added EQ abap_true.
+
+        new_element_id = _add_single_component_to_class( i_found_class_name = found_class_name
+                                                         i_found_cmpname    = found_cmpname
+                                                         i_found_cmptype    = found_cmptype
+                                                         i_found_mtdtype    = found_mtdtype ).
+        is_added_now = abap_true.
+      ENDIF.
+
+    ENDIF.
+
+  ENDMETHOD.
+  METHOD _add_metarel.
+
+    DATA: relation        TYPE seometarel,
+          relations       TYPE STANDARD TABLE OF seometarel,
+          element_metarel TYPE element_metarel_type,
+          is_added        TYPE abap_bool,
+          new_element_id  TYPE i.
+
+    DATA access TYPE REF TO cl_extr3_access.
+    access = cl_extr3_access=>get_instance( i_element_manager = element_manager ).
+
+    DATA invocation TYPE REF TO cl_extr3_invocation.
+    invocation = cl_extr3_invocation=>get_instance( i_element_manager = element_manager ).
+
+
+      SELECT * FROM seometarel INTO TABLE relations WHERE clsname = clsname
+                                                      AND version = 1
+                                                      AND state   = 1.
+
+
+    LOOP AT relations INTO relation WHERE reltype = 1 OR reltype = 2.
+
+      element_metarel-element_id = new_element_id.
+      element_metarel-refclsname = relation-refclsname.
+      element_metarel-reltype = relation-reltype.
+
+      INSERT element_metarel INTO TABLE elements_metarel_element_id.
+      INSERT element_metarel INTO TABLE elements_metarel_refclsname.
+
+      IF relation-reltype EQ 1. " Interface
+
+        DATA: interface_class_components TYPE ty_class_components,
+              interface_class_component  TYPE ty_class_component,
+              reclsname_string           TYPE string.
+
+        reclsname_string = relation-refclsname.
+
+        me->add( EXPORTING class            = reclsname_string
+                 IMPORTING is_added         = is_added
+                           new_element_id   = new_element_id
+                           class_components = interface_class_components ).
+
+        LOOP AT interface_class_components INTO interface_class_component.
+
+          new_element_id = _add_single_component_to_class( i_found_class_name = clsname
+                                                           i_found_cmpname    = |{ interface_class_component-clsname }~{ interface_class_component-cmpname }|
+                                                           i_found_cmptype    = interface_class_component-cmptype
+                                                           i_found_mtdtype    = interface_class_component-mtdtype ).
+
+          DATA interface_element_id TYPE cl_extr3_element_manager=>element_id_type .
+
+          me->add_component( EXPORTING clsname        = interface_class_component-clsname
+                                       cmpname        = interface_class_component-cmpname
+                                       is_specific    = abap_false
+                              IMPORTING "*              is_added       =
+                                        new_element_id = interface_element_id ).
+
+          IF interface_class_component-cmptype EQ attribute_type.
+
+            " Connections between attributes are not expressible in FAMIX, or?
+
+*            access->add( EXPORTING accessed_element_id1  = new_element_id
+*                                   accessing_element_id2 = interface_element_id ).
+
+          ELSE.
+
+            invocation->add( EXPORTING invoced_element_id1  = new_element_id
+                                       invocing_element_id2 = interface_element_id ).
+
+          ENDIF.
+
+
+        ENDLOOP.
+
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+  METHOD _add_single_component_to_class.
+
+    " Add single component to class
+
+    DATA element_comp2 TYPE element_comp_type.
+
+    ASSERT i_found_cmpname IS NOT INITIAL.
+
+    r_new_element_id = element_manager->add_element( element = me
+                                                     is_specific = abap_false ).
+    element_comp2-element_id = r_new_element_id.
+    element_comp2-clsname = i_found_class_name.
+    element_comp2-cmpname = i_found_cmpname.
+    element_comp2-cmptype = i_found_cmptype.
+    element_comp2-mtdtype = i_found_mtdtype.
+
+    INSERT element_comp2 INTO TABLE elements_comp_element_id .
+    INSERT element_comp2 INTO TABLE elements_comp_clsname_cmpname .
+
+  ENDMETHOD.
   METHOD _get_redefined.
 
     DATA: redefined_components TYPE STANDARD TABLE OF redefined_type WITH DEFAULT KEY,
@@ -3937,39 +4019,12 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
-  METHOD is_redefinition_of_method.
-
-    DATA: invoced  TYPE element_comp_type,
-          invocing TYPE element_comp_type.
-
-    READ TABLE elements_comp_element_id INTO invoced WITH KEY element_id = invoced_element_id1.
-    IF sy-subrc <> 0.
-      RETURN.
-    ENDIF.
-
-    READ TABLE elements_comp_element_id INTO invocing WITH KEY element_id = invocing_element_id2.
-    IF sy-subrc <> 0.
-      RETURN.
-    ENDIF.
-
-    IF invoced-cmpname <> invocing-cmpname.
-      RETURN.
-    ENDIF.
-
-    DATA: r TYPE redefined_method_type.
-
-    READ TABLE redefined_methods INTO r WITH TABLE KEY method = invocing-cmpname
-                                                       clsname = invocing-clsname
-                                                       defined_in_clsname = invoced-clsname.
-
-    IF sy-subrc EQ 0.
-      r_result = 'X'.
-    ENDIF.
-
-
-  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_ELEMENTS IMPLEMENTATION.
+  METHOD COLLECT_INFOS.
+    " Redefine me
+    ASSERT 1 = 2.
+  ENDMETHOD.
   METHOD make_model.
     " Redefine me
     ASSERT 1 = 2.
@@ -3978,21 +4033,8 @@ CLASS CL_EXTR3_ELEMENTS IMPLEMENTATION.
     " Redefine me
     ASSERT 1 = 2.
   ENDMETHOD.
-  METHOD COLLECT_INFOS.
-    " Redefine me
-    ASSERT 1 = 2.
-  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_PACKAGES IMPLEMENTATION.
-  METHOD get_instance.
-    IF instance IS NOT BOUND.
-      CREATE OBJECT instance
-        EXPORTING
-          i_element_manager = i_element_manager.
-    ENDIF.
-    instance->type = package_type.
-    r_instance = instance.
-  ENDMETHOD.
   METHOD add.
 
     DATA element TYPE element_type.
@@ -4022,6 +4064,30 @@ CLASS CL_EXTR3_PACKAGES IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
+  METHOD collect_infos.
+  ENDMETHOD.
+  METHOD devclass.
+
+    DATA element TYPE element_type.
+
+    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = i_element_id.
+    ASSERT sy-subrc EQ 0.
+
+    r_result = element-devclass.
+
+  ENDMETHOD.
+  METHOD get_instance.
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = i_element_manager.
+    ENDIF.
+    instance->type = package_type.
+    r_instance = instance.
+  ENDMETHOD.
   METHOD make_model.
 
     DATA element TYPE element_type.
@@ -4032,14 +4098,15 @@ CLASS CL_EXTR3_PACKAGES IMPLEMENTATION.
     element_manager->famix_package->add( name = element-devclass ).
 
   ENDMETHOD.
-  METHOD devclass.
+  METHOD name.
 
-    DATA element TYPE element_type.
+    DATA devclass TYPE devclass.
+    devclass = devclass( i_element_id = element_id ).
 
-    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = i_element_id.
-    ASSERT sy-subrc EQ 0.
+    element_type = |ABAPPackage|.
+    parent_name = ||.
+    name = devclass.
 
-    r_result = element-devclass.
 
   ENDMETHOD.
   METHOD _does_package_exists.
@@ -4055,33 +4122,8 @@ CLASS CL_EXTR3_PACKAGES IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD name.
-
-    DATA devclass TYPE devclass.
-    devclass = devclass( i_element_id = element_id ).
-
-    element_type = |ABAPPackage|.
-    parent_name = ||.
-    name = devclass.
-
-
-  ENDMETHOD.
-  METHOD clear.
-    CLEAR instance.
-  ENDMETHOD.
-  METHOD collect_infos.
-  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
-  METHOD get_instance.
-    IF instance IS NOT BOUND.
-      CREATE OBJECT instance
-        EXPORTING
-          i_element_manager = i_element_manager.
-    ENDIF.
-    instance->type = program_type.
-    r_instance = instance.
-  ENDMETHOD.
   METHOD add.
 
     DATA element TYPE element_type.
@@ -4121,22 +4163,68 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD program_name.
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
+  METHOD collect_infos.
 
-    DATA element TYPE element_type.
+    FIELD-SYMBOLS: <p> TYPE element_type,
+                   <e> TYPE element_type.
 
-    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = i_element_id.
-    ASSERT sy-subrc EQ 0.
+    LOOP AT elements_program ASSIGNING <p>.
 
-    program = element-program.
-    IF element-program_type EQ |FUNCTION| OR element-program_type = |FUNCTION_INCLUDE|.
-      external_program_name_class = _get_names_for_function_groups( i_element = element ).
-    ELSE.
-      external_program_name_class = element-external_program_name.
+     IF <p>-program_type EQ |PROGRAM|.
+
+        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
+
+        CONCATENATE 'adt://' sysid '/sap/bc/adt/programs/programs/' <p>-program_attribute_1 INTO <p>-adt_or_bwmt_link.
+
+     ENDIF.
+
+     IF <p>-program_type EQ |FUNCTION|.
+
+        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
+        TRANSLATE <p>-program_attribute_2 to LOWER CASE.
+
+        CONCATENATE 'adt://' sysid '/sap/bc/adt/functions/groups/' <p>-program_attribute_1 '/fmodules/' <p>-program_attribute_2 INTO <p>-adt_or_bwmt_link.
+
+     ENDIF.
+
+     IF <p>-program_type EQ |FUNCTION_INCLUDE|.
+
+        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
+        TRANSLATE <p>-program_attribute_2 to LOWER CASE.
+
+        CONCATENATE 'adt://' sysid '/sap/bc/adt/functions/groups/' <p>-program_attribute_1 '/includes/' <p>-program_attribute_2 INTO <p>-adt_or_bwmt_link.
+
+     ENDIF.
+
+      IF <p>-program_type EQ 'BW_TRAN'.
+
+        CONCATENATE 'bwmt://' sysid '/sap/bw/modeling/trfn/' <p>-program_attribute_1 INTO <p>-adt_or_bwmt_link.
+
+      ENDIF.
+
+      IF <p>-adt_or_bwmt_link IS NOT INITIAL.
+
+        READ TABLE elements_element_id ASSIGNING <e> WITH TABLE KEY element_id = <p>-element_id.
+        ASSERT sy-subrc EQ 0.
+
+        <e>-adt_or_bwmt_link = <p>-adt_or_bwmt_link.
+
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+  METHOD get_instance.
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = i_element_manager.
     ENDIF.
-      external_program_name_method = element-external_program_name.
-    subc = element-subc.
-
+    instance->type = program_type.
+    r_instance = instance.
   ENDMETHOD.
   METHOD make_model.
 
@@ -4221,6 +4309,31 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
       ENDIF.
 
     ENDIF.
+
+  ENDMETHOD.
+  METHOD name.
+
+    element_type = |ABAPProgramOrFunctionOrSAPBW|.
+    program_name( EXPORTING i_element_id          = element_id
+                  IMPORTING external_program_name_method = name ).
+    parent_name = ||.
+
+  ENDMETHOD.
+  METHOD program_name.
+
+    DATA element TYPE element_type.
+
+    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = i_element_id.
+    ASSERT sy-subrc EQ 0.
+
+    program = element-program.
+    IF element-program_type EQ |FUNCTION| OR element-program_type = |FUNCTION_INCLUDE|.
+      external_program_name_class = _get_names_for_function_groups( i_element = element ).
+    ELSE.
+      external_program_name_class = element-external_program_name.
+    ENDIF.
+      external_program_name_method = element-external_program_name.
+    subc = element-subc.
 
   ENDMETHOD.
   METHOD _convert_program_2_ext_name.
@@ -4418,68 +4531,6 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD name.
-
-    element_type = |ABAPProgramOrFunctionOrSAPBW|.
-    program_name( EXPORTING i_element_id          = element_id
-                  IMPORTING external_program_name_method = name ).
-    parent_name = ||.
-
-  ENDMETHOD.
-  METHOD clear.
-    CLEAR instance.
-  ENDMETHOD.
-  METHOD collect_infos.
-
-    FIELD-SYMBOLS: <p> TYPE element_type,
-                   <e> TYPE element_type.
-
-    LOOP AT elements_program ASSIGNING <p>.
-
-     IF <p>-program_type EQ |PROGRAM|.
-
-        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
-
-        CONCATENATE 'adt://' sysid '/sap/bc/adt/programs/programs/' <p>-program_attribute_1 INTO <p>-adt_or_bwmt_link.
-
-     ENDIF.
-
-     IF <p>-program_type EQ |FUNCTION|.
-
-        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
-        TRANSLATE <p>-program_attribute_2 to LOWER CASE.
-
-        CONCATENATE 'adt://' sysid '/sap/bc/adt/functions/groups/' <p>-program_attribute_1 '/fmodules/' <p>-program_attribute_2 INTO <p>-adt_or_bwmt_link.
-
-     ENDIF.
-
-     IF <p>-program_type EQ |FUNCTION_INCLUDE|.
-
-        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
-        TRANSLATE <p>-program_attribute_2 to LOWER CASE.
-
-        CONCATENATE 'adt://' sysid '/sap/bc/adt/functions/groups/' <p>-program_attribute_1 '/includes/' <p>-program_attribute_2 INTO <p>-adt_or_bwmt_link.
-
-     ENDIF.
-
-      IF <p>-program_type EQ 'BW_TRAN'.
-
-        CONCATENATE 'bwmt://' sysid '/sap/bw/modeling/trfn/' <p>-program_attribute_1 INTO <p>-adt_or_bwmt_link.
-
-      ENDIF.
-
-      IF <p>-adt_or_bwmt_link IS NOT INITIAL.
-
-        READ TABLE elements_element_id ASSIGNING <e> WITH TABLE KEY element_id = <p>-element_id.
-        ASSERT sy-subrc EQ 0.
-
-        <e>-adt_or_bwmt_link = <p>-adt_or_bwmt_link.
-
-      ENDIF.
-
-    ENDLOOP.
-
-  ENDMETHOD.
   METHOD _get_names_for_function_groups.
 
     CONCATENATE 'FGR-' i_element-program_attribute_1 INTO name_of_mapped_class.
@@ -4487,15 +4538,6 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_TABLES IMPLEMENTATION.
-  METHOD get_instance.
-    IF instance IS NOT BOUND.
-      CREATE OBJECT instance
-        EXPORTING
-          i_element_manager = i_element_manager.
-    ENDIF.
-    instance->type = table_type.
-    r_instance = instance.
-  ENDMETHOD.
   METHOD add.
 
     DATA element TYPE element_type.
@@ -4533,15 +4575,19 @@ CLASS CL_EXTR3_TABLES IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD table_name.
-
-    DATA element TYPE element_type.
-
-    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = i_element_id.
-    ASSERT sy-subrc EQ 0.
-
-    r_result = element-tabname.
-
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
+  METHOD collect_infos.
+  ENDMETHOD.
+  METHOD get_instance.
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = i_element_manager.
+    ENDIF.
+    instance->type = table_type.
+    r_instance = instance.
   ENDMETHOD.
   METHOD make_model.
 
@@ -4602,22 +4648,18 @@ CLASS CL_EXTR3_TABLES IMPLEMENTATION.
     name = table.
 
   ENDMETHOD.
-  METHOD clear.
-    CLEAR instance.
-  ENDMETHOD.
-  METHOD collect_infos.
+  METHOD table_name.
+
+    DATA element TYPE element_type.
+
+    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = i_element_id.
+    ASSERT sy-subrc EQ 0.
+
+    r_result = element-tabname.
+
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
-  METHOD get_instance.
-    IF instance IS NOT BOUND.
-      CREATE OBJECT instance
-        EXPORTING
-          i_element_manager = element_manager.
-    ENDIF.
-    instance->type = web_dynpro_comps_type.
-    r_instance = instance.
-  ENDMETHOD.
   METHOD add.
     " WDY_COMPONENT
     " WDY_CONTROLLER
@@ -4678,48 +4720,6 @@ CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD _add_component.
-
-    DATA element_comp TYPE element_comp_type.
-
-    READ TABLE elements_comp_comp_contr_name INTO element_comp WITH KEY wdy_component_name  = wdy_component_name
-                                                                        wdy_controller_name  = wdy_controller_name .
-    IF sy-subrc EQ 0.
-      is_added = abap_true.
-      new_element_id = element_comp-element_id.
-    ELSE.
-
-      " Does component exists?
-      DATA: found_component_name  TYPE wdy_component_name,
-            found_controller_name TYPE seocmpname.
-
-        SELECT SINGLE component_name controller_name FROM wdy_controller
-          " No blank between ( and found to be 7.02 compatible
-          INTO (found_component_name, found_controller_name ) WHERE component_name  = wdy_component_name
-                                                                 AND controller_name  = wdy_controller_name
-                                                                 AND version = 'A'.
-
-      IF found_component_name IS NOT INITIAL.
-        is_added = abap_true.
-      ENDIF.
-
-      IF is_added EQ abap_true.
-
-        new_element_id = element_manager->add_element( element = me
-                                                       is_specific = abap_false ).
-        element_comp-element_id = new_element_id.
-        element_comp-wdy_component_name = found_component_name.
-        element_comp-wdy_controller_name = found_controller_name.
-
-        INSERT element_comp INTO TABLE elements_comp_element_id .
-        INSERT element_comp INTO TABLE elements_comp_comp_contr_name .
-
-      ENDIF.
-
-    ENDIF.
-
-
-  ENDMETHOD.
   METHOD add_component.
 
     add( EXPORTING wdy_component_name = wdy_component_name
@@ -4737,6 +4737,20 @@ CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
 
     ENDIF.
 
+  ENDMETHOD.
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
+  METHOD collect_infos.
+  ENDMETHOD.
+  METHOD get_instance.
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = element_manager.
+    ENDIF.
+    instance->type = web_dynpro_comps_type.
+    r_instance = instance.
   ENDMETHOD.
   METHOD make_model.
 
@@ -4785,31 +4799,6 @@ CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD wdy_component_name.
-
-    DATA element TYPE element_type.
-
-    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
-    IF sy-subrc EQ 0.
-
-      wdy_component_name = element-wdy_component_name.
-
-    ENDIF.
-
-  ENDMETHOD.
-  METHOD wdy_controller_name.
-
-    DATA element_comp TYPE element_comp_type.
-
-    READ TABLE elements_comp_element_id INTO element_comp WITH KEY element_id = element_id.
-    IF sy-subrc EQ 0.
-
-      wdy_component_name = element_comp-wdy_component_name.
-      wdy_controller_name = element_comp-wdy_controller_name.
-
-    ENDIF.
-
-  ENDMETHOD.
   METHOD name.
 
     DATA: wdy_component_name TYPE wdy_component_name.
@@ -4837,16 +4826,75 @@ CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD clear.
-    CLEAR instance.
+  METHOD wdy_component_name.
+
+    DATA element TYPE element_type.
+
+    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
+    IF sy-subrc EQ 0.
+
+      wdy_component_name = element-wdy_component_name.
+
+    ENDIF.
+
   ENDMETHOD.
-  METHOD collect_infos.
+  METHOD wdy_controller_name.
+
+    DATA element_comp TYPE element_comp_type.
+
+    READ TABLE elements_comp_element_id INTO element_comp WITH KEY element_id = element_id.
+    IF sy-subrc EQ 0.
+
+      wdy_component_name = element_comp-wdy_component_name.
+      wdy_controller_name = element_comp-wdy_controller_name.
+
+    ENDIF.
+
+  ENDMETHOD.
+  METHOD _add_component.
+
+    DATA element_comp TYPE element_comp_type.
+
+    READ TABLE elements_comp_comp_contr_name INTO element_comp WITH KEY wdy_component_name  = wdy_component_name
+                                                                        wdy_controller_name  = wdy_controller_name .
+    IF sy-subrc EQ 0.
+      is_added = abap_true.
+      new_element_id = element_comp-element_id.
+    ELSE.
+
+      " Does component exists?
+      DATA: found_component_name  TYPE wdy_component_name,
+            found_controller_name TYPE seocmpname.
+
+        SELECT SINGLE component_name controller_name FROM wdy_controller
+          " No blank between ( and found to be 7.02 compatible
+          INTO (found_component_name, found_controller_name ) WHERE component_name  = wdy_component_name
+                                                                 AND controller_name  = wdy_controller_name
+                                                                 AND version = 'A'.
+
+      IF found_component_name IS NOT INITIAL.
+        is_added = abap_true.
+      ENDIF.
+
+      IF is_added EQ abap_true.
+
+        new_element_id = element_manager->add_element( element = me
+                                                       is_specific = abap_false ).
+        element_comp-element_id = new_element_id.
+        element_comp-wdy_component_name = found_component_name.
+        element_comp-wdy_controller_name = found_controller_name.
+
+        INSERT element_comp INTO TABLE elements_comp_element_id .
+        INSERT element_comp INTO TABLE elements_comp_comp_contr_name .
+
+      ENDIF.
+
+    ENDIF.
+
+
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3 IMPLEMENTATION.
-  METHOD constructor.
-    element_manager = i_element_manager.
-  ENDMETHOD.
   METHOD clear_all.
 
     cl_extr3_access=>clear( ).
@@ -4858,6 +4906,9 @@ CLASS CL_EXTR3 IMPLEMENTATION.
     cl_extr3_tables=>clear( ).
     cl_extr3_web_dynpro_comp=>clear( ).
 
+  ENDMETHOD.
+  METHOD constructor.
+    element_manager = i_element_manager.
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
@@ -4886,6 +4937,23 @@ CLASS CL_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
     ADD 1 TO next_element_id.
 
   ENDMETHOD.
+  METHOD collect_infos.
+
+    DATA: element      TYPE element_type.
+
+    LOOP AT elements INTO element.
+
+      IF element-element->infos_are_collected EQ abap_false.
+
+        element-element->collect_infos( sysid ).
+
+        element-element->infos_are_collected = abap_true.
+
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
   METHOD constructor.
 
     model_builder = i_model_builder.
@@ -4903,6 +4971,31 @@ CLASS CL_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
     CREATE OBJECT famix_invocation EXPORTING model = model.
     CREATE OBJECT famix_access EXPORTING model = model.
     create OBJECT famix_file_anchor EXPORTING model = model.
+
+  ENDMETHOD.
+  METHOD get_associations.
+    DATA association TYPE association_type.
+
+    LOOP AT associations1 INTO association WHERE element_id1 = i_element_id.
+      INSERT association INTO TABLE associations.
+    ENDLOOP.
+
+    LOOP AT associations2 INTO association WHERE element_id2 = i_element_id.
+      INSERT association INTO TABLE associations.
+    ENDLOOP.
+
+    SORT associations.
+    DELETE ADJACENT DUPLICATES FROM associations.
+
+  ENDMETHOD.
+  METHOD get_element.
+
+    DATA element TYPE element_type.
+
+    READ TABLE elements INTO element WITH TABLE KEY element_id = i_element_id.
+    ASSERT sy-subrc EQ 0.
+
+    r_result = element-element.
 
   ENDMETHOD.
   METHOD make_model.
@@ -4963,48 +5056,6 @@ CLASS CL_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
     model->make_mse( IMPORTING mse_model = r_result ).
 
   ENDMETHOD.
-  METHOD get_element.
-
-    DATA element TYPE element_type.
-
-    READ TABLE elements INTO element WITH TABLE KEY element_id = i_element_id.
-    ASSERT sy-subrc EQ 0.
-
-    r_result = element-element.
-
-  ENDMETHOD.
-  METHOD get_associations.
-    DATA association TYPE association_type.
-
-    LOOP AT associations1 INTO association WHERE element_id1 = i_element_id.
-      INSERT association INTO TABLE associations.
-    ENDLOOP.
-
-    LOOP AT associations2 INTO association WHERE element_id2 = i_element_id.
-      INSERT association INTO TABLE associations.
-    ENDLOOP.
-
-    SORT associations.
-    DELETE ADJACENT DUPLICATES FROM associations.
-
-  ENDMETHOD.
-  METHOD collect_infos.
-
-    DATA: element      TYPE element_type.
-
-    LOOP AT elements INTO element.
-
-      IF element-element->infos_are_collected EQ abap_false.
-
-        element-element->collect_infos( sysid ).
-
-        element-element->infos_are_collected = abap_true.
-
-      ENDIF.
-
-    ENDLOOP.
-
-  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_INITIAL_ELEMENTS IMPLEMENTATION.
   METHOD constructor.
@@ -5012,6 +5063,11 @@ CLASS CL_EXTR3_INITIAL_ELEMENTS IMPLEMENTATION.
       g_tdevc_test = tdevc_test.
       g_is_test = abap_true.
     ENDIF.
+
+  ENDMETHOD.
+  METHOD get_selected.
+
+    r_packages = g_selected_packages.
 
   ENDMETHOD.
   METHOD select_packages.
@@ -5085,6 +5141,39 @@ CLASS CL_EXTR3_INITIAL_ELEMENTS IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+  METHOD select_specific.
+
+  data new_element_id TYPE i.
+
+    model_builder->initial_selection_started( ).
+    model_builder->usage_of_single_element( ).
+
+    CASE i_element_type_filter.
+      WHEN cl_extr3_elements=>class_type.
+
+        DATA classes TYPE REF TO cl_extr3_classes.
+        classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
+        classes->add_component( EXPORTING clsname        = i_parent_name_filter
+                                          cmpname        = i_name_filter
+                                          is_specific    = abap_false
+                                IMPORTING new_element_id = new_element_id ).
+
+        model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
+                                                 i_is_specific = abap_true ).
+
+
+      WHEN cl_extr3_elements=>table_type.
+
+        DATA tables TYPE REF TO cl_extr3_tables.
+        tables = cl_extr3_tables=>get_instance( i_element_manager = element_manager ).
+        tables->add( EXPORTING table          = i_name_filter
+                     IMPORTING new_element_id = new_element_id ).
+
+        model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
+                                                 i_is_specific = abap_true ).
+    ENDCASE.
+
+  ENDMETHOD.
   METHOD _select_sub_packages.
 
     CLEAR r_packages.
@@ -5128,215 +5217,33 @@ CLASS CL_EXTR3_INITIAL_ELEMENTS IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD get_selected.
-
-    r_packages = g_selected_packages.
-
-  ENDMETHOD.
-  METHOD select_specific.
-
-  data new_element_id TYPE i.
-
-    model_builder->initial_selection_started( ).
-    model_builder->usage_of_single_element( ).
-
-    CASE i_element_type_filter.
-      WHEN cl_extr3_elements=>class_type.
-
-        DATA classes TYPE REF TO cl_extr3_classes.
-        classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
-        classes->add_component( EXPORTING clsname        = i_parent_name_filter
-                                          cmpname        = i_name_filter
-                                          is_specific    = abap_false
-                                IMPORTING new_element_id = new_element_id ).
-
-        model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
-                                                 i_is_specific = abap_true ).
-
-
-      WHEN cl_extr3_elements=>table_type.
-
-        DATA tables TYPE REF TO cl_extr3_tables.
-        tables = cl_extr3_tables=>get_instance( i_element_manager = element_manager ).
-        tables->add( EXPORTING table          = i_name_filter
-                     IMPORTING new_element_id = new_element_id ).
-
-        model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
-                                                 i_is_specific = abap_true ).
-    ENDCASE.
-
-  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
-  METHOD search.
+  METHOD initialize.
 
-    " Initial search
+    element_manager = i_element_manager.
 
-    DATA: found_in_level         TYPE found_in_level_type,
-          first_initial_elements TYPE found_in_levels_type.
-    FIELD-SYMBOLS: <found_in_level>         TYPE found_in_level_type.
+    DATA association_builder_init TYPE builder_type.
 
+    CREATE OBJECT tadir_builder EXPORTING i_element_manager = i_element_manager.
 
-    " found_in_levels will be updated in this method, so add this elements to a new temporary table.
-    IF is_usage_of_single_element EQ abap_false.
-      LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_initial_selection EQ abap_true.
+    association_builder_init-association_builder = tadir_builder.
+    INSERT association_builder_init INTO TABLE association_builders_init.
 
-        <found_in_level>-initially_selected_analyzed = abap_true.
+    DATA association_builder_post TYPE builder_type.
 
-        INSERT <found_in_level> INTO TABLE first_initial_elements.
+    CREATE OBJECT tadir_builder EXPORTING i_element_manager = i_element_manager.
 
-      ENDLOOP.
+    association_builder_post-association_builder = tadir_builder.
+    INSERT association_builder_post INTO TABLE association_builders_post.
 
-      DATA association_builder TYPE builder_type.
+    DATA association_builder TYPE builder_type.
 
-      LOOP AT association_builders_init INTO association_builder.
+    CREATE OBJECT where_used_builder EXPORTING i_element_manager = i_element_manager.
+    where_used_builder->set_dynamic_read( i_dynamic_read = i_dynamic_read ).
 
-        LOOP AT first_initial_elements INTO found_in_level.
-*
-*          IF     is_usage_of_single_element EQ abap_true
-*             AND found_in_level-specific EQ abap_false.
-*            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-*          ENDIF.
-
-          association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
-
-        ENDLOOP.
-
-      ENDLOOP.
-
-    ENDIF.
-
-    is_initial_selection = abap_false.
-
-    " Search up
-
-    is_up_search = abap_true.
-
-    DATA: level_to_search_up      TYPE i,
-          something_to_be_done_up TYPE abap_bool.
-
-    IF i_search_up <> 0.
-
-      something_to_be_done_up = abap_true.
-
-      WHILE something_to_be_done_up EQ abap_true.
-
-        DATA temp TYPE string.
-        temp = |Search up for level { level_to_search_up }|. "To be 7.02 compatible
-        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
-
-        something_to_be_done_up = abap_false.
-        DATA workload TYPE found_in_levels_type.
-        CLEAR workload.
-        LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_upsearch = level_to_search_up.
-
-          IF     is_usage_of_single_element EQ abap_true
-             AND <found_in_level>-specific EQ abap_false.
-            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-          ENDIF.
-
-          level_for_found_in_upsearch = <found_in_level>-found_in_level_upsearch + 1.
-
-          LOOP AT association_builders INTO association_builder.
-
-            association_builder-association_builder->search_up( element_id = <found_in_level>-element_id ).
-
-          ENDLOOP.
-
-          something_to_be_done_up = abap_true.
-
-        ENDLOOP.
-
-        ADD 1 TO level_to_search_up.
-
-        IF i_search_up >= 0 AND i_search_up <= level_to_search_up.
-
-            something_to_be_done_up = abap_false.
-
-        ENDIF.
-
-      ENDWHILE.
-
-    ENDIF.
-
-    is_up_search = abap_false.
-
-    " Search down
-
-    is_down_search = abap_true.
-
-    DATA: level_to_search_down      TYPE i,
-          something_to_be_done_down TYPE abap_bool.
-
-    IF i_search_down <> 0.
-
-      something_to_be_done_down = abap_true.
-
-      WHILE something_to_be_done_down EQ abap_true.
-
-        temp = |Search up for level { level_to_search_down }|."To be 7.02 compatible
-        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
-
-        something_to_be_done_down = abap_false.
-        CLEAR workload.
-        LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_downsearch = level_to_search_down.
-          IF     is_usage_of_single_element EQ abap_true
-             AND <found_in_level>-specific EQ abap_false.
-            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-          ENDIF.
-
-          level_for_found_in_downsearch = <found_in_level>-found_in_level_downsearch + 1.
-
-          LOOP AT association_builders INTO association_builder.
-
-            association_builder-association_builder->search_down( element_id = <found_in_level>-element_id ).
-
-          ENDLOOP.
-
-          something_to_be_done_down = abap_true.
-
-        ENDLOOP.
-
-        ADD 1 TO level_to_search_down.
-
-        IF i_search_down <= 0 AND i_search_down <= level_to_search_down.
-
-            something_to_be_done_down = abap_false.
-
-        ENDIF.
-
-      ENDWHILE.
-
-    ENDIF.
-
-    is_down_search = abap_false.
-
-    " Post search
-
-    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Final actions of search'.
-
-    is_post_selection = abap_true.
-
-    DATA all_elements TYPE found_in_levels_type.
-
-    all_elements = found_in_levels.
-
-    LOOP AT association_builders_post INTO association_builder.
-
-      LOOP AT all_elements INTO found_in_level.
-
-        IF     is_usage_of_single_element EQ abap_true
-           AND found_in_level-specific EQ abap_false.
-          CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-        ENDIF.
-
-        association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
-
-      ENDLOOP.
-
-    ENDLOOP.
-
-    is_post_selection = abap_false.
+    association_builder-association_builder = where_used_builder.
+    INSERT association_builder INTO TABLE association_builders.
 
   ENDMETHOD.
   METHOD initial_selection_started.
@@ -5428,31 +5335,179 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD initialize.
+  METHOD search.
 
-    element_manager = i_element_manager.
+    " Initial search
 
-    DATA association_builder_init TYPE builder_type.
+    DATA: found_in_level         TYPE found_in_level_type,
+          first_initial_elements TYPE found_in_levels_type.
+    FIELD-SYMBOLS: <found_in_level>         TYPE found_in_level_type.
 
-    CREATE OBJECT tadir_builder EXPORTING i_element_manager = i_element_manager.
 
-    association_builder_init-association_builder = tadir_builder.
-    INSERT association_builder_init INTO TABLE association_builders_init.
+    " found_in_levels will be updated in this method, so add this elements to a new temporary table.
+    IF is_usage_of_single_element EQ abap_false.
+      LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_initial_selection EQ abap_true.
 
-    DATA association_builder_post TYPE builder_type.
+        <found_in_level>-initially_selected_analyzed = abap_true.
 
-    CREATE OBJECT tadir_builder EXPORTING i_element_manager = i_element_manager.
+        INSERT <found_in_level> INTO TABLE first_initial_elements.
 
-    association_builder_post-association_builder = tadir_builder.
-    INSERT association_builder_post INTO TABLE association_builders_post.
+      ENDLOOP.
 
-    DATA association_builder TYPE builder_type.
+      DATA association_builder TYPE builder_type.
 
-    CREATE OBJECT where_used_builder EXPORTING i_element_manager = i_element_manager.
+      LOOP AT association_builders_init INTO association_builder.
 
-    association_builder-association_builder = where_used_builder.
-    INSERT association_builder INTO TABLE association_builders.
+        LOOP AT first_initial_elements INTO found_in_level.
+*
+*          IF     is_usage_of_single_element EQ abap_true
+*             AND found_in_level-specific EQ abap_false.
+*            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+*          ENDIF.
 
+          association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
+
+        ENDLOOP.
+
+      ENDLOOP.
+
+    ENDIF.
+
+    is_initial_selection = abap_false.
+
+    " Search up
+
+    is_up_search = abap_true.
+
+    DATA: level_to_search_up      TYPE i,
+          something_to_be_done_up TYPE abap_bool.
+
+    IF i_search_up <> 0.
+
+      something_to_be_done_up = abap_true.
+
+      WHILE something_to_be_done_up EQ abap_true.
+
+        DATA temp TYPE string.
+        temp = |Search up for level { level_to_search_up }|. "To be 7.02 compatible
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
+
+        something_to_be_done_up = abap_false.
+        DATA workload TYPE found_in_levels_type.
+        CLEAR workload.
+        LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_upsearch = level_to_search_up.
+
+          IF     is_usage_of_single_element EQ abap_true
+             AND <found_in_level>-specific EQ abap_false.
+            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+          ENDIF.
+
+          level_for_found_in_upsearch = <found_in_level>-found_in_level_upsearch + 1.
+
+          LOOP AT association_builders INTO association_builder.
+
+            association_builder-association_builder->search_up( element_id = <found_in_level>-element_id ).
+
+          ENDLOOP.
+
+          something_to_be_done_up = abap_true.
+
+        ENDLOOP.
+
+        ADD 1 TO level_to_search_up.
+
+        IF i_search_up >= 0 AND i_search_up <= level_to_search_up.
+
+          something_to_be_done_up = abap_false.
+
+        ENDIF.
+
+      ENDWHILE.
+
+    ENDIF.
+
+    is_up_search = abap_false.
+
+    " Search down
+
+    is_down_search = abap_true.
+
+    DATA: level_to_search_down      TYPE i,
+          something_to_be_done_down TYPE abap_bool.
+
+    IF i_search_down <> 0.
+
+      something_to_be_done_down = abap_true.
+
+      WHILE something_to_be_done_down EQ abap_true.
+
+        temp = |Search up for level { level_to_search_down }|."To be 7.02 compatible
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
+
+        something_to_be_done_down = abap_false.
+        CLEAR workload.
+        LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_downsearch = level_to_search_down.
+          IF     is_usage_of_single_element EQ abap_true
+             AND <found_in_level>-specific EQ abap_false.
+            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+          ENDIF.
+
+          level_for_found_in_downsearch = <found_in_level>-found_in_level_downsearch + 1.
+
+          LOOP AT association_builders INTO association_builder.
+
+            association_builder-association_builder->search_down( element_id = <found_in_level>-element_id ).
+
+          ENDLOOP.
+
+          something_to_be_done_down = abap_true.
+
+        ENDLOOP.
+
+        ADD 1 TO level_to_search_down.
+
+        IF i_search_down <= 0 AND i_search_down <= level_to_search_down.
+
+          something_to_be_done_down = abap_false.
+
+        ENDIF.
+
+      ENDWHILE.
+
+    ENDIF.
+
+    is_down_search = abap_false.
+
+    " Post search
+
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Final actions of search'.
+
+    is_post_selection = abap_true.
+
+    DATA all_elements TYPE found_in_levels_type.
+
+    all_elements = found_in_levels.
+
+    LOOP AT association_builders_post INTO association_builder.
+
+      LOOP AT all_elements INTO found_in_level.
+
+        IF     is_usage_of_single_element EQ abap_true
+           AND found_in_level-specific EQ abap_false.
+          CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+        ENDIF.
+
+        association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
+
+      ENDLOOP.
+
+    ENDLOOP.
+
+    is_post_selection = abap_false.
+
+  ENDMETHOD.
+  METHOD usage_of_single_element.
+    is_usage_of_single_element = abap_true.
   ENDMETHOD.
   METHOD write_found_elements.
 
@@ -5545,11 +5600,11 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD usage_of_single_element.
-    is_usage_of_single_element = abap_true.
-  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTRACT3 IMPLEMENTATION.
+  METHOD constructor.
+
+  ENDMETHOD.
   METHOD extract.
 
     CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Collect initial elements'.
@@ -5593,9 +5648,6 @@ CLASS CL_EXTRACT3 IMPLEMENTATION.
     mse_model = element_manager->make_model( ).
 
   ENDMETHOD.
-  METHOD constructor.
-
-  ENDMETHOD.
 ENDCLASS.
 
 AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_eltyp.
@@ -5629,7 +5681,8 @@ START-OF-SELECTION.
       i_model_builder          = model_builder
       i_exclude_found_sap_intf = p_ex.
 
-  model_builder->initialize( i_element_manager = element_manager ).
+  model_builder->initialize( i_element_manager = element_manager
+                              i_dynamic_read = p_dyn ).
 
   DATA: initial_elements TYPE REF TO cl_extr3_initial_elements.
   CREATE OBJECT initial_elements.
