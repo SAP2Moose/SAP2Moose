@@ -44,7 +44,8 @@ CLASS ltcl_main IMPLEMENTATION.
         i_model_builder          = model_builder
         i_exclude_found_sap_intf = abap_true.
 
-    model_builder->initialize( i_element_manager = element_manager ).
+    model_builder->initialize( i_element_manager = element_manager
+                               i_dynamic_read = |Z2MSE_TEST_DYNAMIC_USAGE| ).
 
     f_cut = NEW #( ).
     f_cut->extract( EXPORTING model_builder            = model_builder
@@ -251,7 +252,8 @@ CLASS ltcl_main IMPLEMENTATION.
         i_model_builder          = model_builder
         i_exclude_found_sap_intf = abap_true.
 
-    model_builder->initialize( i_element_manager = element_manager ).
+    model_builder->initialize( i_element_manager = element_manager
+                               i_dynamic_read = |Z2MSE_TEST_DYNAMIC_USAGE| ).
 
 
     initial_elements->select_specific( EXPORTING model_builder         = model_builder

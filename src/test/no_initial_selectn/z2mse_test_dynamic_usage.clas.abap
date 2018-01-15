@@ -24,6 +24,11 @@ CLASS Z2MSE_TEST_DYNAMIC_USAGE IMPLEMENTATION.
 
     CLEAR line.
     line-otype = 'ME'.
+    line-name = 'Z2MSE_TEST_CL_A\ME:CONSTRUCTOR'.
+    line-include = 'Z2MSE_TEST_CL_B1==============CM002'.
+
+    CLEAR line.
+    line-otype = 'ME'.
     line-name = 'Z2MSE_TEST_CL_A\ME:METHOD_A'.
     line-include = 'Z2MSE_TEST_CL_B1==============CM002'.
     INSERT line INTO TABLE dyn_usage.

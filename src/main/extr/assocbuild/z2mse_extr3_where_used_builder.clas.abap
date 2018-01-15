@@ -166,6 +166,16 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         WHERE otype = otype
           AND name = where_used_name.
 
+      " Read dynamic usages
+
+      DATA: w TYPE wbcrossgt.
+      LOOP AT g_dynamic_usage INTO w
+        WHERE otype = otype
+          AND name = where_used_name.
+        MOVE-CORRESPONDING w TO wbcrossgt.
+        INSERT wbcrossgt INTO TABLE wbcrossgts.
+      ENDLOOP.
+
       LOOP AT wbcrossgts INTO wbcrossgt.
 
         DATA: is_added           TYPE abap_bool,
