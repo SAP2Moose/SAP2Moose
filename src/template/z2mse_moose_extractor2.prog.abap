@@ -48,6 +48,7 @@ PARAMETERS p_nup TYPE i DEFAULT -1.
 PARAMETERS p_ndown TYPE i DEFAULT -1.
 "Exclude interfaces in sap name space when found via where used analysis
 PARAMETERS p_ex AS CHECKBOX DEFAULT 'X'.
+PARAMETERS p_dyn TYPE string. "Classes to determine dynamic accesses
 
 *SELECT-OPTIONS s_compsn FOR tadir-obj_name.
 

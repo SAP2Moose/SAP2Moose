@@ -35,7 +35,8 @@ CLASS Z2MSE_TEST_CL_B1 IMPLEMENTATION.
   METHOD method_b.
 
     method_a( ).
-
+    data(a) = new z2mse_test_cl_a( ).
+    a->method_a( ).
 
   ENDMETHOD.
 ENDCLASS.
