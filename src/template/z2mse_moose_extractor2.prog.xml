@@ -62,6 +62,12 @@
     </item>
     <item>
      <ID>S</ID>
+     <KEY>P_DYN</KEY>
+     <ENTRY>Classes to read dynamic usages</ENTRY>
+     <LENGTH>38</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
      <KEY>P_ELNAM</KEY>
      <ENTRY>Speciifc element</ENTRY>
      <LENGTH>24</LENGTH>

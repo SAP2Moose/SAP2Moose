@@ -3,16 +3,15 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>Z2MSE_EXTR3_WHERE_USED_BUILDER</CLSNAME>
+    <CLSNAME>Z2MSE_TEST_DYNAMIC_USAGE</CLSNAME>
     <VERSION>1</VERSION>
     <LANGU>E</LANGU>
-    <DESCRIPT>Build associations based on the SAP Where Used table</DESCRIPT>
+    <DESCRIPT>Test dynamic usages</DESCRIPT>
     <EXPOSURE>2</EXPOSURE>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
     <UNICODE>X</UNICODE>
-    <WITH_UNIT_TESTS>X</WITH_UNIT_TESTS>
    </VSEOCLASS>
   </asx:values>
  </asx:abap>

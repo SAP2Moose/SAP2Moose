@@ -33,7 +33,8 @@ CLASS z2mse_extr3_model_builder DEFINITION
         i_element_id  TYPE i
         i_is_specific TYPE abap_bool.
     METHODS initialize
-      IMPORTING i_element_manager TYPE REF TO z2mse_extr3_element_manager.
+      IMPORTING i_element_manager TYPE REF TO z2mse_extr3_element_manager
+                i_dynamic_read    TYPE string OPTIONAL.
     METHODS write_found_elements
       IMPORTING
         write TYPE abap_bool OPTIONAL
@@ -115,6 +116,7 @@ CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
     DATA association_builder TYPE builder_type.
 
     CREATE OBJECT where_used_builder EXPORTING i_element_manager = i_element_manager.
+    where_used_builder->set_dynamic_read( i_dynamic_read = i_dynamic_read ).
 
     association_builder-association_builder = where_used_builder.
     INSERT association_builder INTO TABLE association_builders.
@@ -298,7 +300,7 @@ CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
         IF i_search_up >= 0 AND i_search_up <= level_to_search_up.
 
-            something_to_be_done_up = abap_false.
+          something_to_be_done_up = abap_false.
 
         ENDIF.
 
@@ -348,7 +350,7 @@ CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
         IF i_search_down <= 0 AND i_search_down <= level_to_search_down.
 
-            something_to_be_done_down = abap_false.
+          something_to_be_done_down = abap_false.
 
         ENDIF.
 

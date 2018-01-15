@@ -44,7 +44,8 @@ CLASS ltcl_main IMPLEMENTATION.
         i_model_builder          = model_builder
         i_exclude_found_sap_intf = abap_true.
 
-    model_builder->initialize( i_element_manager = element_manager ).
+    model_builder->initialize( i_element_manager = element_manager
+                               i_dynamic_read = |Z2MSE_TEST_DYNAMIC_USAGE| ).
 
     f_cut = NEW #( ).
     f_cut->extract( EXPORTING model_builder            = model_builder
@@ -138,6 +139,9 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_A candidates Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_B candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B2>>METHOD_A candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
+
+( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_B candidates Z2MSE_TEST_CL_A>>CONSTRUCTOR signature DUMMY| ) "Dynamic access
+( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_B candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| ) "Dynamic access
 ( |FAMIX.Invocation sender Z2MSE_TEST_IF_A_00000000000000>>EVENT_A_0000000000000000000000 candidates Z2MSE_TEST_CL_B2>>Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000 signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 candidates Z2MSE_TEST_CL_B2>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_IF_A_00000000000000>>EVENT_A_0000000000000000000000 candidates Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000 signature DUMMY| )
@@ -248,7 +252,8 @@ CLASS ltcl_main IMPLEMENTATION.
         i_model_builder          = model_builder
         i_exclude_found_sap_intf = abap_true.
 
-    model_builder->initialize( i_element_manager = element_manager ).
+    model_builder->initialize( i_element_manager = element_manager
+                               i_dynamic_read = |Z2MSE_TEST_DYNAMIC_USAGE| ).
 
 
     initial_elements->select_specific( EXPORTING model_builder         = model_builder
@@ -284,7 +289,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( where = |S| level = 3 alternate_level = 0 element_type = |ABAPProgramOrFunctionOrSAPBW| parent_name = || name = |LZ2MSE_TEST_FGR_AF01| specific = |X| )
 ( where = |S| level = 2 alternate_level = 0 element_type = |ABAPProgramOrFunctionOrSAPBW| parent_name = || name = |Z2MSE_TEST_PROGRAM_A| specific = |X| )
 ( where = |S| level = 2 alternate_level = 0 element_type = |WebDynproController| parent_name = |Z2MSE_TEST_WDY_A| name = |COMPONENTCONTROLLER| specific = |X| )
-( where = |S| level = 3 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST_CL_B1| name = |METHOD_B| specific = |X| )
+( where = |S| level = 2 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST_CL_B1| name = |METHOD_B| specific = |X| )
 ( where = |S| level = 3 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST_CL_B2| name = |METHOD_A| specific = |X| )
 ( where = |I| level = 4 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST_CL_A| name = |Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| specific = |X| )
  ).
@@ -347,6 +352,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_A candidates Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_B candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
+( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_B candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| ) "Dynamic access
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B2>>METHOD_A candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_IF_A_00000000000000>>EVENT_A_0000000000000000000000 candidates Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000 signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 candidates Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 signature DUMMY| )

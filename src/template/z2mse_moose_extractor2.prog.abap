@@ -1,5 +1,5 @@
 *
-* This is version 0.5.8
+* This is version 0.6.0
 *
 *The MIT License (MIT)
 *
@@ -48,6 +48,7 @@ PARAMETERS p_nup TYPE i DEFAULT -1.
 PARAMETERS p_ndown TYPE i DEFAULT -1.
 "Exclude interfaces in sap name space when found via where used analysis
 PARAMETERS p_ex AS CHECKBOX DEFAULT 'X'.
+PARAMETERS p_dyn TYPE string. "Classes to determine dynamic accesses
 
 *SELECT-OPTIONS s_compsn FOR tadir-obj_name.
 
@@ -250,7 +251,8 @@ START-OF-SELECTION.
       i_model_builder          = model_builder
       i_exclude_found_sap_intf = p_ex.
 
-  model_builder->initialize( i_element_manager = element_manager ).
+  model_builder->initialize( i_element_manager = element_manager
+                              i_dynamic_read = p_dyn ).
 
   DATA: initial_elements TYPE REF TO z2mse_extr3_initial_elements.
   CREATE OBJECT initial_elements.
