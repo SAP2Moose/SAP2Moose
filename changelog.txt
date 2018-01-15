@@ -11,6 +11,11 @@ Legend
 15.01.2018 v1.0.0
 -----------------
 
++ Add dynamic calls to the model #80
+
+06.11.2017 v0.5.8
+-----------------
+
 * No usage of interface method by implementing method #76
 
 05.11.2017 v0.5.7
