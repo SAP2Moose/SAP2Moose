@@ -251,7 +251,8 @@ START-OF-SELECTION.
       i_model_builder          = model_builder
       i_exclude_found_sap_intf = p_ex.
 
-  model_builder->initialize( i_element_manager = element_manager ).
+  model_builder->initialize( i_element_manager = element_manager
+                              i_dynamic_read = p_dyn ).
 
   DATA: initial_elements TYPE REF TO z2mse_extr3_initial_elements.
   CREATE OBJECT initial_elements.

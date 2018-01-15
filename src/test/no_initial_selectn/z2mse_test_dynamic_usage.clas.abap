@@ -4,9 +4,9 @@ class Z2MSE_TEST_DYNAMIC_USAGE definition
 
 public section.
 
-  methods WHERE_USED
-    returning
-      value(DATA) type ref to DATA .
+  class-methods WHERE_USED
+    exporting
+      !DATA type ANY TABLE .
 protected section.
 private section.
 ENDCLASS.
@@ -16,10 +16,9 @@ ENDCLASS.
 CLASS Z2MSE_TEST_DYNAMIC_USAGE IMPLEMENTATION.
 
 
-  METHOD where_used.
+  METHOD WHERE_USED.
 
     " Example of a method to transfer dynamic usages to the extractor
-
     DATA: dyn_usage TYPE STANDARD TABLE OF wbcrossgt WITH DEFAULT KEY,
           line      TYPE wbcrossgt.
 
@@ -29,7 +28,7 @@ CLASS Z2MSE_TEST_DYNAMIC_USAGE IMPLEMENTATION.
     line-include = 'Z2MSE_TEST_CL_B1==============CM002'.
     INSERT line INTO TABLE dyn_usage.
 
-    GET REFERENCE OF dyn_usage INTO data.
+    data = dyn_usage.
 
   ENDMETHOD.
 ENDCLASS.

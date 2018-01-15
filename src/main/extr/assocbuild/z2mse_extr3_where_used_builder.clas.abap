@@ -4,8 +4,15 @@ CLASS z2mse_extr3_where_used_builder DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
-    METHODS search_up REDEFINITION.
-    METHODS search_down REDEFINITION.
+
+    METHODS set_dynamic_read
+      IMPORTING
+        !i_dynamic_read TYPE string OPTIONAL .
+
+    METHODS search_down
+        REDEFINITION .
+    METHODS search_up
+        REDEFINITION .
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -18,11 +25,12 @@ CLASS z2mse_extr3_where_used_builder DEFINITION
         indirect TYPE sgrade,
       END OF wbcrossgt_type ,
       wbcrossgts_type TYPE SORTED TABLE OF wbcrossgt_type WITH UNIQUE KEY otype name include.
+    DATA: g_dynamic_usage TYPE SORTED TABLE OF wbcrossgt WITH UNIQUE KEY otype name include.
 ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
+CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
 
   METHOD search_down.
@@ -267,22 +275,22 @@ CLASS Z2MSE_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
 
           ELSE.
 
-            data: is_redefinition_of_method TYPE abap_bool.
+            DATA: is_redefinition_of_method TYPE abap_bool.
 
             is_redefinition_of_method = classes->is_redefinition_of_method( invoced_element_id1  = element_id
                                                                             invocing_element_id2 = used_by_element_id ).
 
-            if is_redefinition_of_method eq ''.
+            IF is_redefinition_of_method EQ ''.
 
-            invocation->add( EXPORTING invoced_element_id1  = element_id
-                                       invocing_element_id2 = used_by_element_id ).
+              invocation->add( EXPORTING invoced_element_id1  = element_id
+                                         invocing_element_id2 = used_by_element_id ).
 
-                                       else.
+            ELSE.
 
-            invocation->add( EXPORTING invoced_element_id1  = used_by_element_id
-                                       invocing_element_id2 = element_id ).
+              invocation->add( EXPORTING invoced_element_id1  = used_by_element_id
+                                         invocing_element_id2 = element_id ).
 
-                                       endif.
+            ENDIF.
 
           ENDIF.
 
@@ -291,6 +299,41 @@ CLASS Z2MSE_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
       ENDLOOP.
 
     ENDIF.
+
+  ENDMETHOD.
+
+
+
+
+  METHOD set_dynamic_read.
+
+    DATA: s     TYPE string,
+          class TYPE string,
+          t     TYPE TABLE OF string,
+          w2    TYPE wbcrossgt.
+
+    CLEAR g_dynamic_usage.
+
+    s =  i_dynamic_read.
+    TRANSLATE s TO UPPER CASE.
+    CONDENSE s.
+    SPLIT s AT space INTO TABLE t.
+
+    LOOP AT t INTO class.
+
+      DATA dyn_usage TYPE STANDARD TABLE OF wbcrossgt WITH DEFAULT KEY.
+
+      CALL METHOD (class)=>where_used
+        IMPORTING
+          data = dyn_usage.
+
+      LOOP AT dyn_usage INTO w2.
+
+        INSERT w2 INTO TABLE g_dynamic_usage.
+
+      ENDLOOP.
+
+    ENDLOOP.
 
   ENDMETHOD.
 ENDCLASS.
