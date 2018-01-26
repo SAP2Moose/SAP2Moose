@@ -110,6 +110,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.FileAnchor F-Z2MSE_TEST_FUNCTION_A fileName adt://NPL/sap/bc/adt/functions/groups/z2mse_test_fgr_a/fmodules/z2mse_test_function_a| )
 ( |FAMIX.FileAnchor LZ2MSE_TEST_FGR_AF01 fileName adt://NPL/sap/bc/adt/functions/groups/z2mse_test_fgr_a/includes/lz2mse_test_fgr_af01| )
 ( |FAMIX.FileAnchor Z2MSE_TEST_PROGRAM_A fileName adt://NPL/sap/bc/adt/programs/programs/z2mse_test_program_a| )
+( |FAMIX.FileAnchor Z2MSE_TEST_PROGRAM_B fileName adt://NPL/sap/bc/adt/programs/programs/z2mse_test_program_b| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_A>>METHOD_A variable Z2MSE_TEST_A>>Z2MSE_TEST_A| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_B1>>METHOD_A variable Z2MSE_TEST_A>>Z2MSE_TEST_A| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_B1>>METHOD_A variable Z2MSE_TEST_IF_A_00000000000000>>ATTRIBUTE_A_000000000000000000| )
@@ -173,8 +174,11 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Method ZIWCI_2MSE_TEST_WDY_A>>WD_GET_API signature WD_GET_API| )
 " New in 0.3.0 Programs are displayed
 ( |FAMIX.Class Z2MSE_TEST_PROGRAM_A modifiers ABAPProgram| )
+( |FAMIX.Class Z2MSE_TEST_PROGRAM_B modifiers ABAPProgram| )
 ( |FAMIX.Class Z2MSE_TEST_PROGRAM_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
+( |FAMIX.Class Z2MSE_TEST_PROGRAM_B parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
 ( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A signature Z2MSE_TEST_PROGRAM_A| )
+( |FAMIX.Method Z2MSE_TEST_PROGRAM_B>>Z2MSE_TEST_PROGRAM_B signature Z2MSE_TEST_PROGRAM_B| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 " New in 0.3.0 Functions are displayed as external name of the found include program
 " The parent package of functions is not yet found, because the include is not in the TADIR
@@ -213,6 +217,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Method FGR-Z2MSE_TEST_FGR_A>>F-Z2MSE_TEST_FUNCTION_A sourceAnchor| )
 ( |FAMIX.Method FGR-Z2MSE_TEST_FGR_A>>LZ2MSE_TEST_FGR_AF01 sourceAnchor| )
 ( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A sourceAnchor| )
+( |FAMIX.Method Z2MSE_TEST_PROGRAM_B>>Z2MSE_TEST_PROGRAM_B sourceAnchor| )
     ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
