@@ -5,8 +5,8 @@
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
-        <x>1317.0</x>
-        <y>234.0</y>
+        <x>2608.0</x>
+        <y>1347.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -16,17 +16,17 @@
         <y>455.0</y>
     </element>
     <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_EXTR3_PROGRAMS</class>
-        <x>-1134.0</x>
-        <y>374.0</y>
-    </element>
-    <element>
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_ELEMENT_MANAGER</class>
         <attribute>MODEL_BUILDER</attribute>
         <x>-630.0</x>
         <y>320.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <x>-1134.0</x>
+        <y>374.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -74,11 +74,21 @@
         <y>485.0</y>
     </element>
     <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <attribute>ELEMENTS_ELEMENT_ID</attribute>
+    </element>
+    <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_INVOCATION</class>
         <method>GET_INSTANCE</method>
         <x>-825.0</x>
         <y>575.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_CLASSES</class>
+        <attribute>ELEMENTS_COMP_ELEMENT_ID</attribute>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -152,6 +162,12 @@
         <method>SET_DYNAMIC_READ</method>
         <x>-920.0</x>
         <y>145.0</y>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -313,17 +329,17 @@
     </element>
     <element>
         <type>FAMIXAttribute</type>
-        <class>Z2MSE_EXTR3_ELEMENT_MANAGER</class>
-        <attribute>EXCLUDE_FOUND_SAP_INTF</attribute>
-        <x>-715.0</x>
-        <y>320.0</y>
-    </element>
-    <element>
-        <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_ELEMENTS</class>
         <attribute>TABLE_TYPE</attribute>
         <x>-1430.0</x>
         <y>560.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_ELEMENT_MANAGER</class>
+        <attribute>EXCLUDE_FOUND_SAP_INTF</attribute>
+        <x>-715.0</x>
+        <y>320.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -343,6 +359,11 @@
         <method>ADD</method>
         <x>-900.0</x>
         <y>615.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_ELEMENT_MANAGER</class>
+        <method>COLLECT_INFOS</method>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -449,6 +470,21 @@
         <y>345.0</y>
     </element>
     <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_CLASSES</class>
+        <method>NAME</method>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_ACCESS_OR_INVOCATN</class>
+        <method>_GET_FAMIX_ID_USED_AND_USING</method>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
+        <method>INITIAL_SELECTION_STARTED</method>
+    </element>
+    <element>
         <type>FAMIXPackage</type>
         <package>Z2MSE_MAIN_EXTR_ELEMENTS</package>
         <x>532.0</x>
@@ -510,6 +546,11 @@
     </element>
     <element>
         <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
+        <method>GET_SELECTED</method>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_ASSOCIATION_BUILD</class>
         <method>SEARCH_UP</method>
         <x>-1140.0</x>
@@ -529,11 +570,21 @@
         <y>155.0</y>
     </element>
     <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_ELEMENT_MANAGER</class>
+        <method>MAKE_MODEL</method>
+    </element>
+    <element>
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <attribute>ATTRIBUTE_TYPE</attribute>
         <x>-1130.0</x>
         <y>515.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <attribute>ELEMENTS_PROGRAM</attribute>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -602,8 +653,8 @@
         <y>225.0</y>
         <comment><![CDATA[Improve, add also FUGR<br>to the elements that are handled]]>
         </comment>
-        <commentx>-1274.0</commentx>
-        <commenty>225.0</commenty>
+        <commentx>-1301.0</commentx>
+        <commenty>121.0</commenty>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
