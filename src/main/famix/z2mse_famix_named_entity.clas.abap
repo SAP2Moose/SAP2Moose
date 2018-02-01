@@ -46,9 +46,13 @@ CLASS z2mse_famix_named_entity DEFINITION INHERITING FROM z2mse_famix_sourced_en
 
 ENDCLASS.
 
-CLASS z2mse_famix_named_entity IMPLEMENTATION.
+
+
+CLASS Z2MSE_FAMIX_NAMED_ENTITY IMPLEMENTATION.
+
 
   METHOD add.
+"    ASSERT name_group IS NOT INITIAL.
     g_model->add_entity( EXPORTING elementname = g_elementname
                                         is_named_entity = abap_true
                                         can_be_referenced_by_name = abap_true
@@ -63,6 +67,7 @@ CLASS z2mse_famix_named_entity IMPLEMENTATION.
     ENDIF.
     g_last_used_id = id.
   ENDMETHOD.
+
 
   METHOD set_parent_package.
     g_model->add_reference_by_name( element_id = element_id
