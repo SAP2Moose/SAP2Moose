@@ -11,6 +11,10 @@ CLASS z2mse_extr3_programs DEFINITION
         i_element_manager TYPE REF TO z2mse_extr3_element_manager
       RETURNING
         VALUE(r_instance) TYPE REF TO z2mse_extr3_programs.
+    CONSTANTS: type_function          TYPE string VALUE 'FUNCTION',
+               type_function_include  TYPE string VALUE 'FUNCTION_INCLUDE',
+               type_program           TYPE string VALUE 'PROGRAM',
+               type_bw_transformation TYPE string VALUE 'BW_TRAN'.
     METHODS add
       IMPORTING
         program               TYPE progname
@@ -19,12 +23,14 @@ CLASS z2mse_extr3_programs DEFINITION
         VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
     METHODS program_name
       IMPORTING
-        i_element_id                 TYPE i
+        i_element_id                        TYPE i
       EXPORTING
-        VALUE(program)               TYPE progname
-        VALUE(external_program_name_class) TYPE string
+        VALUE(program_type)                 TYPE string
+        VALUE(program)                      TYPE progname
+        VALUE(external_program_name_class)  TYPE string
         VALUE(external_program_name_method) TYPE string
-        VALUE(subc)                  TYPE subc.
+        value(program_attribute_2)          TYPE string
+        VALUE(subc)                         TYPE subc.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
     METHODS collect_infos REDEFINITION.
@@ -45,12 +51,12 @@ CLASS z2mse_extr3_programs DEFINITION
     DATA elements_program TYPE HASHED TABLE OF element_type WITH UNIQUE KEY program.
     METHODS _convert_program_2_ext_name
       IMPORTING
-        i_element_program TYPE progname
+        i_element_program   TYPE progname
       EXPORTING
-        program_type TYPE string
+        program_type        TYPE string
         program_attribute_1 TYPE string
         program_attribute_2 TYPE string
-        value(r_result)   TYPE string.
+        VALUE(r_result)     TYPE string.
     METHODS _extract_function_name
       IMPORTING
         i_element_program TYPE progname
@@ -67,7 +73,7 @@ CLASS z2mse_extr3_programs DEFINITION
         VALUE(r_result)   TYPE string.
     METHODS _get_names_for_function_groups
       IMPORTING
-        i_element TYPE z2mse_extr3_programs=>element_type
+        i_element                   TYPE z2mse_extr3_programs=>element_type
       RETURNING
         VALUE(name_of_mapped_class) TYPE string.
 ENDCLASS.
@@ -132,33 +138,33 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
 
     LOOP AT elements_program ASSIGNING <p>.
 
-     IF <p>-program_type EQ |PROGRAM|.
+      IF <p>-program_type EQ type_program.
 
-        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
+        TRANSLATE <p>-program_attribute_1 TO LOWER CASE.
 
         CONCATENATE 'adt://' sysid '/sap/bc/adt/programs/programs/' <p>-program_attribute_1 INTO <p>-adt_or_bwmt_link.
 
-     ENDIF.
+      ENDIF.
 
-     IF <p>-program_type EQ |FUNCTION|.
+      IF <p>-program_type EQ type_function.
 
-        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
-        TRANSLATE <p>-program_attribute_2 to LOWER CASE.
+        TRANSLATE <p>-program_attribute_1 TO LOWER CASE.
+        TRANSLATE <p>-program_attribute_2 TO LOWER CASE.
 
         CONCATENATE 'adt://' sysid '/sap/bc/adt/functions/groups/' <p>-program_attribute_1 '/fmodules/' <p>-program_attribute_2 INTO <p>-adt_or_bwmt_link.
 
-     ENDIF.
+      ENDIF.
 
-     IF <p>-program_type EQ |FUNCTION_INCLUDE|.
+      IF <p>-program_type EQ type_function_include.
 
-        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
-        TRANSLATE <p>-program_attribute_2 to LOWER CASE.
+        TRANSLATE <p>-program_attribute_1 TO LOWER CASE.
+        TRANSLATE <p>-program_attribute_2 TO LOWER CASE.
 
         CONCATENATE 'adt://' sysid '/sap/bc/adt/functions/groups/' <p>-program_attribute_1 '/includes/' <p>-program_attribute_2 INTO <p>-adt_or_bwmt_link.
 
-     ENDIF.
+      ENDIF.
 
-      IF <p>-program_type EQ 'BW_TRAN'.
+      IF <p>-program_type EQ type_bw_transformation.
 
         CONCATENATE 'bwmt://' sysid '/sap/bw/modeling/trfn/' <p>-program_attribute_1 INTO <p>-adt_or_bwmt_link.
 
@@ -203,15 +209,15 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
           name_of_mapped_class TYPE string.
 *      famix_package->add( name = table-devclass ).
 
-    IF element-program_type EQ |PROGRAM|.
+    IF element-program_type EQ type_program.
       name_group = 'ABAP_PROGRAM'.
       modifier = z2mse_extract3=>modifier_program.
       name_of_mapped_class = element-external_program_name.
-    ELSEIF element-program_type EQ |BW_TRAN|.
+    ELSEIF element-program_type EQ type_bw_transformation.
       name_group = 'BW_TRANSFORMATION'.
       modifier = z2mse_extract3=>modifier_bw_transformation.
       name_of_mapped_class = element-external_program_name.
-    ELSEIF element-program_type EQ |FUNCTION| OR element-program_type = |FUNCTION_INCLUDE|.
+    ELSEIF element-program_type EQ type_function OR element-program_type = type_function_include.
       name_group = 'ABAP_FUNCTIONGROUP'.
       modifier = z2mse_extract3=>modifier_function_group.
 *      name_of_mapped_class = element-external_program_name.
@@ -292,14 +298,15 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
 
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = i_element_id.
     ASSERT sy-subrc EQ 0.
-
+    program_type = element-program_type.
+    program_attribute_2 = element-program_attribute_2.
     program = element-program.
-    IF element-program_type EQ |FUNCTION| OR element-program_type = |FUNCTION_INCLUDE|.
+    IF element-program_type EQ type_function OR element-program_type = type_function_include.
       external_program_name_class = _get_names_for_function_groups( i_element = element ).
     ELSE.
       external_program_name_class = element-external_program_name.
     ENDIF.
-      external_program_name_method = element-external_program_name.
+    external_program_name_method = element-external_program_name.
     subc = element-subc.
 
   ENDMETHOD.
@@ -307,13 +314,13 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
 
   METHOD _convert_program_2_ext_name.
 
-    clear program_type.
-    clear program_attribute_1.
+    CLEAR program_type.
+    CLEAR program_attribute_1.
 
-    data: tranid           type RSTRANID,
-          function_group   type rs38l_area,
-          function         type rs38l_fnam,
-          function_include type string.
+    DATA: tranid           TYPE rstranid,
+          function_group   TYPE rs38l_area,
+          function         TYPE rs38l_fnam,
+          function_include TYPE string.
 
     CLEAR program_type.
     CLEAR program_attribute_1.
@@ -329,13 +336,13 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
 
       IF function IS NOT INITIAL.
 
-        program_type = |FUNCTION|.
+        program_type = type_function.
         program_attribute_1 = function_group.
         program_attribute_2 = function.
 
       ELSEIF function_include IS NOT INITIAL.
 
-        program_type = |FUNCTION_INCLUDE|.
+        program_type = type_function_include.
         program_attribute_1 = function_group.
         program_attribute_2 = function_include.
 
@@ -347,7 +354,7 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
                              IMPORTING tranid = tranid
                                        r_result = r_result ).
 
-      program_type = |BW_TRAN|.
+      program_type = type_bw_transformation.
       program_attribute_1 = tranid.
 
     ELSEIF i_element_program+0(2) EQ |GP|.
@@ -356,14 +363,14 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
                              IMPORTING tranid = tranid
                                        r_result = r_result ).
 
-      program_type = |BW_TRAN|.
+      program_type = type_bw_transformation.
       program_attribute_1 = tranid.
 
     ELSE.
 
       r_result = i_element_program.
 
-      program_type = |PROGRAM|.
+      program_type = type_program.
       program_attribute_1 = i_element_program.
 
     ENDIF.
@@ -507,10 +514,10 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD _get_names_for_function_groups.
 
     CONCATENATE 'FGR-' i_element-program_attribute_1 INTO name_of_mapped_class.
 
   ENDMETHOD.
-
 ENDCLASS.

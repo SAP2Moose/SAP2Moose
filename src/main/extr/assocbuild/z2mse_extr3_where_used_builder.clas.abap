@@ -166,13 +166,19 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         DATA programs2 TYPE REF TO z2mse_extr3_programs.
         programs2 = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
 
-        DATA program TYPE progname.
+        DATA: program             TYPE progname,
+              program_type        TYPE string,
+              program_attribute_2 TYPE string.
+
+
 
         programs2->program_name(
           EXPORTING
             i_element_id                 = element_id
           IMPORTING
             program                      = program
+            program_type                 = program_type
+            program_attribute_2          = program_attribute_2
 *            external_program_name_class  =
 *            external_program_name_method =
 *            subc                         =
@@ -180,9 +186,17 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
         DATA: cross_type TYPE char1,
               cross_name TYPE seu_name.
+        CASE program_type.
+          WHEN programs2->type_program.
+            cross_type = 'R'.
+            cross_name = program.
+          WHEN programs2->type_function.
+            cross_type = 'F'.
+            cross_name = program_attribute_2.
+          WHEN OTHERS.
+            " TBD
+        ENDCASE.
 
-        cross_type = 'R'.
-        cross_name = program.
 
     ENDCASE.
 
@@ -211,8 +225,8 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
         LOOP AT crosss INTO cross.
 
-         " Most where used information is in table wbcrossgt. Now some information is read from table cross. Use nonetheless wbcrossgt
-         " for further processing. There is an integration test, that assures the correctness of the whole coding.
+          " Most where used information is in table wbcrossgt. Now some information is read from table cross. Use nonetheless wbcrossgt
+          " for further processing. There is an integration test, that assures the correctness of the whole coding.
 
           CLEAR wbcrossgt.
 

@@ -61,17 +61,16 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
                                                                attribute           = tabname ).
       WHEN invoced_element->program_type.
         DATA programs2 TYPE REF TO z2mse_extr3_programs.
-        DATA invoved_progname TYPE progname.
+        DATA: invoced_ext_progr_name_class  TYPE string,
+              invoced_ext_progr_name_method TYPE string.
+
         programs2 = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
         programs2->program_name( EXPORTING i_element_id = i_association-element_id1
-                                 IMPORTING program = invoved_progname ).
+                                 IMPORTING external_program_name_class = invoced_ext_progr_name_class
+                                           external_program_name_method = invoced_ext_progr_name_method ).
 
-        e_used_id = element_manager->famix_method->get_id(
-*                class_name_group  =
-                class             = invoved_progname
-*                method_name_group =
-                method            = invoved_progname
-            ).
+        e_used_id = element_manager->famix_method->get_id( class             = invoced_ext_progr_name_class
+                                                           method            = invoced_ext_progr_name_method ).
 
       WHEN OTHERS.
         ASSERT 1 = 2.

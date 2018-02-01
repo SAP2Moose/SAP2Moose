@@ -220,6 +220,8 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Method FGR-Z2MSE_TEST_FGR_A>>LZ2MSE_TEST_FGR_AF01 sourceAnchor| )
 ( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A sourceAnchor| )
 ( |FAMIX.Method Z2MSE_TEST_PROGRAM_B>>Z2MSE_TEST_PROGRAM_B sourceAnchor| )
+" Support functions in more detail #52
+( |FAMIX.Invocation sender Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A candidates FGR-Z2MSE_TEST_FGR_A>>F-Z2MSE_TEST_FUNCTION_A signature DUMMY| )
     ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
@@ -411,6 +413,8 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Method BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 sourceAnchor| )
 ( |FAMIX.Method FGR-Z2MSE_TEST_FGR_A>>LZ2MSE_TEST_FGR_AF01 sourceAnchor| )
 ( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A sourceAnchor| )
+" Support functions in more detail #52
+( |FAMIX.Invocation sender Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A candidates FGR-Z2MSE_TEST_FGR_A>>F-Z2MSE_TEST_FUNCTION_A signature DUMMY| )
     ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
