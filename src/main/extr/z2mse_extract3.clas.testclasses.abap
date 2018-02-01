@@ -180,6 +180,8 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A signature Z2MSE_TEST_PROGRAM_A| )
 ( |FAMIX.Method Z2MSE_TEST_PROGRAM_B>>Z2MSE_TEST_PROGRAM_B signature Z2MSE_TEST_PROGRAM_B| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
+" New usage of programs by programs "Support programs better #53"
+( |FAMIX.Invocation sender Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A candidates Z2MSE_TEST_PROGRAM_B>>Z2MSE_TEST_PROGRAM_B signature DUMMY| )
 " New in 0.3.0 Functions are displayed as external name of the found include program
 " The parent package of functions is not yet found, because the include is not in the TADIR
 ( |FAMIX.Class FGR-Z2MSE_TEST_FGR_A modifiers ABAPFunktionGroup| )

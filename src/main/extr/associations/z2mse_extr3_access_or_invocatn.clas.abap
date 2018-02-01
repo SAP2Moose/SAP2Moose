@@ -59,6 +59,20 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
 
         e_used_id = element_manager->famix_attribute->get_id(  class            = tabname
                                                                attribute           = tabname ).
+      WHEN invoced_element->program_type.
+        DATA programs2 TYPE REF TO z2mse_extr3_programs.
+        DATA invoved_progname TYPE progname.
+        programs2 = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
+        programs2->program_name( EXPORTING i_element_id = i_association-element_id1
+                                 IMPORTING program = invoved_progname ).
+
+        e_used_id = element_manager->famix_method->get_id(
+*                class_name_group  =
+                class             = invoved_progname
+*                method_name_group =
+                method            = invoved_progname
+            ).
+
       WHEN OTHERS.
         ASSERT 1 = 2.
     ENDCASE.
