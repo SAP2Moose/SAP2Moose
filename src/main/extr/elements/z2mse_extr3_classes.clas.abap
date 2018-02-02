@@ -527,7 +527,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       IF element-clstype EQ is_class_type.
         " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
         " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
-        element_manager->famix_class->add( EXPORTING name_group = 'ABAP_CLASS'
+        element_manager->famix_class->add( EXPORTING name_group = ng_abap_class
                                                      name       = element-class_name
                                                      modifiers  = z2mse_extract3=>modifier_abapglobalclass
                                            IMPORTING id         = last_id ).
@@ -552,7 +552,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       ELSEIF element-clstype EQ interface_type.
         " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
         " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
-        element_manager->famix_class->add( EXPORTING name_group = 'ABAP_CLASS'
+        element_manager->famix_class->add( EXPORTING name_group = ng_abap_class
                                                      name       = element-class_name
                                                      modifiers  = z2mse_extract3=>modifier_abapglobalinterface
                                            IMPORTING id         = last_id ).
@@ -604,7 +604,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
           element_manager->famix_attribute->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
           element_manager->famix_attribute->set_parent_type( EXPORTING element_id = last_id
                                                         parent_element = 'FAMIX.Class'
-                                                        parent_name_group = 'ABAP_CLASS'
+                                                        parent_name_group = ng_abap_class
                                                         parent_name    = element_comp-clsname ).
 
           IF element_comp-adt_link IS NOT INITIAL.
@@ -642,7 +642,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
           element_manager->famix_method->set_parent_type( EXPORTING element_id = last_id
                                                      parent_element = 'FAMIX.Class'
-                                                     parent_name_group = 'ABAP_CLASS'
+                                                     parent_name_group = ng_abap_class
                                                      parent_name    = element_comp-clsname ).
 
           IF element_comp-adt_link IS NOT INITIAL.
@@ -803,31 +803,6 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
         ENDIF.
 
-*      ELSE.
-*
-*        " Is it a redefined component?
-*
-*        DATA: redefined_component  TYPE redefined_type.
-*
-*        TEST-SEAM seoredef_2.
-*
-*          SELECT SINGLE clsname refclsname mtdname FROM seoredef INTO redefined_component
-*            WHERE clsname = clsname
-*              AND version = 1
-*              AND mtdname = cmpname.
-*
-*        END-TEST-SEAM.
-*
-*        IF sy-subrc EQ 0.
-*
-*          TEST-SEAM seocompo_4.
-*            SELECT SINGLE clsname cmpname cmptype mtdtype FROM seocompo
-*              INTO (found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = redefined_component-refclsname
-*                                                                                       AND cmpname = cmpname.
-*          END-TEST-SEAM.
-*          found_class_name = clsname. "As it is redefined
-*          is_added = abap_true.
-*        ENDIF.
       ENDIF.
 
       IF is_added EQ abap_true.
