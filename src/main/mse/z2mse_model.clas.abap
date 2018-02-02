@@ -25,7 +25,7 @@ CLASS z2mse_model DEFINITION
     "! @parameter processedid | the id in model either if just created or already existing
     METHODS add_entity
       IMPORTING elementname                   TYPE clike
-                name_group                    TYPE clike DEFAULT ''
+                name_group                    TYPE clike OPTIONAL
                 is_named_entity               TYPE abap_bool
                 is_id_required                TYPE abap_bool DEFAULT ''
                 can_be_referenced_by_name     TYPE abap_bool
@@ -247,6 +247,10 @@ CLASS z2mse_model IMPLEMENTATION.
 
   METHOD add_entity.
 
+    IF can_be_referenced_by_name EQ abap_true.
+      ASSERT name_group IS NOT INITIAL.
+    ENDIF.
+
     FIELD-SYMBOLS <ls_name> LIKE LINE OF g_named_entities.
 
     IF can_be_referenced_by_name EQ abap_true.
@@ -283,7 +287,7 @@ CLASS z2mse_model IMPLEMENTATION.
     INSERT ls_elements_in_model INTO TABLE g_elements_in_model.
 
     IF is_named_entity EQ abap_true.
-      me->add_string( EXPORTING element_id = g_processed_id attribute_name = 'name' string = name ).
+      me->add_string( EXPORTING element_id = g_processed_id attribute_name = 'name' string = name element_name_group = name_group ).
     ENDIF.
 
     processed_id = g_processed_id.
@@ -319,12 +323,17 @@ CLASS z2mse_model IMPLEMENTATION.
 
   METHOD add_reference_by_name.
 
+    ASSERT name_group_of_reference IS NOT INITIAL.
+
     FIELD-SYMBOLS <named_entity> LIKE LINE OF g_named_entities.
 
     READ TABLE g_named_entities ASSIGNING <named_entity> WITH TABLE KEY element_type = type_of_reference
                                                                         element_name_group = name_group_of_reference
                                                                         element_name = name_of_reference.
-    ASSERT sy-subrc EQ 0. "OK
+*    ASSERT sy-subrc EQ 0. "OK
+    IF sy-subrc <> 0.
+      ASSERT 1 = 2.
+    ENDIF.
 
     DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
     CLEAR ls_attribute.
@@ -516,6 +525,7 @@ CLASS z2mse_model IMPLEMENTATION.
     IF element_id <> 0.
       my_element_id = element_id.
     ELSE.
+      ASSERT element_name_group IS NOT INITIAL.
       FIELD-SYMBOLS <element_named_entity> LIKE LINE OF g_named_entities.
       READ TABLE g_named_entities ASSIGNING <element_named_entity> WITH TABLE KEY element_type = element_type
                                                                           element_name_group = element_name_group

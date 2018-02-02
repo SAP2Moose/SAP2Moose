@@ -241,7 +241,8 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
       package ?= element_manager->get_element( i_element_id = association-element_id2 ).
 
       element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
-                                                 parent_package     = package->devclass( i_element_id = association-element_id2 ) ).
+                                                                  parent_package     = package->devclass( i_element_id = association-element_id2 )
+                                                                  parent_package_name_group = ng_abap_package ).
 
     ENDLOOP.
 
@@ -259,7 +260,9 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
                                                               parent_name       = name_of_mapped_class ).
 
 
-    element_manager->famix_method->store_id( EXPORTING class  = name_of_mapped_class
+    element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_program
+                                                       class  = name_of_mapped_class
+                                                       method_name_group = ng_abap_program
                                                        method = element-external_program_name ).
 
     IF element-adt_or_bwmt_link IS NOT INITIAL.

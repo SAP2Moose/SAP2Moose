@@ -16,7 +16,8 @@ CLASS z2mse_famix_container_entity DEFINITION INHERITING FROM z2mse_famix_named_
                                     element_type       TYPE clike OPTIONAL
                                     element_name_group TYPE clike OPTIONAL
                                     element_name       TYPE clike OPTIONAL container_element TYPE clike
-                                    parent_container   TYPE clike.
+                                    parent_container   TYPE clike
+                                    parent_container_name_group TYPE clike.
     "! Set the container an element is in using the reference
     "! Provide either ID or type and name of element
     "! @parameter element_id | the ID of the element where the ID shall be added
@@ -43,6 +44,7 @@ CLASS z2mse_famix_container_entity IMPLEMENTATION.
                                               element_name = element_name
                                               type_of_reference       = container_element
                                               name_of_reference = parent_container
+                                              name_group_of_reference = parent_container_name_group
                                               attribute_name    = 'container' ).
   ENDMETHOD.
 

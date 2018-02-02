@@ -123,7 +123,8 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
       package ?= element_manager->get_element( i_element_id = association-element_id2 ).
 
       element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
-                                                 parent_package     = package->devclass( i_element_id = association-element_id2 ) ).
+                                                                  parent_package     = package->devclass( i_element_id = association-element_id2 )
+                                                                  parent_package_name_group = ng_abap_package ).
 
     ENDLOOP.
 
@@ -135,8 +136,9 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
     element_manager->famix_attribute->set_parent_type( EXPORTING element_id         = dummy_attribute_id
                                                 parent_id          = last_id ).
 
-    element_manager->famix_attribute->store_id( EXPORTING class     = element-tabname
-                                         attribute = element-tabname ).
+    element_manager->famix_attribute->store_id( EXPORTING name_group = ng_sap_table
+                                                          class     = element-tabname
+                                                          attribute = element-tabname ).
 
 
 

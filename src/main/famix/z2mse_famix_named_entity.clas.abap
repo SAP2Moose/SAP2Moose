@@ -26,7 +26,8 @@ CLASS z2mse_famix_named_entity DEFINITION INHERITING FROM z2mse_famix_sourced_en
                                          element_type       TYPE clike OPTIONAL
                                          element_name_group TYPE clike OPTIONAL
                                          element_name       TYPE clike OPTIONAL
-                                         parent_package     TYPE clike.
+                                         parent_package     TYPE clike
+                                         parent_package_name_group TYPE clike.
 
     "! Set the container an element is in using the reference
     "! Provide either ID or type and name of element
@@ -75,6 +76,7 @@ CLASS Z2MSE_FAMIX_NAMED_ENTITY IMPLEMENTATION.
                                     element_name_group = element_name_group
                                     element_name = element_name type_of_reference       = 'FAMIX.Package'
                                     name_of_reference = parent_package
+                                    name_group_of_reference = parent_package_name_group
                                     attribute_name    = 'parentPackage' ).
   ENDMETHOD.
 

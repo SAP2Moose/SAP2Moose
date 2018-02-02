@@ -11,6 +11,7 @@ CLASS z2mse_famix_attribute DEFINITION INHERITING FROM z2mse_famix_named_entity
     "! @parameter attribute | the attribute name
     METHODS store_id
       IMPORTING
+        name_group TYPE clike
         class     TYPE clike
         attribute TYPE clike.
     "! Returns the ID for a given attribute of a class
@@ -20,6 +21,7 @@ CLASS z2mse_famix_attribute DEFINITION INHERITING FROM z2mse_famix_named_entity
     "! @parameter id | the ID of the element
     METHODS get_id
       IMPORTING
+                name_group TYPE clike
                 class     TYPE clike
                 attribute TYPE clike
       RETURNING VALUE(id) TYPE i.
@@ -48,18 +50,48 @@ CLASS z2mse_famix_attribute DEFINITION INHERITING FROM z2mse_famix_named_entity
         parent_id          TYPE i     OPTIONAL.
   PRIVATE SECTION.
     TYPES: BEGIN OF attribute_id_type,
+             name_group TYPE string,
              class     TYPE string,
              attribute TYPE string,
              id        TYPE i,
            END OF attribute_id_type.
-    DATA: g_attribute_ids TYPE HASHED TABLE OF attribute_id_type WITH UNIQUE KEY class attribute.
+    DATA: g_attribute_ids TYPE HASHED TABLE OF attribute_id_type WITH UNIQUE KEY name_group class attribute.
 ENDCLASS.
 
-CLASS z2mse_famix_attribute IMPLEMENTATION.
+
+
+CLASS Z2MSE_FAMIX_ATTRIBUTE IMPLEMENTATION.
+
+
+  METHOD add.
+    g_model->add_entity(
+               EXPORTING elementname = g_elementname
+                         is_named_entity = abap_true
+                         can_be_referenced_by_name = abap_false
+                         name = name
+               IMPORTING processed_id = id ).
+    g_last_used_id = id.
+  ENDMETHOD.
+
+
   METHOD constructor.
     CALL METHOD super->constructor( model ).
     g_elementname = 'FAMIX.Attribute'.
   ENDMETHOD.
+
+
+  METHOD get_id.
+    FIELD-SYMBOLS <attribute_id> LIKE LINE OF g_attribute_ids.
+
+    READ TABLE g_attribute_ids ASSIGNING <attribute_id> WITH TABLE KEY name_group = name_group class = class attribute = attribute.
+    IF sy-subrc EQ 0. "OK
+      id = <attribute_id>-id.
+    ELSE.
+      id = 0.
+    ENDIF.
+  ENDMETHOD.
+
+
   METHOD set_parent_type.
     ASSERT ( parent_element IS SUPPLIED AND parent_name IS SUPPLIED )
         OR parent_id IS SUPPLIED.
@@ -81,35 +113,15 @@ CLASS z2mse_famix_attribute IMPLEMENTATION.
                                                 reference_id       = parent_id ).
     ENDIF.
   ENDMETHOD.
-  METHOD add.
-    g_model->add_entity(
-               EXPORTING elementname = g_elementname
-                         is_named_entity = abap_true
-                         can_be_referenced_by_name = abap_false
-                         name = name
-               IMPORTING processed_id = id ).
-    g_last_used_id = id.
-  ENDMETHOD.
 
 
   METHOD store_id.
     DATA ls_attribute_id LIKE LINE OF g_attribute_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
     CLEAR ls_attribute_id.
     ls_attribute_id-id = g_last_used_id.
+    ls_attribute_id-name_group = name_group.
     ls_attribute_id-class = class.
     ls_attribute_id-attribute = attribute.
     INSERT ls_attribute_id INTO TABLE g_attribute_ids.
   ENDMETHOD.
-
-  METHOD get_id.
-    FIELD-SYMBOLS <attribute_id> LIKE LINE OF g_attribute_ids.
-
-    READ TABLE g_attribute_ids ASSIGNING <attribute_id> WITH TABLE KEY class = class attribute = attribute.
-    IF sy-subrc EQ 0. "OK
-      id = <attribute_id>-id.
-    ELSE.
-      id = 0.
-    ENDIF.
-  ENDMETHOD.
-
 ENDCLASS.

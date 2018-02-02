@@ -22,11 +22,11 @@ CLASS ltcl_test IMPLEMENTATION.
     DATA f_cut TYPE REF TO z2mse_famix_class.
     model = NEW #( ).
     f_custom_source_language = NEW #( model = model ).
-    f_custom_source_language->add( name = 'ABAP' ).
+    f_custom_source_language->add( name = 'ABAP' name_group = z2mse_extr3=>ng_source_language ).
     f_package = NEW #( model = model ).
     f_package->add(
       EXPORTING
-        name_group             = 'GroupP'
+        name_group             = z2mse_extr3=>ng_abap_package
         name                   = 'package1'
         modifiers              = 'pmodifier' ).
     f_module = NEW #( model = model ).
@@ -48,10 +48,12 @@ CLASS ltcl_test IMPLEMENTATION.
 
     f_cut->is_interface( EXPORTING element_id = id_class1 ).
     f_cut->set_parent_package( EXPORTING element_id         = id_class1
-                                         parent_package     = 'package1' ).
+                                         parent_package     = 'package1'
+                                         parent_package_name_group = z2mse_extr3=>ng_abap_package ).
     f_cut->set_container( EXPORTING element_id         = id_class1
                                     container_element  = 'FAMIX.Module'
-                                    parent_container   = 'AProgram' ).
+                                    parent_container   = 'AProgram'
+                                    parent_container_name_group = 'ModulNames').
     f_cut->set_container_by_id( EXPORTING element_id          = id_class2
                                           container_element   = 'FAMIX.Module'
                                           parent_container_id = id_module ).
@@ -121,7 +123,8 @@ CLASS ltcl_test IMPLEMENTATION.
 
     f_attribute = NEW #( model = model ).
 
-    DATA(id_attribute_get) = f_attribute->get_id( EXPORTING class     = 'Class1'
+    DATA(id_attribute_get) = f_attribute->get_id( EXPORTING name_group = z2mse_extr3=>ng_abap_class
+                                                            class     = 'Class1'
                                                             attribute = 'ClassAttribute1' ).
 
     cl_abap_unit_assert=>assert_equals(
@@ -140,10 +143,12 @@ CLASS ltcl_test IMPLEMENTATION.
                                             parent_name_group = 'Group1'
                                             parent_name       = 'Class1' ).
 
-    f_attribute->store_id( EXPORTING class     = 'Class1'
+    f_attribute->store_id( EXPORTING name_group = z2mse_extr3=>ng_abap_class
+                                     class     = 'Class1'
                                      attribute = 'ClassAttribute1' ).
 
-    id_attribute_get = f_attribute->get_id( EXPORTING class     = 'Class1'
+    id_attribute_get = f_attribute->get_id( EXPORTING name_group = z2mse_extr3=>ng_abap_class
+                                                      class     = 'Class1'
                                                       attribute = 'ClassAttribute1' ).
 
 

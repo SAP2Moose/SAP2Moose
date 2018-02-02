@@ -34,9 +34,9 @@ CLASS z2mse_famix_method DEFINITION INHERITING FROM Z2MSE_famix_behavioural_entt
     "! @parameter method_name_group | the name group of the method name
     "! @parameter method | the method name
     METHODS store_id
-      IMPORTING class_name_group  TYPE clike OPTIONAL
+      IMPORTING class_name_group  TYPE clike
                 class             TYPE clike
-                method_name_group TYPE clike OPTIONAL
+                method_name_group TYPE clike
                 method            TYPE clike.
     "! Returns the ID for a given method of a class
     "! Returns 0 if the class is not known
@@ -46,9 +46,9 @@ CLASS z2mse_famix_method DEFINITION INHERITING FROM Z2MSE_famix_behavioural_entt
     "! @parameter method | the method name
     "! @parameter id | the ID of the element
     METHODS get_id
-      IMPORTING class_name_group  TYPE clike OPTIONAL
+      IMPORTING class_name_group  TYPE clike
                 class             TYPE clike
-                method_name_group TYPE clike OPTIONAL
+                method_name_group TYPE clike
                 method            TYPE clike
       RETURNING VALUE(id)         TYPE i.
   PRIVATE SECTION.

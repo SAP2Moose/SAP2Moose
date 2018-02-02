@@ -386,7 +386,7 @@ CLASS ltcl_test IMPLEMENTATION.
 
     f_cut->add_boolean( EXPORTING element_id         = 1
 *                                 element_type       =
-*                                 element_name_group =
+*                                  element_name_group = 'DUMMY'
 *                                 element_name       =
                                   attribute_name     = 'attr'
                                   is_true            = abap_true ).
@@ -394,14 +394,14 @@ CLASS ltcl_test IMPLEMENTATION.
 
     f_cut->add_boolean( EXPORTING element_id         = 1
 *                                 element_type       =
-*                                 element_name_group =
+*                                  element_name_group = 'DUMMY'
 *                                 element_name       =
                                   attribute_name     = 'attr'
                                   is_true            = abap_false ).
 
     f_cut->add_boolean( EXPORTING element_id         = 1
 *                                 element_type       =
-*                                 element_name_group =
+*                                  element_name_group = 'DUMMY'
 *                                 element_name       =
                                   attribute_name     = 'attr'
                                   is_true            = abap_true ).
@@ -508,7 +508,7 @@ CLASS ltcl_test IMPLEMENTATION.
                                  processed_id              = processed_id ).
     f_cut->add_reference_by_id( EXPORTING element_id         = 1
 *                                     element_type       =
-*                                     element_name_group =
+*                                          element_name_group = 'DUMMY'
 *                                     element_name       =
                                           attribute_name     = 'attribute1'
                                           reference_id       = 2 ).
@@ -568,7 +568,7 @@ CLASS ltcl_test IMPLEMENTATION.
                                  processed_id              = processed_id ).
     f_cut->add_reference_by_name( EXPORTING element_id              = 1
 *                                           element_type            =
-*                                           element_name_group      =
+*                                            element_name_group      =
 *                                           element_name            =
                                             attribute_name          = 'attribute1'
                                             type_of_reference       = 'Type1'

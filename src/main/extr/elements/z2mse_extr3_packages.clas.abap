@@ -121,7 +121,8 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
     ASSERT sy-subrc EQ 0.
 
-    element_manager->famix_package->add( name = element-devclass ).
+    element_manager->famix_package->add( name       = element-devclass
+                                         name_group = ng_abap_package ).
 
   ENDMETHOD.
 

@@ -236,7 +236,8 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
         DATA package TYPE REF TO z2mse_extr3_packages.
         package ?= element_manager->get_element( i_element_id = association-element_id2 ).
         element_manager->famix_class->set_parent_package( element_id     = class_id
-                                                          parent_package = package->devclass( i_element_id = association-element_id2 ) ).
+                                                          parent_package = package->devclass( i_element_id = association-element_id2 )
+                                                          parent_package_name_group = ng_abap_package ).
 
       ENDLOOP.
 
@@ -253,8 +254,10 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
             parent_id          = class_id ).
 
         "! TBD Really required, this appears to be not exact, no namegroup, ...
-        element_manager->famix_method->store_id( EXPORTING class  = element-wdy_component_name
-                                          method = element_component-wdy_controller_name ).
+        element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_webdynpro
+                                                           class  = element-wdy_component_name
+                                                           method_name_group = ng_abap_webdynpro
+                                                           method = element_component-wdy_controller_name ).
 
       ENDLOOP.
 

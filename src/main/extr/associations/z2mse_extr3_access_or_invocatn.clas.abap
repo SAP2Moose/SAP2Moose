@@ -44,11 +44,13 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
         CASE invoced_cmptype.
           WHEN classes->attribute_type.
 
-            e_used_id = element_manager->famix_attribute->get_id(  class            = invoced_class_name
-                                                                   attribute           = invoced_cmpname ).
+            e_used_id = element_manager->famix_attribute->get_id(  name_group = ng_abap_class
+                                                                   class      = invoced_class_name
+                                                                   attribute  = invoced_cmpname ).
           WHEN classes->method_type OR classes->event_type.
-            e_used_id = element_manager->famix_method->get_id( class_name_group = ''
+            e_used_id = element_manager->famix_method->get_id( class_name_group = ng_abap_class
                                                              class            = invoced_class_name
+                                                             method_name_group = ng_abap_method
                                                              method           = invoced_cmpname ).
         ENDCASE.
       WHEN invoced_element->table_type.
@@ -57,8 +59,9 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
         tables = z2mse_extr3_tables=>get_instance( i_element_manager = element_manager ).
         tabname = tables->table_name( i_element_id = i_association-element_id1 ).
 
-        e_used_id = element_manager->famix_attribute->get_id(  class            = tabname
-                                                               attribute           = tabname ).
+        e_used_id = element_manager->famix_attribute->get_id(  name_group = ng_sap_table
+                                                               class      = tabname
+                                                               attribute  = tabname ).
       WHEN invoced_element->program_type.
         DATA programs2 TYPE REF TO z2mse_extr3_programs.
         DATA: invoced_ext_progr_name_class  TYPE string,
@@ -69,18 +72,25 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
                                  IMPORTING external_program_name_class = invoced_ext_progr_name_class
                                            external_program_name_method = invoced_ext_progr_name_method ).
 
-        e_used_id = element_manager->famix_method->get_id( class             = invoced_ext_progr_name_class
+        e_used_id = element_manager->famix_method->get_id( class_name_group = ng_abap_program
+                                                           class             = invoced_ext_progr_name_class
+                                                           method_name_group = ng_abap_program
                                                            method            = invoced_ext_progr_name_method ).
 
       WHEN OTHERS.
         ASSERT 1 = 2.
     ENDCASE.
 
-    DATA: invoicing_famix_class  TYPE string,
-          invoicing_famix_method TYPE string.
+    DATA: invoicing_famix_class       TYPE string,
+          invoicing_famix_method      TYPE string,
+          invoicing_class_name_group  TYPE string,
+          invoicing_method_name_group TYPE string.
 
     CASE invocing_element->type.
       WHEN invocing_element->class_type.
+
+        invoicing_class_name_group = ng_abap_class.
+        invoicing_method_name_group = ng_abap_method.
 
         DATA: invocing_class_name TYPE string,
               invocing_cmpname    TYPE string.
@@ -95,6 +105,9 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
         invoicing_famix_method = invocing_cmpname.
 
       WHEN invocing_element->web_dynpro_comps_type.
+
+        invoicing_class_name_group = ng_abap_webdynpro.
+        invoicing_method_name_group = ng_abap_webdynpro.
 
         DATA web_dynpro_component TYPE REF TO z2mse_extr3_web_dynpro_comp.
 
@@ -113,6 +126,9 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
 
       WHEN invocing_element->program_type.
 
+        invoicing_class_name_group = ng_abap_program.
+        invoicing_method_name_group = ng_abap_program.
+
         DATA programs TYPE REF TO z2mse_extr3_programs.
 
         programs = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
@@ -127,8 +143,11 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
     ENDCASE.
 
     DATA using_method_id TYPE i.
-
-    e_using_method_id = element_manager->famix_method->get_id( class  = invoicing_famix_class
+    ASSERT invoicing_class_name_group IS NOT INITIAL.
+    ASSERT invoicing_method_name_group IS NOT INITIAL.
+    e_using_method_id = element_manager->famix_method->get_id( class_name_group = invoicing_class_name_group
+                                                               class  = invoicing_famix_class
+                                                               method_name_group = invoicing_method_name_group
                                                                method = invoicing_famix_method ).
 
   ENDMETHOD.

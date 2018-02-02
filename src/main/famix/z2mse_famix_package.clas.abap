@@ -22,6 +22,7 @@ CLASS z2mse_famix_package IMPLEMENTATION.
     g_model->add_entity( EXPORTING elementname = g_elementname
                                         is_named_entity = abap_true
                                         can_be_referenced_by_name = abap_true
+                                        name_group = name_group
                                         name = name
                               IMPORTING exists_already_with_id = exists_already_with_id
                                         processed_id = id ).

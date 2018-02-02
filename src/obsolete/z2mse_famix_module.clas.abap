@@ -23,6 +23,7 @@ CLASS z2mse_famix_module IMPLEMENTATION.
                                         is_named_entity = abap_true
                                         can_be_referenced_by_name = abap_true
                                         name = name
+                                        name_group = name_group
                               IMPORTING exists_already_with_id = exists_already_with_id
                                         processed_id = id ).
     g_last_used_id = id.

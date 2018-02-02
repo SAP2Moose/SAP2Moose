@@ -6,6 +6,13 @@ CLASS z2mse_extr3 DEFINITION
   PUBLIC SECTION.
     "! Call once to clear all global variables. This is required before an extraction is repeated
     CLASS-METHODS clear_all.
+    CONSTANTS: ng_source_language TYPE string VALUE 'SOURCE_LANGUAGE',
+               ng_abap_package TYPE string VALUE 'ABAP_PACKAGE',
+               ng_abap_class TYPE string VALUE 'ABAP_CLASS',
+               ng_abap_method TYPE string VALUE 'ABAP_METHOD',
+               ng_abap_program TYPE string VALUE 'ABAP_PROGRAM',
+               ng_abap_webdynpro TYPE string VALUE 'ABAP_WEBDYNPRO',
+               ng_sap_table TYPE string VALUE 'SAP_TABLE'.
   PROTECTED SECTION.
     DATA element_manager TYPE REF TO z2mse_extr3_element_manager.
     METHODS constructor

@@ -585,7 +585,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
         DATA package TYPE REF TO z2mse_extr3_packages.
         package ?= element_manager->get_element( i_element_id = association-element_id2 ).
         element_manager->famix_class->set_parent_package( element_id     = last_id
-                                                          parent_package = package->devclass( i_element_id = association-element_id2 ) ).
+                                                          parent_package = package->devclass( i_element_id = association-element_id2 )
+                                                          parent_package_name_group = ng_abap_package ).
 
       ENDLOOP.
 
@@ -623,8 +624,9 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
           ENDIF.
 
-          element_manager->famix_attribute->store_id( EXPORTING class     = element_comp-clsname
-                                               attribute = element_comp-cmpname ).
+          element_manager->famix_attribute->store_id( EXPORTING name_group = ng_abap_class
+                                                                class      = element_comp-clsname
+                                                                attribute  = element_comp-cmpname ).
 
 *            sap_attribute->add( EXPORTING class     = class-clsname
 *                                          attribute = component-cmpname ).
@@ -660,8 +662,10 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
           ENDIF.
 
-          element_manager->famix_method->store_id( EXPORTING class  = element_comp-clsname
-                                              method = element_comp-cmpname ).
+          element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_class
+                                                             class  = element_comp-clsname
+                                                             method_name_group = ng_abap_method
+                                                             method = element_comp-cmpname ).
 
 
 *            sap_method->add( EXPORTING class  = class-clsname
