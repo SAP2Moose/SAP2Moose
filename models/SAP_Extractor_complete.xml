@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <!--Moose2Model Layout data, visit moose2model.org on how to use this file-->
 <elements>
-    <version>v1.1.0</version>
+    <version>v1.2.0</version>
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
-        <x>3407.0</x>
-        <y>1199.0</y>
+        <x>1015.0</x>
+        <y>2019.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -72,8 +72,8 @@
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_TEST_A</class>
-        <x>-875.47153683</x>
-        <y>536.9128552</y>
+        <x>-874.95958802</x>
+        <y>537.42480401</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -151,12 +151,19 @@
         <type>FAMIXMethod</type>
         <class>FGR-Z2MSE_TEST_FGR_A</class>
         <method>LZ2MSE_TEST_FGR_AF01</method>
-        <x>-470.0</x>
-        <y>590.0</y>
+        <x>-393.0</x>
+        <y>587.0</y>
         <comment><![CDATA[This is an include of a function group<br>No further usages are extracted yet]]>
         </comment>
-        <commentx>-482.0</commentx>
-        <commenty>537.0</commenty>
+        <commentx>-405.0</commentx>
+        <commenty>534.0</commenty>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <attribute>TYPE_PROGRAM</attribute>
+        <x>-1793.0</x>
+        <y>1022.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -267,8 +274,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_TEST_CL_A</class>
         <method>CONSTRUCTOR</method>
-        <x>-915.0</x>
-        <y>470.0</y>
+        <x>-914.0</x>
+        <y>471.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -390,7 +397,7 @@
         <class>Z2MSE_TEST_CL_A</class>
         <method>EVENTHANDLER_A</method>
         <x>-810.0</x>
-        <y>465.0</y>
+        <y>466.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -597,8 +604,8 @@
     <element>
         <type>FAMIXClass</type>
         <class>FGR-Z2MSE_TEST_FGR_A</class>
-        <x>-521.0</x>
-        <y>600.0</y>
+        <x>-444.0</x>
+        <y>598.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -626,7 +633,7 @@
         <class>Z2MSE_TEST_CL_A</class>
         <method>EVENT_A</method>
         <x>-1070.0</x>
-        <y>520.0</y>
+        <y>521.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -801,6 +808,13 @@
     </element>
     <element>
         <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <attribute>TYPE_BW_TRANSFORMATION</attribute>
+        <x>-2083.0</x>
+        <y>1047.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTRACT3</class>
         <attribute>MODIFIER_UNKNOWN</attribute>
         <x>-2480.0</x>
@@ -823,8 +837,8 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_TEST_A</class>
         <attribute>Z2MSE_TEST_A</attribute>
-        <x>-840.0</x>
-        <y>565.0</y>
+        <x>-839.0</x>
+        <y>566.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -929,11 +943,18 @@
         <y>1185.0</y>
     </element>
     <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <attribute>TYPE_FUNCTION_INCLUDE</attribute>
+        <x>-1873.0</x>
+        <y>1022.0</y>
+    </element>
+    <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_TEST_CL_A</class>
         <method>Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000</method>
         <x>-1045.0</x>
-        <y>550.0</y>
+        <y>551.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -1061,7 +1082,7 @@
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_TEST_CL_A2</class>
-        <x>-699.0</x>
+        <x>-698.0</x>
         <y>601.0</y>
     </element>
     <element>
@@ -1187,8 +1208,8 @@
         <type>FAMIXMethod</type>
         <class>FGR-Z2MSE_TEST_FGR_A</class>
         <method>F-Z2MSE_TEST_FUNCTION_A</method>
-        <x>-565.0</x>
-        <y>590.0</y>
+        <x>-492.0</x>
+        <y>587.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -1248,11 +1269,11 @@
         <class>Z2MSE_TEST_CL_A2</class>
         <method>METHOD_A</method>
         <x>-700.0</x>
-        <y>590.0</y>
+        <y>591.0</y>
         <comment><![CDATA[Redefinition of method in class Z2MSE_TEST_CL_A<br>There is a "dummy usage" from the method in the super class]]>
         </comment>
-        <commentx>-643.0</commentx>
-        <commenty>651.0</commenty>
+        <commentx>-642.0</commentx>
+        <commenty>652.0</commenty>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -1358,7 +1379,7 @@
         <class>Z2MSE_TEST_CL_A</class>
         <attribute>Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000</attribute>
         <x>-1005.0</x>
-        <y>495.0</y>
+        <y>496.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -1556,8 +1577,8 @@
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_TEST_PROGRAM_A</class>
-        <x>-668.0</x>
-        <y>493.0</y>
+        <x>-642.0</x>
+        <y>503.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -1571,14 +1592,14 @@
         <class>Z2MSE_TEST_CL_A</class>
         <method>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000</method>
         <x>-900.0</x>
-        <y>515.0</y>
+        <y>516.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
         <class>ZIWCI_2MSE_TEST_WDY_A</class>
         <method>WD_GET_API</method>
         <x>-1240.0</x>
-        <y>455.0</y>
+        <y>456.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -1622,17 +1643,17 @@
         <y>340.0</y>
     </element>
     <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_TEST_CL_B2</class>
-        <x>-843.0</x>
-        <y>850.0</y>
-    </element>
-    <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_FAMIX_NAMED_ENTITY</class>
         <method>SET_SOURCE_ANCHOR_BY_ID</method>
         <x>-1945.0</x>
         <y>515.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_TEST_CL_B2</class>
+        <x>-843.0</x>
+        <y>850.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -1792,7 +1813,7 @@
     <element>
         <type>FAMIXPackage</type>
         <package>Z2MSE_TEST_INITIAL_SELECTION</package>
-        <x>-947.0</x>
+        <x>-946.0</x>
         <y>520.0</y>
     </element>
     <element>
@@ -1900,8 +1921,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_TEST_CL_A</class>
         <method>METHOD_A</method>
-        <x>-785.0</x>
-        <y>545.0</y>
+        <x>-784.0</x>
+        <y>546.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -1983,8 +2004,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_TEST_PROGRAM_A</class>
         <method>Z2MSE_TEST_PROGRAM_A</method>
-        <x>-670.0</x>
-        <y>480.0</y>
+        <x>-639.0</x>
+        <y>493.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -2044,7 +2065,7 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_TEST_WDY_A</class>
         <method>EMPTYVIEW</method>
-        <x>-845.0</x>
+        <x>-844.0</x>
         <y>350.0</y>
     </element>
     <element>
@@ -2317,6 +2338,13 @@
         <y>1150.0</y>
     </element>
     <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <attribute>TYPE_FUNCTION</attribute>
+        <x>-1997.0</x>
+        <y>1047.0</y>
+    </element>
+    <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_EP_ANALYZE_OTHER_KEYWRD</class>
         <method>ANALYZE</method>
@@ -2574,7 +2602,7 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_TEST_WDY_A</class>
         <method>COMPONENTCONTROLLER</method>
-        <x>-915.0</x>
+        <x>-914.0</x>
         <y>340.0</y>
     </element>
     <element>
@@ -2593,9 +2621,15 @@
     </element>
     <element>
         <type>FAMIXClass</type>
+        <class>Z2MSE_TEST_PROGRAM_B</class>
+        <x>-562.0</x>
+        <y>429.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
         <class>Z2MSE_TEST_WDY_A</class>
         <x>-896.0</x>
-        <y>374.0</y>
+        <y>375.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -2645,6 +2679,13 @@
         <method>_ADD_COMPONENT</method>
         <x>-3070.0</x>
         <y>1000.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_TEST_PROGRAM_B</class>
+        <method>Z2MSE_TEST_PROGRAM_B</method>
+        <x>-560.0</x>
+        <y>419.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>

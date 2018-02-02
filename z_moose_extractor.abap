@@ -1,7 +1,7 @@
-* generated on system NPL at 15.01.2018 on 20:45:05
+* generated on system NPL at 02.02.2018 on 10:36:01
 
 *
-* This is version 1.0.0
+* This is version 1.1.0
 *
 *The MIT License (MIT)
 *
@@ -136,7 +136,7 @@ CLASS cl_model DEFINITION
     "! @parameter processedid | the id in model either if just created or already existing
     METHODS add_entity
       IMPORTING elementname                   TYPE clike
-                name_group                    TYPE clike DEFAULT ''
+                name_group                    TYPE clike OPTIONAL
                 is_named_entity               TYPE abap_bool
                 is_id_required                TYPE abap_bool DEFAULT ''
                 can_be_referenced_by_name     TYPE abap_bool
@@ -352,6 +352,10 @@ CLASS CL_MODEL IMPLEMENTATION.
   ENDMETHOD.
   METHOD add_entity.
 
+    IF can_be_referenced_by_name EQ abap_true.
+      ASSERT name_group IS NOT INITIAL.
+    ENDIF.
+
     FIELD-SYMBOLS <ls_name> LIKE LINE OF g_named_entities.
 
     IF can_be_referenced_by_name EQ abap_true.
@@ -388,7 +392,7 @@ CLASS CL_MODEL IMPLEMENTATION.
     INSERT ls_elements_in_model INTO TABLE g_elements_in_model.
 
     IF is_named_entity EQ abap_true.
-      me->add_string( EXPORTING element_id = g_processed_id attribute_name = 'name' string = name ).
+      me->add_string( EXPORTING element_id = g_processed_id attribute_name = 'name' string = name element_name_group = name_group ).
     ENDIF.
 
     processed_id = g_processed_id.
@@ -420,12 +424,17 @@ CLASS CL_MODEL IMPLEMENTATION.
   ENDMETHOD.
   METHOD add_reference_by_name.
 
+    ASSERT name_group_of_reference IS NOT INITIAL.
+
     FIELD-SYMBOLS <named_entity> LIKE LINE OF g_named_entities.
 
     READ TABLE g_named_entities ASSIGNING <named_entity> WITH TABLE KEY element_type = type_of_reference
                                                                         element_name_group = name_group_of_reference
                                                                         element_name = name_of_reference.
-    ASSERT sy-subrc EQ 0. "OK
+*    ASSERT sy-subrc EQ 0. "OK
+    IF sy-subrc <> 0.
+      ASSERT 1 = 2.
+    ENDIF.
 
     DATA ls_attribute LIKE LINE OF g_attributes. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
     CLEAR ls_attribute.
@@ -605,6 +614,7 @@ CLASS CL_MODEL IMPLEMENTATION.
     IF element_id <> 0.
       my_element_id = element_id.
     ELSE.
+      ASSERT element_name_group IS NOT INITIAL.
       FIELD-SYMBOLS <element_named_entity> LIKE LINE OF g_named_entities.
       READ TABLE g_named_entities ASSIGNING <element_named_entity> WITH TABLE KEY element_type = element_type
                                                                           element_name_group = element_name_group
@@ -810,7 +820,8 @@ CLASS cl_famix_named_entity DEFINITION INHERITING FROM cl_famix_sourced_entity A
                                          element_type       TYPE clike OPTIONAL
                                          element_name_group TYPE clike OPTIONAL
                                          element_name       TYPE clike OPTIONAL
-                                         parent_package     TYPE clike.
+                                         parent_package     TYPE clike
+                                         parent_package_name_group TYPE clike.
 
     "! Set the container an element is in using the reference
     "! Provide either ID or type and name of element
@@ -832,6 +843,7 @@ CLASS cl_famix_named_entity DEFINITION INHERITING FROM cl_famix_sourced_entity A
 ENDCLASS.
 CLASS CL_FAMIX_NAMED_ENTITY IMPLEMENTATION.
   METHOD add.
+"    ASSERT name_group IS NOT INITIAL.
     g_model->add_entity( EXPORTING elementname = g_elementname
                                         is_named_entity = abap_true
                                         can_be_referenced_by_name = abap_true
@@ -852,6 +864,7 @@ CLASS CL_FAMIX_NAMED_ENTITY IMPLEMENTATION.
                                     element_name_group = element_name_group
                                     element_name = element_name type_of_reference       = 'FAMIX.Package'
                                     name_of_reference = parent_package
+                                    name_group_of_reference = parent_package_name_group
                                     attribute_name    = 'parentPackage' ).
   ENDMETHOD.
   METHOD set_source_anchor_by_id.
@@ -878,6 +891,7 @@ CLASS cl_famix_attribute DEFINITION INHERITING FROM cl_famix_named_entity
     "! @parameter attribute | the attribute name
     METHODS store_id
       IMPORTING
+        name_group TYPE clike
         class     TYPE clike
         attribute TYPE clike.
     "! Returns the ID for a given attribute of a class
@@ -887,6 +901,7 @@ CLASS cl_famix_attribute DEFINITION INHERITING FROM cl_famix_named_entity
     "! @parameter id | the ID of the element
     METHODS get_id
       IMPORTING
+                name_group TYPE clike
                 class     TYPE clike
                 attribute TYPE clike
       RETURNING VALUE(id) TYPE i.
@@ -916,11 +931,12 @@ CLASS cl_famix_attribute DEFINITION INHERITING FROM cl_famix_named_entity
 
   PRIVATE SECTION.
     TYPES: BEGIN OF attribute_id_type,
+             name_group TYPE string,
              class     TYPE string,
              attribute TYPE string,
              id        TYPE i,
            END OF attribute_id_type.
-    DATA: g_attribute_ids TYPE HASHED TABLE OF attribute_id_type WITH UNIQUE KEY class attribute.
+    DATA: g_attribute_ids TYPE HASHED TABLE OF attribute_id_type WITH UNIQUE KEY name_group class attribute.
 ENDCLASS.
 CLASS CL_FAMIX_ATTRIBUTE IMPLEMENTATION.
   METHOD add.
@@ -939,7 +955,7 @@ CLASS CL_FAMIX_ATTRIBUTE IMPLEMENTATION.
   METHOD get_id.
     FIELD-SYMBOLS <attribute_id> LIKE LINE OF g_attribute_ids.
 
-    READ TABLE g_attribute_ids ASSIGNING <attribute_id> WITH TABLE KEY class = class attribute = attribute.
+    READ TABLE g_attribute_ids ASSIGNING <attribute_id> WITH TABLE KEY name_group = name_group class = class attribute = attribute.
     IF sy-subrc EQ 0. "OK
       id = <attribute_id>-id.
     ELSE.
@@ -971,6 +987,7 @@ CLASS CL_FAMIX_ATTRIBUTE IMPLEMENTATION.
     DATA ls_attribute_id LIKE LINE OF g_attribute_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
     CLEAR ls_attribute_id.
     ls_attribute_id-id = g_last_used_id.
+    ls_attribute_id-name_group = name_group.
     ls_attribute_id-class = class.
     ls_attribute_id-attribute = attribute.
     INSERT ls_attribute_id INTO TABLE g_attribute_ids.
@@ -994,7 +1011,8 @@ CLASS cl_famix_container_entity DEFINITION INHERITING FROM cl_famix_named_entity
                                     element_type       TYPE clike OPTIONAL
                                     element_name_group TYPE clike OPTIONAL
                                     element_name       TYPE clike OPTIONAL container_element TYPE clike
-                                    parent_container   TYPE clike.
+                                    parent_container   TYPE clike
+                                    parent_container_name_group TYPE clike.
     "! Set the container an element is in using the reference
     "! Provide either ID or type and name of element
     "! @parameter element_id | the ID of the element where the ID shall be added
@@ -1020,6 +1038,7 @@ CLASS CL_FAMIX_CONTAINER_ENTITY IMPLEMENTATION.
                                               element_name = element_name
                                               type_of_reference       = container_element
                                               name_of_reference = parent_container
+                                              name_group_of_reference = parent_container_name_group
                                               attribute_name    = 'container' ).
   ENDMETHOD.
   METHOD set_container_by_id.
@@ -1085,6 +1104,7 @@ CLASS CL_FAMIX_PACKAGE IMPLEMENTATION.
     g_model->add_entity( EXPORTING elementname = g_elementname
                                         is_named_entity = abap_true
                                         can_be_referenced_by_name = abap_true
+                                        name_group = name_group
                                         name = name
                               IMPORTING exists_already_with_id = exists_already_with_id
                                         processed_id = id ).
@@ -1131,9 +1151,9 @@ CLASS cl_famix_method DEFINITION INHERITING FROM CL_famix_behavioural_entty
     "! @parameter method_name_group | the name group of the method name
     "! @parameter method | the method name
     METHODS store_id
-      IMPORTING class_name_group  TYPE clike OPTIONAL
+      IMPORTING class_name_group  TYPE clike
                 class             TYPE clike
-                method_name_group TYPE clike OPTIONAL
+                method_name_group TYPE clike
                 method            TYPE clike.
     "! Returns the ID for a given method of a class
     "! Returns 0 if the class is not known
@@ -1143,9 +1163,9 @@ CLASS cl_famix_method DEFINITION INHERITING FROM CL_famix_behavioural_entty
     "! @parameter method | the method name
     "! @parameter id | the ID of the element
     METHODS get_id
-      IMPORTING class_name_group  TYPE clike OPTIONAL
+      IMPORTING class_name_group  TYPE clike
                 class             TYPE clike
-                method_name_group TYPE clike OPTIONAL
+                method_name_group TYPE clike
                 method            TYPE clike
       RETURNING VALUE(id)         TYPE i.
 
@@ -1503,6 +1523,7 @@ CLASS cl_famix_custom_source_lng DEFINITION INHERITING FROM cl_famix_entity
   PUBLIC SECTION.
     "! @parameter exists_already_with_id | contains the id if entry already existed
     METHODS add IMPORTING name                          TYPE clike
+                          name_group                    TYPE clike
                 EXPORTING VALUE(exists_already_with_id) TYPE i
                           VALUE(id)                     TYPE i.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
@@ -1515,6 +1536,7 @@ CLASS CL_FAMIX_CUSTOM_SOURCE_LNG IMPLEMENTATION.
                                         is_named_entity = abap_true
                                         can_be_referenced_by_name = abap_true
                                         name = name
+                                        name_group = name_group
                               IMPORTING exists_already_with_id = exists_already_with_id
                                         processed_id = id ).
     g_last_used_id = id.
@@ -1546,6 +1568,7 @@ CLASS CL_FAMIX_MODULE IMPLEMENTATION.
                                         is_named_entity = abap_true
                                         can_be_referenced_by_name = abap_true
                                         name = name
+                                        name_group = name_group
                               IMPORTING exists_already_with_id = exists_already_with_id
                                         processed_id = id ).
     g_last_used_id = id.
@@ -1645,6 +1668,13 @@ CLASS cl_extr3 DEFINITION
   PUBLIC SECTION.
     "! Call once to clear all global variables. This is required before an extraction is repeated
     CLASS-METHODS clear_all.
+    CONSTANTS: ng_source_language TYPE string VALUE 'SOURCE_LANGUAGE',
+               ng_abap_package TYPE string VALUE 'ABAP_PACKAGE',
+               ng_abap_class TYPE string VALUE 'ABAP_CLASS',
+               ng_abap_method TYPE string VALUE 'ABAP_METHOD',
+               ng_abap_program TYPE string VALUE 'ABAP_PROGRAM',
+               ng_abap_webdynpro TYPE string VALUE 'ABAP_WEBDYNPRO',
+               ng_sap_table TYPE string VALUE 'SAP_TABLE'.
   PROTECTED SECTION.
     DATA element_manager TYPE REF TO cl_extr3_element_manager.
     METHODS constructor
@@ -2023,6 +2053,10 @@ CLASS cl_extr3_programs DEFINITION
         i_element_manager TYPE REF TO cl_extr3_element_manager
       RETURNING
         VALUE(r_instance) TYPE REF TO cl_extr3_programs.
+    CONSTANTS: type_function          TYPE string VALUE 'FUNCTION',
+               type_function_include  TYPE string VALUE 'FUNCTION_INCLUDE',
+               type_program           TYPE string VALUE 'PROGRAM',
+               type_bw_transformation TYPE string VALUE 'BW_TRAN'.
     METHODS add
       IMPORTING
         program               TYPE progname
@@ -2031,12 +2065,14 @@ CLASS cl_extr3_programs DEFINITION
         VALUE(new_element_id) TYPE cl_extr3_element_manager=>element_id_type.
     METHODS program_name
       IMPORTING
-        i_element_id                 TYPE i
+        i_element_id                        TYPE i
       EXPORTING
-        VALUE(program)               TYPE progname
-        VALUE(external_program_name_class) TYPE string
+        VALUE(program_type)                 TYPE string
+        VALUE(program)                      TYPE progname
+        VALUE(external_program_name_class)  TYPE string
         VALUE(external_program_name_method) TYPE string
-        VALUE(subc)                  TYPE subc.
+        value(program_attribute_2)          TYPE string
+        VALUE(subc)                         TYPE subc.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
     METHODS collect_infos REDEFINITION.
@@ -2057,12 +2093,12 @@ CLASS cl_extr3_programs DEFINITION
     DATA elements_program TYPE HASHED TABLE OF element_type WITH UNIQUE KEY program.
     METHODS _convert_program_2_ext_name
       IMPORTING
-        i_element_program TYPE progname
+        i_element_program   TYPE progname
       EXPORTING
-        program_type TYPE string
+        program_type        TYPE string
         program_attribute_1 TYPE string
         program_attribute_2 TYPE string
-        value(r_result)   TYPE string.
+        VALUE(r_result)     TYPE string.
     METHODS _extract_function_name
       IMPORTING
         i_element_program TYPE progname
@@ -2079,7 +2115,7 @@ CLASS cl_extr3_programs DEFINITION
         VALUE(r_result)   TYPE string.
     METHODS _get_names_for_function_groups
       IMPORTING
-        i_element TYPE cl_extr3_programs=>element_type
+        i_element                   TYPE cl_extr3_programs=>element_type
       RETURNING
         VALUE(name_of_mapped_class) TYPE string.
 ENDCLASS.
@@ -2227,7 +2263,15 @@ CLASS cl_extr3_where_used_builder DEFINITION
         direct   TYPE sgrade,
         indirect TYPE sgrade,
       END OF wbcrossgt_type ,
-      wbcrossgts_type TYPE SORTED TABLE OF wbcrossgt_type WITH UNIQUE KEY otype name include.
+      wbcrossgts_type TYPE SORTED TABLE OF wbcrossgt_type WITH UNIQUE KEY otype name include,
+
+      BEGIN OF cross_type,
+        type    TYPE char1,
+        name    TYPE seu_name,
+        include TYPE syrepid,
+      END OF cross_type,
+      cross_types TYPE STANDARD TABLE OF cross_type WITH DEFAULT KEY.
+
     DATA: g_dynamic_usage TYPE SORTED TABLE OF wbcrossgt WITH UNIQUE KEY otype name include.
 ENDCLASS.
 "! I build all initial elements that are the starting point for searching further elements.
@@ -2505,11 +2549,13 @@ CLASS CL_EXTR3_ACCESS_OR_INVOCATN IMPLEMENTATION.
         CASE invoced_cmptype.
           WHEN classes->attribute_type.
 
-            e_used_id = element_manager->famix_attribute->get_id(  class            = invoced_class_name
-                                                                   attribute           = invoced_cmpname ).
+            e_used_id = element_manager->famix_attribute->get_id(  name_group = ng_abap_class
+                                                                   class      = invoced_class_name
+                                                                   attribute  = invoced_cmpname ).
           WHEN classes->method_type OR classes->event_type.
-            e_used_id = element_manager->famix_method->get_id( class_name_group = ''
+            e_used_id = element_manager->famix_method->get_id( class_name_group = ng_abap_class
                                                              class            = invoced_class_name
+                                                             method_name_group = ng_abap_method
                                                              method           = invoced_cmpname ).
         ENDCASE.
       WHEN invoced_element->table_type.
@@ -2518,17 +2564,38 @@ CLASS CL_EXTR3_ACCESS_OR_INVOCATN IMPLEMENTATION.
         tables = cl_extr3_tables=>get_instance( i_element_manager = element_manager ).
         tabname = tables->table_name( i_element_id = i_association-element_id1 ).
 
-        e_used_id = element_manager->famix_attribute->get_id(  class            = tabname
-                                                               attribute           = tabname ).
+        e_used_id = element_manager->famix_attribute->get_id(  name_group = ng_sap_table
+                                                               class      = tabname
+                                                               attribute  = tabname ).
+      WHEN invoced_element->program_type.
+        DATA programs2 TYPE REF TO cl_extr3_programs.
+        DATA: invoced_ext_progr_name_class  TYPE string,
+              invoced_ext_progr_name_method TYPE string.
+
+        programs2 = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
+        programs2->program_name( EXPORTING i_element_id = i_association-element_id1
+                                 IMPORTING external_program_name_class = invoced_ext_progr_name_class
+                                           external_program_name_method = invoced_ext_progr_name_method ).
+
+        e_used_id = element_manager->famix_method->get_id( class_name_group = ng_abap_program
+                                                           class             = invoced_ext_progr_name_class
+                                                           method_name_group = ng_abap_program
+                                                           method            = invoced_ext_progr_name_method ).
+
       WHEN OTHERS.
         ASSERT 1 = 2.
     ENDCASE.
 
-    DATA: invoicing_famix_class  TYPE string,
-          invoicing_famix_method TYPE string.
+    DATA: invoicing_famix_class       TYPE string,
+          invoicing_famix_method      TYPE string,
+          invoicing_class_name_group  TYPE string,
+          invoicing_method_name_group TYPE string.
 
     CASE invocing_element->type.
       WHEN invocing_element->class_type.
+
+        invoicing_class_name_group = ng_abap_class.
+        invoicing_method_name_group = ng_abap_method.
 
         DATA: invocing_class_name TYPE string,
               invocing_cmpname    TYPE string.
@@ -2543,6 +2610,9 @@ CLASS CL_EXTR3_ACCESS_OR_INVOCATN IMPLEMENTATION.
         invoicing_famix_method = invocing_cmpname.
 
       WHEN invocing_element->web_dynpro_comps_type.
+
+        invoicing_class_name_group = ng_abap_webdynpro.
+        invoicing_method_name_group = ng_abap_webdynpro.
 
         DATA web_dynpro_component TYPE REF TO cl_extr3_web_dynpro_comp.
 
@@ -2561,6 +2631,9 @@ CLASS CL_EXTR3_ACCESS_OR_INVOCATN IMPLEMENTATION.
 
       WHEN invocing_element->program_type.
 
+        invoicing_class_name_group = ng_abap_program.
+        invoicing_method_name_group = ng_abap_program.
+
         DATA programs TYPE REF TO cl_extr3_programs.
 
         programs = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
@@ -2575,8 +2648,11 @@ CLASS CL_EXTR3_ACCESS_OR_INVOCATN IMPLEMENTATION.
     ENDCASE.
 
     DATA using_method_id TYPE i.
-
-    e_using_method_id = element_manager->famix_method->get_id( class  = invoicing_famix_class
+    ASSERT invoicing_class_name_group IS NOT INITIAL.
+    ASSERT invoicing_method_name_group IS NOT INITIAL.
+    e_using_method_id = element_manager->famix_method->get_id( class_name_group = invoicing_class_name_group
+                                                               class  = invoicing_famix_class
+                                                               method_name_group = invoicing_method_name_group
                                                                method = invoicing_famix_method ).
 
   ENDMETHOD.
@@ -2967,18 +3043,83 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
 
         is_access = abap_true.
 
+      WHEN element->program_type.
+
+        DATA programs2 TYPE REF TO cl_extr3_programs.
+        programs2 = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
+
+        DATA: program             TYPE progname,
+              program_type        TYPE string,
+              program_attribute_2 TYPE string.
+
+
+
+        programs2->program_name(
+          EXPORTING
+            i_element_id                 = element_id
+          IMPORTING
+            program                      = program
+            program_type                 = program_type
+            program_attribute_2          = program_attribute_2
+*            external_program_name_class  =
+*            external_program_name_method =
+*            subc                         =
+        ).
+
+        DATA: cross_type TYPE char1,
+              cross_name TYPE seu_name.
+        CASE program_type.
+          WHEN programs2->type_program.
+            cross_type = 'R'.
+            cross_name = program.
+          WHEN programs2->type_function.
+            cross_type = 'F'.
+            cross_name = program_attribute_2.
+          WHEN OTHERS.
+            " TBD
+        ENDCASE.
+
+
     ENDCASE.
 
-    IF where_used_name IS NOT INITIAL.
+    IF where_used_name IS NOT INITIAL OR cross_name IS NOT INITIAL.
 
       DATA: wbcrossgts TYPE wbcrossgts_type,
-            wbcrossgt  TYPE wbcrossgt_type.
+            wbcrossgt  TYPE wbcrossgt_type,
+            cross      TYPE cross_type,
+            crosss     TYPE cross_types.
 
-      SELECT otype name include direct indirect
-        FROM wbcrossgt
-        INTO TABLE wbcrossgts
-        WHERE otype = otype
-          AND name = where_used_name.
+      IF otype IS NOT INITIAL.
+
+        SELECT otype name include direct indirect
+          FROM wbcrossgt
+          INTO TABLE wbcrossgts
+          WHERE otype = otype
+            AND name = where_used_name.
+
+      ENDIF.
+
+      IF cross_type IS NOT INITIAL.
+
+        SELECT type name include FROM cross INTO TABLE crosss
+          WHERE type = cross_type
+            AND name = cross_name.
+
+        LOOP AT crosss INTO cross.
+
+          " Most where used information is in table wbcrossgt. Now some information is read from table cross. Use nonetheless wbcrossgt
+          " for further processing. There is an integration test, that assures the correctness of the whole coding.
+
+          CLEAR wbcrossgt.
+
+          wbcrossgt-name = cross-name.
+          wbcrossgt-include = cross-include.
+
+          INSERT wbcrossgt INTO TABLE wbcrossgts.
+
+        ENDLOOP.
+
+      ENDIF.
 
       " Read dynamic usages
 
@@ -3550,7 +3691,7 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
       IF element-clstype EQ is_class_type.
         " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
         " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
-        element_manager->famix_class->add( EXPORTING name_group = 'ABAP_CLASS'
+        element_manager->famix_class->add( EXPORTING name_group = ng_abap_class
                                                      name       = element-class_name
                                                      modifiers  = cl_extract3=>modifier_abapglobalclass
                                            IMPORTING id         = last_id ).
@@ -3575,7 +3716,7 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
       ELSEIF element-clstype EQ interface_type.
         " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
         " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
-        element_manager->famix_class->add( EXPORTING name_group = 'ABAP_CLASS'
+        element_manager->famix_class->add( EXPORTING name_group = ng_abap_class
                                                      name       = element-class_name
                                                      modifiers  = cl_extract3=>modifier_abapglobalinterface
                                            IMPORTING id         = last_id ).
@@ -3608,7 +3749,8 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
         DATA package TYPE REF TO cl_extr3_packages.
         package ?= element_manager->get_element( i_element_id = association-element_id2 ).
         element_manager->famix_class->set_parent_package( element_id     = last_id
-                                                          parent_package = package->devclass( i_element_id = association-element_id2 ) ).
+                                                          parent_package = package->devclass( i_element_id = association-element_id2 )
+                                                          parent_package_name_group = ng_abap_package ).
 
       ENDLOOP.
 
@@ -3626,7 +3768,7 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
           element_manager->famix_attribute->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
           element_manager->famix_attribute->set_parent_type( EXPORTING element_id = last_id
                                                         parent_element = 'FAMIX.Class'
-                                                        parent_name_group = 'ABAP_CLASS'
+                                                        parent_name_group = ng_abap_class
                                                         parent_name    = element_comp-clsname ).
 
           IF element_comp-adt_link IS NOT INITIAL.
@@ -3646,8 +3788,9 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
 
           ENDIF.
 
-          element_manager->famix_attribute->store_id( EXPORTING class     = element_comp-clsname
-                                               attribute = element_comp-cmpname ).
+          element_manager->famix_attribute->store_id( EXPORTING name_group = ng_abap_class
+                                                                class      = element_comp-clsname
+                                                                attribute  = element_comp-cmpname ).
 
 *            sap_attribute->add( EXPORTING class     = class-clsname
 *                                          attribute = component-cmpname ).
@@ -3663,7 +3806,7 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
 
           element_manager->famix_method->set_parent_type( EXPORTING element_id = last_id
                                                      parent_element = 'FAMIX.Class'
-                                                     parent_name_group = 'ABAP_CLASS'
+                                                     parent_name_group = ng_abap_class
                                                      parent_name    = element_comp-clsname ).
 
           IF element_comp-adt_link IS NOT INITIAL.
@@ -3683,8 +3826,10 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
 
           ENDIF.
 
-          element_manager->famix_method->store_id( EXPORTING class  = element_comp-clsname
-                                              method = element_comp-cmpname ).
+          element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_class
+                                                             class  = element_comp-clsname
+                                                             method_name_group = ng_abap_method
+                                                             method = element_comp-cmpname ).
 
 
 *            sap_method->add( EXPORTING class  = class-clsname
@@ -3816,31 +3961,6 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
 
         ENDIF.
 
-*      ELSE.
-*
-*        " Is it a redefined component?
-*
-*        DATA: redefined_component  TYPE redefined_type.
-*
-*        TEST-SEAM seoredef_2.
-*
-*          SELECT SINGLE clsname refclsname mtdname FROM seoredef INTO redefined_component
-*            WHERE clsname = clsname
-*              AND version = 1
-*              AND mtdname = cmpname.
-*
-*        END-TEST-SEAM.
-*
-*        IF sy-subrc EQ 0.
-*
-*          TEST-SEAM seocompo_4.
-*            SELECT SINGLE clsname cmpname cmptype mtdtype FROM seocompo
-*              INTO (found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = redefined_component-refclsname
-*                                                                                       AND cmpname = cmpname.
-*          END-TEST-SEAM.
-*          found_class_name = clsname. "As it is redefined
-*          is_added = abap_true.
-*        ENDIF.
       ENDIF.
 
       IF is_added EQ abap_true.
@@ -4095,7 +4215,8 @@ CLASS CL_EXTR3_PACKAGES IMPLEMENTATION.
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
     ASSERT sy-subrc EQ 0.
 
-    element_manager->famix_package->add( name = element-devclass ).
+    element_manager->famix_package->add( name       = element-devclass
+                                         name_group = ng_abap_package ).
 
   ENDMETHOD.
   METHOD name.
@@ -4173,33 +4294,33 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
 
     LOOP AT elements_program ASSIGNING <p>.
 
-     IF <p>-program_type EQ |PROGRAM|.
+      IF <p>-program_type EQ type_program.
 
-        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
+        TRANSLATE <p>-program_attribute_1 TO LOWER CASE.
 
         CONCATENATE 'adt://' sysid '/sap/bc/adt/programs/programs/' <p>-program_attribute_1 INTO <p>-adt_or_bwmt_link.
 
-     ENDIF.
+      ENDIF.
 
-     IF <p>-program_type EQ |FUNCTION|.
+      IF <p>-program_type EQ type_function.
 
-        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
-        TRANSLATE <p>-program_attribute_2 to LOWER CASE.
+        TRANSLATE <p>-program_attribute_1 TO LOWER CASE.
+        TRANSLATE <p>-program_attribute_2 TO LOWER CASE.
 
         CONCATENATE 'adt://' sysid '/sap/bc/adt/functions/groups/' <p>-program_attribute_1 '/fmodules/' <p>-program_attribute_2 INTO <p>-adt_or_bwmt_link.
 
-     ENDIF.
+      ENDIF.
 
-     IF <p>-program_type EQ |FUNCTION_INCLUDE|.
+      IF <p>-program_type EQ type_function_include.
 
-        TRANSLATE <p>-program_attribute_1 to LOWER CASE.
-        TRANSLATE <p>-program_attribute_2 to LOWER CASE.
+        TRANSLATE <p>-program_attribute_1 TO LOWER CASE.
+        TRANSLATE <p>-program_attribute_2 TO LOWER CASE.
 
         CONCATENATE 'adt://' sysid '/sap/bc/adt/functions/groups/' <p>-program_attribute_1 '/includes/' <p>-program_attribute_2 INTO <p>-adt_or_bwmt_link.
 
-     ENDIF.
+      ENDIF.
 
-      IF <p>-program_type EQ 'BW_TRAN'.
+      IF <p>-program_type EQ type_bw_transformation.
 
         CONCATENATE 'bwmt://' sysid '/sap/bw/modeling/trfn/' <p>-program_attribute_1 INTO <p>-adt_or_bwmt_link.
 
@@ -4240,15 +4361,15 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
           name_of_mapped_class TYPE string.
 *      famix_package->add( name = table-devclass ).
 
-    IF element-program_type EQ |PROGRAM|.
+    IF element-program_type EQ type_program.
       name_group = 'ABAP_PROGRAM'.
       modifier = cl_extract3=>modifier_program.
       name_of_mapped_class = element-external_program_name.
-    ELSEIF element-program_type EQ |BW_TRAN|.
+    ELSEIF element-program_type EQ type_bw_transformation.
       name_group = 'BW_TRANSFORMATION'.
       modifier = cl_extract3=>modifier_bw_transformation.
       name_of_mapped_class = element-external_program_name.
-    ELSEIF element-program_type EQ |FUNCTION| OR element-program_type = |FUNCTION_INCLUDE|.
+    ELSEIF element-program_type EQ type_function OR element-program_type = type_function_include.
       name_group = 'ABAP_FUNCTIONGROUP'.
       modifier = cl_extract3=>modifier_function_group.
 *      name_of_mapped_class = element-external_program_name.
@@ -4272,7 +4393,8 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
       package ?= element_manager->get_element( i_element_id = association-element_id2 ).
 
       element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
-                                                 parent_package     = package->devclass( i_element_id = association-element_id2 ) ).
+                                                                  parent_package     = package->devclass( i_element_id = association-element_id2 )
+                                                                  parent_package_name_group = ng_abap_package ).
 
     ENDLOOP.
 
@@ -4290,7 +4412,9 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
                                                               parent_name       = name_of_mapped_class ).
 
 
-    element_manager->famix_method->store_id( EXPORTING class  = name_of_mapped_class
+    element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_program
+                                                       class  = name_of_mapped_class
+                                                       method_name_group = ng_abap_program
                                                        method = element-external_program_name ).
 
     IF element-adt_or_bwmt_link IS NOT INITIAL.
@@ -4325,26 +4449,27 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
 
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = i_element_id.
     ASSERT sy-subrc EQ 0.
-
+    program_type = element-program_type.
+    program_attribute_2 = element-program_attribute_2.
     program = element-program.
-    IF element-program_type EQ |FUNCTION| OR element-program_type = |FUNCTION_INCLUDE|.
+    IF element-program_type EQ type_function OR element-program_type = type_function_include.
       external_program_name_class = _get_names_for_function_groups( i_element = element ).
     ELSE.
       external_program_name_class = element-external_program_name.
     ENDIF.
-      external_program_name_method = element-external_program_name.
+    external_program_name_method = element-external_program_name.
     subc = element-subc.
 
   ENDMETHOD.
   METHOD _convert_program_2_ext_name.
 
-    clear program_type.
-    clear program_attribute_1.
+    CLEAR program_type.
+    CLEAR program_attribute_1.
 
-    data: tranid           type RSTRANID,
-          function_group   type rs38l_area,
-          function         type rs38l_fnam,
-          function_include type string.
+    DATA: tranid           TYPE rstranid,
+          function_group   TYPE rs38l_area,
+          function         TYPE rs38l_fnam,
+          function_include TYPE string.
 
     CLEAR program_type.
     CLEAR program_attribute_1.
@@ -4360,13 +4485,13 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
 
       IF function IS NOT INITIAL.
 
-        program_type = |FUNCTION|.
+        program_type = type_function.
         program_attribute_1 = function_group.
         program_attribute_2 = function.
 
       ELSEIF function_include IS NOT INITIAL.
 
-        program_type = |FUNCTION_INCLUDE|.
+        program_type = type_function_include.
         program_attribute_1 = function_group.
         program_attribute_2 = function_include.
 
@@ -4378,7 +4503,7 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
                              IMPORTING tranid = tranid
                                        r_result = r_result ).
 
-      program_type = |BW_TRAN|.
+      program_type = type_bw_transformation.
       program_attribute_1 = tranid.
 
     ELSEIF i_element_program+0(2) EQ |GP|.
@@ -4387,14 +4512,14 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
                              IMPORTING tranid = tranid
                                        r_result = r_result ).
 
-      program_type = |BW_TRAN|.
+      program_type = type_bw_transformation.
       program_attribute_1 = tranid.
 
     ELSE.
 
       r_result = i_element_program.
 
-      program_type = |PROGRAM|.
+      program_type = type_program.
       program_attribute_1 = i_element_program.
 
     ENDIF.
@@ -4612,7 +4737,8 @@ CLASS CL_EXTR3_TABLES IMPLEMENTATION.
       package ?= element_manager->get_element( i_element_id = association-element_id2 ).
 
       element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
-                                                 parent_package     = package->devclass( i_element_id = association-element_id2 ) ).
+                                                                  parent_package     = package->devclass( i_element_id = association-element_id2 )
+                                                                  parent_package_name_group = ng_abap_package ).
 
     ENDLOOP.
 
@@ -4624,8 +4750,9 @@ CLASS CL_EXTR3_TABLES IMPLEMENTATION.
     element_manager->famix_attribute->set_parent_type( EXPORTING element_id         = dummy_attribute_id
                                                 parent_id          = last_id ).
 
-    element_manager->famix_attribute->store_id( EXPORTING class     = element-tabname
-                                         attribute = element-tabname ).
+    element_manager->famix_attribute->store_id( EXPORTING name_group = ng_sap_table
+                                                          class     = element-tabname
+                                                          attribute = element-tabname ).
 
 
 
@@ -4774,7 +4901,8 @@ CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
         DATA package TYPE REF TO cl_extr3_packages.
         package ?= element_manager->get_element( i_element_id = association-element_id2 ).
         element_manager->famix_class->set_parent_package( element_id     = class_id
-                                                          parent_package = package->devclass( i_element_id = association-element_id2 ) ).
+                                                          parent_package = package->devclass( i_element_id = association-element_id2 )
+                                                          parent_package_name_group = ng_abap_package ).
 
       ENDLOOP.
 
@@ -4791,8 +4919,10 @@ CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
             parent_id          = class_id ).
 
         "! TBD Really required, this appears to be not exact, no namegroup, ...
-        element_manager->famix_method->store_id( EXPORTING class  = element-wdy_component_name
-                                          method = element_component-wdy_controller_name ).
+        element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_webdynpro
+                                                           class  = element-wdy_component_name
+                                                           method_name_group = ng_abap_webdynpro
+                                                           method = element_component-wdy_controller_name ).
 
       ENDLOOP.
 
