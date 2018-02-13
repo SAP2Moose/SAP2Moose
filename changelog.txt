@@ -8,6 +8,15 @@ Legend
 + : added
 - : removed
 
+13.02.2018 v1.1.0
+-----------------
+
++ Support programs better #53
+  Programs that are used by other programs or coding are now extracted together with their usage
++ Support functions in more detail #52
+  Functions are now displayed together with elements that use them
+* Support elements with equal names #84
+
 15.01.2018 v1.0.0
 -----------------
 
