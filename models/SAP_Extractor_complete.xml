@@ -5,8 +5,8 @@
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
-        <x>1015.0</x>
-        <y>2019.0</y>
+        <x>139.25</x>
+        <y>2460.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -151,12 +151,12 @@
         <type>FAMIXMethod</type>
         <class>FGR-Z2MSE_TEST_FGR_A</class>
         <method>LZ2MSE_TEST_FGR_AF01</method>
-        <x>-393.0</x>
-        <y>587.0</y>
+        <x>14.0</x>
+        <y>504.0</y>
         <comment><![CDATA[This is an include of a function group<br>No further usages are extracted yet]]>
         </comment>
-        <commentx>-405.0</commentx>
-        <commenty>534.0</commenty>
+        <commentx>76.0</commentx>
+        <commenty>591.0</commenty>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -199,6 +199,13 @@
         <method>ADD_REFERENCE_BY_NAME</method>
         <x>-2745.0</x>
         <y>370.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3</class>
+        <attribute>NG_ABAP_METHOD</attribute>
+        <x>-1949.0</x>
+        <y>926.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -248,6 +255,13 @@
         <method>GET_ASSOCIATIONS</method>
         <x>-2595.0</x>
         <y>1025.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3</class>
+        <attribute>NG_SOURCE_LANGUAGE</attribute>
+        <x>-1849.0</x>
+        <y>901.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -489,11 +503,11 @@
         <y>790.0</y>
     </element>
     <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_PACKAGES</class>
-        <method>DEVCLASS</method>
-        <x>-1690.0</x>
-        <y>1185.0</y>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3</class>
+        <attribute>NG_SAP_TABLE</attribute>
+        <x>-2016.0</x>
+        <y>926.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -501,6 +515,13 @@
         <attribute>ELEMENTS_ELEMENT_ID</attribute>
         <x>-2440.0</x>
         <y>945.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_PACKAGES</class>
+        <method>DEVCLASS</method>
+        <x>-1690.0</x>
+        <y>1185.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -604,8 +625,8 @@
     <element>
         <type>FAMIXClass</type>
         <class>FGR-Z2MSE_TEST_FGR_A</class>
-        <x>-444.0</x>
-        <y>598.0</y>
+        <x>-37.0</x>
+        <y>516.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -1122,6 +1143,13 @@
     </element>
     <element>
         <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3</class>
+        <attribute>NG_ABAP_WEBDYNPRO</attribute>
+        <x>-1791.0</x>
+        <y>926.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_TABLES</class>
         <attribute>INSTANCE</attribute>
         <x>-1470.0</x>
@@ -1195,8 +1223,8 @@
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_TEST_CL_A</class>
-        <x>-945.0</x>
-        <y>530.0</y>
+        <x>-784.0</x>
+        <y>553.0</y>
     </element>
     <element>
         <type>FAMIXPackage</type>
@@ -1208,8 +1236,12 @@
         <type>FAMIXMethod</type>
         <class>FGR-Z2MSE_TEST_FGR_A</class>
         <method>F-Z2MSE_TEST_FUNCTION_A</method>
-        <x>-492.0</x>
-        <y>587.0</y>
+        <x>-86.0</x>
+        <y>504.0</y>
+        <comment><![CDATA[New in v1.1.0 - Display used functions]]>
+        </comment>
+        <commentx>-58.0</commentx>
+        <commenty>407.0</commenty>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -1577,8 +1609,8 @@
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_TEST_PROGRAM_A</class>
-        <x>-642.0</x>
-        <y>503.0</y>
+        <x>-227.0</x>
+        <y>387.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -2004,8 +2036,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_TEST_PROGRAM_A</class>
         <method>Z2MSE_TEST_PROGRAM_A</method>
-        <x>-639.0</x>
-        <y>493.0</y>
+        <x>-225.0</x>
+        <y>377.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -2310,6 +2342,20 @@
         <method>MAKE_MODEL</method>
         <x>-1560.0</x>
         <y>925.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3</class>
+        <attribute>NG_ABAP_PACKAGE</attribute>
+        <x>-1931.0</x>
+        <y>901.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3</class>
+        <attribute>NG_ABAP_CLASS</attribute>
+        <x>-1771.0</x>
+        <y>901.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -2622,8 +2668,8 @@
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_TEST_PROGRAM_B</class>
-        <x>-562.0</x>
-        <y>429.0</y>
+        <x>-372.0</x>
+        <y>527.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -2684,8 +2730,12 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_TEST_PROGRAM_B</class>
         <method>Z2MSE_TEST_PROGRAM_B</method>
-        <x>-560.0</x>
-        <y>419.0</y>
+        <x>-371.0</x>
+        <y>517.0</y>
+        <comment><![CDATA[New in v1.1.0 - Display used programs]]>
+        </comment>
+        <commentx>-300.0</commentx>
+        <commenty>575.0</commenty>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -2851,6 +2901,13 @@
         <method>W_MAIN</method>
         <x>-930.0</x>
         <y>375.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3</class>
+        <attribute>NG_ABAP_PROGRAM</attribute>
+        <x>-1874.0</x>
+        <y>926.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>

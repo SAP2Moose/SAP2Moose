@@ -1,7 +1,7 @@
-* generated on system NPL at 02.02.2018 on 10:36:01
+* generated on system NPL at 08.06.2018 on 16:05:08
 
 *
-* This is version 1.1.0
+* This is version 1.1.1
 *
 *The MIT License (MIT)
 *
@@ -258,7 +258,6 @@ CLASS cl_model DEFINITION
     "! Also to give a feedback what is extracted
     METHODS get_model
       RETURNING VALUE(public_elements) TYPE public_elements_type.
-
 
 
   PRIVATE SECTION.
@@ -634,8 +633,6 @@ CLASS cl_output_model DEFINITION
         mse_model                 TYPE cl_model=>lines_type
         g_parameter_download_file TYPE abap_bool
         i_default_prefix          TYPE string.
-
-
 ENDCLASS.
 CLASS CL_OUTPUT_MODEL IMPLEMENTATION.
   METHOD make.
@@ -711,7 +708,6 @@ CLASS cl_famix_entity DEFINITION ABSTRACT
     DATA g_elementname TYPE string.
     DATA g_model TYPE REF TO cl_model.
     DATA g_last_used_id TYPE i.
-
 ENDCLASS.
 CLASS CL_FAMIX_ENTITY IMPLEMENTATION.
   METHOD constructor.
@@ -739,8 +735,6 @@ CLASS cl_famix_sourced_entity DEFINITION ABSTRACT INHERITING FROM cl_famix_entit
         element_name            TYPE clike OPTIONAL
         source_language_element TYPE clike
         source_language_name    TYPE clike.
-
-
 ENDCLASS.
 CLASS CL_FAMIX_SOURCED_ENTITY IMPLEMENTATION.
   METHOD set_declared_source_language.
@@ -839,7 +833,6 @@ CLASS cl_famix_named_entity DEFINITION INHERITING FROM cl_famix_sourced_entity A
 
   PROTECTED SECTION.
 
-
 ENDCLASS.
 CLASS CL_FAMIX_NAMED_ENTITY IMPLEMENTATION.
   METHOD add.
@@ -928,7 +921,6 @@ CLASS cl_famix_attribute DEFINITION INHERITING FROM cl_famix_named_entity
         parent_name_group  TYPE clike OPTIONAL
         parent_name        TYPE clike OPTIONAL
         parent_id          TYPE i     OPTIONAL.
-
   PRIVATE SECTION.
     TYPES: BEGIN OF attribute_id_type,
              name_group TYPE string,
@@ -1028,7 +1020,6 @@ CLASS cl_famix_container_entity DEFINITION INHERITING FROM cl_famix_named_entity
                                           parent_container_id TYPE i.
   PROTECTED SECTION.
 
-
 ENDCLASS.
 CLASS CL_FAMIX_CONTAINER_ENTITY IMPLEMENTATION.
   METHOD set_container.
@@ -1072,8 +1063,6 @@ CLASS cl_famix_behavioural_entty DEFINITION INHERITING FROM CL_famix_container_e
                             element_name       TYPE clike OPTIONAL
                             signature          TYPE clike.
 
-
-
 ENDCLASS.
 CLASS CL_FAMIX_BEHAVIOURAL_ENTTY IMPLEMENTATION.
   METHOD set_signature.
@@ -1095,8 +1084,6 @@ CLASS cl_famix_package DEFINITION INHERITING FROM cl_famix_named_entity
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
 
     METHODS add REDEFINITION.
-
-
 
 ENDCLASS.
 CLASS CL_FAMIX_PACKAGE IMPLEMENTATION.
@@ -1168,7 +1155,6 @@ CLASS cl_famix_method DEFINITION INHERITING FROM CL_famix_behavioural_entty
                 method_name_group TYPE clike
                 method            TYPE clike
       RETURNING VALUE(id)         TYPE i.
-
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_method_id,
              class_name_group  TYPE string,
@@ -1256,8 +1242,6 @@ CLASS cl_famix_class DEFINITION INHERITING FROM CL_famix_container_entity
         element_type       TYPE clike OPTIONAL
         element_name_group TYPE clike OPTIONAL
         element_name       TYPE clike OPTIONAL .
-
-
 ENDCLASS.
 CLASS CL_FAMIX_CLASS IMPLEMENTATION.
   METHOD constructor.
@@ -1281,8 +1265,6 @@ CLASS cl_famix_association DEFINITION INHERITING FROM cl_famix_sourced_entity AB
   PUBLIC SECTION.
     METHODS add
       RETURNING VALUE(id) TYPE i.
-
-
 ENDCLASS.
 CLASS CL_FAMIX_ASSOCIATION IMPLEMENTATION.
   METHOD add.
@@ -1324,7 +1306,6 @@ CLASS cl_famix_access DEFINITION INHERITING FROM CL_famix_association
         element_name       TYPE clike OPTIONAL
         accessor_id        TYPE i
         variable_id        TYPE i.
-
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_accessor_variable_id,
              accessor_id TYPE i,
@@ -1401,7 +1382,6 @@ CLASS cl_famix_invocation DEFINITION INHERITING FROM CL_famix_association
         receiver_id          TYPE i OPTIONAL
         signature            TYPE clike OPTIONAL
         receiver_source_code TYPE clike OPTIONAL.
-
 
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_sender_candidate,
@@ -1493,8 +1473,6 @@ CLASS cl_famix_inheritance DEFINITION INHERITING FROM CL_famix_association
         superclass_name_group TYPE clike
         superclass_name       TYPE clike.
 
-
-
 ENDCLASS.
 CLASS CL_FAMIX_INHERITANCE IMPLEMENTATION.
   METHOD constructor.
@@ -1527,8 +1505,6 @@ CLASS cl_famix_custom_source_lng DEFINITION INHERITING FROM cl_famix_entity
                 EXPORTING VALUE(exists_already_with_id) TYPE i
                           VALUE(id)                     TYPE i.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
-
-
 ENDCLASS.
 CLASS CL_FAMIX_CUSTOM_SOURCE_LNG IMPLEMENTATION.
   METHOD add.
@@ -1558,8 +1534,6 @@ CLASS cl_famix_module DEFINITION INHERITING FROM cl_famix_named_entity
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
 
     METHODS add REDEFINITION.
-
-
 
 ENDCLASS.
 CLASS CL_FAMIX_MODULE IMPLEMENTATION.
@@ -4231,6 +4205,15 @@ CLASS CL_EXTR3_PACKAGES IMPLEMENTATION.
 
   ENDMETHOD.
   METHOD _does_package_exists.
+
+    " SAP_2_FAMIX_66
+
+    " Local packages start with a $ and have no entry in table TADIR. So report them always as existing
+
+    IF i_package+0(1) EQ '$'.
+      exists = abap_true.
+      RETURN.
+    ENDIF.
 
     " Does package exists?
     DATA found_obj_name TYPE sobj_name.

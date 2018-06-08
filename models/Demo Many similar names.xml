@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
-<!--Moose2Model Layout data, see www.moose2model.org on how to use this file-->
+<!--Moose2Model Layout data, visit moose2model.org on how to use this file-->
 <elements>
-    <version>v0.4.5</version>
+    <version>v1.3.0</version>
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
         <x>829.0</x>
-        <y>16.0</y>
+        <y>158.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -62,8 +62,12 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_DEMO_LONG_PREFIX_CL_E</class>
         <method>LONG_MEANINGLESS_METHOD_NAME</method>
-        <x>-529.0</x>
-        <y>80.0</y>
+        <x>-437.0</x>
+        <y>-36.0</y>
+        <comment><![CDATA[A Comment]]>
+        </comment>
+        <commentx>-380.0</commentx>
+        <commenty>-85.0</commenty>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
@@ -80,8 +84,8 @@
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_DEMO_LONG_PREFIX_CL_E</class>
-        <x>-529.0</x>
-        <y>91.0</y>
+        <x>-436.0</x>
+        <y>-25.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
