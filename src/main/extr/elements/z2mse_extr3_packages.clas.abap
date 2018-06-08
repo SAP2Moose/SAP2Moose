@@ -129,6 +129,15 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
 
   METHOD _does_package_exists.
 
+    " SAP_2_FAMIX_66
+
+    " Local packages start with a $ and have no entry in table TADIR. So report them always as existing
+
+    IF i_package+0(1) EQ '$'.
+      exists = abap_true.
+      RETURN.
+    ENDIF.
+
     " Does package exists?
     DATA found_obj_name TYPE sobj_name.
     TEST-SEAM tadir.
