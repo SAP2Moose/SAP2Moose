@@ -7,6 +7,11 @@ Legend
 ! : changed
 + : added
 - : removed
+
+15.06.2018 v1.1.2
+-----------------
+* Inform users when elements are not restricted #86
+
 08.06.2018 v1.1.1
 -----------------
 * No elements extracted if package starts with $ #85
