@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
-<!--Moose Diagram Layout data, see "https://github.com/RainerWinkler/Moose-FAMIX-SAP-Extractor" on how to use this file-->
+<!--Moose2Model Layout data, visit moose2model.org on how to use this file-->
 <elements>
-    <version>v0.4.5</version>
+    <version>v1.3.0</version>
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
-        <x>84.0</x>
-        <y>427.0</y>
+        <x>750.0</x>
+        <y>669.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -23,12 +23,6 @@
         <y>121.0</y>
     </element>
     <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_EXTR3_PROGRAMS</class>
-        <x>-453.0</x>
-        <y>702.0</y>
-    </element>
-    <element>
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_ELEMENT_MANAGER</class>
         <attribute>MODEL_BUILDER</attribute>
@@ -36,11 +30,30 @@
         <y>325.0</y>
     </element>
     <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <x>-453.0</x>
+        <y>702.0</y>
+    </element>
+    <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <method>GET_INSTANCE</method>
         <x>-202.0</x>
         <y>701.0</y>
+    </element>
+    <element>
+        <type>FAMIXPackage</type>
+        <package>Z2MSE_MAIN_MSE</package>
+        <x>1564.0</x>
+        <y>477.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <attribute>TYPE_PROGRAM</attribute>
+        <x>-497.0</x>
+        <y>679.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -91,6 +104,13 @@
         <y>691.0</y>
     </element>
     <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <method>PROGRAM_NAME</method>
+        <x>-437.0</x>
+        <y>704.0</y>
+    </element>
+    <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_EXTR3_ACCESS</class>
         <x>64.0</x>
@@ -131,6 +151,12 @@
         </ACTSuppressOthers>
     </element>
     <element>
+        <type>FAMIXPackage</type>
+        <package>Z2MSE_MAIN_EXTR</package>
+        <x>494.0</x>
+        <y>542.0</y>
+    </element>
+    <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_PACKAGES</class>
         <method>DEVCLASS</method>
@@ -149,6 +175,13 @@
         <method>NEW_ELEMENT_ID</method>
         <x>-746.0</x>
         <y>290.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_ELEMENTS</class>
+        <attribute>PROGRAM_TYPE</attribute>
+        <x>-295.0</x>
+        <y>109.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -177,6 +210,12 @@
         <method>ADD_COMPONENT</method>
         <x>-860.0</x>
         <y>725.0</y>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -201,17 +240,17 @@
     </element>
     <element>
         <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_INVOCATION</class>
-        <method>ADD</method>
-        <x>-117.0</x>
-        <y>607.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <method>ADD</method>
         <x>-160.0</x>
         <y>701.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_INVOCATION</class>
+        <method>ADD</method>
+        <x>-117.0</x>
+        <y>607.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -316,17 +355,17 @@
     </element>
     <element>
         <type>FAMIXAttribute</type>
-        <class>Z2MSE_EXTR3_ELEMENT_MANAGER</class>
-        <attribute>EXCLUDE_FOUND_SAP_INTF</attribute>
-        <x>-1321.0</x>
-        <y>330.0</y>
-    </element>
-    <element>
-        <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_ELEMENTS</class>
         <attribute>TABLE_TYPE</attribute>
         <x>-308.0</x>
         <y>110.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_ELEMENT_MANAGER</class>
+        <attribute>EXCLUDE_FOUND_SAP_INTF</attribute>
+        <x>-1321.0</x>
+        <y>330.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -401,12 +440,6 @@
         <y>726.0</y>
     </element>
     <element>
-        <type>FAMIXPackage</type>
-        <package>Z2MSE_ASSOCIATIONS</package>
-        <x>852.0</x>
-        <y>69.0</y>
-    </element>
-    <element>
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <attribute>METHOD_TYPE</attribute>
@@ -434,12 +467,6 @@
         <y>130.0</y>
     </element>
     <element>
-        <type>FAMIXPackage</type>
-        <package>Z2MSE_MSE</package>
-        <x>90.0</x>
-        <y>41.0</y>
-    </element>
-    <element>
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>IS_INITIAL_SELECTION</attribute>
@@ -460,12 +487,6 @@
         </ACTSuppressOthers>
     </element>
     <element>
-        <type>FAMIXPackage</type>
-        <package>Z2MSE_ELEMENTS</package>
-        <x>185.0</x>
-        <y>259.0</y>
-    </element>
-    <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_EXTR3_WEB_DYNPRO_COMP</class>
         <x>-854.0</x>
@@ -478,6 +499,12 @@
         <y>544.0</y>
     </element>
     <element>
+        <type>FAMIXPackage</type>
+        <package>Z2MSE_MAIN_EXTR_ASSOCIATIONS</package>
+        <x>1427.0</x>
+        <y>287.0</y>
+    </element>
+    <element>
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>ASSOCIATION_BUILDERS_INIT</attribute>
@@ -488,8 +515,12 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_MOOSE_EXTRACTOR2</class>
         <method>Z2MSE_MOOSE_EXTRACTOR2</method>
-        <x>-1052.0</x>
-        <y>-29.0</y>
+        <x>-995.0</x>
+        <y>10.0</y>
+        <comment><![CDATA[The main entry point]]>
+        </comment>
+        <commentx>-927.0</commentx>
+        <commenty>-27.0</commenty>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
@@ -498,16 +529,17 @@
         </ACTSuppressOthers>
     </element>
     <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_WEB_DYNPRO_COMP</class>
+        <method>_ADD_COMPONENT</method>
+        <x>-824.0</x>
+        <y>725.0</y>
+    </element>
+    <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_EXTR3_TABLES</class>
         <x>-651.0</x>
         <y>717.0</y>
-    </element>
-    <element>
-        <type>FAMIXPackage</type>
-        <package>Z2MSE_ASSOCIATION_BUILDERS</package>
-        <x>504.0</x>
-        <y>284.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -527,6 +559,12 @@
         <method>INITIAL_SELECTION_STARTED</method>
         <x>-719.0</x>
         <y>279.0</y>
+    </element>
+    <element>
+        <type>FAMIXPackage</type>
+        <package>Z2MSE_MAIN_EXTR_ELEMENTS</package>
+        <x>889.0</x>
+        <y>324.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -590,6 +628,13 @@
         </ACTSuppressOthers>
     </element>
     <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_WHERE_USED_BUILDER</class>
+        <attribute>G_DYNAMIC_USAGE</attribute>
+        <x>-541.0</x>
+        <y>521.0</y>
+    </element>
+    <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_ELEMENT_MANAGER</class>
         <method>MAKE_MODEL</method>
@@ -643,10 +688,11 @@
         <y>167.0</y>
     </element>
     <element>
-        <type>FAMIXPackage</type>
-        <package>Z2MSE_EXTRACT3</package>
-        <x>420.0</x>
-        <y>82.0</y>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <attribute>TYPE_FUNCTION</attribute>
+        <x>-433.0</x>
+        <y>679.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -718,8 +764,19 @@
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_MOOSE_EXTRACTOR2</class>
-        <x>-1052.0</x>
-        <y>-19.0</y>
+        <x>-995.0</x>
+        <y>19.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
+        <method>USAGE_OF_SINGLE_ELEMENT</method>
+    </element>
+    <element>
+        <type>FAMIXPackage</type>
+        <package>Z2MSE_MAIN_EXTR_ASSOCBUILD</package>
+        <x>1231.0</x>
+        <y>542.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>

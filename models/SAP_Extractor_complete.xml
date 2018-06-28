@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <!--Moose2Model Layout data, visit moose2model.org on how to use this file-->
 <elements>
-    <version>v1.2.0</version>
+    <version>v1.3.0</version>
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
-        <x>139.25</x>
-        <y>2460.0</y>
+        <x>2722.25</x>
+        <y>319.5</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -550,8 +550,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_WHERE_USED_BUILDER</class>
         <method>SET_DYNAMIC_READ</method>
-        <x>-2435.0</x>
-        <y>1440.0</y>
+        <x>-2369.0</x>
+        <y>1454.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -745,6 +745,17 @@
         <method>_SELECT_TOP_PACKAGES</method>
         <x>-3080.0</x>
         <y>1155.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_DYNAMIC_USAGE</class>
+        <method>WHERE_USED</method>
+        <x>-1266.0</x>
+        <y>944.0</y>
+        <comment><![CDATA[Contains informations on dynamic calls]]>
+        </comment>
+        <commentx>-1256.0</commentx>
+        <commenty>896.0</commenty>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -1114,6 +1125,13 @@
         <y>265.0</y>
     </element>
     <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_TEST_CL_B2</class>
+        <attribute>Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000</attribute>
+        <x>-970.0</x>
+        <y>825.0</y>
+    </element>
+    <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_MSE_HARMONIZE</class>
         <method>_ANALYZE_ATTRIBUTE_VALUE</method>
@@ -1126,13 +1144,6 @@
         <attribute>TABLE_TYPE</attribute>
         <x>-1730.0</x>
         <y>920.0</y>
-    </element>
-    <element>
-        <type>FAMIXAttribute</type>
-        <class>Z2MSE_TEST_CL_B2</class>
-        <attribute>Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000</attribute>
-        <x>-970.0</x>
-        <y>825.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -1149,18 +1160,18 @@
         <y>926.0</y>
     </element>
     <element>
-        <type>FAMIXAttribute</type>
-        <class>Z2MSE_EXTR3_TABLES</class>
-        <attribute>INSTANCE</attribute>
-        <x>-1470.0</x>
-        <y>1085.0</y>
-    </element>
-    <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_FAMIX_INVOCATION</class>
         <method>IS_NEW_INVOCATION_TO_CANDIDATE</method>
         <x>-1880.0</x>
         <y>655.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_TABLES</class>
+        <attribute>INSTANCE</attribute>
+        <x>-1470.0</x>
+        <y>1085.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -1173,6 +1184,12 @@
         <class>Z2MSE_DEMO_LONG_PREFIX_CL_D</class>
         <x>589.0</x>
         <y>407.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_DYNAMIC_USAGE</class>
+        <x>-1196.0</x>
+        <y>954.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -2346,15 +2363,15 @@
     <element>
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3</class>
-        <attribute>NG_ABAP_PACKAGE</attribute>
-        <x>-1931.0</x>
+        <attribute>NG_ABAP_CLASS</attribute>
+        <x>-1771.0</x>
         <y>901.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3</class>
-        <attribute>NG_ABAP_CLASS</attribute>
-        <x>-1771.0</x>
+        <attribute>NG_ABAP_PACKAGE</attribute>
+        <x>-1931.0</x>
         <y>901.0</y>
     </element>
     <element>
@@ -2753,17 +2770,17 @@
     </element>
     <element>
         <type>FAMIXMethod</type>
-        <class>Z2MSE_FAMIX_PACKAGE</class>
-        <method>ADD</method>
-        <x>-3040.0</x>
-        <y>610.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
         <class>Z2MSE_FAMIX_METHOD</class>
         <method>ADD</method>
         <x>-2660.0</x>
         <y>615.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_FAMIX_PACKAGE</class>
+        <method>ADD</method>
+        <x>-3040.0</x>
+        <y>610.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -2925,17 +2942,17 @@
     </element>
     <element>
         <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_PACKAGES_MOCK</class>
-        <method>CLEAR_MOCK</method>
-        <x>-1600.0</x>
-        <y>1290.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_INVOCATION</class>
         <method>MAKE_MODEL</method>
         <x>-2470.0</x>
         <y>850.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_PACKAGES_MOCK</class>
+        <method>CLEAR_MOCK</method>
+        <x>-1600.0</x>
+        <y>1290.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
