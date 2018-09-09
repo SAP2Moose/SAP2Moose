@@ -36,7 +36,7 @@ CLASS ltcl_main IMPLEMENTATION.
           selected_packages_exp TYPE z2mse_extr3_initial_elements=>ty_packages.
 
     selected_packages_act = f_cut->g_selected_packages.
-    selected_packages_exp = VALUE #( ( package = 'A') ).
+    selected_packages_exp = VALUE #( ( package = 'A' ) ).
 
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
@@ -67,8 +67,8 @@ CLASS ltcl_main IMPLEMENTATION.
           selected_packages_exp TYPE z2mse_extr3_initial_elements=>ty_packages.
 
     selected_packages_act = f_cut->g_selected_packages.
-    selected_packages_exp = VALUE #( ( package = 'A' parentpackage = '')
-                                     ( package = 'A_A' parentpackage = 'A') ).
+    selected_packages_exp = VALUE #( ( package = 'A' parentpackage = '' )
+                                     ( package = 'A_A' parentpackage = 'A' ) ).
 
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
@@ -103,8 +103,8 @@ CLASS ltcl_main IMPLEMENTATION.
           selected_packages_exp TYPE z2mse_extr3_initial_elements=>ty_packages.
 
     selected_packages_act = f_cut->g_selected_packages.
-    selected_packages_exp = VALUE #( ( package = 'A' parentpackage = '')
-                                     ( package = 'A_A_A' parentpackage = 'A_A') ).
+    selected_packages_exp = VALUE #( ( package = 'A' parentpackage = '' )
+                                     ( package = 'A_A_A' parentpackage = 'A_A' ) ).
 
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
