@@ -1,5 +1,5 @@
 *
-* This is version 1.1.0
+* This is version 1.1.2
 *
 *The MIT License (MIT)
 *
@@ -224,6 +224,26 @@ AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_eltyp.
   PERFORM fill_f4_eltyp.
 
 START-OF-SELECTION.
+
+  " Inform users when selection is wrong
+
+  IF s_pack IS INITIAL AND
+     s_spack IS INITIAL AND
+     p_eltyp IS INITIAL.
+
+    FORMAT COLOR COL_NEGATIVE.
+    WRITE: / 'Restrict elements to be extracted'.
+    FORMAT COLOR COL_BACKGROUND.
+    WRITE: / 'The extractor is not able to extract the whole system'.
+    WRITE: / 'You should start with a small quantity of elements, to limit problems when experimenting with the tool'.
+    WRITE: / 'Choose a package with only a few 1000 elements'.
+    WRITE: / 'Choose a small number for upward (downward) search if needed'.
+
+    RETURN.
+
+  ENDIF.
+
+  " Process user selection
 
   DATA: mse_model TYPE z2mse_model=>lines_type.
 

@@ -1,12 +1,13 @@
 <?xml version="1.0"?>
 <!--Moose2Model Layout data, visit moose2model.org on how to use this file-->
 <elements>
-    <version>v1.3.0</version>
+    <version>v1.3.1</version>
+    <suppressed>packageBox</suppressed>
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
-        <x>750.0</x>
-        <y>669.0</y>
+        <x>1664.0</x>
+        <y>420.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -766,11 +767,6 @@
         <class>Z2MSE_MOOSE_EXTRACTOR2</class>
         <x>-995.0</x>
         <y>19.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
-        <method>USAGE_OF_SINGLE_ELEMENT</method>
     </element>
     <element>
         <type>FAMIXPackage</type>

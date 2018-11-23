@@ -1,3 +1,5 @@
+CLASS ltcl_main DEFINITION DEFERRED.
+CLASS z2mse_extr3_packages DEFINITION LOCAL FRIENDS ltcl_main.
 CLASS ltcl_main DEFINITION FINAL FOR TESTING
   DURATION SHORT
   RISK LEVEL HARMLESS.
@@ -8,7 +10,8 @@ CLASS ltcl_main DEFINITION FINAL FOR TESTING
           f_cut           TYPE REF TO z2mse_extr3_packages.
     METHODS:
       setup,
-      simple FOR TESTING RAISING cx_static_check.
+      simple FOR TESTING RAISING cx_static_check,
+      _does_package_exists FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
 
@@ -82,6 +85,24 @@ CLASS ltcl_main IMPLEMENTATION.
         act                  = equalized_harmonized_mse_act
         exp                  = equalized_harmonized_mse_exp
         msg                  = 'Expect mse with correct package' ).
+  ENDMETHOD.
+
+  METHOD _does_package_exists.
+
+    TEST-INJECTION tadir.
+      sy-subrc = 4.
+    END-TEST-INJECTION.
+
+    " SAP_2_FAMIX_66
+
+    data(exists) = f_cut->_does_package_exists( i_package = '$LOCAL_PACKAGE' ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Local packages exist always' exp = abap_true act = exists ).
+
+    exists = f_cut->_does_package_exists( i_package = '' ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Empty package names exist never' exp = abap_false act = exists ).
+
   ENDMETHOD.
 
 ENDCLASS.
