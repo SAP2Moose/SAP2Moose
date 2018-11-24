@@ -135,8 +135,8 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
                          IMPORTING is_added       = is_added
                                    new_element_id = uses_element_id ).
 
-          invocation->add( EXPORTING invoced_element_id1  = element_id
-                                     invocing_element_id2 = uses_element_id ).
+          invocation->add( EXPORTING invoced_element_id1  = uses_element_id
+                                     invocing_element_id2 = element_id ).
 
           CLEAR is_added.
 
