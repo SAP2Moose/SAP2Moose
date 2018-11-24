@@ -323,7 +323,7 @@ CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
       WHILE something_to_be_done_down EQ abap_true.
 
-        temp = |Search up for level { level_to_search_down }|."To be 7.02 compatible
+        temp = |Search down for level { level_to_search_down }|."To be 7.02 compatible
         CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
 
         something_to_be_done_down = abap_false.
