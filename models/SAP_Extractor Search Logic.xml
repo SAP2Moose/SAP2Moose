@@ -5,8 +5,8 @@
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
-        <x>1757.0</x>
-        <y>455.0</y>
+        <x>1911.0</x>
+        <y>467.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -118,15 +118,15 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>IS_POST_SELECTION</attribute>
-        <x>-1070.0</x>
-        <y>-90.0</y>
+        <x>-987.0</x>
+        <y>-75.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <method>SEARCH</method>
-        <x>-1150.0</x>
-        <y>-60.0</y>
+        <x>-1067.0</x>
+        <y>-45.0</y>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
@@ -157,15 +157,15 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <method>NEW_ELEMENT_ID</method>
-        <x>-1030.0</x>
-        <y>-55.0</y>
+        <x>-947.0</x>
+        <y>-40.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_WHERE_USED_BUILDER</class>
         <method>SET_DYNAMIC_READ</method>
-        <x>-920.0</x>
-        <y>151.0</y>
+        <x>-899.0</x>
+        <y>136.0</y>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
@@ -226,8 +226,8 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>IS_DOWN_SEARCH</attribute>
-        <x>-1020.0</x>
-        <y>-115.0</y>
+        <x>-937.0</x>
+        <y>-100.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -261,8 +261,8 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>IS_USAGE_OF_SINGLE_ELEMENT</attribute>
-        <x>-1315.0</x>
-        <y>-115.0</y>
+        <x>-1232.0</x>
+        <y>-100.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -282,8 +282,8 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>ELEMENT_MANAGER</attribute>
-        <x>-1305.0</x>
-        <y>-125.0</y>
+        <x>-1222.0</x>
+        <y>-110.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -295,8 +295,8 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>LEVEL_FOR_FOUND_IN_DOWNSEARCH</attribute>
-        <x>-1305.0</x>
-        <y>-90.0</y>
+        <x>-1222.0</x>
+        <y>-75.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -316,8 +316,8 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>LEVEL_FOR_FOUND_IN_UPSEARCH</attribute>
-        <x>-1175.0</x>
-        <y>-90.0</y>
+        <x>-1092.0</x>
+        <y>-75.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -375,8 +375,15 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>ASSOCIATION_BUILDERS_POST</attribute>
-        <x>-975.0</x>
-        <y>-90.0</y>
+        <x>-892.0</x>
+        <y>-75.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
+        <method>WRITE_FOUND_ELEMENTS</method>
+        <x>-1135.0</x>
+        <y>-34.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -428,8 +435,8 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>IS_INITIAL_SELECTION</attribute>
-        <x>-875.0</x>
-        <y>-90.0</y>
+        <x>-792.0</x>
+        <y>-75.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -453,8 +460,8 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>ASSOCIATION_BUILDERS_INIT</attribute>
-        <x>-1200.0</x>
-        <y>-115.0</y>
+        <x>-1117.0</x>
+        <y>-100.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -491,8 +498,18 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>FOUND_IN_LEVELS</attribute>
-        <x>-1340.0</x>
-        <y>-65.0</y>
+        <x>-817.0</x>
+        <y>1.0</y>
+        <comment><![CDATA[Table to manage during what search an element was found]]>
+        </comment>
+        <commentx>-813.0</commentx>
+        <commenty>-59.0</commenty>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -504,8 +521,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <method>INITIALIZE</method>
-        <x>-995.0</x>
-        <y>-155.0</y>
+        <x>-912.0</x>
+        <y>-140.0</y>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
@@ -585,21 +602,21 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>IS_UP_SEARCH</attribute>
-        <x>-955.0</x>
-        <y>-115.0</y>
+        <x>-872.0</x>
+        <y>-100.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
-        <x>-1103.0</x>
-        <y>-77.0</y>
+        <x>-1020.0</x>
+        <y>-62.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>ASSOCIATION_BUILDERS</attribute>
-        <x>-1100.0</x>
-        <y>-115.0</y>
+        <x>-1017.0</x>
+        <y>-100.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -688,15 +705,15 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>TADIR_BUILDER</attribute>
-        <x>-1045.0</x>
-        <y>-75.0</y>
+        <x>-962.0</x>
+        <y>-60.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
         <attribute>WHERE_USED_BUILDER</attribute>
-        <x>-905.0</x>
-        <y>-125.0</y>
+        <x>-822.0</x>
+        <y>-110.0</y>
     </element>
     <element>
         <type>FAMIXPackage</type>
