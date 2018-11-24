@@ -10,4 +10,7 @@ class_a->method_a( ).
 
 SUBMIT z2mse_test_program_b AND RETURN.
 
+" This program is not in the selected package and has to be found with down search
+SUBMIT z2mse_test_program_c AND RETURN.
+
 CALL FUNCTION 'Z2MSE_TEST_FUNCTION_A'.

@@ -47,6 +47,114 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
     element = element_manager->get_element( element_id ).
 
+    DATA invocation TYPE REF TO z2mse_extr3_invocation.
+    invocation = z2mse_extr3_invocation=>get_instance( i_element_manager = element_manager ).
+
+    CASE element->type.
+      WHEN element->class_type.
+        "TBD
+      WHEN element->table_type.
+        "Is this needed?
+      WHEN element->program_type.
+
+        " Duplicate coding 1/2 see method search_up
+
+        DATA programs2 TYPE REF TO z2mse_extr3_programs.
+        programs2 = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
+
+        DATA: program             TYPE progname,
+              program_type        TYPE string,
+              program_attribute_2 TYPE string.
+
+
+
+        programs2->program_name(
+          EXPORTING
+            i_element_id                 = element_id
+          IMPORTING
+            program                      = program
+            program_type                 = program_type
+            program_attribute_2          = program_attribute_2
+*            external_program_name_class  =
+*            external_program_name_method =
+*            subc                         =
+        ).
+
+        DATA: include_name TYPE syrepid.
+        CASE program_type.
+          WHEN programs2->type_program.
+
+            include_name = program.
+
+          WHEN programs2->type_function.
+
+            include_name = program_attribute_2.
+
+          WHEN OTHERS.
+            " TBD
+        ENDCASE.
+
+    ENDCASE.
+
+    IF include_name IS NOT INITIAL.
+
+      DATA: wbcrossgts TYPE wbcrossgts_type,
+            wbcrossgt  TYPE wbcrossgt_type,
+            cross      TYPE cross_type,
+            crosss     TYPE cross_types.
+
+      SELECT otype name include direct indirect
+        FROM wbcrossgt
+        INTO TABLE wbcrossgts
+        WHERE include = include_name.
+
+      SELECT type name include FROM cross INTO TABLE crosss
+        WHERE include = include_name.
+
+      " Read dynamic usages
+
+      DATA: w TYPE wbcrossgt.
+      LOOP AT g_dynamic_usage INTO w
+        WHERE include = include_name.
+        MOVE-CORRESPONDING w TO wbcrossgt.
+        INSERT wbcrossgt INTO TABLE wbcrossgts.
+      ENDLOOP.
+
+      LOOP AT crosss INTO cross.
+
+        DATA: is_added        TYPE abap_bool,
+              uses_element_id TYPE z2mse_extr3_element_manager=>element_id_type.
+
+        DATA programs TYPE REF TO z2mse_extr3_programs.
+        programs = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
+
+        IF cross-type EQ 'R'.
+          DATA: program_found  TYPE progname.
+          program_found = cross-name.
+          programs->add( EXPORTING program        = program_found
+                         IMPORTING is_added       = is_added
+                                   new_element_id = uses_element_id ).
+
+          invocation->add( EXPORTING invoced_element_id1  = element_id
+                                     invocing_element_id2 = uses_element_id ).
+
+          CLEAR is_added.
+
+        ELSEIF cross-type EQ 'F'.
+          " TBD functions
+        ELSE.
+          " TBD ?
+        ENDIF.
+
+      ENDLOOP.
+
+      LOOP AT wbcrossgts INTO wbcrossgt.
+
+        CLEAR is_added.
+
+      ENDLOOP.
+    ENDIF.
+
   ENDMETHOD.
 
 
@@ -162,6 +270,8 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         is_access = abap_true.
 
       WHEN element->program_type.
+
+        " Duplicate coding 2/2 see method search_down
 
         DATA programs2 TYPE REF TO z2mse_extr3_programs.
         programs2 = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
