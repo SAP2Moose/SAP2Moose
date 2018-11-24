@@ -111,6 +111,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.FileAnchor LZ2MSE_TEST_FGR_AF01 fileName adt://NPL/sap/bc/adt/functions/groups/z2mse_test_fgr_a/includes/lz2mse_test_fgr_af01| )
 ( |FAMIX.FileAnchor Z2MSE_TEST_PROGRAM_A fileName adt://NPL/sap/bc/adt/programs/programs/z2mse_test_program_a| )
 ( |FAMIX.FileAnchor Z2MSE_TEST_PROGRAM_B fileName adt://NPL/sap/bc/adt/programs/programs/z2mse_test_program_b| )
+( |FAMIX.FileAnchor Z2MSE_TEST_PROGRAM_C fileName adt://NPL/sap/bc/adt/programs/programs/z2mse_test_program_c| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_A>>METHOD_A variable Z2MSE_TEST_A>>Z2MSE_TEST_A| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_B1>>METHOD_A variable Z2MSE_TEST_A>>Z2MSE_TEST_A| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_B1>>METHOD_A variable Z2MSE_TEST_IF_A_00000000000000>>ATTRIBUTE_A_000000000000000000| )
@@ -175,13 +176,17 @@ CLASS ltcl_main IMPLEMENTATION.
 " New in 0.3.0 Programs are displayed
 ( |FAMIX.Class Z2MSE_TEST_PROGRAM_A modifiers ABAPProgram| )
 ( |FAMIX.Class Z2MSE_TEST_PROGRAM_B modifiers ABAPProgram| )
+( |FAMIX.Class Z2MSE_TEST_PROGRAM_C modifiers ABAPProgram| )
 ( |FAMIX.Class Z2MSE_TEST_PROGRAM_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
 ( |FAMIX.Class Z2MSE_TEST_PROGRAM_B parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
 ( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A signature Z2MSE_TEST_PROGRAM_A| )
 ( |FAMIX.Method Z2MSE_TEST_PROGRAM_B>>Z2MSE_TEST_PROGRAM_B signature Z2MSE_TEST_PROGRAM_B| )
+( |FAMIX.Method Z2MSE_TEST_PROGRAM_C>>Z2MSE_TEST_PROGRAM_C signature Z2MSE_TEST_PROGRAM_C| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 " New usage of programs by programs "Support programs better #53"
 ( |FAMIX.Invocation sender Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A candidates Z2MSE_TEST_PROGRAM_B>>Z2MSE_TEST_PROGRAM_B signature DUMMY| )
+" Downsearch issue 93
+( |FAMIX.Invocation sender Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A candidates Z2MSE_TEST_PROGRAM_C>>Z2MSE_TEST_PROGRAM_C signature DUMMY| )
 " New in 0.3.0 Functions are displayed as external name of the found include program
 " The parent package of functions is not yet found, because the include is not in the TADIR
 ( |FAMIX.Class FGR-Z2MSE_TEST_FGR_A modifiers ABAPFunktionGroup| )
@@ -220,6 +225,7 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Method FGR-Z2MSE_TEST_FGR_A>>LZ2MSE_TEST_FGR_AF01 sourceAnchor| )
 ( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A sourceAnchor| )
 ( |FAMIX.Method Z2MSE_TEST_PROGRAM_B>>Z2MSE_TEST_PROGRAM_B sourceAnchor| )
+( |FAMIX.Method Z2MSE_TEST_PROGRAM_C>>Z2MSE_TEST_PROGRAM_C sourceAnchor| )
 " Support functions in more detail #52
 ( |FAMIX.Invocation sender Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A candidates FGR-Z2MSE_TEST_FGR_A>>F-Z2MSE_TEST_FUNCTION_A signature DUMMY| )
     ).

@@ -92,7 +92,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
+CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
 
   METHOD initialize.
@@ -308,6 +308,9 @@ CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
     ENDIF.
 
+    " SAP_2_FAMIX_68        When more than a single level is searched up, the up search is not done for elements that where found in the search down
+    " Fullfilled because the search down starts here
+
     is_up_search = abap_false.
 
     " Search down
@@ -332,6 +335,12 @@ CLASS Z2MSE_EXTR3_MODEL_BUILDER IMPLEMENTATION.
           IF     is_usage_of_single_element EQ abap_true
              AND <found_in_level>-specific EQ abap_false.
             CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+          ENDIF.
+          IF level_to_search_down EQ 0.
+            IF <found_in_level>-found_in_initial_selection EQ abap_false.
+              " SAP_2_FAMIX_69      When more than a single level is searched down, the down search is not done for elements that where found in the search up
+              CONTINUE. "Start searching down with the elements found in the initial selection. Ignore all that was found in upsearch
+            ENDIF.
           ENDIF.
 
           level_for_found_in_downsearch = <found_in_level>-found_in_level_downsearch + 1.

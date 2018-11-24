@@ -129,6 +129,7 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         programs = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
 
         IF cross-type EQ 'R'.
+          " SAP_2_FAMIX_67 Provide downsearch for programs - list found programs
           DATA: program_found  TYPE progname.
           program_found = cross-name.
           programs->add( EXPORTING program        = program_found
