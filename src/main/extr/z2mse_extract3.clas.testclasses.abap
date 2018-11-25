@@ -63,85 +63,28 @@ CLASS ltcl_main IMPLEMENTATION.
     equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
 
     equalized_harmonized_mse_exp = VALUE #(
-*( |FAMIX.Package| )
-*( |FAMIX.Package Z2MSE_TEST_INITIAL_SELECTION| )
-*( |FAMIX.Package Z2MSE_TEST_NO_INITIAL_SELECTN| )
-*( |FAMIX.Class Z2MSE_TEST_A modifiers DBTable| )
-*( |FAMIX.Class Z2MSE_TEST_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
-*( |FAMIX.Class Z2MSE_TEST_CL_A modifiers ABAPGlobalClass| )
-*( |FAMIX.Class Z2MSE_TEST_CL_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
-*( |FAMIX.Class Z2MSE_TEST_CL_A2 modifiers ABAPGlobalClass| )
-*( |FAMIX.Class Z2MSE_TEST_CL_A2 parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
-*( |FAMIX.Class Z2MSE_TEST_CL_B1 modifiers ABAPGlobalClass| )
-*( |FAMIX.Class Z2MSE_TEST_CL_B1 parentPackage Z2MSE_TEST_NO_INITIAL_SELECTN| )
-*( |FAMIX.Class Z2MSE_TEST_CL_B2 modifiers ABAPGlobalClass| )
-*( |FAMIX.Class Z2MSE_TEST_CL_B2 parentPackage Z2MSE_TEST_NO_INITIAL_SELECTN| )
-*( |FAMIX.Class Z2MSE_TEST_IF_A_00000000000000 isInterface true| )
-*( |FAMIX.Class Z2MSE_TEST_IF_A_00000000000000 modifiers ABAPGlobalInterface| )
-*( |FAMIX.Class Z2MSE_TEST_IF_A_00000000000000 parentPackage Z2MSE_TEST_NO_INITIAL_SELECTN| )
-*( |FAMIX.Class Z2MSE_TEST_WDY_A modifiers ABAPWebDynproComponent| )
-" New in 0.3.0 (Web Dynpros now also initially collected, not only added if used by something):
-*( |FAMIX.Class Z2MSE_TEST_WDY_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
-*( |FAMIX.Class ZIWCI_2MSE_TEST_WDY_A isInterface true| )
-*( |FAMIX.Class ZIWCI_2MSE_TEST_WDY_A modifiers ABAPGlobalInterface| )
-*( |FAMIX.Class ZIWCI_2MSE_TEST_WDY_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
 
-( |FAMIX.FileAnchor ATTRIBUTE_A_000000000000000000 fileName adt://NPL/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main#start=5,1| )
-( |FAMIX.FileAnchor CONSTRUCTOR fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_a/source/main#start=11,1| )
-( |FAMIX.FileAnchor EVENTHANDLER_A fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_a/source/main#start=13,1| )
-( |FAMIX.FileAnchor EVENT_A fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_a/source/main#start=9,1| )
-( |FAMIX.FileAnchor EVENT_A fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_b1/source/main#start=8,1| )
-( |FAMIX.FileAnchor EVENT_A_0000000000000000000000 fileName adt://NPL/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main#start=7,1| )
-( |FAMIX.FileAnchor METHOD_A fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_a/source/main#start=12,1| )
-( |FAMIX.FileAnchor METHOD_A fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_a2/source/main#start=8,1| )
-( |FAMIX.FileAnchor METHOD_A fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_b1/source/main#start=10,1| )
-( |FAMIX.FileAnchor METHOD_A fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_b2/source/main#start=12,1| )
-( |FAMIX.FileAnchor METHOD_A_000000000000000000000 fileName adt://NPL/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main#start=9,1| )
-( |FAMIX.FileAnchor METHOD_B fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_b1/source/main#start=11,1| )
-( |FAMIX.FileAnchor WD_GET_API fileName adt://NPL/sap/bc/adt/oo/interfaces/ziwci_2mse_test_wdy_a/source/main#start=17,1| )
-
-*( |FAMIX.FileAnchor Z2MSE_TEST_CL_A fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_a/source/main| )
-*( |FAMIX.FileAnchor Z2MSE_TEST_CL_A2 fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_a2/source/main| )
-*( |FAMIX.FileAnchor Z2MSE_TEST_CL_B1 fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_b1/source/main| )
-*( |FAMIX.FileAnchor Z2MSE_TEST_CL_B2 fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_b2/source/main| )
-*( |FAMIX.FileAnchor Z2MSE_TEST_IF_A_00000000000000 fileName adt://NPL/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main| )
-*( |FAMIX.FileAnchor ZIWCI_2MSE_TEST_WDY_A fileName adt://NPL/sap/bc/adt/oo/interfaces/ziwci_2mse_test_wdy_a/source/main| )
 ( |FAMIX.FileAnchor BW-ODSO-Z2MSET001-CUBE-Z2MSET002 fileName bwmt://NPL/sap/bw/modeling/trfn/123| )
 ( |FAMIX.FileAnchor F-Z2MSE_TEST_FUNCTION_A fileName adt://NPL/sap/bc/adt/functions/groups/z2mse_test_fgr_a/fmodules/z2mse_test_function_a| )
 ( |FAMIX.FileAnchor LZ2MSE_TEST_FGR_AF01 fileName adt://NPL/sap/bc/adt/functions/groups/z2mse_test_fgr_a/includes/lz2mse_test_fgr_af01| )
-*( |FAMIX.FileAnchor Z2MSE_TEST_PROGRAM_A fileName adt://NPL/sap/bc/adt/programs/programs/z2mse_test_program_a| )
-*( |FAMIX.FileAnchor Z2MSE_TEST_PROGRAM_B fileName adt://NPL/sap/bc/adt/programs/programs/z2mse_test_program_b| )
-*( |FAMIX.FileAnchor Z2MSE_TEST_PROGRAM_C fileName adt://NPL/sap/bc/adt/programs/programs/z2mse_test_program_c| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_A>>METHOD_A variable Z2MSE_TEST_A>>Z2MSE_TEST_A| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_B1>>METHOD_A variable Z2MSE_TEST_A>>Z2MSE_TEST_A| )
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_B1>>METHOD_A variable Z2MSE_TEST_IF_A_00000000000000>>ATTRIBUTE_A_000000000000000000| )
-" New with #48:
 ( |FAMIX.Access accessor Z2MSE_TEST_CL_B1>>METHOD_A variable Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000| )
 ( |FAMIX.Access accessor Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER variable Z2MSE_TEST_A>>Z2MSE_TEST_A| )
-*( |FAMIX.Attribute Z2MSE_TEST_A>>Z2MSE_TEST_A| )
 ( |FAMIX.Attribute Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000| )
-"( |FAMIX.Attribute Z2MSE_TEST_IF_A_00000000000000>>ATTRIBUTE_A_000000000000000000| )
 ( |FAMIX.Attribute Z2MSE_TEST_CL_B2>>Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>CONSTRUCTOR candidates Z2MSE_TEST_CL_A>>EVENTHANDLER_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>METHOD_A candidates Z2MSE_TEST_CL_A>>EVENT_A signature DUMMY| )
-" New with #62
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 candidates Z2MSE_TEST_CL_B2>>METHOD_A signature DUMMY| )
-
-" Outcomment the next to prepare issue #76
-* ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 candidates Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 signature DUMMY| )
-
-
-" End new with #62
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>METHOD_A candidates Z2MSE_TEST_CL_A2>>METHOD_A signature DUMMY| ) " Correct order
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A2>>METHOD_A candidates Z2MSE_TEST_CL_B1>>METHOD_B signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_A candidates Z2MSE_TEST_CL_A>>CONSTRUCTOR signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_A candidates Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 signature DUMMY| )
-" New with #48:
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_A candidates Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_B candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B2>>METHOD_A candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
-
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_B candidates Z2MSE_TEST_CL_A>>CONSTRUCTOR signature DUMMY| ) "Dynamic access
 ( |FAMIX.Invocation sender Z2MSE_TEST_CL_B1>>METHOD_B candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| ) "Dynamic access
 ( |FAMIX.Invocation sender Z2MSE_TEST_IF_A_00000000000000>>EVENT_A_0000000000000000000000 candidates Z2MSE_TEST_CL_B2>>Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000 signature DUMMY| )
@@ -151,82 +94,30 @@ CLASS ltcl_main IMPLEMENTATION.
 ( |FAMIX.Invocation sender Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER candidates Z2MSE_TEST_CL_A>>CONSTRUCTOR signature DUMMY| ) " Suddenly needed 04.11.2017 after regenerating WebDynpro
 ( |FAMIX.Invocation sender Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER candidates ZIWCI_2MSE_TEST_WDY_A>>WD_GET_API signature DUMMY| )
-( |FAMIX.Method Z2MSE_TEST_CL_A>>CONSTRUCTOR signature CONSTRUCTOR| )
-( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENTHANDLER_A signature EVENTHANDLER_A| )
-( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENT_A signature EVENT_A| )
-( |FAMIX.Method Z2MSE_TEST_CL_A>>METHOD_A signature METHOD_A| )
-( |FAMIX.Method Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000 signature Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000| )
-( |FAMIX.Method Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 signature Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| )
-( |FAMIX.Method Z2MSE_TEST_CL_A2>>METHOD_A signature METHOD_A| )
-( |FAMIX.Method Z2MSE_TEST_CL_B1>>EVENT_A signature EVENT_A| )
-( |FAMIX.Method Z2MSE_TEST_CL_B1>>METHOD_A signature METHOD_A| )
-( |FAMIX.Method Z2MSE_TEST_CL_B1>>METHOD_B signature METHOD_B| )
-( |FAMIX.Method Z2MSE_TEST_CL_B2>>METHOD_A signature METHOD_A| )
-( |FAMIX.Method Z2MSE_TEST_CL_B2>>Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000 signature Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000| )
-( |FAMIX.Method Z2MSE_TEST_CL_B2>>Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000 signature Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| )
-( |FAMIX.Method Z2MSE_TEST_IF_A_00000000000000>>EVENT_A_0000000000000000000000 signature EVENT_A_0000000000000000000000| )
-( |FAMIX.Method Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 signature METHOD_A_000000000000000000000| )
 ( |FAMIX.Method Z2MSE_TEST_WDY_A>>COMPONENTCONTROLLER signature COMPONENTCONTROLLER| )
-" New in 0.3.0 (Web Dynpros now also initially collected, not only added if used by something, so also not used controllers now in model):
 ( |FAMIX.Method Z2MSE_TEST_WDY_A>>EMPTYVIEW signature EMPTYVIEW| )
 ( |FAMIX.Method Z2MSE_TEST_WDY_A>>V_MAIN signature V_MAIN| )
 ( |FAMIX.Method Z2MSE_TEST_WDY_A>>W_MAIN signature W_MAIN| )
-
 ( |FAMIX.Method ZIWCI_2MSE_TEST_WDY_A>>WD_GET_API signature WD_GET_API| )
-" New in 0.3.0 Programs are displayed
-*( |FAMIX.Class Z2MSE_TEST_PROGRAM_A modifiers ABAPProgram| )
-*( |FAMIX.Class Z2MSE_TEST_PROGRAM_B modifiers ABAPProgram| )
-*( |FAMIX.Class Z2MSE_TEST_PROGRAM_C modifiers ABAPProgram| )
-*( |FAMIX.Class Z2MSE_TEST_PROGRAM_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
-*( |FAMIX.Class Z2MSE_TEST_PROGRAM_B parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
-*( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A signature Z2MSE_TEST_PROGRAM_A| )
-*( |FAMIX.Method Z2MSE_TEST_PROGRAM_B>>Z2MSE_TEST_PROGRAM_B signature Z2MSE_TEST_PROGRAM_B| )
-*( |FAMIX.Method Z2MSE_TEST_PROGRAM_C>>Z2MSE_TEST_PROGRAM_C signature Z2MSE_TEST_PROGRAM_C| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
-" New usage of programs by programs "Support programs better #53"
 ( |FAMIX.Invocation sender Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A candidates Z2MSE_TEST_PROGRAM_B>>Z2MSE_TEST_PROGRAM_B signature DUMMY| )
-" Downsearch issue 93
 ( |FAMIX.Invocation sender Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A candidates Z2MSE_TEST_PROGRAM_C>>Z2MSE_TEST_PROGRAM_C signature DUMMY| )
-" New in 0.3.0 Functions are displayed as external name of the found include program
-" The parent package of functions is not yet found, because the include is not in the TADIR
 ( |FAMIX.Class FGR-Z2MSE_TEST_FGR_A modifiers ABAPFunktionGroup| )
 ( |FAMIX.Method FGR-Z2MSE_TEST_FGR_A>>F-Z2MSE_TEST_FUNCTION_A signature F-Z2MSE_TEST_FUNCTION_A| )
 ( |FAMIX.Method FGR-Z2MSE_TEST_FGR_A>>LZ2MSE_TEST_FGR_AF01 signature LZ2MSE_TEST_FGR_AF01| )
 ( |FAMIX.Invocation sender FGR-Z2MSE_TEST_FGR_A>>F-Z2MSE_TEST_FUNCTION_A candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
 ( |FAMIX.Invocation sender FGR-Z2MSE_TEST_FGR_A>>LZ2MSE_TEST_FGR_AF01 candidates Z2MSE_TEST_CL_B1>>METHOD_A signature DUMMY| )
-" New in 0.3.0 SAP BW transformations are partly extracted.
-" Currently only if a usage to the generated program is found.
 ( |FAMIX.Class BW-ODSO-Z2MSET001-CUBE-Z2MSET002 modifiers BWTransformation| )
 ( |FAMIX.Method BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 signature BW-ODSO-Z2MSET001-CUBE-Z2MSET002| )
 ( |FAMIX.Invocation sender BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 candidates Z2MSE_TEST_CL_A>>CONSTRUCTOR signature DUMMY| )
 ( |FAMIX.Invocation sender BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 candidates Z2MSE_TEST_CL_A>>METHOD_A signature DUMMY| )
-
 ( |FAMIX.Attribute Z2MSE_TEST_IF_A_00000000000000>>ATTRIBUTE_A_000000000000000000 sourceAnchor| )
-*( |FAMIX.Class Z2MSE_TEST_CL_A sourceAnchor| )
-*( |FAMIX.Class Z2MSE_TEST_CL_A2 sourceAnchor| )
-*( |FAMIX.Class Z2MSE_TEST_CL_B1 sourceAnchor| )
-*( |FAMIX.Class Z2MSE_TEST_CL_B2 sourceAnchor| )
-*( |FAMIX.Class Z2MSE_TEST_IF_A_00000000000000 sourceAnchor| )
-*( |FAMIX.Class ZIWCI_2MSE_TEST_WDY_A sourceAnchor| )
-( |FAMIX.Method Z2MSE_TEST_CL_A>>CONSTRUCTOR sourceAnchor| )
-( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENTHANDLER_A sourceAnchor| )
-( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENT_A sourceAnchor| )
-( |FAMIX.Method Z2MSE_TEST_CL_A>>METHOD_A sourceAnchor| )
-( |FAMIX.Method Z2MSE_TEST_CL_A2>>METHOD_A sourceAnchor| )
-( |FAMIX.Method Z2MSE_TEST_CL_B1>>EVENT_A sourceAnchor| )
-( |FAMIX.Method Z2MSE_TEST_CL_B1>>METHOD_A sourceAnchor| )
-( |FAMIX.Method Z2MSE_TEST_CL_B1>>METHOD_B sourceAnchor| )
-( |FAMIX.Method Z2MSE_TEST_CL_B2>>METHOD_A sourceAnchor| )
-( |FAMIX.Method Z2MSE_TEST_IF_A_00000000000000>>EVENT_A_0000000000000000000000 sourceAnchor| )
-( |FAMIX.Method Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 sourceAnchor| )
 ( |FAMIX.Method ZIWCI_2MSE_TEST_WDY_A>>WD_GET_API sourceAnchor| )
 ( |FAMIX.Method BW-ODSO-Z2MSET001-CUBE-Z2MSET002>>BW-ODSO-Z2MSET001-CUBE-Z2MSET002 sourceAnchor| )
 ( |FAMIX.Method FGR-Z2MSE_TEST_FGR_A>>F-Z2MSE_TEST_FUNCTION_A sourceAnchor| )
 ( |FAMIX.Method FGR-Z2MSE_TEST_FGR_A>>LZ2MSE_TEST_FGR_AF01 sourceAnchor| )
-*( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A sourceAnchor| )
-*( |FAMIX.Method Z2MSE_TEST_PROGRAM_B>>Z2MSE_TEST_PROGRAM_B sourceAnchor| )
-*( |FAMIX.Method Z2MSE_TEST_PROGRAM_C>>Z2MSE_TEST_PROGRAM_C sourceAnchor| )
-" Support functions in more detail #52
+( |FAMIX.FileAnchor ATTRIBUTE_A_000000000000000000 fileName adt://NPL/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main#start=5,1| )
+( |FAMIX.FileAnchor WD_GET_API fileName adt://NPL/sap/bc/adt/oo/interfaces/ziwci_2mse_test_wdy_a/source/main#start=17,1| )
 ( |FAMIX.Invocation sender Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A candidates FGR-Z2MSE_TEST_FGR_A>>F-Z2MSE_TEST_FUNCTION_A signature DUMMY| )
     ).
 
@@ -240,10 +131,25 @@ CLASS ltcl_main IMPLEMENTATION.
     maker->add_package( package = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
     maker->add_db_table(   name = |Z2MSE_TEST_A|     parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
     maker->add_class(      name = |Z2MSE_TEST_CL_A|  parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
+    maker->add_method(  class   = |Z2MSE_TEST_CL_A| method  = |CONSTRUCTOR | at_line = 11 ).
+    maker->add_method(  class   = |Z2MSE_TEST_CL_A| method  = |EVENTHANDLER_A | at_line = 13 ).
+    maker->add_method(  class   = |Z2MSE_TEST_CL_A| method  = |EVENT_A | at_line = 9 ).
+    maker->add_method(  class   = |Z2MSE_TEST_CL_A| method  = |METHOD_A | at_line = 12 ).
+    maker->add_method(  class   = |Z2MSE_TEST_CL_A| method  = |Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000| ).
+    maker->add_method(  class   = |Z2MSE_TEST_CL_A| method  = |Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| ).
     maker->add_class(      name = |Z2MSE_TEST_CL_A2| parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
+    maker->add_method(  class   = |Z2MSE_TEST_CL_A2| method  = |METHOD_A | at_line = 8 ).
     maker->add_class(      name = |Z2MSE_TEST_CL_B1| parentpackage = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
+    maker->add_method(  class   = |Z2MSE_TEST_CL_B1| method  = |EVENT_A | at_line = 8 ).
+    maker->add_method(  class   = |Z2MSE_TEST_CL_B1| method  = |METHOD_A | at_line = 10 ).
+    maker->add_method(  class   = |Z2MSE_TEST_CL_B1| method  = |METHOD_B | at_line = 11 ).
     maker->add_class(      name = |Z2MSE_TEST_CL_B2| parentpackage = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
+    maker->add_method(  class   = |Z2MSE_TEST_CL_B2| method  = |METHOD_A | at_line = 12 ).
+    maker->add_method(  class   = |Z2MSE_TEST_CL_B2| method  = |Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000| ).
+    maker->add_method(  class   = |Z2MSE_TEST_CL_B2| method  = |Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| ).
     maker->add_interface(  name = |Z2MSE_TEST_IF_A_00000000000000| parentpackage = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
+    maker->add_interface_method(  interface   = |Z2MSE_TEST_IF_A_00000000000000| method  = |EVENT_A_0000000000000000000000| at_line = 7 ).
+    maker->add_interface_method(  interface   = |Z2MSE_TEST_IF_A_00000000000000| method  = |METHOD_A_000000000000000000000| at_line = 9 ).
     maker->add_interface(  name = |ZIWCI_2MSE_TEST_WDY_A| parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
     maker->add_web_dynpro_component( name = |Z2MSE_TEST_WDY_A| parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
     maker->add_program(   name = |Z2MSE_TEST_PROGRAM_A| parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).

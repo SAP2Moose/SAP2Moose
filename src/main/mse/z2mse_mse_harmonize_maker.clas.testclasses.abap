@@ -8,7 +8,9 @@ CLASS ltcl_test DEFINITION FINAL FOR TESTING
       add_package FOR TESTING RAISING cx_static_check,
       add_table FOR TESTING RAISING cx_static_check,
       add_class FOR TESTING RAISING cx_static_check,
+      add_method FOR TESTING RAISING cx_static_check,
       add_interface FOR TESTING RAISING cx_static_check,
+      add_interface_method FOR TESTING RAISING cx_static_check,
       add_web_dynpro_component FOR TESTING RAISING cx_static_check,
       add_program FOR TESTING RAISING cx_static_check.
 ENDCLASS.
@@ -65,6 +67,24 @@ CLASS ltcl_test IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD add_method.
+    DATA: t_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
+    f_cut = NEW #( ).
+    f_cut->add_method( class          = |Z2MSE_TEST_CL_A|
+                       method = |EVENTHANDLER_A|
+                       at_line = 13 ).
+
+    t_exp = VALUE #( ( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENTHANDLER_A signature EVENTHANDLER_A| )
+                     ( |FAMIX.FileAnchor EVENTHANDLER_A fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_a/source/main#start=13,1| )
+                     ( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENTHANDLER_A sourceAnchor| ) ).
+
+    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = f_cut->to_change ).
+    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = t_exp ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Wrong mse for new class' exp = t_exp act = f_cut->to_change ).
+
+  ENDMETHOD.
+
   METHOD add_interface.
     DATA: t_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
     f_cut = NEW #( ).
@@ -81,6 +101,24 @@ CLASS ltcl_test IMPLEMENTATION.
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = t_exp ).
 
     cl_abap_unit_assert=>assert_equals( msg = 'Wrong mse for new interface' exp = t_exp act = f_cut->to_change ).
+
+  ENDMETHOD.
+
+  METHOD add_interface_method.
+    DATA: t_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
+    f_cut = NEW #( ).
+    f_cut->add_interface_method( interface = |Z2MSE_TEST_IF_A_00000000000000|
+                                    method = |METHOD_A_000000000000000000000|
+                                   at_line = 9 ).
+
+    t_exp = VALUE #( ( |FAMIX.Method Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 signature METHOD_A_000000000000000000000| )
+                     ( |FAMIX.Method Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 sourceAnchor| )
+                     ( |FAMIX.FileAnchor METHOD_A_000000000000000000000 fileName adt://NPL/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main#start=9,1| ) ).
+
+    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = f_cut->to_change ).
+    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = t_exp ).
+
+    cl_abap_unit_assert=>assert_equals( msg = 'Wrong mse for new class' exp = t_exp act = f_cut->to_change ).
 
   ENDMETHOD.
 
