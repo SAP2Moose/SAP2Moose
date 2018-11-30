@@ -1,4 +1,4 @@
-* generated on system NPL at 30.11.2018 on 22:00:22
+* generated on system NPL at 30.11.2018 on 22:11:22
 
 *
 * This is version 1.1.2
@@ -3255,6 +3255,12 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
             DATA: part1 TYPE string,
                   part2 TYPE string.
             SPLIT class AT '\ME:' INTO part1 part2.
+
+            IF part2 IS NOT INITIAL.
+              CONTINUE." TBD specify this better
+            ENDIF.
+
+            split class at '\IN:' INTO part1 part2.
 
             IF part2 IS NOT INITIAL.
               CONTINUE." TBD specify this better
