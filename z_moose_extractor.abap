@@ -1,4 +1,4 @@
-* generated on system NPL at 30.11.2018 on 21:53:06
+* generated on system NPL at 30.11.2018 on 22:00:22
 
 *
 * This is version 1.1.2
@@ -3841,8 +3841,7 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
                                 is_added_now   = is_added_now ).
 
       IF is_specific EQ abap_true
-*      AND is_added_now EQ abap_true
-      .
+      AND new_element_id IS NOT INITIAL.
 
         element_manager->model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
                                                                   i_is_specific = abap_true ).
