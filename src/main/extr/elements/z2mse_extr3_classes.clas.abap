@@ -277,8 +277,9 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                 new_element_id = new_element_id
                                 is_added_now   = is_added_now ).
 
-      IF is_specific EQ abap_true AND
-         is_added_now EQ abap_true.
+      IF is_specific EQ abap_true
+*      AND is_added_now EQ abap_true
+      .
 
         element_manager->model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
                                                                   i_is_specific = abap_true ).

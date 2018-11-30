@@ -119,7 +119,7 @@ CLASS ltcl_main IMPLEMENTATION.
     maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| ).
     maker->access(                          used = |Z2MSE_TEST_A| ).
     maker->access(                          used_group  = |Z2MSE_TEST_IF_A_00000000000000| used = |ATTRIBUTE_A_000000000000000000| ).
-    maker->access(                          used_group  = |Z2MSE_TEST_CL_A| used = |Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000| ).
+*    maker->access(                          used_group  = |Z2MSE_TEST_CL_A| used = |Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000| ).
 
     maker->add_method(            method  = |METHOD_B| at_line = 11 ).
     maker->usage(                           used_group  = |Z2MSE_TEST_CL_B1| used = |METHOD_A| ).

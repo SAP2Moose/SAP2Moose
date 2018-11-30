@@ -257,6 +257,16 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
     is_initial_selection = abap_false.
 
+    IF is_usage_of_single_element EQ abap_false.
+
+      " All initially selected elements are marked as specific so that they are correctly searched
+
+      LOOP AT found_in_levels ASSIGNING <found_in_level>.
+        <found_in_level>-specific = abap_true.
+      ENDLOOP.
+
+    ENDIF.
+
     " Search up
 
     is_up_search = abap_true.
@@ -279,8 +289,10 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
         CLEAR workload.
         LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_upsearch = level_to_search_up.
 
-          IF     is_usage_of_single_element EQ abap_true
-             AND <found_in_level>-specific EQ abap_false.
+          IF
+*               is_usage_of_single_element EQ abap_true
+*             AND
+             <found_in_level>-specific EQ abap_false.
             CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
           ENDIF.
 
@@ -332,8 +344,10 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
         something_to_be_done_down = abap_false.
         CLEAR workload.
         LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_downsearch = level_to_search_down.
-          IF     is_usage_of_single_element EQ abap_true
-             AND <found_in_level>-specific EQ abap_false.
+          IF
+*          is_usage_of_single_element EQ abap_true
+*             AND
+             <found_in_level>-specific EQ abap_false.
             CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
           ENDIF.
           IF level_to_search_down EQ 0.
@@ -341,7 +355,7 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
               " SAP_2_FAMIX_69      When more than a single level is searched down, the down search is not done for elements that where found in the search up
               CONTINUE. "Start searching down with the elements found in the initial selection. Ignore all that was found in upsearch
             ELSE.
-              IF is_usage_of_single_element EQ abap_true and (
+              IF is_usage_of_single_element EQ abap_true AND (
                  <found_in_level>-specific EQ abap_false OR
                  <found_in_level>-found_in_level_upsearch > 0 ).
                 CONTINUE. " No downsearch for elements that are in initially selected classes but are not initially selected.

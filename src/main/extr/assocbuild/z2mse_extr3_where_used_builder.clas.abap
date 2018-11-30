@@ -99,18 +99,36 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         class_key-clsname = class_name.
 
         IF cmptype EQ '1' OR cmptype EQ '2'.
-          CALL FUNCTION 'SEO_CLASS_GET_METHOD_INCLUDES'
+          DATA clsname  TYPE seoclsname.
+          clsname = class_key.
+          CALL METHOD cl_oo_classname_service=>get_all_method_includes(
             EXPORTING
-              clskey                       = class_key
-            IMPORTING
-              includes                     = includes
+              clsname            = clsname
+*             with_enhancements  =     " X = searches also for enh.method includes
+            RECEIVING
+              result             = includes
             EXCEPTIONS
-              _internal_class_not_existing = 1
-              OTHERS                       = 2.
+              class_not_existing = 1
+              OTHERS             = 2
+                                   ).
           IF sy-subrc <> 0.
             " TBD Better error handling
             RETURN.
           ENDIF.
+
+          " This method is described to be obsolete
+*          CALL FUNCTION 'SEO_CLASS_GET_METHOD_INCLUDES'
+*            EXPORTING
+*              clskey                       = class_key
+*            IMPORTING
+*              includes                     = includes
+*            EXCEPTIONS
+*              _internal_class_not_existing = 1
+*              OTHERS                       = 2.
+*          IF sy-subrc <> 0.
+*            " TBD Better error handling
+*            RETURN.
+*          ENDIF.
           DATA: include TYPE LINE OF seop_methods_w_include.
           READ TABLE includes INTO include WITH KEY cpdkey-cpdname = cmpname.
           IF sy-subrc <> 0.
@@ -307,6 +325,10 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
                   method TYPE string.
             SPLIT wbcrossgt-name AT '\ME:' INTO class method.
 
+            IF class EQ 'Z2MSE_EXTR3_WHERE_USED_BUILDER\ME:SEARCH_DOWN'.
+              BREAK-POINT.
+            ENDIF.
+
             DATA: temp TYPE string.
             temp = class && |~| && method.
 
@@ -320,11 +342,12 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
             " SAP_2_FAMIX_75 Find class methods in downsearch
 
+            ASSERT class IS NOT INITIAL.
             classes->add_component(
               EXPORTING
                 clsname        = class
                 cmpname        = method
-                is_specific    = abap_false
+                is_specific    = abap_true
               IMPORTING
                 is_added       = is_added
                 new_element_id = uses_element_id ).
@@ -365,13 +388,20 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
             DATA: attribute TYPE string.
 
             SPLIT wbcrossgt-name AT '\DA:' INTO class attribute.
+            DATA: part1 TYPE string,
+                  part2 TYPE string.
+            SPLIT class AT '\ME:' INTO part1 part2.
+
+            IF part2 IS NOT INITIAL.
+              CONTINUE." TBD specify this better
+            ENDIF.
 
             IF attribute IS NOT INITIAL.
 
               classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
 
               " SAP_2_FAMIX_76 Find class attributes in downsearch
-
+              ASSERT class IS NOT INITIAL.
               classes->add_component(
                 EXPORTING
                   clsname        = class
