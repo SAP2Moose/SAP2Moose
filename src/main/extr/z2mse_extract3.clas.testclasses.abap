@@ -152,9 +152,12 @@ CLASS ltcl_main IMPLEMENTATION.
     maker->usage(                used = |Z2MSE_TEST_PROGRAM_C| ).
     maker->usage(                used = |Z2MSE_TEST_INCLUDE_A| ).
     maker->usage(                       used_group  = |FGR-Z2MSE_TEST_FGR_A| used = |F-Z2MSE_TEST_FUNCTION_A| ).
+    maker->usage(                       used_group  = |FGR-Z2MSE_TEST_FGR_B| used = |F-Z2MSE_TEST_FUNCTION_B| ).
     maker->add_program(   name = |Z2MSE_TEST_PROGRAM_B| parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
     maker->add_program(   name = |Z2MSE_TEST_PROGRAM_C| parentpackage = || ). "TBD add parentpackage to exported model
     maker->add_program(   name = |Z2MSE_TEST_INCLUDE_A| parentpackage = || ). "TBD add parentpackage to exported model
+    maker->add_function_group( name = |Z2MSE_TEST_FGR_B| parentpackage = || ). " TBD Add Parentpackage
+    maker->add_function(              function = |Z2MSE_TEST_FUNCTION_B| ).
 
     maker->add_bw_transformation( bw_transformation = |BW-ODSO-Z2MSET001-CUBE-Z2MSET002| at_line = 123 ).
     maker->usage(                                     used_group  = |Z2MSE_TEST_CL_A| used = |CONSTRUCTOR| ).

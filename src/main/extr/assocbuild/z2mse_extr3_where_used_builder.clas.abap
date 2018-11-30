@@ -140,10 +140,25 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         DATA programs TYPE REF TO z2mse_extr3_programs.
         programs = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
 
-        IF cross-type EQ 'R'.
-          " SAP_2_FAMIX_67 Provide downsearch for programs - list found programs
+        IF cross-type EQ 'R' OR cross-type EQ 'F'.
           DATA: program_found  TYPE progname.
-          program_found = cross-name.
+          IF cross-type EQ 'R'.
+            " SAP_2_FAMIX_67 Find programs in downsearch
+            program_found = cross-name.
+          ELSEIF cross-type EQ 'F'.
+            " SAP_2_FAMIX_72 Find functions in downsearch
+            DATA tf TYPE tfdir.
+            " TBD find a more performant solution for this
+            SELECT SINGLE * FROM tfdir INTO tf WHERE funcname = cross-name.
+            IF tf IS NOT INITIAL.
+              "TBD handle error
+            ENDIF.
+            program_found = tf-pname.
+            SHIFT program_found LEFT BY 3 PLACES.
+            program_found = program_found && |U| && tf-include.
+          ELSE.
+            ASSERT 1 = 2.
+          ENDIF.
           programs->add( EXPORTING program        = program_found
                          IMPORTING is_added       = is_added
                                    new_element_id = uses_element_id ).
@@ -153,8 +168,8 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
           CLEAR is_added.
 
-        ELSEIF cross-type EQ 'F'.
-          " TBD functions
+*        ELSEIF cross-type EQ 'F'.
+*          " TBD functions
         ELSE.
           " TBD ?
         ENDIF.
@@ -165,7 +180,7 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
         programs = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
 
-        " SAP_2_FAMIX_70 Provide downsearch for includes - list found programs
+        " SAP_2_FAMIX_70 Find includes in downsearch
 
         " This is an include, but it is reported as program, TBD change this
         program_found = wbcrossi-name.
@@ -526,8 +541,6 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-
-
 
 
   METHOD set_dynamic_read.
