@@ -4,6 +4,7 @@ CLASS z2mse_extr3_where_used_builder DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    TYPE-POOLS seop .
 
     METHODS set_dynamic_read
       IMPORTING
@@ -15,6 +16,7 @@ CLASS z2mse_extr3_where_used_builder DEFINITION
         REDEFINITION .
   PROTECTED SECTION.
   PRIVATE SECTION.
+
 
     TYPES:
       BEGIN OF wbcrossgt_type,
@@ -57,9 +59,71 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
     DATA invocation TYPE REF TO z2mse_extr3_invocation.
     invocation = z2mse_extr3_invocation=>get_instance( i_element_manager = element_manager ).
 
+
+    DATA: include_name TYPE syrepid.
+
     CASE element->type.
       WHEN element->class_type.
         "TBD
+
+
+        DATA: class_name TYPE string,
+              cmpname    TYPE string,
+              cmptype    TYPE seocmptype,
+              exists     TYPE abap_bool.
+
+
+        DATA classes TYPE REF TO z2mse_extr3_classes.
+        classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
+        classes->comp_name( EXPORTING element_id = element_id
+              IMPORTING
+                class_name = class_name
+                cmpname    = cmpname
+                cmptype    = cmptype
+                exists     = exists
+        ).
+
+        IF exists EQ abap_false.
+          RETURN.
+        ENDIF.
+
+        DATA: class_key TYPE seoclskey.
+        DATA: includes    TYPE    seop_methods_w_include.
+        class_key-clsname = class_name.
+
+        IF cmptype EQ '1' OR cmptype EQ '2'.
+          CALL FUNCTION 'SEO_CLASS_GET_METHOD_INCLUDES'
+            EXPORTING
+              clskey                       = class_key
+            IMPORTING
+              includes                     = includes
+            EXCEPTIONS
+              _internal_class_not_existing = 1
+              OTHERS                       = 2.
+          IF sy-subrc <> 0.
+            " TBD Better error handling
+            RETURN.
+          ENDIF.
+          DATA: include TYPE LINE OF seop_methods_w_include.
+          READ TABLE includes INTO include WITH KEY cpdkey-cpdname = cmpname.
+          IF sy-subrc <> 0.
+            " TBD ?
+            RETURN.
+          ELSE.
+
+            include_name = include-incname.
+
+          ENDIF.
+
+        ELSE.
+          RETURN.
+        ENDIF.
+
+*        CASE cmptype.
+*          WHEN '1'. "Method
+*          WHEN '2'. "Even
+*        ENDCASE.
+
       WHEN element->table_type.
         "Is this needed?
       WHEN element->program_type.
@@ -86,8 +150,6 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 *            external_program_name_method =
 *            subc                         =
         ).
-
-        DATA: include_name TYPE syrepid.
         CASE program_type.
           WHEN programs2->type_program.
 
@@ -166,10 +228,15 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
           programs->add( EXPORTING program        = program_found
                          IMPORTING is_added       = is_added
                                    new_element_id = uses_element_id ).
+          IF is_added EQ abap_true.
 
-          element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
-                                                                    i_is_specific = abap_true ).
+            element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
+                                                                      i_is_specific = abap_true ).
 
+          ELSE.
+            "TBD what is to be done here?
+
+          ENDIF.
           invocation->add( EXPORTING invoced_element_id1  = uses_element_id
                                      invocing_element_id2 = element_id ).
 
@@ -194,9 +261,15 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         programs->add( EXPORTING program        = program_found
                        IMPORTING is_added       = is_added
                                  new_element_id = uses_element_id ).
+        IF is_added EQ abap_true.
 
-        element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
-                                                                  i_is_specific = abap_true ).
+          element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
+                                                                    i_is_specific = abap_true ).
+
+        ELSE.
+          "TBD what is to be done here?
+
+        ENDIF.
 
         invocation->add( EXPORTING invoced_element_id1  = uses_element_id
                                    invocing_element_id2 = element_id ).
@@ -213,7 +286,15 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
                   method TYPE string.
             SPLIT wbcrossgt-name AT '\ME:' INTO class method.
 
-            DATA classes TYPE REF TO z2mse_extr3_classes.
+            DATA: temp TYPE string.
+            temp = class && |~| && method.
+
+            IF cmpname EQ temp. " Implementation of interface methods are in the where used list. These are added explicitely in the class coding. So filter here.
+
+              RETURN.
+
+            ENDIF.
+
             classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
 
             " SAP_2_FAMIX_75 Find class methods in downsearch
@@ -236,8 +317,21 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
             ENDIF.
 
-            invocation->add( EXPORTING invoced_element_id1  = uses_element_id
-                                       invocing_element_id2 = element_id ).
+            DATA: is_redefinition_of_method TYPE abap_bool.
+
+            is_redefinition_of_method = classes->is_redefinition_of_method( invoced_element_id1  = uses_element_id
+                                                                            invocing_element_id2 = element_id ).
+
+            IF is_redefinition_of_method EQ abap_true.
+
+              invocation->add( EXPORTING invoced_element_id1  = element_id
+                                         invocing_element_id2 = uses_element_id ).
+            ELSE.
+
+              invocation->add( EXPORTING invoced_element_id1  = uses_element_id
+                                         invocing_element_id2 = element_id ).
+
+            ENDIF.
 
           WHEN 'DA'.
 
@@ -245,31 +339,37 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
             SPLIT wbcrossgt-name AT '\DA:' INTO class attribute.
 
-            classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
+            IF attribute IS NOT INITIAL.
 
-            " SAP_2_FAMIX_76 Find class attributes in downsearch
+              classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
 
-            classes->add_component(
-              EXPORTING
-                clsname        = class
-                cmpname        = attribute
-                is_specific    = abap_false
-              IMPORTING
-                is_added       = is_added
-                new_element_id = uses_element_id ).
-            IF is_added EQ abap_true.
+              " SAP_2_FAMIX_76 Find class attributes in downsearch
 
-              element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
-                                                                        i_is_specific = abap_true ).
+              classes->add_component(
+                EXPORTING
+                  clsname        = class
+                  cmpname        = attribute
+                  is_specific    = abap_false
+                IMPORTING
+                  is_added       = is_added
+                  new_element_id = uses_element_id ).
+              IF is_added EQ abap_true.
+
+                element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
+                                                                          i_is_specific = abap_true ).
+
+              ELSE.
+                "TBD what is to be done here?
+
+              ENDIF.
+
               DATA access TYPE REF TO z2mse_extr3_access.
               access = z2mse_extr3_access=>get_instance( i_element_manager = element_manager ).
 
-              access->add( EXPORTING accessed_element_id1  = uses_element_id
-                                     accessing_element_id2 = element_id ).
-
-
-            ELSE.
-              "TBD what is to be done here?
+              IF uses_element_id IS NOT INITIAL. " This may be some irregular object, that is not a class attribute
+                access->add( EXPORTING accessed_element_id1  = uses_element_id
+                                       accessing_element_id2 = element_id ).
+              ENDIF.
 
             ENDIF.
 
@@ -289,14 +389,23 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
               " SAP_2_FAMIX_77 Find database tables in downsearch
 
               tables->add( EXPORTING table          = new_table
-                           IMPORTING new_element_id = uses_element_id ).
+                           IMPORTING new_element_id = uses_element_id
+                                     is_added       = is_added ).
+              IF is_added EQ abap_true.
 
-              element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
-                                                                        i_is_specific = abap_true ).
-              access = z2mse_extr3_access=>get_instance( i_element_manager = element_manager ).
+                element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
+                                                                          i_is_specific = abap_true ).
 
-              access->add( EXPORTING accessed_element_id1  = uses_element_id
-                                     accessing_element_id2 = element_id ).
+              ELSE.
+                "TBD what is to be done here?
+
+              ENDIF.
+              IF uses_element_id IS NOT INITIAL.
+                access = z2mse_extr3_access=>get_instance( i_element_manager = element_manager ).
+
+                access->add( EXPORTING accessed_element_id1  = uses_element_id
+                                       accessing_element_id2 = element_id ).
+              ENDIF.
 
             ENDIF.
 

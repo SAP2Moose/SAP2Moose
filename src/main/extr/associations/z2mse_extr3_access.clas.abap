@@ -29,12 +29,15 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_ACCESS IMPLEMENTATION.
+CLASS z2mse_extr3_access IMPLEMENTATION.
 
 
   METHOD add.
 
     DATA association TYPE association_type.
+
+    ASSERT accessed_element_id1 IS NOT INITIAL.
+    ASSERT accessing_element_id2 IS NOT INITIAL.
 
     association-accessed_element_id1 = accessed_element_id1.
     association-accessing_element_id2 = accessing_element_id2.

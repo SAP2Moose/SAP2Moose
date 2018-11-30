@@ -50,6 +50,9 @@ CLASS z2mse_extr3_invocation IMPLEMENTATION.
 
     DATA association TYPE association_type.
 
+    ASSERT invoced_element_id1 IS NOT INITIAL.
+    ASSERT invocing_element_id2 IS NOT INITIAL.
+
     association-invoced_element_id1 = invoced_element_id1.
     association-invocing_element_id2 = invocing_element_id2.
     INSERT association INTO TABLE associations.
