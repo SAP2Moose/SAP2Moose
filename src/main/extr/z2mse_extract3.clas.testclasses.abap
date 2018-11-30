@@ -75,6 +75,7 @@ CLASS ltcl_main IMPLEMENTATION.
     maker->add_package( package = |Z2MSE_TEST_INITIAL_SELECTION| ).
     maker->add_package( package = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
     maker->add_db_table(   name = |Z2MSE_TEST_A|     parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
+    maker->add_db_table(   name = |Z2MSE_TEST_DB_B|  parentpackage = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
 
     maker->add_class(      name = |Z2MSE_TEST_CL_A|  parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
     maker->add_attribute(         attribute = |Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000| ).
@@ -152,6 +153,7 @@ CLASS ltcl_main IMPLEMENTATION.
     maker->usage(                used_group  = |Z2MSE_TEST_CL_A| used = |METHOD_A| ).
     maker->usage(                used_group  = |Z2MSE_TEST_CL_B1| used = |METHOD_A| ).
     maker->access(               used_group  = |Z2MSE_TEST_CL_B1| used = |ATTRIBUTE_A| ).
+    maker->access(               used = |Z2MSE_TEST_DB_B| ).
     maker->usage(                used = |Z2MSE_TEST_PROGRAM_B| ).
     maker->usage(                used = |Z2MSE_TEST_PROGRAM_C| ).
     maker->usage(                used = |Z2MSE_TEST_INCLUDE_A| ).

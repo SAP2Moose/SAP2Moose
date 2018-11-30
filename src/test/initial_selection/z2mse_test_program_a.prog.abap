@@ -25,3 +25,6 @@ CALL FUNCTION 'Z2MSE_TEST_FUNCTION_B'.
 DATA class_b1 TYPE REF TO z2mse_test_cl_b1.
 class_b1->method_a( ).
 DATA(t) = class_b1->attribute_a.
+
+" This table is not in the selected package and has to be found with down search
+SELECT * FROM z2mse_test_db_b INTO TABLE @DATA(db_b).

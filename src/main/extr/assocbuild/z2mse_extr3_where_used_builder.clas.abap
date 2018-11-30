@@ -167,6 +167,9 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
                          IMPORTING is_added       = is_added
                                    new_element_id = uses_element_id ).
 
+          element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
+                                                                    i_is_specific = abap_true ).
+
           invocation->add( EXPORTING invoced_element_id1  = uses_element_id
                                      invocing_element_id2 = element_id ).
 
@@ -191,6 +194,9 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         programs->add( EXPORTING program        = program_found
                        IMPORTING is_added       = is_added
                                  new_element_id = uses_element_id ).
+
+        element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
+                                                                  i_is_specific = abap_true ).
 
         invocation->add( EXPORTING invoced_element_id1  = uses_element_id
                                    invocing_element_id2 = element_id ).
@@ -264,6 +270,33 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
             ELSE.
               "TBD what is to be done here?
+
+            ENDIF.
+
+          WHEN 'TY'.
+
+            DATA tabclass TYPE tabclass.
+
+            SELECT SINGLE tabclass FROM dd02l INTO tabclass WHERE tabname = wbcrossgt-name.
+
+            IF sy-subrc EQ 0.
+
+              DATA tables TYPE REF TO z2mse_extr3_tables.
+              tables = z2mse_extr3_tables=>get_instance( i_element_manager = element_manager ).
+              DATA: new_table TYPE string.
+              new_table = wbcrossgt-name.
+
+              " SAP_2_FAMIX_77 Find database tables in downsearch
+
+              tables->add( EXPORTING table          = new_table
+                           IMPORTING new_element_id = uses_element_id ).
+
+              element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
+                                                                        i_is_specific = abap_true ).
+              access = z2mse_extr3_access=>get_instance( i_element_manager = element_manager ).
+
+              access->add( EXPORTING accessed_element_id1  = uses_element_id
+                                     accessing_element_id2 = element_id ).
 
             ENDIF.
 
