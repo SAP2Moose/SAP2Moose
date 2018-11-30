@@ -91,6 +91,8 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         CASE program_type.
           WHEN programs2->type_program.
 
+            " SAP_2_FAMIX_73 Provide downsearch for programs
+
             include_name = program.
 
           WHEN programs2->type_function.
@@ -137,6 +139,8 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         DATA: is_added        TYPE abap_bool,
               uses_element_id TYPE z2mse_extr3_element_manager=>element_id_type.
 
+        CLEAR is_added.
+
         DATA programs TYPE REF TO z2mse_extr3_programs.
         programs = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
 
@@ -166,8 +170,6 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
           invocation->add( EXPORTING invoced_element_id1  = uses_element_id
                                      invocing_element_id2 = element_id ).
 
-          CLEAR is_added.
-
 *        ELSEIF cross-type EQ 'F'.
 *          " TBD functions
         ELSE.
@@ -177,6 +179,8 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
       ENDLOOP.
 
       LOOP AT wbcrossis INTO wbcrossi.
+
+        CLEAR is_added.
 
         programs = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
 
@@ -191,13 +195,79 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         invocation->add( EXPORTING invoced_element_id1  = uses_element_id
                                    invocing_element_id2 = element_id ).
 
-        CLEAR is_added.
-
       ENDLOOP.
 
       LOOP AT wbcrossgts INTO wbcrossgt.
 
         CLEAR is_added.
+
+        CASE wbcrossgt-otype.
+          WHEN 'ME'.
+            DATA: class  TYPE string,
+                  method TYPE string.
+            SPLIT wbcrossgt-name AT '\ME:' INTO class method.
+
+            DATA classes TYPE REF TO z2mse_extr3_classes.
+            classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
+
+            " SAP_2_FAMIX_75 Find class methods in downsearch
+
+            classes->add_component(
+              EXPORTING
+                clsname        = class
+                cmpname        = method
+                is_specific    = abap_false
+              IMPORTING
+                is_added       = is_added
+                new_element_id = uses_element_id ).
+            IF is_added EQ abap_true.
+
+              element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
+                                                                        i_is_specific = abap_true ).
+
+            ELSE.
+              "TBD what is to be done here?
+
+            ENDIF.
+
+            invocation->add( EXPORTING invoced_element_id1  = uses_element_id
+                                       invocing_element_id2 = element_id ).
+
+          WHEN 'DA'.
+
+            DATA: attribute TYPE string.
+
+            SPLIT wbcrossgt-name AT '\DA:' INTO class attribute.
+
+            classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
+
+            " SAP_2_FAMIX_76 Find class attributes in downsearch
+
+            classes->add_component(
+              EXPORTING
+                clsname        = class
+                cmpname        = attribute
+                is_specific    = abap_false
+              IMPORTING
+                is_added       = is_added
+                new_element_id = uses_element_id ).
+            IF is_added EQ abap_true.
+
+              element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
+                                                                        i_is_specific = abap_true ).
+              DATA access TYPE REF TO z2mse_extr3_access.
+              access = z2mse_extr3_access=>get_instance( i_element_manager = element_manager ).
+
+              access->add( EXPORTING accessed_element_id1  = uses_element_id
+                                     accessing_element_id2 = element_id ).
+
+
+            ELSE.
+              "TBD what is to be done here?
+
+            ENDIF.
+
+        ENDCASE.
 
       ENDLOOP.
     ENDIF.

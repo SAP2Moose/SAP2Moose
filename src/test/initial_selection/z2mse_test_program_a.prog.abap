@@ -19,4 +19,9 @@ SUBMIT z2mse_test_program_c AND RETURN.
 INCLUDE z2mse_test_include_a.
 
 " This function is not in the selected package and has to be found with down search
-call FUNCTION 'Z2MSE_TEST_FUNCTION_B'.
+CALL FUNCTION 'Z2MSE_TEST_FUNCTION_B'.
+
+" This class, attributes and methods are not in the selected package and have to be found with down search
+DATA class_b1 TYPE REF TO z2mse_test_cl_b1.
+class_b1->method_a( ).
+DATA(t) = class_b1->attribute_a.
