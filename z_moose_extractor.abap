@@ -1,4 +1,4 @@
-* generated on system NPL at 15.06.2018 on 11:15:13
+* generated on system NPL at 30.11.2018 on 21:53:06
 
 *
 * This is version 1.1.2
@@ -2217,6 +2217,7 @@ CLASS cl_extr3_where_used_builder DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    TYPE-POOLS seop .
 
     METHODS set_dynamic_read
       IMPORTING
@@ -2228,6 +2229,7 @@ CLASS cl_extr3_where_used_builder DEFINITION
         REDEFINITION .
   PROTECTED SECTION.
   PRIVATE SECTION.
+
 
     TYPES:
       BEGIN OF wbcrossgt_type,
@@ -2244,7 +2246,14 @@ CLASS cl_extr3_where_used_builder DEFINITION
         name    TYPE seu_name,
         include TYPE syrepid,
       END OF cross_type,
-      cross_types TYPE STANDARD TABLE OF cross_type WITH DEFAULT KEY.
+      cross_types TYPE STANDARD TABLE OF cross_type WITH DEFAULT KEY,
+
+      BEGIN OF wbcrossi_type,
+        name    TYPE eu_lname,
+        include TYPE program,
+        " Ignore field master, it is in most cases identical to field include
+      END OF wbcrossi_type,
+      wbcrossi_types TYPE STANDARD TABLE OF wbcrossi_type WITH DEFAULT KEY.
 
     DATA: g_dynamic_usage TYPE SORTED TABLE OF wbcrossgt WITH UNIQUE KEY otype name include.
 ENDCLASS.
@@ -2454,6 +2463,9 @@ CLASS CL_EXTR3_ACCESS IMPLEMENTATION.
 
     DATA association TYPE association_type.
 
+    ASSERT accessed_element_id1 IS NOT INITIAL.
+    ASSERT accessing_element_id2 IS NOT INITIAL.
+
     association-accessed_element_id1 = accessed_element_id1.
     association-accessing_element_id2 = accessing_element_id2.
     INSERT association INTO TABLE associations.
@@ -2641,6 +2653,9 @@ CLASS CL_EXTR3_INVOCATION IMPLEMENTATION.
   METHOD add.
 
     DATA association TYPE association_type.
+
+    ASSERT invoced_element_id1 IS NOT INITIAL.
+    ASSERT invocing_element_id2 IS NOT INITIAL.
 
     association-invoced_element_id1 = invoced_element_id1.
     association-invocing_element_id2 = invocing_element_id2.
@@ -2905,6 +2920,433 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
 
     element = element_manager->get_element( element_id ).
 
+    DATA invocation TYPE REF TO cl_extr3_invocation.
+    invocation = cl_extr3_invocation=>get_instance( i_element_manager = element_manager ).
+
+
+    DATA: include_name TYPE syrepid.
+
+    CASE element->type.
+      WHEN element->class_type.
+        "TBD
+
+
+        DATA: class_name TYPE string,
+              cmpname    TYPE string,
+              cmptype    TYPE seocmptype,
+              exists     TYPE abap_bool.
+
+
+        DATA classes TYPE REF TO cl_extr3_classes.
+        classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
+        classes->comp_name( EXPORTING element_id = element_id
+              IMPORTING
+                class_name = class_name
+                cmpname    = cmpname
+                cmptype    = cmptype
+                exists     = exists
+        ).
+
+        IF exists EQ abap_false.
+          RETURN.
+        ENDIF.
+
+*        WRITE: / class_name, ' ', cmpname.
+
+*        IF class_name EQ 'CL_EXTR3_WHERE_USED_BUILDER' AND cmpname EQ 'SEARCH_DOWN'.
+*          BREAK-POINT.
+*        ENDIF.
+
+
+        DATA: class_key TYPE seoclskey.
+        DATA: includes    TYPE    seop_methods_w_include.
+        class_key-clsname = class_name.
+
+        IF cmptype EQ '1' OR cmptype EQ '2'.
+          DATA clsname  TYPE seoclsname.
+          clsname = class_key.
+          CALL METHOD cl_oo_classname_service=>get_all_method_includes(
+            EXPORTING
+              clsname            = clsname
+*             with_enhancements  =     " X = searches also for enh.method includes
+            RECEIVING
+              result             = includes
+            EXCEPTIONS
+              class_not_existing = 1
+              OTHERS             = 2
+                                   ).
+          IF sy-subrc <> 0.
+            " TBD Better error handling
+            RETURN.
+          ENDIF.
+
+          " This method is described to be obsolete
+*          CALL FUNCTION 'SEO_CLASS_GET_METHOD_INCLUDES'
+*            EXPORTING
+*              clskey                       = class_key
+*            IMPORTING
+*              includes                     = includes
+*            EXCEPTIONS
+*              _internal_class_not_existing = 1
+*              OTHERS                       = 2.
+*          IF sy-subrc <> 0.
+*            " TBD Better error handling
+*            RETURN.
+*          ENDIF.
+          DATA: include TYPE LINE OF seop_methods_w_include.
+          READ TABLE includes INTO include WITH KEY cpdkey-cpdname = cmpname.
+          IF sy-subrc <> 0.
+            " TBD ?
+            RETURN.
+          ELSE.
+
+            "SAP_2_FAMIX_78 Provide downsearch for class methods
+
+            include_name = include-incname.
+
+          ENDIF.
+
+        ELSE.
+          RETURN.
+        ENDIF.
+
+*        CASE cmptype.
+*          WHEN '1'. "Method
+*          WHEN '2'. "Even
+*        ENDCASE.
+
+      WHEN element->table_type.
+        "Is this needed?
+      WHEN element->program_type.
+
+        " Duplicate coding 1/2 see method search_up
+
+        DATA programs2 TYPE REF TO cl_extr3_programs.
+        programs2 = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
+
+        DATA: program             TYPE progname,
+              program_type        TYPE string,
+              program_attribute_2 TYPE string.
+
+
+
+        programs2->program_name(
+          EXPORTING
+            i_element_id                 = element_id
+          IMPORTING
+            program                      = program
+            program_type                 = program_type
+            program_attribute_2          = program_attribute_2
+*            external_program_name_class  =
+*            external_program_name_method =
+*            subc                         =
+        ).
+        CASE program_type.
+          WHEN programs2->type_program.
+
+            " SAP_2_FAMIX_73 Provide downsearch for programs
+
+            include_name = program.
+
+          WHEN programs2->type_function.
+
+            include_name = program_attribute_2.
+
+          WHEN OTHERS.
+            " TBD
+        ENDCASE.
+
+    ENDCASE.
+
+    IF include_name IS NOT INITIAL.
+
+      DATA: wbcrossgts TYPE wbcrossgts_type,
+            wbcrossgt  TYPE wbcrossgt_type,
+            cross      TYPE cross_type,
+            crosss     TYPE cross_types,
+            wbcrossi   TYPE wbcrossi_type,
+            wbcrossis  TYPE wbcrossi_types.
+
+      SELECT otype name include direct indirect
+        FROM wbcrossgt
+        INTO TABLE wbcrossgts
+        WHERE include = include_name.
+
+      SELECT type name include FROM cross INTO TABLE crosss
+        WHERE include = include_name.
+
+      SELECT name include FROM wbcrossi INTO TABLE wbcrossis
+        WHERE include = include_name.
+
+      " Read dynamic usages
+
+      DATA: w TYPE wbcrossgt.
+      LOOP AT g_dynamic_usage INTO w
+        WHERE include = include_name.
+        MOVE-CORRESPONDING w TO wbcrossgt.
+        INSERT wbcrossgt INTO TABLE wbcrossgts.
+      ENDLOOP.
+
+      LOOP AT crosss INTO cross.
+
+        DATA: is_added        TYPE abap_bool,
+              uses_element_id TYPE cl_extr3_element_manager=>element_id_type.
+
+        CLEAR is_added.
+
+        DATA programs TYPE REF TO cl_extr3_programs.
+        programs = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
+
+        IF cross-type EQ 'R' OR cross-type EQ 'F'.
+          DATA: program_found  TYPE progname.
+          IF cross-type EQ 'R'.
+            " SAP_2_FAMIX_67 Find programs in downsearch
+            program_found = cross-name.
+          ELSEIF cross-type EQ 'F'.
+            " SAP_2_FAMIX_72 Find functions in downsearch
+            DATA tf TYPE tfdir.
+            " TBD find a more performant solution for this
+            SELECT SINGLE * FROM tfdir INTO tf WHERE funcname = cross-name.
+            IF tf IS NOT INITIAL.
+              "TBD handle error
+            ENDIF.
+            program_found = tf-pname.
+            SHIFT program_found LEFT BY 3 PLACES.
+            program_found = program_found && |U| && tf-include.
+          ELSE.
+            ASSERT 1 = 2.
+          ENDIF.
+          programs->add( EXPORTING program        = program_found
+                         IMPORTING is_added       = is_added
+                                   new_element_id = uses_element_id ).
+
+          IF uses_element_id IS INITIAL.
+            "TBD support this kind of elements
+            CONTINUE.
+          ENDIF.
+
+          IF is_added EQ abap_true.
+
+            element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
+                                                                      i_is_specific = abap_true ).
+
+          ELSE.
+            "TBD what is to be done here?
+
+          ENDIF.
+          invocation->add( EXPORTING invoced_element_id1  = uses_element_id
+                                     invocing_element_id2 = element_id ).
+
+*        ELSEIF cross-type EQ 'F'.
+*          " TBD functions
+        ELSE.
+          " TBD ?
+        ENDIF.
+
+      ENDLOOP.
+
+      LOOP AT wbcrossis INTO wbcrossi.
+
+        CLEAR is_added.
+
+        programs = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
+
+        " SAP_2_FAMIX_70 Find includes in downsearch
+
+        " This is an include, but it is reported as program, TBD change this
+        program_found = wbcrossi-name.
+        programs->add( EXPORTING program        = program_found
+                       IMPORTING is_added       = is_added
+                                 new_element_id = uses_element_id ).
+
+        IF uses_element_id IS INITIAL.
+          "TBD support this kind of elements
+          CONTINUE.
+        ENDIF.
+
+        IF is_added EQ abap_true.
+
+          element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
+                                                                    i_is_specific = abap_true ).
+
+        ELSE.
+          "TBD what is to be done here?
+
+        ENDIF.
+
+        invocation->add( EXPORTING invoced_element_id1  = uses_element_id
+                                   invocing_element_id2 = element_id ).
+
+      ENDLOOP.
+
+      LOOP AT wbcrossgts INTO wbcrossgt.
+
+        CLEAR is_added.
+
+        CASE wbcrossgt-otype.
+          WHEN 'ME'.
+            DATA: class  TYPE string,
+                  method TYPE string.
+            SPLIT wbcrossgt-name AT '\ME:' INTO class method.
+
+            IF class EQ 'CL_EXTR3_WHERE_USED_BUILDER\ME:SEARCH_DOWN'.
+              BREAK-POINT.
+            ENDIF.
+
+            DATA: temp TYPE string.
+            temp = class && |~| && method.
+
+            IF cmpname EQ temp. " Implementation of interface methods are in the where used list. These are added explicitely in the class coding. So filter here.
+
+              CONTINUE.
+
+            ENDIF.
+
+            classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
+
+            " SAP_2_FAMIX_75 Find class methods in downsearch
+
+            ASSERT class IS NOT INITIAL.
+            classes->add_component(
+              EXPORTING
+                clsname        = class
+                cmpname        = method
+                is_specific    = abap_true
+              IMPORTING
+                is_added       = is_added
+                new_element_id = uses_element_id ).
+
+            IF uses_element_id IS INITIAL.
+              "TBD support this kind of elements
+              CONTINUE.
+            ENDIF.
+
+            IF is_added EQ abap_true.
+
+              element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
+                                                                        i_is_specific = abap_true ).
+
+            ELSE.
+              "TBD what is to be done here?
+
+            ENDIF.
+
+            DATA: is_redefinition_of_method TYPE abap_bool.
+
+            is_redefinition_of_method = classes->is_redefinition_of_method( invoced_element_id1  = uses_element_id
+                                                                            invocing_element_id2 = element_id ).
+
+            IF is_redefinition_of_method EQ abap_true.
+
+              invocation->add( EXPORTING invoced_element_id1  = element_id
+                                         invocing_element_id2 = uses_element_id ).
+            ELSE.
+
+              invocation->add( EXPORTING invoced_element_id1  = uses_element_id
+                                         invocing_element_id2 = element_id ).
+
+            ENDIF.
+
+          WHEN 'DA'.
+
+            DATA: attribute TYPE string.
+
+            SPLIT wbcrossgt-name AT '\DA:' INTO class attribute.
+            DATA: part1 TYPE string,
+                  part2 TYPE string.
+            SPLIT class AT '\ME:' INTO part1 part2.
+
+            IF part2 IS NOT INITIAL.
+              CONTINUE." TBD specify this better
+            ENDIF.
+
+            IF attribute IS NOT INITIAL.
+
+              classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
+
+              " SAP_2_FAMIX_76 Find class attributes in downsearch
+              ASSERT class IS NOT INITIAL.
+              classes->add_component(
+                EXPORTING
+                  clsname        = class
+                  cmpname        = attribute
+                  is_specific    = abap_false
+                IMPORTING
+                  is_added       = is_added
+                  new_element_id = uses_element_id ).
+
+              IF uses_element_id IS INITIAL.
+                "TBD support this kind of elements
+                CONTINUE.
+              ENDIF.
+
+              IF is_added EQ abap_true.
+
+                element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
+                                                                          i_is_specific = abap_true ).
+
+              ELSE.
+                "TBD what is to be done here?
+
+              ENDIF.
+
+              DATA access TYPE REF TO cl_extr3_access.
+              access = cl_extr3_access=>get_instance( i_element_manager = element_manager ).
+
+              IF uses_element_id IS NOT INITIAL. " This may be some irregular object, that is not a class attribute
+                access->add( EXPORTING accessed_element_id1  = uses_element_id
+                                       accessing_element_id2 = element_id ).
+              ENDIF.
+
+            ENDIF.
+
+          WHEN 'TY'.
+
+            DATA tabclass TYPE tabclass.
+
+            SELECT SINGLE tabclass FROM dd02l INTO tabclass WHERE tabname = wbcrossgt-name.
+
+            IF sy-subrc EQ 0.
+
+              DATA tables TYPE REF TO cl_extr3_tables.
+              tables = cl_extr3_tables=>get_instance( i_element_manager = element_manager ).
+              DATA: new_table TYPE string.
+              new_table = wbcrossgt-name.
+
+              " SAP_2_FAMIX_77 Find database tables in downsearch
+
+              tables->add( EXPORTING table          = new_table
+                           IMPORTING new_element_id = uses_element_id
+                                     is_added       = is_added ).
+
+              IF uses_element_id IS INITIAL.
+                "TBD support this kind of elements
+                CONTINUE.
+              ENDIF.
+
+              IF is_added EQ abap_true.
+
+                element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
+                                                                          i_is_specific = abap_true ).
+
+              ELSE.
+                "TBD what is to be done here?
+
+              ENDIF.
+              IF uses_element_id IS NOT INITIAL.
+                access = cl_extr3_access=>get_instance( i_element_manager = element_manager ).
+
+                access->add( EXPORTING accessed_element_id1  = uses_element_id
+                                       accessing_element_id2 = element_id ).
+              ENDIF.
+
+            ENDIF.
+
+        ENDCASE.
+
+      ENDLOOP.
+    ENDIF.
+
   ENDMETHOD.
   METHOD search_up.
 
@@ -3018,6 +3460,8 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
         is_access = abap_true.
 
       WHEN element->program_type.
+
+        " Duplicate coding 2/2 see method search_down
 
         DATA programs2 TYPE REF TO cl_extr3_programs.
         programs2 = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
@@ -3396,8 +3840,9 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
                                 new_element_id = new_element_id
                                 is_added_now   = is_added_now ).
 
-      IF is_specific EQ abap_true AND
-         is_added_now EQ abap_true.
+      IF is_specific EQ abap_true
+*      AND is_added_now EQ abap_true
+      .
 
         element_manager->model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
                                                                   i_is_specific = abap_true ).
@@ -5488,6 +5933,16 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
     is_initial_selection = abap_false.
 
+    IF is_usage_of_single_element EQ abap_false.
+
+      " All initially selected elements are marked as specific so that they are correctly searched
+
+      LOOP AT found_in_levels ASSIGNING <found_in_level>.
+        <found_in_level>-specific = abap_true.
+      ENDLOOP.
+
+    ENDIF.
+
     " Search up
 
     is_up_search = abap_true.
@@ -5510,8 +5965,10 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
         CLEAR workload.
         LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_upsearch = level_to_search_up.
 
-          IF     is_usage_of_single_element EQ abap_true
-             AND <found_in_level>-specific EQ abap_false.
+          IF
+*               is_usage_of_single_element EQ abap_true
+*             AND
+             <found_in_level>-specific EQ abap_false.
             CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
           ENDIF.
 
@@ -5539,6 +5996,9 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
     ENDIF.
 
+    " SAP_2_FAMIX_68        When more than a single level is searched up, the up search is not done for elements that where found in the search down
+    " Fullfilled because the search down starts here
+
     is_up_search = abap_false.
 
     " Search down
@@ -5554,15 +6014,31 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
       WHILE something_to_be_done_down EQ abap_true.
 
-        temp = |Search up for level { level_to_search_down }|."To be 7.02 compatible
+        temp = |Search down for level { level_to_search_down }|."To be 7.02 compatible
         CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
 
         something_to_be_done_down = abap_false.
         CLEAR workload.
         LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_downsearch = level_to_search_down.
-          IF     is_usage_of_single_element EQ abap_true
-             AND <found_in_level>-specific EQ abap_false.
+          IF
+*          is_usage_of_single_element EQ abap_true
+*             AND
+             <found_in_level>-specific EQ abap_false.
             CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+          ENDIF.
+          IF level_to_search_down EQ 0.
+            IF <found_in_level>-found_in_initial_selection EQ abap_false.
+              " SAP_2_FAMIX_69      When more than a single level is searched down, the down search is not done for elements that where found in the search up
+              CONTINUE. "Start searching down with the elements found in the initial selection. Ignore all that was found in upsearch
+            ELSE.
+              IF is_usage_of_single_element EQ abap_true AND (
+                 <found_in_level>-specific EQ abap_false OR
+                 <found_in_level>-found_in_level_upsearch > 0 ).
+                CONTINUE. " No downsearch for elements that are in initially selected classes but are not initially selected.
+                " They are not initially selected when found in level upsearch is greater than zero
+              ENDIF.
+            ENDIF.
+
           ENDIF.
 
           level_for_found_in_downsearch = <found_in_level>-found_in_level_downsearch + 1.
@@ -5579,7 +6055,7 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
 
         ADD 1 TO level_to_search_down.
 
-        IF i_search_down <= 0 AND i_search_down <= level_to_search_down.
+        IF i_search_down >= 0 AND i_search_down <= level_to_search_down.
 
           something_to_be_done_down = abap_false.
 
