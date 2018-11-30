@@ -396,6 +396,12 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
               CONTINUE." TBD specify this better
             ENDIF.
 
+            split class at '\IN:' INTO part1 part2.
+
+            IF part2 IS NOT INITIAL.
+              CONTINUE." TBD specify this better
+            ENDIF.
+
             IF attribute IS NOT INITIAL.
 
               classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
