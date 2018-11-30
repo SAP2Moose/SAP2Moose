@@ -307,6 +307,12 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
               IMPORTING
                 is_added       = is_added
                 new_element_id = uses_element_id ).
+
+            IF uses_element_id IS INITIAL.
+              "TBD support this kind of elements
+              RETURN.
+            ENDIF.
+
             IF is_added EQ abap_true.
 
               element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
