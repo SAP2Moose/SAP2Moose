@@ -87,6 +87,13 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
           RETURN.
         ENDIF.
 
+*        WRITE: / class_name, ' ', cmpname.
+
+*        IF class_name EQ 'Z2MSE_EXTR3_WHERE_USED_BUILDER' AND cmpname EQ 'SEARCH_DOWN'.
+*          BREAK-POINT.
+*        ENDIF.
+
+
         DATA: class_key TYPE seoclskey.
         DATA: includes    TYPE    seop_methods_w_include.
         class_key-clsname = class_name.
@@ -110,6 +117,8 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
             " TBD ?
             RETURN.
           ELSE.
+
+            "SAP_2_FAMIX_78 Provide downsearch for class methods
 
             include_name = include-incname.
 
@@ -228,6 +237,12 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
           programs->add( EXPORTING program        = program_found
                          IMPORTING is_added       = is_added
                                    new_element_id = uses_element_id ).
+
+          IF uses_element_id IS INITIAL.
+            "TBD support this kind of elements
+            CONTINUE.
+          ENDIF.
+
           IF is_added EQ abap_true.
 
             element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
@@ -261,6 +276,12 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         programs->add( EXPORTING program        = program_found
                        IMPORTING is_added       = is_added
                                  new_element_id = uses_element_id ).
+
+        IF uses_element_id IS INITIAL.
+          "TBD support this kind of elements
+          CONTINUE.
+        ENDIF.
+
         IF is_added EQ abap_true.
 
           element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
@@ -291,7 +312,7 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
             IF cmpname EQ temp. " Implementation of interface methods are in the where used list. These are added explicitely in the class coding. So filter here.
 
-              RETURN.
+              CONTINUE.
 
             ENDIF.
 
@@ -310,7 +331,7 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
             IF uses_element_id IS INITIAL.
               "TBD support this kind of elements
-              RETURN.
+              CONTINUE.
             ENDIF.
 
             IF is_added EQ abap_true.
@@ -359,6 +380,12 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
                 IMPORTING
                   is_added       = is_added
                   new_element_id = uses_element_id ).
+
+              IF uses_element_id IS INITIAL.
+                "TBD support this kind of elements
+                CONTINUE.
+              ENDIF.
+
               IF is_added EQ abap_true.
 
                 element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id
@@ -397,6 +424,12 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
               tables->add( EXPORTING table          = new_table
                            IMPORTING new_element_id = uses_element_id
                                      is_added       = is_added ).
+
+              IF uses_element_id IS INITIAL.
+                "TBD support this kind of elements
+                CONTINUE.
+              ENDIF.
+
               IF is_added EQ abap_true.
 
                 element_manager->model_builder->new_element_id( EXPORTING i_element_id  = uses_element_id

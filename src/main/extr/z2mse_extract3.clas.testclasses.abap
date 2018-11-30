@@ -52,7 +52,7 @@ CLASS ltcl_main IMPLEMENTATION.
                               element_manager          = element_manager
                               initial_elements         = initial_elements
                               i_search_up              = -1
-                              i_search_down            = -1
+                              i_search_down            = 2
                               i_exclude_found_sap_intf = abap_true
                     IMPORTING mse_model             = mse_model_act
                               nothing_done          = nothing_done_act ).
@@ -105,6 +105,7 @@ CLASS ltcl_main IMPLEMENTATION.
 
     maker->add_method(            method  = |METHOD_A| at_line = 9 ).
     maker->usage(                           used_group  = |Z2MSE_TEST_CL_B1| used = |METHOD_A| ).
+    maker->access(                          used = |Z2MSE_TEST_DB_B| ).
 
     maker->add_class(      name = |Z2MSE_TEST_CL_B1| parentpackage = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
     maker->add_method(            method  = |EVENT_A| at_line = 8 ).
@@ -166,6 +167,8 @@ CLASS ltcl_main IMPLEMENTATION.
     maker->usage(                       used_group  = |FGR-Z2MSE_TEST_FGR_B| used = |F-Z2MSE_TEST_FUNCTION_B| ).
     maker->add_program(   name = |Z2MSE_TEST_PROGRAM_B| parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
     maker->add_program(   name = |Z2MSE_TEST_PROGRAM_C| parentpackage = || ). "TBD add parentpackage to exported model
+    maker->usage(                used = |Z2MSE_TEST_PROGRAM_D| ).
+    maker->add_program(   name = |Z2MSE_TEST_PROGRAM_D| parentpackage = || ). "TBD add parentpackage to exported model
     maker->add_program(   name = |Z2MSE_TEST_INCLUDE_A| parentpackage = || ). "TBD add parentpackage to exported model
     maker->add_function_group( name = |Z2MSE_TEST_FGR_B| parentpackage = || ). " TBD Add Parentpackage
     maker->add_function(              function = |Z2MSE_TEST_FUNCTION_B| ).

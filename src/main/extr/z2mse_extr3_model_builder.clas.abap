@@ -341,8 +341,9 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
               " SAP_2_FAMIX_69      When more than a single level is searched down, the down search is not done for elements that where found in the search up
               CONTINUE. "Start searching down with the elements found in the initial selection. Ignore all that was found in upsearch
             ELSE.
-              IF <found_in_level>-specific EQ abap_false OR
-                 <found_in_level>-found_in_level_upsearch > 0.
+              IF is_usage_of_single_element EQ abap_true and (
+                 <found_in_level>-specific EQ abap_false OR
+                 <found_in_level>-found_in_level_upsearch > 0 ).
                 CONTINUE. " No downsearch for elements that are in initially selected classes but are not initially selected.
                 " They are not initially selected when found in level upsearch is greater than zero
               ENDIF.
@@ -364,7 +365,7 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
         ADD 1 TO level_to_search_down.
 
-        IF i_search_down <= 0 AND i_search_down <= level_to_search_down.
+        IF i_search_down >= 0 AND i_search_down <= level_to_search_down.
 
           something_to_be_done_down = abap_false.
 
