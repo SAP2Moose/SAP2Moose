@@ -93,8 +93,8 @@
     <item>
      <ID>S</ID>
      <KEY>P_NDOWN</KEY>
-     <ENTRY>Downsearch not yet working</ENTRY>
-     <LENGTH>34</LENGTH>
+     <ENTRY>Search down (-1 if no limit)</ENTRY>
+     <LENGTH>36</LENGTH>
     </item>
     <item>
      <ID>S</ID>
