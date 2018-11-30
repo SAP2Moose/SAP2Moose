@@ -31,7 +31,14 @@ CLASS z2mse_extr3_where_used_builder DEFINITION
         name    TYPE seu_name,
         include TYPE syrepid,
       END OF cross_type,
-      cross_types TYPE STANDARD TABLE OF cross_type WITH DEFAULT KEY.
+      cross_types TYPE STANDARD TABLE OF cross_type WITH DEFAULT KEY,
+
+      BEGIN OF wbcrossi_type,
+        name    TYPE eu_lname,
+        include TYPE program,
+        " Ignore field master, it is in most cases identical to field include
+      END OF wbcrossi_type,
+      wbcrossi_types TYPE STANDARD TABLE OF wbcrossi_type WITH DEFAULT KEY.
 
     DATA: g_dynamic_usage TYPE SORTED TABLE OF wbcrossgt WITH UNIQUE KEY otype name include.
 ENDCLASS.
@@ -101,7 +108,9 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
       DATA: wbcrossgts TYPE wbcrossgts_type,
             wbcrossgt  TYPE wbcrossgt_type,
             cross      TYPE cross_type,
-            crosss     TYPE cross_types.
+            crosss     TYPE cross_types,
+            wbcrossi   TYPE wbcrossi_type,
+            wbcrossis  TYPE wbcrossi_types.
 
       SELECT otype name include direct indirect
         FROM wbcrossgt
@@ -109,6 +118,9 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         WHERE include = include_name.
 
       SELECT type name include FROM cross INTO TABLE crosss
+        WHERE include = include_name.
+
+      SELECT name include FROM wbcrossi INTO TABLE wbcrossis
         WHERE include = include_name.
 
       " Read dynamic usages
@@ -146,6 +158,25 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         ELSE.
           " TBD ?
         ENDIF.
+
+      ENDLOOP.
+
+      LOOP AT wbcrossis INTO wbcrossi.
+
+        programs = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
+
+        " SAP_2_FAMIX_70 Provide downsearch for includes - list found programs
+
+        " This is an include, but it is reported as program, TBD change this
+        program_found = wbcrossi-name.
+        programs->add( EXPORTING program        = program_found
+                       IMPORTING is_added       = is_added
+                                 new_element_id = uses_element_id ).
+
+        invocation->add( EXPORTING invoced_element_id1  = uses_element_id
+                                   invocing_element_id2 = element_id ).
+
+        CLEAR is_added.
 
       ENDLOOP.
 
