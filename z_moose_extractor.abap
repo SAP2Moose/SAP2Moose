@@ -1,4 +1,4 @@
-* generated on system NPL at 30.11.2018 on 22:11:22
+* generated on system NPL at 04.12.2018 on 22:09:23
 
 *
 * This is version 1.1.2
@@ -2045,8 +2045,15 @@ CLASS cl_extr3_programs DEFINITION
         VALUE(program)                      TYPE progname
         VALUE(external_program_name_class)  TYPE string
         VALUE(external_program_name_method) TYPE string
-        value(program_attribute_2)          TYPE string
+        VALUE(program_attribute_1)          TYPE string
+        VALUE(program_attribute_2)          TYPE string
         VALUE(subc)                         TYPE subc.
+    METHODS add_function_group
+      IMPORTING
+        fgr            TYPE string
+      EXPORTING
+        is_added       TYPE abap_bool
+        new_element_id TYPE i.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
     METHODS collect_infos REDEFINITION.
@@ -2762,6 +2769,7 @@ CLASS CL_EXTR3_TADIR_BUILDER IMPLEMENTATION.
           new_element_id     TYPE cl_extr3_element_manager=>element_id_type,
           class_name         TYPE string,
           tabname            TYPE string,
+          function_group     TYPE string,
           program            TYPE progname,
           wdy_component_name TYPE wdy_component_name.
 
@@ -2802,6 +2810,11 @@ CLASS CL_EXTR3_TADIR_BUILDER IMPLEMENTATION.
 
               WHEN 'DEVC'.
               WHEN 'FUGR'.
+
+                function_group = tadir-obj_name.
+                programs->add_function_group( EXPORTING fgr            = function_group
+                                              IMPORTING is_added       = is_found
+                                                        new_element_id = new_element_id ).
               WHEN 'PROG'.
 
                 program = tadir-obj_name.
@@ -2881,6 +2894,29 @@ CLASS CL_EXTR3_TADIR_BUILDER IMPLEMENTATION.
         tabname = tables->table_name( i_element_id = element_id ).
         object = 'TABL'.
         obj_name = tabname.
+      WHEN element->program_type.
+        DATA program_type TYPE string.
+        DATA program TYPE progname.
+        DATA program_attribute_1 TYPE string.
+        programs->program_name(
+          EXPORTING
+            i_element_id                 = element_id
+          IMPORTING
+            program_type                 = program_type
+            program                      = program
+*            external_program_name_class  = external_program_name_class
+*            external_program_name_method =
+            program_attribute_1          = program_attribute_1
+*            subc                         =
+        ).
+        IF program_type EQ programs->type_function OR program_type EQ programs->type_function_include.
+          object = 'FUGR'.
+          obj_name = program_attribute_1.
+        ELSEIF program_type EQ programs->type_program.
+          object = 'PROG'.
+          obj_name = program.
+        ENDIF.
+
     ENDCASE.
 
     TYPES: BEGIN OF ty_tadir,
@@ -4807,6 +4843,11 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
       modifier = cl_extract3=>modifier_function_group.
 *      name_of_mapped_class = element-external_program_name.
       name_of_mapped_class = _get_names_for_function_groups( element ).
+
+*      " Get parent package for function group
+*      DATA devclass TYPE tadir-devclass.
+*      SELECT SINGLE devclass FROM tadir INTO devclass WHERE pgmid = 'R3TR' AND object = 'FUGR' AND obj_name = element-program_attribute_1.
+
     ELSE.
       name_group = 'UNKNOWN'.
       modifier = cl_extract3=>modifier_unknown.
@@ -4820,6 +4861,7 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
                                                  modifiers              = modifier
                                        IMPORTING id         = last_id ).
     DATA association TYPE cl_extr3_element_manager=>association_type.
+*    DATA: package_set TYPE abap_bool.
     LOOP AT associations INTO association WHERE element_id1 = element_id
                                             AND association->type = cl_extr3_association=>parent_package_ass.
       DATA package TYPE REF TO cl_extr3_packages.
@@ -4828,8 +4870,20 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
       element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
                                                                   parent_package     = package->devclass( i_element_id = association-element_id2 )
                                                                   parent_package_name_group = ng_abap_package ).
-
+*      package_set = abap_true.
     ENDLOOP.
+*    IF package_set EQ abap_false.
+*
+*      DATA packages_elements TYPE REF TO cl_extr3_packages.
+*
+*      packages_elements = cl_extr3_packages=>get_instance( i_element_manager = element_manager ).
+*
+*      packages_elements->add( EXPORTING package = devclass ).
+*
+*      element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
+*                                                                  parent_package     = devclass
+*                                                                  parent_package_name_group = ng_abap_package ).
+*    ENDIF.
 
     DATA dummy_method_id TYPE i.
 
@@ -4883,6 +4937,7 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = i_element_id.
     ASSERT sy-subrc EQ 0.
     program_type = element-program_type.
+    program_attribute_1 = element-program_attribute_1.
     program_attribute_2 = element-program_attribute_2.
     program = element-program.
     IF element-program_type EQ type_function OR element-program_type = type_function_include.
@@ -5092,6 +5147,38 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
   METHOD _get_names_for_function_groups.
 
     CONCATENATE 'FGR-' i_element-program_attribute_1 INTO name_of_mapped_class.
+
+  ENDMETHOD.
+  METHOD add_function_group.
+
+    DATA pname TYPE pname.
+
+    TYPES: BEGIN OF ty_function_group,
+             include TYPE includenr,
+           END OF ty_function_group.
+
+    DATA: fg  TYPE ty_function_group,
+          fgs TYPE STANDARD TABLE OF ty_function_group WITH DEFAULT KEY.
+
+    pname = |SAPL| && fgr.
+
+    SELECT include FROM tfdir INTO TABLE fgs WHERE pname = pname.
+
+    LOOP AT fgs INTO fg.
+
+      DATA progname TYPE progname.
+
+      progname = |L| && fgr && |U| && fg-include.
+
+      DATA is_found TYPE abap_bool.
+
+      DATA: fg_new_element_id TYPE cl_extr3_element_manager=>element_id_type.
+
+      add( EXPORTING program        = progname
+           IMPORTING is_added       = is_found
+                     new_element_id = fg_new_element_id ).
+
+    ENDLOOP.
 
   ENDMETHOD.
 ENDCLASS.
