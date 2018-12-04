@@ -174,13 +174,14 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
         obj_name = tabname.
       WHEN element->program_type.
         DATA program_type TYPE string.
+        DATA program TYPE progname.
         DATA program_attribute_1 TYPE string.
         programs->program_name(
           EXPORTING
             i_element_id                 = element_id
           IMPORTING
             program_type                 = program_type
-*            program                      =
+            program                      = program
 *            external_program_name_class  = external_program_name_class
 *            external_program_name_method =
             program_attribute_1          = program_attribute_1
@@ -189,6 +190,9 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
         IF program_type EQ programs->type_function OR program_type EQ programs->type_function_include.
           object = 'FUGR'.
           obj_name = program_attribute_1.
+        ELSEIF program_type EQ programs->type_program.
+          object = 'PROG'.
+          obj_name = program.
         ENDIF.
 
     ENDCASE.
