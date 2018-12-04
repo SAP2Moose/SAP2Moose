@@ -29,8 +29,15 @@ CLASS z2mse_extr3_programs DEFINITION
         VALUE(program)                      TYPE progname
         VALUE(external_program_name_class)  TYPE string
         VALUE(external_program_name_method) TYPE string
-        value(program_attribute_2)          TYPE string
+        VALUE(program_attribute_1)          TYPE string
+        VALUE(program_attribute_2)          TYPE string
         VALUE(subc)                         TYPE subc.
+    METHODS add_function_group
+      IMPORTING
+        fgr            TYPE string
+      EXPORTING
+        is_added       TYPE abap_bool
+        new_element_id TYPE i.
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
     METHODS collect_infos REDEFINITION.
@@ -80,7 +87,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
+CLASS z2mse_extr3_programs IMPLEMENTATION.
 
 
   METHOD add.
@@ -122,6 +129,40 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
       ENDIF.
 
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD add_function_group.
+
+    DATA pname TYPE pname.
+
+    TYPES: BEGIN OF ty_function_group,
+             include TYPE includenr,
+           END OF ty_function_group.
+
+    DATA: fg  TYPE ty_function_group,
+          fgs TYPE STANDARD TABLE OF ty_function_group WITH DEFAULT KEY.
+
+    pname = |SAPL| && fgr.
+
+    SELECT include FROM tfdir INTO TABLE fgs WHERE pname = pname.
+
+    LOOP AT fgs INTO fg.
+
+      DATA progname TYPE progname.
+
+      progname = |L| && fgr && |U| && fg-include.
+
+      DATA is_found TYPE abap_bool.
+
+      DATA: fg_new_element_id TYPE z2mse_extr3_element_manager=>element_id_type.
+
+      add( EXPORTING program        = progname
+           IMPORTING is_added       = is_found
+                     new_element_id = fg_new_element_id ).
+
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -222,6 +263,11 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
       modifier = z2mse_extract3=>modifier_function_group.
 *      name_of_mapped_class = element-external_program_name.
       name_of_mapped_class = _get_names_for_function_groups( element ).
+
+*      " Get parent package for function group
+*      DATA devclass TYPE tadir-devclass.
+*      SELECT SINGLE devclass FROM tadir INTO devclass WHERE pgmid = 'R3TR' AND object = 'FUGR' AND obj_name = element-program_attribute_1.
+
     ELSE.
       name_group = 'UNKNOWN'.
       modifier = z2mse_extract3=>modifier_unknown.
@@ -235,6 +281,7 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
                                                  modifiers              = modifier
                                        IMPORTING id         = last_id ).
     DATA association TYPE z2mse_extr3_element_manager=>association_type.
+*    DATA: package_set TYPE abap_bool.
     LOOP AT associations INTO association WHERE element_id1 = element_id
                                             AND association->type = z2mse_extr3_association=>parent_package_ass.
       DATA package TYPE REF TO z2mse_extr3_packages.
@@ -243,8 +290,20 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
       element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
                                                                   parent_package     = package->devclass( i_element_id = association-element_id2 )
                                                                   parent_package_name_group = ng_abap_package ).
-
+*      package_set = abap_true.
     ENDLOOP.
+*    IF package_set EQ abap_false.
+*
+*      DATA packages_elements TYPE REF TO z2mse_extr3_packages.
+*
+*      packages_elements = z2mse_extr3_packages=>get_instance( i_element_manager = element_manager ).
+*
+*      packages_elements->add( EXPORTING package = devclass ).
+*
+*      element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
+*                                                                  parent_package     = devclass
+*                                                                  parent_package_name_group = ng_abap_package ).
+*    ENDIF.
 
     DATA dummy_method_id TYPE i.
 
@@ -302,6 +361,7 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = i_element_id.
     ASSERT sy-subrc EQ 0.
     program_type = element-program_type.
+    program_attribute_1 = element-program_attribute_1.
     program_attribute_2 = element-program_attribute_2.
     program = element-program.
     IF element-program_type EQ type_function OR element-program_type = type_function_include.

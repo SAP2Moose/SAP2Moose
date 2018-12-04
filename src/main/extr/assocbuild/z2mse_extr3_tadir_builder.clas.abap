@@ -45,6 +45,7 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
           new_element_id     TYPE z2mse_extr3_element_manager=>element_id_type,
           class_name         TYPE string,
           tabname            TYPE string,
+          function_group     TYPE string,
           program            TYPE progname,
           wdy_component_name TYPE wdy_component_name.
 
@@ -85,6 +86,11 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
 
               WHEN 'DEVC'.
               WHEN 'FUGR'.
+
+                function_group = tadir-obj_name.
+                programs->add_function_group( EXPORTING fgr            = function_group
+                                              IMPORTING is_added       = is_found
+                                                        new_element_id = new_element_id ).
               WHEN 'PROG'.
 
                 program = tadir-obj_name.
@@ -166,6 +172,25 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
         tabname = tables->table_name( i_element_id = element_id ).
         object = 'TABL'.
         obj_name = tabname.
+      WHEN element->program_type.
+        DATA program_type TYPE string.
+        DATA program_attribute_1 TYPE string.
+        programs->program_name(
+          EXPORTING
+            i_element_id                 = element_id
+          IMPORTING
+            program_type                 = program_type
+*            program                      =
+*            external_program_name_class  = external_program_name_class
+*            external_program_name_method =
+            program_attribute_1          = program_attribute_1
+*            subc                         =
+        ).
+        IF program_type EQ programs->type_function OR program_type EQ programs->type_function_include.
+          object = 'FUGR'.
+          obj_name = program_attribute_1.
+        ENDIF.
+
     ENDCASE.
 
     TYPES: BEGIN OF ty_tadir,
