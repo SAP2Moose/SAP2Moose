@@ -87,13 +87,6 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
           RETURN.
         ENDIF.
 
-*        WRITE: / class_name, ' ', cmpname.
-
-*        IF class_name EQ 'Z2MSE_EXTR3_WHERE_USED_BUILDER' AND cmpname EQ 'SEARCH_DOWN'.
-*          BREAK-POINT.
-*        ENDIF.
-
-
         DATA: class_key TYPE seoclskey.
         DATA: includes    TYPE    seop_methods_w_include.
         class_key-clsname = class_name.
@@ -325,8 +318,13 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
                   method TYPE string.
             SPLIT wbcrossgt-name AT '\ME:' INTO class method.
 
-            IF class EQ 'Z2MSE_EXTR3_WHERE_USED_BUILDER\ME:SEARCH_DOWN'.
-              BREAK-POINT.
+            DATA: part1 TYPE string,
+                  part2 TYPE string.
+
+            split class at '\IN:' INTO part1 part2.
+
+            IF part2 IS NOT INITIAL.
+              CONTINUE." TBD specify this better
             ENDIF.
 
             DATA: temp TYPE string.
@@ -388,8 +386,7 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
             DATA: attribute TYPE string.
 
             SPLIT wbcrossgt-name AT '\DA:' INTO class attribute.
-            DATA: part1 TYPE string,
-                  part2 TYPE string.
+
             SPLIT class AT '\ME:' INTO part1 part2.
 
             IF part2 IS NOT INITIAL.
