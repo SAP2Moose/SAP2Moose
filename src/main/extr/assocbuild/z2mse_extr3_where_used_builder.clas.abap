@@ -179,7 +179,7 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
           WHEN programs2->type_function.
 
-            include_name = program_attribute_2.
+            include_name = program.
 
           WHEN OTHERS.
             " TBD

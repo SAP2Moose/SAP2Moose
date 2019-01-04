@@ -338,6 +338,7 @@ CLASS Z2MSE_MAIN_TEST IMPLEMENTATION.
     maker->add_function_group( name = |Z2MSE_TEST_FGR_A| parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
     maker->add_function(              function = |Z2MSE_TEST_FUNCTION_A| ).
     maker->usage(                                used_group  = |Z2MSE_TEST_CL_A| used = |METHOD_A| ).
+    maker->usage(                                used_group  = |FGR-Z2MSE_TEST_FGR_B| used = |F-Z2MSE_TEST_FUNCTION_B| ).
     maker->add_function_group_include( include = |LZ2MSE_TEST_FGR_AF01| ).
     maker->usage(                                used_group  = |Z2MSE_TEST_CL_B1| used = |METHOD_A| ).
 
@@ -403,6 +404,32 @@ CLASS Z2MSE_MAIN_TEST IMPLEMENTATION.
                                          parentpackage = |Z2MSE_TEST2_INITIAL| ).
 
     maker->add_function( EXPORTING       function      = |Z2MSE_TEST2_I_FUNCTION_A| ).
+
+    " This is to be found with the down search for functions
+
+    maker->add_package( package = |Z2MSE_TEST2_M1| ).
+
+    maker->add_function_group( EXPORTING name          = |Z2MSE_TEST2_M1_FGR_A|
+                                         parentpackage = |Z2MSE_TEST2_M1| ).
+
+    maker->add_function( EXPORTING       function      = |Z2MSE_TEST2_M1_FUNCTION_A| ).
+
+    maker->usage( EXPORTING              using_group = |FGR-Z2MSE_TEST2_I_FGR_A|
+                                         using       = |F-Z2MSE_TEST2_I_FUNCTION_A|
+                                         used_group  = |FGR-Z2MSE_TEST2_M1_FGR_A|
+                                         used        = |F-Z2MSE_TEST2_M1_FUNCTION_A| ).
+
+    " This is now found with the up search for packages:
+
+    maker->add_package( package = |Z2MSE_TEST2_P1| ).
+
+    maker->add_function_group( EXPORTING name          = |Z2MSE_TEST2_P1_FGR_A|
+                                         parentpackage = |Z2MSE_TEST2_P1| ).
+
+    maker->add_function( EXPORTING       function      = |Z2MSE_TEST2_P1_FUNCTION_A| ).
+
+    maker->usage( EXPORTING              used_group  = |FGR-Z2MSE_TEST2_I_FGR_A|
+                                         used        = |F-Z2MSE_TEST2_I_FUNCTION_A| ).
 
     equalized_harmonized_mse_exp = maker->to_change.
 
