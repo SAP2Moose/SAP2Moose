@@ -229,7 +229,9 @@ START-OF-SELECTION.
 
   IF s_pack IS INITIAL AND
      s_spack IS INITIAL AND
-     p_eltyp IS INITIAL.
+     p_eltyp IS INITIAL AND
+     p_elpar IS INITIAL AND
+     p_elnam IS INITIAL.
 
     FORMAT COLOR COL_NEGATIVE.
     WRITE: / 'Restrict elements to be extracted'.
@@ -293,6 +295,64 @@ START-OF-SELECTION.
     p_eltyp_string = p_eltyp.
     p_elpar_string = p_elpar.
     p_elnam_string = p_elnam.
+
+    IF p_eltyp IS INITIAL.
+
+      FORMAT COLOR COL_NEGATIVE.
+      WRITE: / |You have to specify the type of the searched element in field 'Element name'|.
+      FORMAT COLOR COL_BACKGROUND.
+      WRITE: / |Click into the field to get a value help|.
+      RETURN.
+
+    ENDIF.
+
+    IF p_eltyp_string EQ z2mse_extr3_initial_elements=>select_function OR
+       p_eltyp_string EQ z2mse_extr3_initial_elements=>select_program OR
+       p_eltyp_string EQ z2mse_extr3_initial_elements=>select_table.
+
+      IF p_elpar_string IS NOT INITIAL.
+
+        FORMAT COLOR COL_NEGATIVE.
+        WRITE: / 'Do not enter a parent name for this type of element'.
+        FORMAT COLOR COL_BACKGROUND.
+
+        RETURN.
+
+      ENDIF.
+
+    ELSEIF p_eltyp_string EQ z2mse_extr3_initial_elements=>select_class_method.
+
+      IF p_elpar_string IS INITIAL.
+
+        FORMAT COLOR COL_NEGATIVE.
+        WRITE: / 'Enter a parent name for this type of element, in case of methods this is the class'.
+        FORMAT COLOR COL_BACKGROUND.
+
+        RETURN.
+
+      ENDIF.
+
+    ELSE.
+
+      FORMAT COLOR COL_NEGATIVE.
+      WRITE: / |You have to specify a valid value for the type of the searched element in field 'Element name'|.
+      FORMAT COLOR COL_BACKGROUND.
+      WRITE: / |The text you entered is not valid|.
+      WRITE: / |Click into the field to get a value help|.
+
+        RETURN.
+
+    ENDIF.
+
+    IF p_elnam_string IS INITIAL.
+
+      FORMAT COLOR COL_NEGATIVE.
+      WRITE: / |You have to enter the name of the searched element in the field 'Specific element'|.
+      FORMAT COLOR COL_BACKGROUND.
+
+      RETURN.
+
+    ENDIF.
 
     initial_elements->select_specific( EXPORTING model_builder         = model_builder
                                                  element_manager       = element_manager
