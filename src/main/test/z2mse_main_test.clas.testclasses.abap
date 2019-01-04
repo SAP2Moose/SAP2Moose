@@ -8,7 +8,9 @@ CLASS ltcl_main DEFINITION FINAL FOR TESTING
     METHODS:
       setup,
       z2mse_test_initial_selection FOR TESTING RAISING cx_static_check,
-      specific_search FOR TESTING RAISING cx_static_check.
+      z2mse_test_initial_selection2 FOR TESTING RAISING cx_static_check,
+      specific_search FOR TESTING RAISING cx_static_check,
+      to_do FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
 
@@ -46,5 +48,23 @@ CLASS ltcl_main IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD to_do.
+
+    cl_abap_unit_assert=>fail( msg = 'Implement Improve searching specific elements #103' ).
+
+    cl_abap_unit_assert=>fail( msg = 'Finalize "Provide Down Search - Include Elements that are used #93" (See comment from 4.1.2019)' ).
+
+  ENDMETHOD.
+
+  METHOD z2mse_test_initial_selection2.
+
+    " The SAP2Moose extractor does not analyze test methods.
+    " Performing the test in the normal methods add them to the extracted model data.
+
+    DATA(test) = NEW z2mse_main_test( ).
+    test->z2mse_test_initial_selection2( ).
+
+  ENDMETHOD.
 
 ENDCLASS.
