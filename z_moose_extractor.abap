@@ -1,7 +1,7 @@
-* generated on system NPL at 06.12.2018 on 07:39:20
+* generated on system NPL at 04.01.2019 on 18:47:54
 
 *
-* This is version 1.1.2
+* This is version 1.2
 *
 *The MIT License (MIT)
 *
@@ -47,7 +47,7 @@ PARAMETERS p_elpar TYPE c LENGTH 30.
 PARAMETERS p_elnam TYPE c LENGTH 61.
 PARAMETERS p_sub AS CHECKBOX DEFAULT 'X'.
 PARAMETERS p_nup TYPE i DEFAULT -1.
-PARAMETERS p_ndown TYPE i DEFAULT -1.
+PARAMETERS p_ndown TYPE i DEFAULT 1.
 "Exclude interfaces in sap name space when found via where used analysis
 PARAMETERS p_ex AS CHECKBOX DEFAULT 'X'.
 PARAMETERS p_dyn TYPE string. "Classes to determine dynamic accesses
@@ -2033,7 +2033,13 @@ CLASS cl_extr3_programs DEFINITION
                type_bw_transformation TYPE string VALUE 'BW_TRAN'.
     METHODS add
       IMPORTING
-        program               TYPE progname
+        program               TYPE program
+      EXPORTING
+        VALUE(is_added)       TYPE abap_bool
+        VALUE(new_element_id) TYPE cl_extr3_element_manager=>element_id_type.
+    METHODS add_function
+      IMPORTING
+        function              TYPE string
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
         VALUE(new_element_id) TYPE cl_extr3_element_manager=>element_id_type.
@@ -2277,6 +2283,11 @@ CLASS cl_extr3_initial_elements DEFINITION
            END OF ty_package.
     TYPES ty_packages TYPE HASHED TABLE OF ty_package WITH UNIQUE KEY package.
 
+    CONSTANTS: select_class_method TYPE string VALUE 'Class',
+               select_table        TYPE string VALUE 'Table',
+               select_program      TYPE string VALUE 'Program',
+               select_function     TYPE string VALUE 'Function'.
+
     TYPES: ty_s_pack TYPE RANGE OF tadir-devclass .
     TYPES:
       BEGIN OF ty_tdevc_test,
@@ -2336,6 +2347,31 @@ CLASS cl_extr3_initial_elements DEFINITION
         i_packages_to_search_sub TYPE ty_packages_to_search_sub
       RETURNING
         VALUE(r_packages)        TYPE cl_extr3_packages=>ty_packages.
+    METHODS _select_class_method
+      IMPORTING
+        name_filter           TYPE cl_extr3_initial_elements=>ty_filter
+        parent_name_filter    TYPE cl_extr3_initial_elements=>ty_filter
+        element_manager       TYPE REF TO cl_extr3_element_manager
+      RETURNING
+        VALUE(new_element_id) TYPE i.
+    METHODS _select_table
+      IMPORTING
+        name_filter           TYPE cl_extr3_initial_elements=>ty_filter
+        element_manager       TYPE REF TO cl_extr3_element_manager
+      RETURNING
+        VALUE(new_element_id) TYPE i.
+    METHODS _select_program
+      IMPORTING
+        element_manager       TYPE REF TO cl_extr3_element_manager
+        name_filter           TYPE cl_extr3_initial_elements=>ty_filter
+      RETURNING
+        VALUE(new_element_id) TYPE i.
+    METHODS _select_function
+      IMPORTING
+        element_manager       TYPE REF TO cl_extr3_element_manager
+        name_filter           TYPE cl_extr3_initial_elements=>ty_filter
+      RETURNING
+        VALUE(new_element_id) TYPE i.
 ENDCLASS.
 "! I know the level where an element was added to the model.
 "! I know whether it was found in upward or downward search.
@@ -2425,6 +2461,14 @@ CLASS cl_extr3_model_builder DEFINITION
           where_used_builder TYPE REF TO cl_extr3_where_used_builder.
     "! A single element is analyzed of usage and using
     DATA is_usage_of_single_element TYPE abap_bool.
+    METHODS _post_search.
+    METHODS _initial_search.
+    METHODS _search_up
+      IMPORTING
+        i_search_up TYPE i.
+    METHODS _search_down
+      IMPORTING
+        i_search_down TYPE i.
 
 ENDCLASS.
 "! I am the starting point for an extraction. I am called from the main report.
@@ -3079,7 +3123,7 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
 
           WHEN programs2->type_function.
 
-            include_name = program_attribute_2.
+            include_name = program.
 
           WHEN OTHERS.
             " TBD
@@ -3129,25 +3173,21 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
         IF cross-type EQ 'R' OR cross-type EQ 'F'.
           DATA: program_found  TYPE progname.
           IF cross-type EQ 'R'.
-            " SAP_2_FAMIX_67 Find programs in downsearch
+            " SAP_2_FAMIX_67 Find programs in down search
             program_found = cross-name.
+            programs->add( EXPORTING program        = program_found
+                           IMPORTING is_added       = is_added
+                                     new_element_id = uses_element_id ).
           ELSEIF cross-type EQ 'F'.
-            " SAP_2_FAMIX_72 Find functions in downsearch
-            DATA tf TYPE tfdir.
-            " TBD find a more performant solution for this
-            SELECT SINGLE * FROM tfdir INTO tf WHERE funcname = cross-name.
-            IF tf IS NOT INITIAL.
-              "TBD handle error
-            ENDIF.
-            program_found = tf-pname.
-            SHIFT program_found LEFT BY 3 PLACES.
-            program_found = program_found && |U| && tf-include.
+            " SAP_2_FAMIX_72 Find functions in down search
+            DATA function TYPE string.
+            function = cross-name.
+            programs->add_function( EXPORTING function       = function
+                                    IMPORTING is_added       = is_added
+                                              new_element_id = uses_element_id ).
           ELSE.
             ASSERT 1 = 2.
           ENDIF.
-          programs->add( EXPORTING program        = program_found
-                         IMPORTING is_added       = is_added
-                                   new_element_id = uses_element_id ).
 
           IF uses_element_id IS INITIAL.
             "TBD support this kind of elements
@@ -3221,7 +3261,7 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
             DATA: part1 TYPE string,
                   part2 TYPE string.
 
-            split class at '\IN:' INTO part1 part2.
+            SPLIT class AT '\IN:' INTO part1 part2.
 
             IF part2 IS NOT INITIAL.
               CONTINUE." TBD specify this better
@@ -3293,7 +3333,7 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
               CONTINUE." TBD specify this better
             ENDIF.
 
-            split class at '\IN:' INTO part1 part2.
+            SPLIT class AT '\IN:' INTO part1 part2.
 
             IF part2 IS NOT INITIAL.
               CONTINUE." TBD specify this better
@@ -5178,6 +5218,24 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+  METHOD add_function.
+
+    DATA: program_found TYPE progname,
+          tf            TYPE tfdir.
+    " TBD find a better solution for this
+    SELECT SINGLE * FROM tfdir INTO tf WHERE funcname = function .
+    IF tf IS NOT INITIAL.
+      "TBD handle error
+    ENDIF.
+    program_found = tf-pname.
+    SHIFT program_found LEFT BY 3 PLACES.
+    program_found = program_found && |U| && tf-include.
+
+    add( EXPORTING program        = program_found
+         IMPORTING is_added       = is_added
+                   new_element_id = new_element_id ).
+
+  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_TABLES IMPLEMENTATION.
   METHOD add.
@@ -5790,35 +5848,40 @@ CLASS CL_EXTR3_INITIAL_ELEMENTS IMPLEMENTATION.
   ENDMETHOD.
   METHOD select_specific.
 
-  data new_element_id TYPE i.
+    DATA new_element_id TYPE i.
 
     model_builder->initial_selection_started( ).
     model_builder->usage_of_single_element( ).
 
     CASE i_element_type_filter.
-      WHEN cl_extr3_elements=>class_type.
+      WHEN cl_extr3_initial_elements=>select_class_method.
 
-        DATA classes TYPE REF TO cl_extr3_classes.
-        classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
-        classes->add_component( EXPORTING clsname        = i_parent_name_filter
-                                          cmpname        = i_name_filter
-                                          is_specific    = abap_false
-                                IMPORTING new_element_id = new_element_id ).
-
-        model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
-                                                 i_is_specific = abap_true ).
+        new_element_id = _select_class_method( name_filter        = i_name_filter
+                                               parent_name_filter = i_parent_name_filter
+                                               element_manager    = element_manager ).
 
 
-      WHEN cl_extr3_elements=>table_type.
+      WHEN cl_extr3_initial_elements=>select_table.
 
-        DATA tables TYPE REF TO cl_extr3_tables.
-        tables = cl_extr3_tables=>get_instance( i_element_manager = element_manager ).
-        tables->add( EXPORTING table          = i_name_filter
-                     IMPORTING new_element_id = new_element_id ).
+        new_element_id = _select_table( name_filter     = i_name_filter
+                                        element_manager = element_manager ).
 
-        model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
-                                                 i_is_specific = abap_true ).
+      WHEN cl_extr3_initial_elements=>select_program.
+
+        new_element_id = _select_program( element_manager = element_manager
+                                          name_filter     = i_name_filter ).
+
+      WHEN cl_extr3_initial_elements=>select_function.
+
+        new_element_id = _select_function( element_manager = element_manager
+                                           name_filter     = i_name_filter ).
+
+      WHEN OTHERS.
+        ASSERT 1 = 2.
     ENDCASE.
+
+    model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
+                                             i_is_specific = abap_true ).
 
   ENDMETHOD.
   METHOD _select_sub_packages.
@@ -5862,6 +5925,52 @@ CLASS CL_EXTR3_INITIAL_ELEMENTS IMPLEMENTATION.
       ENDLOOP.
       SORT r_packages BY package.
     ENDIF.
+
+  ENDMETHOD.
+  METHOD _select_class_method.
+
+    " Select class method
+
+    DATA classes TYPE REF TO cl_extr3_classes.
+    classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
+    classes->add_component( EXPORTING clsname        = parent_name_filter
+                                      cmpname        = name_filter
+                                      is_specific    = abap_false
+                            IMPORTING new_element_id = new_element_id ).
+
+  ENDMETHOD.
+  METHOD _select_table.
+
+    " Select table
+
+    DATA tables TYPE REF TO cl_extr3_tables.
+    tables = cl_extr3_tables=>get_instance( i_element_manager = element_manager ).
+    tables->add( EXPORTING table          = name_filter
+                 IMPORTING new_element_id = new_element_id ).
+
+  ENDMETHOD.
+  METHOD _select_program.
+
+    " Select program
+
+    DATA programname TYPE program.
+    programname = name_filter.
+
+    DATA programs TYPE REF TO cl_extr3_programs.
+    programs = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
+    programs->add( EXPORTING program        = programname
+                   IMPORTING new_element_id = new_element_id
+    ).
+
+  ENDMETHOD.
+  METHOD _select_function.
+
+    " Select function
+
+    DATA programs2 TYPE REF TO cl_extr3_programs.
+    programs2 = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
+    programs2->add_function( EXPORTING function       = name_filter
+                             IMPORTING new_element_id = new_element_id ).
 
   ENDMETHOD.
 ENDCLASS.
@@ -5984,204 +6093,13 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
   ENDMETHOD.
   METHOD search.
 
-    " Initial search
+    _initial_search( ).
 
-    DATA: found_in_level         TYPE found_in_level_type,
-          first_initial_elements TYPE found_in_levels_type.
-    FIELD-SYMBOLS: <found_in_level>         TYPE found_in_level_type.
+    _search_up( i_search_up ).
 
+    _search_down( i_search_down ).
 
-    " found_in_levels will be updated in this method, so add this elements to a new temporary table.
-    IF is_usage_of_single_element EQ abap_false.
-      LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_initial_selection EQ abap_true.
-
-        <found_in_level>-initially_selected_analyzed = abap_true.
-
-        INSERT <found_in_level> INTO TABLE first_initial_elements.
-
-      ENDLOOP.
-
-      DATA association_builder TYPE builder_type.
-
-      LOOP AT association_builders_init INTO association_builder.
-
-        LOOP AT first_initial_elements INTO found_in_level.
-*
-*          IF     is_usage_of_single_element EQ abap_true
-*             AND found_in_level-specific EQ abap_false.
-*            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-*          ENDIF.
-
-          association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
-
-        ENDLOOP.
-
-      ENDLOOP.
-
-    ENDIF.
-
-    is_initial_selection = abap_false.
-
-    IF is_usage_of_single_element EQ abap_false.
-
-      " All initially selected elements are marked as specific so that they are correctly searched
-
-      LOOP AT found_in_levels ASSIGNING <found_in_level>.
-        <found_in_level>-specific = abap_true.
-      ENDLOOP.
-
-    ENDIF.
-
-    " Search up
-
-    is_up_search = abap_true.
-
-    DATA: level_to_search_up      TYPE i,
-          something_to_be_done_up TYPE abap_bool.
-
-    IF i_search_up <> 0.
-
-      something_to_be_done_up = abap_true.
-
-      WHILE something_to_be_done_up EQ abap_true.
-
-        DATA temp TYPE string.
-        temp = |Search up for level { level_to_search_up }|. "To be 7.02 compatible
-        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
-
-        something_to_be_done_up = abap_false.
-        DATA workload TYPE found_in_levels_type.
-        CLEAR workload.
-        LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_upsearch = level_to_search_up.
-
-          IF
-*               is_usage_of_single_element EQ abap_true
-*             AND
-             <found_in_level>-specific EQ abap_false.
-            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-          ENDIF.
-
-          level_for_found_in_upsearch = <found_in_level>-found_in_level_upsearch + 1.
-
-          LOOP AT association_builders INTO association_builder.
-
-            association_builder-association_builder->search_up( element_id = <found_in_level>-element_id ).
-
-          ENDLOOP.
-
-          something_to_be_done_up = abap_true.
-
-        ENDLOOP.
-
-        ADD 1 TO level_to_search_up.
-
-        IF i_search_up >= 0 AND i_search_up <= level_to_search_up.
-
-          something_to_be_done_up = abap_false.
-
-        ENDIF.
-
-      ENDWHILE.
-
-    ENDIF.
-
-    " SAP_2_FAMIX_68        When more than a single level is searched up, the up search is not done for elements that where found in the search down
-    " Fullfilled because the search down starts here
-
-    is_up_search = abap_false.
-
-    " Search down
-
-    is_down_search = abap_true.
-
-    DATA: level_to_search_down      TYPE i,
-          something_to_be_done_down TYPE abap_bool.
-
-    IF i_search_down <> 0.
-
-      something_to_be_done_down = abap_true.
-
-      WHILE something_to_be_done_down EQ abap_true.
-
-        temp = |Search down for level { level_to_search_down }|."To be 7.02 compatible
-        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
-
-        something_to_be_done_down = abap_false.
-        CLEAR workload.
-        LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_downsearch = level_to_search_down.
-          IF
-*          is_usage_of_single_element EQ abap_true
-*             AND
-             <found_in_level>-specific EQ abap_false.
-            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-          ENDIF.
-          IF level_to_search_down EQ 0.
-            IF <found_in_level>-found_in_initial_selection EQ abap_false.
-              " SAP_2_FAMIX_69      When more than a single level is searched down, the down search is not done for elements that where found in the search up
-              CONTINUE. "Start searching down with the elements found in the initial selection. Ignore all that was found in upsearch
-            ELSE.
-              IF is_usage_of_single_element EQ abap_true AND (
-                 <found_in_level>-specific EQ abap_false OR
-                 <found_in_level>-found_in_level_upsearch > 0 ).
-                CONTINUE. " No downsearch for elements that are in initially selected classes but are not initially selected.
-                " They are not initially selected when found in level upsearch is greater than zero
-              ENDIF.
-            ENDIF.
-
-          ENDIF.
-
-          level_for_found_in_downsearch = <found_in_level>-found_in_level_downsearch + 1.
-
-          LOOP AT association_builders INTO association_builder.
-
-            association_builder-association_builder->search_down( element_id = <found_in_level>-element_id ).
-
-          ENDLOOP.
-
-          something_to_be_done_down = abap_true.
-
-        ENDLOOP.
-
-        ADD 1 TO level_to_search_down.
-
-        IF i_search_down >= 0 AND i_search_down <= level_to_search_down.
-
-          something_to_be_done_down = abap_false.
-
-        ENDIF.
-
-      ENDWHILE.
-
-    ENDIF.
-
-    is_down_search = abap_false.
-
-    " Post search
-
-    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Final actions of search'.
-
-    is_post_selection = abap_true.
-
-    DATA all_elements TYPE found_in_levels_type.
-
-    all_elements = found_in_levels.
-
-    LOOP AT association_builders_post INTO association_builder.
-
-      LOOP AT all_elements INTO found_in_level.
-
-        IF     is_usage_of_single_element EQ abap_true
-           AND found_in_level-specific EQ abap_false.
-          CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-        ENDIF.
-
-        association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
-
-      ENDLOOP.
-
-    ENDLOOP.
-
-    is_post_selection = abap_false.
+    _post_search( ).
 
   ENDMETHOD.
   METHOD usage_of_single_element.
@@ -6278,6 +6196,220 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+  METHOD _post_search.
+
+    DATA found_in_level TYPE cl_extr3_model_builder=>found_in_level_type.
+    DATA association_builder TYPE cl_extr3_model_builder=>builder_type.
+
+    " Post search
+
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Final actions of search'.
+
+    is_post_selection = abap_true.
+
+    DATA all_elements TYPE found_in_levels_type.
+
+    all_elements = found_in_levels.
+
+    LOOP AT association_builders_post INTO association_builder.
+
+      LOOP AT all_elements INTO found_in_level.
+
+*        IF     is_usage_of_single_element EQ abap_true
+*           AND found_in_level-specific EQ abap_false.
+*          CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+*        ENDIF.
+
+        association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
+
+      ENDLOOP.
+
+    ENDLOOP.
+
+    is_post_selection = abap_false.
+
+  ENDMETHOD.
+  METHOD _initial_search.
+
+    " Initial search
+
+    DATA: found_in_level         TYPE found_in_level_type,
+          first_initial_elements TYPE found_in_levels_type,
+          association_builder    TYPE cl_extr3_model_builder=>builder_type.
+
+    " found_in_levels will be updated in this method, so add this elements to a new temporary table.
+    IF is_usage_of_single_element EQ abap_false.
+
+      FIELD-SYMBOLS: <fil>         TYPE found_in_level_type.
+      LOOP AT found_in_levels ASSIGNING <fil> WHERE found_in_initial_selection EQ abap_true.
+
+        <fil>-initially_selected_analyzed = abap_true.
+
+        INSERT <fil> INTO TABLE first_initial_elements.
+
+      ENDLOOP.
+
+      LOOP AT association_builders_init INTO association_builder.
+
+        LOOP AT first_initial_elements INTO found_in_level.
+
+          association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
+
+        ENDLOOP.
+
+      ENDLOOP.
+
+    ENDIF.
+
+    is_initial_selection = abap_false.
+
+    IF is_usage_of_single_element EQ abap_false.
+
+      " All initially selected elements are marked as specific so that they are correctly searched
+
+      FIELD-SYMBOLS: <fil2>         TYPE found_in_level_type.
+      LOOP AT found_in_levels ASSIGNING <fil2>.
+        <fil2>-specific = abap_true.
+      ENDLOOP.
+
+    ENDIF.
+
+  ENDMETHOD.
+  METHOD _search_up.
+
+    " Search up
+
+    is_up_search = abap_true.
+
+    DATA: level_to_search_up      TYPE i,
+          something_to_be_done_up TYPE abap_bool.
+
+    IF i_search_up <> 0.
+
+      something_to_be_done_up = abap_true.
+
+      WHILE something_to_be_done_up EQ abap_true.
+
+        DATA temp TYPE string.
+        temp = |Search up for level { level_to_search_up }|. "To be 7.02 compatible
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
+
+        something_to_be_done_up = abap_false.
+
+        FIELD-SYMBOLS: <fil>         TYPE found_in_level_type.
+        LOOP AT found_in_levels ASSIGNING <fil> WHERE found_in_level_upsearch = level_to_search_up.
+
+          IF <fil>-specific EQ abap_false.
+
+            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+
+          ENDIF.
+
+          level_for_found_in_upsearch = <fil>-found_in_level_upsearch + 1.
+
+          DATA association_builder TYPE cl_extr3_model_builder=>builder_type.
+
+          LOOP AT association_builders INTO association_builder.
+
+            association_builder-association_builder->search_up( element_id = <fil>-element_id ).
+
+          ENDLOOP.
+
+          something_to_be_done_up = abap_true.
+
+        ENDLOOP.
+
+        ADD 1 TO level_to_search_up.
+
+        IF i_search_up >= 0 AND i_search_up <= level_to_search_up.
+
+          something_to_be_done_up = abap_false.
+
+        ENDIF.
+
+      ENDWHILE.
+
+    ENDIF.
+
+    " SAP_2_FAMIX_68        When more than a single level is searched up, the up search is not done for elements that where found in the search down
+    " Fullfilled because the search down starts here
+
+    is_up_search = abap_false.
+
+  ENDMETHOD.
+  METHOD _search_down.
+
+    " Search down
+
+    is_down_search = abap_true.
+
+    DATA: level_to_search_down      TYPE i,
+          something_to_be_done_down TYPE abap_bool.
+
+    IF i_search_down <> 0.
+
+      something_to_be_done_down = abap_true.
+
+      WHILE something_to_be_done_down EQ abap_true.
+
+        DATA temp TYPE string.
+        temp = |Search down for level { level_to_search_down }|."To be 7.02 compatible
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
+
+        something_to_be_done_down = abap_false.
+
+        FIELD-SYMBOLS: <fil>         TYPE found_in_level_type.
+        LOOP AT found_in_levels ASSIGNING <fil> WHERE found_in_level_downsearch = level_to_search_down.
+          IF
+*          is_usage_of_single_element EQ abap_true
+*             AND
+             <fil>-specific EQ abap_false.
+            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+          ENDIF.
+          IF level_to_search_down EQ 0.
+            IF <fil>-found_in_initial_selection EQ abap_false.
+              " SAP_2_FAMIX_69      When more than a single level is searched down, the down search is not done for elements that where found in the search up
+              CONTINUE. "Start searching down with the elements found in the initial selection. Ignore all that was found in upsearch
+            ELSE.
+              IF is_usage_of_single_element EQ abap_true AND (
+                 <fil>-specific EQ abap_false OR
+                 <fil>-found_in_level_upsearch > 0 ).
+                CONTINUE. " No downsearch for elements that are in initially selected classes but are not initially selected.
+                " They are not initially selected when found in level upsearch is greater than zero
+              ENDIF.
+            ENDIF.
+
+          ENDIF.
+
+          level_for_found_in_downsearch = <fil>-found_in_level_downsearch + 1.
+
+          DATA association_builder TYPE cl_extr3_model_builder=>builder_type.
+
+          LOOP AT association_builders INTO association_builder.
+
+            association_builder-association_builder->search_down( element_id = <fil>-element_id ).
+
+          ENDLOOP.
+
+          something_to_be_done_down = abap_true.
+
+        ENDLOOP.
+
+        ADD 1 TO level_to_search_down.
+
+        IF i_search_down >= 0 AND i_search_down <= level_to_search_down.
+
+          something_to_be_done_down = abap_false.
+
+        ENDIF.
+
+      ENDWHILE.
+
+    ENDIF.
+
+    is_down_search = abap_false.
+
+  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTRACT3 IMPLEMENTATION.
   METHOD constructor.
@@ -6337,7 +6469,9 @@ START-OF-SELECTION.
 
   IF s_pack IS INITIAL AND
      s_spack IS INITIAL AND
-     p_eltyp IS INITIAL.
+     p_eltyp IS INITIAL AND
+     p_elpar IS INITIAL AND
+     p_elnam IS INITIAL.
 
     FORMAT COLOR COL_NEGATIVE.
     WRITE: / 'Restrict elements to be extracted'.
@@ -6402,6 +6536,64 @@ START-OF-SELECTION.
     p_elpar_string = p_elpar.
     p_elnam_string = p_elnam.
 
+    IF p_eltyp IS INITIAL.
+
+      FORMAT COLOR COL_NEGATIVE.
+      WRITE: / |You have to specify the type of the searched element in field 'Element name'|.
+      FORMAT COLOR COL_BACKGROUND.
+      WRITE: / |Click into the field to get a value help|.
+      RETURN.
+
+    ENDIF.
+
+    IF p_eltyp_string EQ cl_extr3_initial_elements=>select_function OR
+       p_eltyp_string EQ cl_extr3_initial_elements=>select_program OR
+       p_eltyp_string EQ cl_extr3_initial_elements=>select_table.
+
+      IF p_elpar_string IS NOT INITIAL.
+
+        FORMAT COLOR COL_NEGATIVE.
+        WRITE: / 'Do not enter a parent name for this type of element'.
+        FORMAT COLOR COL_BACKGROUND.
+
+        RETURN.
+
+      ENDIF.
+
+    ELSEIF p_eltyp_string EQ cl_extr3_initial_elements=>select_class_method.
+
+      IF p_elpar_string IS INITIAL.
+
+        FORMAT COLOR COL_NEGATIVE.
+        WRITE: / 'Enter a parent name for this type of element, in case of methods this is the class'.
+        FORMAT COLOR COL_BACKGROUND.
+
+        RETURN.
+
+      ENDIF.
+
+    ELSE.
+
+      FORMAT COLOR COL_NEGATIVE.
+      WRITE: / |You have to specify a valid value for the type of the searched element in field 'Element name'|.
+      FORMAT COLOR COL_BACKGROUND.
+      WRITE: / |The text you entered is not valid|.
+      WRITE: / |Click into the field to get a value help|.
+
+        RETURN.
+
+    ENDIF.
+
+    IF p_elnam_string IS INITIAL.
+
+      FORMAT COLOR COL_NEGATIVE.
+      WRITE: / |You have to enter the name of the searched element in the field 'Specific element'|.
+      FORMAT COLOR COL_BACKGROUND.
+
+      RETURN.
+
+    ENDIF.
+
     initial_elements->select_specific( EXPORTING model_builder         = model_builder
                                                  element_manager       = element_manager
                                                  i_element_type_filter = p_eltyp_string
@@ -6448,9 +6640,13 @@ FORM fill_f4_eltyp.
   DATA: lt_eltyps TYPE STANDARD TABLE OF ty_eltyp,
         ls_eltyp  TYPE ty_eltyp.
 
-  ls_eltyp-eltyp = 'class'.
+  ls_eltyp-eltyp = cl_extr3_initial_elements=>select_class_method.
   INSERT ls_eltyp INTO TABLE lt_eltyps.
-  ls_eltyp-eltyp = 'table'.
+  ls_eltyp-eltyp = cl_extr3_initial_elements=>select_table.
+  INSERT ls_eltyp INTO TABLE lt_eltyps.
+  ls_eltyp-eltyp = cl_extr3_initial_elements=>select_program.
+  INSERT ls_eltyp INTO TABLE lt_eltyps.
+  ls_eltyp-eltyp = cl_extr3_initial_elements=>select_function.
   INSERT ls_eltyp INTO TABLE lt_eltyps.
 
   CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'

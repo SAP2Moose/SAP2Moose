@@ -7,6 +7,22 @@ Legend
 ! : changed
 + : added
 - : removed
+
+04.01.2019 v1.2
+-----------------
+* Change parameters and text of report #105
++ Improve searching specific elements #103
+* Too many elements where found in upsearch #102
++ Add parent package for functions #101
++ Add parent package for function groups #100
++ Find functions in initial selection #96
++ Simplify integration test #95
++ Provide Down Search - Include Elements that are used #93
++ Inform users when elements are not restricted #86
+
+New parameter text for report:
+P_NDOWN	Search down (-1 if no limit)
+
 08.06.2018 v1.1.1
 -----------------
 * No elements extracted if package starts with $ #85
