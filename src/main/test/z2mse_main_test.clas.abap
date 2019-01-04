@@ -457,7 +457,7 @@ CLASS z2mse_main_test IMPLEMENTATION.
     " Test class used by program is found
 
     maker->add_class( EXPORTING          name          = |Z2MSE_TEST2_M1_CL_A|
-                                         parentpackage = || ). "Z2MSE_TEST2_M1
+                                         parentpackage = |Z2MSE_TEST2_M1| ). "
 
     maker->add_method( EXPORTING         method  = |STATIC_METHOD_A|
                                          at_line = 7 ).

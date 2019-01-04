@@ -53,8 +53,6 @@ CLASS ltcl_main IMPLEMENTATION.
 
   METHOD to_do.
 
-    cl_abap_unit_assert=>fail( msg = 'Decide what to do with the not found parent package by specific search: "Z2MSE_TEST2_M1' ).
-
   ENDMETHOD.
 
   METHOD z2mse_test_initial_selection2.

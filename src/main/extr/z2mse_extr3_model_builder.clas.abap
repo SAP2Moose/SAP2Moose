@@ -405,10 +405,10 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
       LOOP AT all_elements INTO found_in_level.
 
-        IF     is_usage_of_single_element EQ abap_true
-           AND found_in_level-specific EQ abap_false.
-          CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-        ENDIF.
+*        IF     is_usage_of_single_element EQ abap_true
+*           AND found_in_level-specific EQ abap_false.
+*          CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+*        ENDIF.
 
         association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
 
