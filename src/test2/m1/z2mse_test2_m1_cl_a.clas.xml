@@ -3,17 +3,24 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>Z2MSE_EXTRACT3</CLSNAME>
+    <CLSNAME>Z2MSE_TEST2_M1_CL_A</CLSNAME>
     <VERSION>1</VERSION>
     <LANGU>E</LANGU>
-    <DESCRIPT>Extract SAP elements</DESCRIPT>
+    <DESCRIPT>Class down by 1 layer</DESCRIPT>
     <EXPOSURE>2</EXPOSURE>
     <STATE>1</STATE>
-    <CLSFINAL>X</CLSFINAL>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
     <UNICODE>X</UNICODE>
    </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>Z2MSE_TEST2_M1_CL_A</CLSNAME>
+     <CMPNAME>STATIC_METHOD_A</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Static method</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
   </asx:values>
  </asx:abap>
 </abapGit>

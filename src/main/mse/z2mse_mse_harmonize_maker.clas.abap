@@ -85,10 +85,10 @@ CLASS z2mse_mse_harmonize_maker DEFINITION
       IMPORTING bw_transformation TYPE string
                 at_line           TYPE i OPTIONAL.
     "! A coding uses another coding.
-    "! @parameter using_group | Class in case of classes. Do not provide when there is no grouping (Programs, Transformations,...). Is filled with last_grouping if using is not supplied.
-    "! @parameter using | The using element. Is filled with last_element if not supplied.
-    "! @parameter used_group | Class in case of classes. Do not provide when there is no grouping (Programs, Transformations,...). In case of function groups FGR- is needed as prefix.
-    "! @parameter used | The using element. In case of functions F- is needed as prefix.
+    "! @parameter using_group | Class in case of classes. Do not provide when there is no grouping (Programs, Transformations,...). Is filled with last_grouping if using is not supplied (In case of function groups FGR- is needed as prefix).
+    "! @parameter using | The using element. Is filled with last_element if not supplied (In case of functions F- is needed as prefix).
+    "! @parameter used_group | Class in case of classes. Do not provide when there is no grouping (Programs, Transformations,...) (In case of function groups FGR- is needed as prefix).
+    "! @parameter used | The using element (In case of functions F- is needed as prefix).
     METHODS usage
       IMPORTING using_group TYPE string OPTIONAL
                 using       TYPE string OPTIONAL

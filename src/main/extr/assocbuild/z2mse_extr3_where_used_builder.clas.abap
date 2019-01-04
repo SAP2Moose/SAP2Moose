@@ -179,7 +179,7 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
           WHEN programs2->type_function.
 
-            include_name = program_attribute_2.
+            include_name = program.
 
           WHEN OTHERS.
             " TBD
@@ -229,25 +229,21 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
         IF cross-type EQ 'R' OR cross-type EQ 'F'.
           DATA: program_found  TYPE progname.
           IF cross-type EQ 'R'.
-            " SAP_2_FAMIX_67 Find programs in downsearch
+            " SAP_2_FAMIX_67 Find programs in down search
             program_found = cross-name.
+            programs->add( EXPORTING program        = program_found
+                           IMPORTING is_added       = is_added
+                                     new_element_id = uses_element_id ).
           ELSEIF cross-type EQ 'F'.
-            " SAP_2_FAMIX_72 Find functions in downsearch
-            DATA tf TYPE tfdir.
-            " TBD find a more performant solution for this
-            SELECT SINGLE * FROM tfdir INTO tf WHERE funcname = cross-name.
-            IF tf IS NOT INITIAL.
-              "TBD handle error
-            ENDIF.
-            program_found = tf-pname.
-            SHIFT program_found LEFT BY 3 PLACES.
-            program_found = program_found && |U| && tf-include.
+            " SAP_2_FAMIX_72 Find functions in down search
+            DATA function TYPE string.
+            function = cross-name.
+            programs->add_function( EXPORTING function       = function
+                                    IMPORTING is_added       = is_added
+                                              new_element_id = uses_element_id ).
           ELSE.
             ASSERT 1 = 2.
           ENDIF.
-          programs->add( EXPORTING program        = program_found
-                         IMPORTING is_added       = is_added
-                                   new_element_id = uses_element_id ).
 
           IF uses_element_id IS INITIAL.
             "TBD support this kind of elements
@@ -321,7 +317,7 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
             DATA: part1 TYPE string,
                   part2 TYPE string.
 
-            split class at '\IN:' INTO part1 part2.
+            SPLIT class AT '\IN:' INTO part1 part2.
 
             IF part2 IS NOT INITIAL.
               CONTINUE." TBD specify this better
@@ -393,7 +389,7 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
               CONTINUE." TBD specify this better
             ENDIF.
 
-            split class at '\IN:' INTO part1 part2.
+            SPLIT class AT '\IN:' INTO part1 part2.
 
             IF part2 IS NOT INITIAL.
               CONTINUE." TBD specify this better
