@@ -340,9 +340,13 @@ FORM fill_f4_eltyp.
   DATA: lt_eltyps TYPE STANDARD TABLE OF ty_eltyp,
         ls_eltyp  TYPE ty_eltyp.
 
-  ls_eltyp-eltyp = 'class'.
+  ls_eltyp-eltyp = z2mse_extr3_initial_elements=>select_class_method.
   INSERT ls_eltyp INTO TABLE lt_eltyps.
-  ls_eltyp-eltyp = 'table'.
+  ls_eltyp-eltyp = z2mse_extr3_initial_elements=>select_table.
+  INSERT ls_eltyp INTO TABLE lt_eltyps.
+  ls_eltyp-eltyp = z2mse_extr3_initial_elements=>select_program.
+  INSERT ls_eltyp INTO TABLE lt_eltyps.
+  ls_eltyp-eltyp = z2mse_extr3_initial_elements=>select_function.
   INSERT ls_eltyp INTO TABLE lt_eltyps.
 
   CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'

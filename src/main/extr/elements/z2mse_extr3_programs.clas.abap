@@ -17,7 +17,13 @@ CLASS z2mse_extr3_programs DEFINITION
                type_bw_transformation TYPE string VALUE 'BW_TRAN'.
     METHODS add
       IMPORTING
-        program               TYPE progname
+        program               TYPE program
+      EXPORTING
+        VALUE(is_added)       TYPE abap_bool
+        VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
+    METHODS add_function
+      IMPORTING
+        function              TYPE string
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
         VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
@@ -129,6 +135,26 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
       ENDIF.
 
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD add_function.
+
+    DATA: program_found TYPE progname,
+          tf            TYPE tfdir.
+    " TBD find a better solution for this
+    SELECT SINGLE * FROM tfdir INTO tf WHERE funcname = function .
+    IF tf IS NOT INITIAL.
+      "TBD handle error
+    ENDIF.
+    program_found = tf-pname.
+    SHIFT program_found LEFT BY 3 PLACES.
+    program_found = program_found && |U| && tf-include.
+
+    add( EXPORTING program        = program_found
+         IMPORTING is_added       = is_added
+                   new_element_id = new_element_id ).
 
   ENDMETHOD.
 

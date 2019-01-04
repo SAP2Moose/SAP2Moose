@@ -12,6 +12,11 @@ CLASS z2mse_extr3_initial_elements DEFINITION
            END OF ty_package.
     TYPES ty_packages TYPE HASHED TABLE OF ty_package WITH UNIQUE KEY package.
 
+    CONSTANTS: select_class_method TYPE string VALUE 'Class',
+               select_table        TYPE string VALUE 'Table',
+               select_program      TYPE string VALUE 'Program',
+               select_function     TYPE string VALUE 'Function'.
+
     TYPES: ty_s_pack TYPE RANGE OF tadir-devclass .
     TYPES:
       BEGIN OF ty_tdevc_test,
@@ -71,6 +76,31 @@ CLASS z2mse_extr3_initial_elements DEFINITION
         i_packages_to_search_sub TYPE ty_packages_to_search_sub
       RETURNING
         VALUE(r_packages)        TYPE z2mse_extr3_packages=>ty_packages.
+    METHODS _select_class_method
+      IMPORTING
+        name_filter           TYPE z2mse_extr3_initial_elements=>ty_filter
+        parent_name_filter    TYPE z2mse_extr3_initial_elements=>ty_filter
+        element_manager       TYPE REF TO z2mse_extr3_element_manager
+      RETURNING
+        VALUE(new_element_id) TYPE i.
+    METHODS _select_table
+      IMPORTING
+        name_filter           TYPE z2mse_extr3_initial_elements=>ty_filter
+        element_manager       TYPE REF TO z2mse_extr3_element_manager
+      RETURNING
+        VALUE(new_element_id) TYPE i.
+    METHODS _select_program
+      IMPORTING
+        element_manager       TYPE REF TO z2mse_extr3_element_manager
+        name_filter           TYPE z2mse_extr3_initial_elements=>ty_filter
+      RETURNING
+        VALUE(new_element_id) TYPE i.
+    METHODS _select_function
+      IMPORTING
+        element_manager       TYPE REF TO z2mse_extr3_element_manager
+        name_filter           TYPE z2mse_extr3_initial_elements=>ty_filter
+      RETURNING
+        VALUE(new_element_id) TYPE i.
 ENDCLASS.
 
 
@@ -169,35 +199,40 @@ CLASS z2mse_extr3_initial_elements IMPLEMENTATION.
 
   METHOD select_specific.
 
-  data new_element_id TYPE i.
+    DATA new_element_id TYPE i.
 
     model_builder->initial_selection_started( ).
     model_builder->usage_of_single_element( ).
 
     CASE i_element_type_filter.
-      WHEN z2mse_extr3_elements=>class_type.
+      WHEN z2mse_extr3_initial_elements=>select_class_method.
 
-        DATA classes TYPE REF TO z2mse_extr3_classes.
-        classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
-        classes->add_component( EXPORTING clsname        = i_parent_name_filter
-                                          cmpname        = i_name_filter
-                                          is_specific    = abap_false
-                                IMPORTING new_element_id = new_element_id ).
-
-        model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
-                                                 i_is_specific = abap_true ).
+        new_element_id = _select_class_method( name_filter        = i_name_filter
+                                               parent_name_filter = i_parent_name_filter
+                                               element_manager    = element_manager ).
 
 
-      WHEN z2mse_extr3_elements=>table_type.
+      WHEN z2mse_extr3_initial_elements=>select_table.
 
-        DATA tables TYPE REF TO z2mse_extr3_tables.
-        tables = z2mse_extr3_tables=>get_instance( i_element_manager = element_manager ).
-        tables->add( EXPORTING table          = i_name_filter
-                     IMPORTING new_element_id = new_element_id ).
+        new_element_id = _select_table( name_filter     = i_name_filter
+                                        element_manager = element_manager ).
 
-        model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
-                                                 i_is_specific = abap_true ).
+      WHEN z2mse_extr3_initial_elements=>select_program.
+
+        new_element_id = _select_program( element_manager = element_manager
+                                          name_filter     = i_name_filter ).
+
+      WHEN z2mse_extr3_initial_elements=>select_function.
+
+        new_element_id = _select_function( element_manager = element_manager
+                                           name_filter     = i_name_filter ).
+
+      WHEN OTHERS.
+        ASSERT 1 = 2.
     ENDCASE.
+
+    model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
+                                             i_is_specific = abap_true ).
 
   ENDMETHOD.
 
@@ -247,4 +282,58 @@ CLASS z2mse_extr3_initial_elements IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+
+  METHOD _select_class_method.
+
+    " Select class method
+
+    DATA classes TYPE REF TO z2mse_extr3_classes.
+    classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
+    classes->add_component( EXPORTING clsname        = parent_name_filter
+                                      cmpname        = name_filter
+                                      is_specific    = abap_false
+                            IMPORTING new_element_id = new_element_id ).
+
+  ENDMETHOD.
+
+
+  METHOD _select_table.
+
+    " Select table
+
+    DATA tables TYPE REF TO z2mse_extr3_tables.
+    tables = z2mse_extr3_tables=>get_instance( i_element_manager = element_manager ).
+    tables->add( EXPORTING table          = name_filter
+                 IMPORTING new_element_id = new_element_id ).
+
+  ENDMETHOD.
+
+
+  METHOD _select_program.
+
+    " Select program
+
+    DATA programname TYPE program.
+    programname = name_filter.
+
+    DATA programs TYPE REF TO z2mse_extr3_programs.
+    programs = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
+    programs->add( EXPORTING program        = programname
+                   IMPORTING new_element_id = new_element_id
+    ).
+
+  ENDMETHOD.
+
+
+  METHOD _select_function.
+
+    " Select function
+
+    DATA programs2 TYPE REF TO z2mse_extr3_programs.
+    programs2 = z2mse_extr3_programs=>get_instance( i_element_manager = element_manager ).
+    programs2->add_function( EXPORTING function       = name_filter
+                             IMPORTING new_element_id = new_element_id ).
+
+  ENDMETHOD.
+
 ENDCLASS.
