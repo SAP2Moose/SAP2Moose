@@ -380,7 +380,7 @@ CLASS Z2MSE_MAIN_TEST IMPLEMENTATION.
                               element_manager          = element_manager
                               initial_elements         = initial_elements
                               i_search_up              = -1
-                              i_search_down            = 2
+                              i_search_down            = 2 " There are elements 3 layers down, this are not to be found here
                               i_exclude_found_sap_intf = abap_true
                     IMPORTING mse_model             = mse_model_act
                               nothing_done          = nothing_done_act ).
@@ -419,7 +419,7 @@ CLASS Z2MSE_MAIN_TEST IMPLEMENTATION.
                                          used_group  = |FGR-Z2MSE_TEST2_M1_FGR_A|
                                          used        = |F-Z2MSE_TEST2_M1_FUNCTION_A| ).
 
-    " This is now found with the up search for packages:
+    " This is now found with the up search for functions:
 
     maker->add_package( package = |Z2MSE_TEST2_P1| ).
 
@@ -469,6 +469,16 @@ CLASS Z2MSE_MAIN_TEST IMPLEMENTATION.
                                          used        = |F-Z2MSE_TEST2_M2_FUNCTION_A| ).
 
     " Test function used by function is found in up search
+
+    maker->add_package( package = |Z2MSE_TEST2_P2| ).
+
+    maker->add_function_group( EXPORTING name          = |Z2MSE_TEST2_P2_FGR_A|
+                                         parentpackage = |Z2MSE_TEST2_P2| ).
+
+    maker->add_function( EXPORTING       function      = |Z2MSE_TEST2_P2_FUNCTION_A| ).
+
+    maker->usage( EXPORTING              used_group  = |FGR-Z2MSE_TEST2_P1_FGR_A|
+                                         used        = |F-Z2MSE_TEST2_P1_FUNCTION_A| ).
 
 
 
