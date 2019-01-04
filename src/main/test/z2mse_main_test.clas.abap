@@ -454,6 +454,24 @@ CLASS Z2MSE_MAIN_TEST IMPLEMENTATION.
                                          used_group  = |Z2MSE_TEST2_M1_CL_A|
                                          used        = |STATIC_METHOD_A| ).
 
+    " Test function used by function is found in down search
+
+    maker->add_package( package = |Z2MSE_TEST2_M2| ).
+
+    maker->add_function_group( EXPORTING name          = |Z2MSE_TEST2_M2_FGR_A|
+                                         parentpackage = |Z2MSE_TEST2_M2| ).
+
+    maker->add_function( EXPORTING       function      = |Z2MSE_TEST2_M2_FUNCTION_A| ).
+
+    maker->usage( EXPORTING              using_group = |FGR-Z2MSE_TEST2_M1_FGR_A|
+                                         using       = |F-Z2MSE_TEST2_M1_FUNCTION_A|
+                                         used_group  = |FGR-Z2MSE_TEST2_M2_FGR_A|
+                                         used        = |F-Z2MSE_TEST2_M2_FUNCTION_A| ).
+
+    " Test function used by function is found in up search
+
+
+
     equalized_harmonized_mse_exp = maker->to_change.
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
