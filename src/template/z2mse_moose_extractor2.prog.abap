@@ -45,7 +45,7 @@ PARAMETERS p_elpar TYPE c LENGTH 30.
 PARAMETERS p_elnam TYPE c LENGTH 61.
 PARAMETERS p_sub AS CHECKBOX DEFAULT 'X'.
 PARAMETERS p_nup TYPE i DEFAULT -1.
-PARAMETERS p_ndown TYPE i DEFAULT -1.
+PARAMETERS p_ndown TYPE i DEFAULT 1.
 "Exclude interfaces in sap name space when found via where used analysis
 PARAMETERS p_ex AS CHECKBOX DEFAULT 'X'.
 PARAMETERS p_dyn TYPE string. "Classes to determine dynamic accesses
