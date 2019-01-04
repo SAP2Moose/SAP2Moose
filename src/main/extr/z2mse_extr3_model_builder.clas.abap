@@ -87,6 +87,14 @@ CLASS z2mse_extr3_model_builder DEFINITION
           where_used_builder TYPE REF TO z2mse_extr3_where_used_builder.
     "! A single element is analyzed of usage and using
     DATA is_usage_of_single_element TYPE abap_bool.
+    METHODS _post_search.
+    METHODS _initial_search.
+    METHODS _search_up
+      IMPORTING
+        i_search_up TYPE i.
+    METHODS _search_down
+      IMPORTING
+        i_search_down TYPE i.
 
 ENDCLASS.
 
@@ -219,204 +227,13 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
 
   METHOD search.
 
-    " Initial search
+    _initial_search( ).
 
-    DATA: found_in_level         TYPE found_in_level_type,
-          first_initial_elements TYPE found_in_levels_type.
-    FIELD-SYMBOLS: <found_in_level>         TYPE found_in_level_type.
+    _search_up( i_search_up ).
 
+    _search_down( i_search_down ).
 
-    " found_in_levels will be updated in this method, so add this elements to a new temporary table.
-    IF is_usage_of_single_element EQ abap_false.
-      LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_initial_selection EQ abap_true.
-
-        <found_in_level>-initially_selected_analyzed = abap_true.
-
-        INSERT <found_in_level> INTO TABLE first_initial_elements.
-
-      ENDLOOP.
-
-      DATA association_builder TYPE builder_type.
-
-      LOOP AT association_builders_init INTO association_builder.
-
-        LOOP AT first_initial_elements INTO found_in_level.
-*
-*          IF     is_usage_of_single_element EQ abap_true
-*             AND found_in_level-specific EQ abap_false.
-*            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-*          ENDIF.
-
-          association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
-
-        ENDLOOP.
-
-      ENDLOOP.
-
-    ENDIF.
-
-    is_initial_selection = abap_false.
-
-    IF is_usage_of_single_element EQ abap_false.
-
-      " All initially selected elements are marked as specific so that they are correctly searched
-
-      LOOP AT found_in_levels ASSIGNING <found_in_level>.
-        <found_in_level>-specific = abap_true.
-      ENDLOOP.
-
-    ENDIF.
-
-    " Search up
-
-    is_up_search = abap_true.
-
-    DATA: level_to_search_up      TYPE i,
-          something_to_be_done_up TYPE abap_bool.
-
-    IF i_search_up <> 0.
-
-      something_to_be_done_up = abap_true.
-
-      WHILE something_to_be_done_up EQ abap_true.
-
-        DATA temp TYPE string.
-        temp = |Search up for level { level_to_search_up }|. "To be 7.02 compatible
-        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
-
-        something_to_be_done_up = abap_false.
-        DATA workload TYPE found_in_levels_type.
-        CLEAR workload.
-        LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_upsearch = level_to_search_up.
-
-          IF
-*               is_usage_of_single_element EQ abap_true
-*             AND
-             <found_in_level>-specific EQ abap_false.
-            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-          ENDIF.
-
-          level_for_found_in_upsearch = <found_in_level>-found_in_level_upsearch + 1.
-
-          LOOP AT association_builders INTO association_builder.
-
-            association_builder-association_builder->search_up( element_id = <found_in_level>-element_id ).
-
-          ENDLOOP.
-
-          something_to_be_done_up = abap_true.
-
-        ENDLOOP.
-
-        ADD 1 TO level_to_search_up.
-
-        IF i_search_up >= 0 AND i_search_up <= level_to_search_up.
-
-          something_to_be_done_up = abap_false.
-
-        ENDIF.
-
-      ENDWHILE.
-
-    ENDIF.
-
-    " SAP_2_FAMIX_68        When more than a single level is searched up, the up search is not done for elements that where found in the search down
-    " Fullfilled because the search down starts here
-
-    is_up_search = abap_false.
-
-    " Search down
-
-    is_down_search = abap_true.
-
-    DATA: level_to_search_down      TYPE i,
-          something_to_be_done_down TYPE abap_bool.
-
-    IF i_search_down <> 0.
-
-      something_to_be_done_down = abap_true.
-
-      WHILE something_to_be_done_down EQ abap_true.
-
-        temp = |Search down for level { level_to_search_down }|."To be 7.02 compatible
-        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
-
-        something_to_be_done_down = abap_false.
-        CLEAR workload.
-        LOOP AT found_in_levels ASSIGNING <found_in_level> WHERE found_in_level_downsearch = level_to_search_down.
-          IF
-*          is_usage_of_single_element EQ abap_true
-*             AND
-             <found_in_level>-specific EQ abap_false.
-            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-          ENDIF.
-          IF level_to_search_down EQ 0.
-            IF <found_in_level>-found_in_initial_selection EQ abap_false.
-              " SAP_2_FAMIX_69      When more than a single level is searched down, the down search is not done for elements that where found in the search up
-              CONTINUE. "Start searching down with the elements found in the initial selection. Ignore all that was found in upsearch
-            ELSE.
-              IF is_usage_of_single_element EQ abap_true AND (
-                 <found_in_level>-specific EQ abap_false OR
-                 <found_in_level>-found_in_level_upsearch > 0 ).
-                CONTINUE. " No downsearch for elements that are in initially selected classes but are not initially selected.
-                " They are not initially selected when found in level upsearch is greater than zero
-              ENDIF.
-            ENDIF.
-
-          ENDIF.
-
-          level_for_found_in_downsearch = <found_in_level>-found_in_level_downsearch + 1.
-
-          LOOP AT association_builders INTO association_builder.
-
-            association_builder-association_builder->search_down( element_id = <found_in_level>-element_id ).
-
-          ENDLOOP.
-
-          something_to_be_done_down = abap_true.
-
-        ENDLOOP.
-
-        ADD 1 TO level_to_search_down.
-
-        IF i_search_down >= 0 AND i_search_down <= level_to_search_down.
-
-          something_to_be_done_down = abap_false.
-
-        ENDIF.
-
-      ENDWHILE.
-
-    ENDIF.
-
-    is_down_search = abap_false.
-
-    " Post search
-
-    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Final actions of search'.
-
-    is_post_selection = abap_true.
-
-    DATA all_elements TYPE found_in_levels_type.
-
-    all_elements = found_in_levels.
-
-    LOOP AT association_builders_post INTO association_builder.
-
-      LOOP AT all_elements INTO found_in_level.
-
-*        IF     is_usage_of_single_element EQ abap_true
-*           AND found_in_level-specific EQ abap_false.
-*          CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-*        ENDIF.
-
-        association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
-
-      ENDLOOP.
-
-    ENDLOOP.
-
-    is_post_selection = abap_false.
+    _post_search( ).
 
   ENDMETHOD.
 
@@ -517,4 +334,226 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+
+  METHOD _post_search.
+
+    DATA found_in_level TYPE z2mse_extr3_model_builder=>found_in_level_type.
+    DATA association_builder TYPE z2mse_extr3_model_builder=>builder_type.
+
+    " Post search
+
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Final actions of search'.
+
+    is_post_selection = abap_true.
+
+    DATA all_elements TYPE found_in_levels_type.
+
+    all_elements = found_in_levels.
+
+    LOOP AT association_builders_post INTO association_builder.
+
+      LOOP AT all_elements INTO found_in_level.
+
+*        IF     is_usage_of_single_element EQ abap_true
+*           AND found_in_level-specific EQ abap_false.
+*          CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+*        ENDIF.
+
+        association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
+
+      ENDLOOP.
+
+    ENDLOOP.
+
+    is_post_selection = abap_false.
+
+  ENDMETHOD.
+
+
+  METHOD _initial_search.
+
+    " Initial search
+
+    DATA: found_in_level         TYPE found_in_level_type,
+          first_initial_elements TYPE found_in_levels_type,
+          association_builder    TYPE z2mse_extr3_model_builder=>builder_type.
+
+    " found_in_levels will be updated in this method, so add this elements to a new temporary table.
+    IF is_usage_of_single_element EQ abap_false.
+
+      FIELD-SYMBOLS: <fil>         TYPE found_in_level_type.
+      LOOP AT found_in_levels ASSIGNING <fil> WHERE found_in_initial_selection EQ abap_true.
+
+        <fil>-initially_selected_analyzed = abap_true.
+
+        INSERT <fil> INTO TABLE first_initial_elements.
+
+      ENDLOOP.
+
+      LOOP AT association_builders_init INTO association_builder.
+
+        LOOP AT first_initial_elements INTO found_in_level.
+
+          association_builder-association_builder->search_down( element_id = found_in_level-element_id ).
+
+        ENDLOOP.
+
+      ENDLOOP.
+
+    ENDIF.
+
+    is_initial_selection = abap_false.
+
+    IF is_usage_of_single_element EQ abap_false.
+
+      " All initially selected elements are marked as specific so that they are correctly searched
+
+      FIELD-SYMBOLS: <fil2>         TYPE found_in_level_type.
+      LOOP AT found_in_levels ASSIGNING <fil2>.
+        <fil2>-specific = abap_true.
+      ENDLOOP.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD _search_up.
+
+    " Search up
+
+    is_up_search = abap_true.
+
+    DATA: level_to_search_up      TYPE i,
+          something_to_be_done_up TYPE abap_bool.
+
+    IF i_search_up <> 0.
+
+      something_to_be_done_up = abap_true.
+
+      WHILE something_to_be_done_up EQ abap_true.
+
+        DATA temp TYPE string.
+        temp = |Search up for level { level_to_search_up }|. "To be 7.02 compatible
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
+
+        something_to_be_done_up = abap_false.
+
+        FIELD-SYMBOLS: <fil>         TYPE found_in_level_type.
+        LOOP AT found_in_levels ASSIGNING <fil> WHERE found_in_level_upsearch = level_to_search_up.
+
+          IF <fil>-specific EQ abap_false.
+
+            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+
+          ENDIF.
+
+          level_for_found_in_upsearch = <fil>-found_in_level_upsearch + 1.
+
+          DATA association_builder TYPE z2mse_extr3_model_builder=>builder_type.
+
+          LOOP AT association_builders INTO association_builder.
+
+            association_builder-association_builder->search_up( element_id = <fil>-element_id ).
+
+          ENDLOOP.
+
+          something_to_be_done_up = abap_true.
+
+        ENDLOOP.
+
+        ADD 1 TO level_to_search_up.
+
+        IF i_search_up >= 0 AND i_search_up <= level_to_search_up.
+
+          something_to_be_done_up = abap_false.
+
+        ENDIF.
+
+      ENDWHILE.
+
+    ENDIF.
+
+    " SAP_2_FAMIX_68        When more than a single level is searched up, the up search is not done for elements that where found in the search down
+    " Fullfilled because the search down starts here
+
+    is_up_search = abap_false.
+
+  ENDMETHOD.
+
+
+  METHOD _search_down.
+
+    " Search down
+
+    is_down_search = abap_true.
+
+    DATA: level_to_search_down      TYPE i,
+          something_to_be_done_down TYPE abap_bool.
+
+    IF i_search_down <> 0.
+
+      something_to_be_done_down = abap_true.
+
+      WHILE something_to_be_done_down EQ abap_true.
+
+        DATA temp TYPE string.
+        temp = |Search down for level { level_to_search_down }|."To be 7.02 compatible
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
+
+        something_to_be_done_down = abap_false.
+
+        FIELD-SYMBOLS: <fil>         TYPE found_in_level_type.
+        LOOP AT found_in_levels ASSIGNING <fil> WHERE found_in_level_downsearch = level_to_search_down.
+          IF
+*          is_usage_of_single_element EQ abap_true
+*             AND
+             <fil>-specific EQ abap_false.
+            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+          ENDIF.
+          IF level_to_search_down EQ 0.
+            IF <fil>-found_in_initial_selection EQ abap_false.
+              " SAP_2_FAMIX_69      When more than a single level is searched down, the down search is not done for elements that where found in the search up
+              CONTINUE. "Start searching down with the elements found in the initial selection. Ignore all that was found in upsearch
+            ELSE.
+              IF is_usage_of_single_element EQ abap_true AND (
+                 <fil>-specific EQ abap_false OR
+                 <fil>-found_in_level_upsearch > 0 ).
+                CONTINUE. " No downsearch for elements that are in initially selected classes but are not initially selected.
+                " They are not initially selected when found in level upsearch is greater than zero
+              ENDIF.
+            ENDIF.
+
+          ENDIF.
+
+          level_for_found_in_downsearch = <fil>-found_in_level_downsearch + 1.
+
+          DATA association_builder TYPE z2mse_extr3_model_builder=>builder_type.
+
+          LOOP AT association_builders INTO association_builder.
+
+            association_builder-association_builder->search_down( element_id = <fil>-element_id ).
+
+          ENDLOOP.
+
+          something_to_be_done_down = abap_true.
+
+        ENDLOOP.
+
+        ADD 1 TO level_to_search_down.
+
+        IF i_search_down >= 0 AND i_search_down <= level_to_search_down.
+
+          something_to_be_done_down = abap_false.
+
+        ENDIF.
+
+      ENDWHILE.
+
+    ENDIF.
+
+    is_down_search = abap_false.
+
+  ENDMETHOD.
+
 ENDCLASS.
