@@ -6,3 +6,5 @@
 REPORT z2mse_test2_i_program.
 
 CALL FUNCTION 'Z2MSE_TEST2_M1_FUNCTION_A'.
+
+z2mse_test2_m1_cl_a=>static_method_a( ).

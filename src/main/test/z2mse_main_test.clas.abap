@@ -436,8 +436,23 @@ CLASS Z2MSE_MAIN_TEST IMPLEMENTATION.
     maker->add_program( EXPORTING        name          = |Z2MSE_TEST2_I_PROGRAM|
                                          parentpackage = |Z2MSE_TEST2_INITIAL| ).
 
+    " Test function used by program is found
+
     maker->usage( EXPORTING              used_group  = |FGR-Z2MSE_TEST2_M1_FGR_A|
                                          used        = |F-Z2MSE_TEST2_M1_FUNCTION_A| ).
+
+    " Test class used by program is found
+
+    maker->add_class( EXPORTING          name          = |Z2MSE_TEST2_M1_CL_A|
+                                         parentpackage = |Z2MSE_TEST2_M1| ).
+
+    maker->add_method( EXPORTING         method  = |STATIC_METHOD_A|
+                                         at_line = 7 ).
+
+    maker->usage( EXPORTING              using_group = ||
+                                         using       = |Z2MSE_TEST2_I_PROGRAM|
+                                         used_group  = |Z2MSE_TEST2_M1_CL_A|
+                                         used        = |STATIC_METHOD_A| ).
 
     equalized_harmonized_mse_exp = maker->to_change.
 
