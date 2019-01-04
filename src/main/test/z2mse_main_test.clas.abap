@@ -379,8 +379,8 @@ CLASS Z2MSE_MAIN_TEST IMPLEMENTATION.
     f_cut->extract( EXPORTING model_builder            = model_builder
                               element_manager          = element_manager
                               initial_elements         = initial_elements
-                              i_search_up              = -1
-                              i_search_down            = 2 " There are elements 3 layers down, this are not to be found here
+                              i_search_up              = 2 " There are elements 3 layers up, these are not to be found here
+                              i_search_down            = 2 " There are elements 3 layers down, these are not to be found here
                               i_exclude_found_sap_intf = abap_true
                     IMPORTING mse_model             = mse_model_act
                               nothing_done          = nothing_done_act ).

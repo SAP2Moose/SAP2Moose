@@ -53,8 +53,6 @@ CLASS ltcl_main IMPLEMENTATION.
 
     cl_abap_unit_assert=>fail( msg = 'Implement Improve searching specific elements #103' ).
 
-    cl_abap_unit_assert=>fail( msg = 'Finalize "Provide Down Search - Include Elements that are used #93" (See comment from 4.1.2019)' ).
-
   ENDMETHOD.
 
   METHOD z2mse_test_initial_selection2.
