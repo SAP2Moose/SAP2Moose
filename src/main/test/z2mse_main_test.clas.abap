@@ -431,6 +431,14 @@ CLASS Z2MSE_MAIN_TEST IMPLEMENTATION.
     maker->usage( EXPORTING              used_group  = |FGR-Z2MSE_TEST2_I_FGR_A|
                                          used        = |F-Z2MSE_TEST2_I_FUNCTION_A| ).
 
+    " Test downsearch for programs
+
+    maker->add_program( EXPORTING        name          = |Z2MSE_TEST2_I_PROGRAM|
+                                         parentpackage = |Z2MSE_TEST2_INITIAL| ).
+
+    maker->usage( EXPORTING              used_group  = |FGR-Z2MSE_TEST2_M1_FGR_A|
+                                         used        = |F-Z2MSE_TEST2_M1_FUNCTION_A| ).
+
     equalized_harmonized_mse_exp = maker->to_change.
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
