@@ -1,5 +1,5 @@
 *
-* This is version 1.2
+* This is version 1.2.1
 *
 *The MIT License (MIT)
 *
@@ -167,6 +167,8 @@ SELECTION-SCREEN END OF BLOCK bl_model_settings.
 * REPLACE Z2MSE_FAMIX_INHERITANCE
 
 * REPLACE Z2MSE_FAMIX_CUSTOM_SOURCE_LNG
+
+* REPLACE ZCX_2MSE_EXTR3_CLASSES_WR_TYPE
 
 " Obsolete:
 
