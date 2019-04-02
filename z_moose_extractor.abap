@@ -1,7 +1,7 @@
-* generated on system NPL at 04.01.2019 on 18:47:54
+* generated on system NPL at 02.04.2019 on 11:19:47
 
 *
-* This is version 1.2
+* This is version 1.2.1
 *
 *The MIT License (MIT)
 *
@@ -1521,6 +1521,37 @@ CLASS CL_FAMIX_CUSTOM_SOURCE_LNG IMPLEMENTATION.
     CALL METHOD super->constructor( model ).
     g_elementname = 'FAMIX.CustomSourceLanguage'.
   ENDMETHOD.
+ENDCLASS.
+
+class ZCX_2MSE_EXTR3_CLASSES_WR_TYPE definition
+  inheriting from CX_NO_CHECK
+  create public .
+
+public section.
+
+  interfaces IF_T100_DYN_MSG .
+  interfaces IF_T100_MESSAGE .
+
+  methods CONSTRUCTOR
+    importing
+      !TEXTID like IF_T100_MESSAGE=>T100KEY optional
+      !PREVIOUS like PREVIOUS optional .
+protected section.
+private section.
+ENDCLASS.
+CLASS ZCX_2MSE_EXTR3_CLASSES_WR_TYPE IMPLEMENTATION.
+  method CONSTRUCTOR.
+CALL METHOD SUPER->CONSTRUCTOR
+EXPORTING
+PREVIOUS = PREVIOUS
+.
+clear me->textid.
+if textid is initial.
+  IF_T100_MESSAGE~T100KEY = IF_T100_MESSAGE=>DEFAULT_TEXTID.
+else.
+  IF_T100_MESSAGE~T100KEY = TEXTID.
+endif.
+  endmethod.
 ENDCLASS.
 
 " Obsolete:
@@ -3281,19 +3312,24 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
             " SAP_2_FAMIX_75 Find class methods in downsearch
 
             ASSERT class IS NOT INITIAL.
-            classes->add_component(
-              EXPORTING
-                clsname        = class
-                cmpname        = method
-                is_specific    = abap_true
-              IMPORTING
-                is_added       = is_added
-                new_element_id = uses_element_id ).
+            TRY.
+                classes->add_component(
+                  EXPORTING
+                    clsname        = class
+                    cmpname        = method
+                    is_specific    = abap_true
+                  IMPORTING
+                    is_added       = is_added
+                    new_element_id = uses_element_id ).
 
-            IF uses_element_id IS INITIAL.
-              "TBD support this kind of elements
-              CONTINUE.
-            ENDIF.
+                IF uses_element_id IS INITIAL.
+                  "TBD support this kind of elements
+                  CONTINUE.
+                ENDIF.
+              CATCH zcx_2mse_extr3_classes_wr_type.
+                " This attribute is indeed a type, but types are not stored to the model
+                CONTINUE.
+            ENDTRY.
 
             IF is_added EQ abap_true.
 
@@ -3345,19 +3381,24 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
 
               " SAP_2_FAMIX_76 Find class attributes in downsearch
               ASSERT class IS NOT INITIAL.
-              classes->add_component(
-                EXPORTING
-                  clsname        = class
-                  cmpname        = attribute
-                  is_specific    = abap_false
-                IMPORTING
-                  is_added       = is_added
-                  new_element_id = uses_element_id ).
+              TRY.
+                  classes->add_component(
+                    EXPORTING
+                      clsname        = class
+                      cmpname        = attribute
+                      is_specific    = abap_false
+                    IMPORTING
+                      is_added       = is_added
+                      new_element_id = uses_element_id ).
 
-              IF uses_element_id IS INITIAL.
-                "TBD support this kind of elements
-                CONTINUE.
-              ENDIF.
+                  IF uses_element_id IS INITIAL.
+                    "TBD support this kind of elements
+                    CONTINUE.
+                  ENDIF.
+                CATCH zcx_2mse_extr3_classes_wr_type.
+                  " This attribute is indeed a type, but types are not stored to the model
+                  CONTINUE.
+              ENDTRY.
 
               IF is_added EQ abap_true.
 
@@ -3668,24 +3709,28 @@ CLASS CL_EXTR3_WHERE_USED_BUILDER IMPLEMENTATION.
               temp = class_name && |~| && cmpname.
 
               IF found_cmpname <> temp. " Implementation of interface methods are in the where used list. These are added explicitely in the class coding. So filter here.
+                TRY.
+                    classes->add_component(
+                      EXPORTING
+                        clsname        = found_class_name
+                        cmpname        = found_cmpname
+                        is_specific    = abap_false
+                      IMPORTING
+                        is_added       = is_added
+                        new_element_id = used_by_element_id ).
+                    IF is_added EQ abap_true.
 
-                classes->add_component(
-                  EXPORTING
-                    clsname        = found_class_name
-                    cmpname        = found_cmpname
-                    is_specific    = abap_false
-                  IMPORTING
-                    is_added       = is_added
-                    new_element_id = used_by_element_id ).
-                IF is_added EQ abap_true.
+                      element_manager->model_builder->new_element_id( EXPORTING i_element_id  = used_by_element_id
+                                                                                i_is_specific = abap_true ).
 
-                  element_manager->model_builder->new_element_id( EXPORTING i_element_id  = used_by_element_id
-                                                                            i_is_specific = abap_true ).
+                    ELSE.
+                      "TBD what is to be done here?
 
-                ELSE.
-                  "TBD what is to be done here?
-
-                ENDIF.
+                    ENDIF.
+                  CATCH zcx_2mse_extr3_classes_wr_type.
+                    " This attribute is indeed a type, but types are not stored to the model
+                    " Do nothing to ignore this attribute
+                ENDTRY.
 
               ENDIF.
 
@@ -4437,6 +4482,10 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
       IF found_class_name IS NOT INITIAL.
 
         is_added = abap_true.
+
+        IF found_cmptype EQ 3. " Is type
+          RAISE EXCEPTION TYPE ZCX_2MSE_EXTR3_CLASSES_WR_TYPE.
+        ENDIF.
 
       ELSE.
 
