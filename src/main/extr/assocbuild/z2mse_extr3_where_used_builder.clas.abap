@@ -337,19 +337,24 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
             " SAP_2_FAMIX_75 Find class methods in downsearch
 
             ASSERT class IS NOT INITIAL.
-            classes->add_component(
-              EXPORTING
-                clsname        = class
-                cmpname        = method
-                is_specific    = abap_true
-              IMPORTING
-                is_added       = is_added
-                new_element_id = uses_element_id ).
+            TRY.
+                classes->add_component(
+                  EXPORTING
+                    clsname        = class
+                    cmpname        = method
+                    is_specific    = abap_true
+                  IMPORTING
+                    is_added       = is_added
+                    new_element_id = uses_element_id ).
 
-            IF uses_element_id IS INITIAL.
-              "TBD support this kind of elements
-              CONTINUE.
-            ENDIF.
+                IF uses_element_id IS INITIAL.
+                  "TBD support this kind of elements
+                  CONTINUE.
+                ENDIF.
+              CATCH zcx_2mse_extr3_classes_wr_type.
+                " This attribute is indeed a type, but types are not stored to the model
+                CONTINUE.
+            ENDTRY.
 
             IF is_added EQ abap_true.
 
@@ -401,19 +406,24 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
 
               " SAP_2_FAMIX_76 Find class attributes in downsearch
               ASSERT class IS NOT INITIAL.
-              classes->add_component(
-                EXPORTING
-                  clsname        = class
-                  cmpname        = attribute
-                  is_specific    = abap_false
-                IMPORTING
-                  is_added       = is_added
-                  new_element_id = uses_element_id ).
+              TRY.
+                  classes->add_component(
+                    EXPORTING
+                      clsname        = class
+                      cmpname        = attribute
+                      is_specific    = abap_false
+                    IMPORTING
+                      is_added       = is_added
+                      new_element_id = uses_element_id ).
 
-              IF uses_element_id IS INITIAL.
-                "TBD support this kind of elements
-                CONTINUE.
-              ENDIF.
+                  IF uses_element_id IS INITIAL.
+                    "TBD support this kind of elements
+                    CONTINUE.
+                  ENDIF.
+                CATCH zcx_2mse_extr3_classes_wr_type.
+                  " This attribute is indeed a type, but types are not stored to the model
+                  CONTINUE.
+              ENDTRY.
 
               IF is_added EQ abap_true.
 
@@ -726,24 +736,28 @@ CLASS z2mse_extr3_where_used_builder IMPLEMENTATION.
               temp = class_name && |~| && cmpname.
 
               IF found_cmpname <> temp. " Implementation of interface methods are in the where used list. These are added explicitely in the class coding. So filter here.
+                TRY.
+                    classes->add_component(
+                      EXPORTING
+                        clsname        = found_class_name
+                        cmpname        = found_cmpname
+                        is_specific    = abap_false
+                      IMPORTING
+                        is_added       = is_added
+                        new_element_id = used_by_element_id ).
+                    IF is_added EQ abap_true.
 
-                classes->add_component(
-                  EXPORTING
-                    clsname        = found_class_name
-                    cmpname        = found_cmpname
-                    is_specific    = abap_false
-                  IMPORTING
-                    is_added       = is_added
-                    new_element_id = used_by_element_id ).
-                IF is_added EQ abap_true.
+                      element_manager->model_builder->new_element_id( EXPORTING i_element_id  = used_by_element_id
+                                                                                i_is_specific = abap_true ).
 
-                  element_manager->model_builder->new_element_id( EXPORTING i_element_id  = used_by_element_id
-                                                                            i_is_specific = abap_true ).
+                    ELSE.
+                      "TBD what is to be done here?
 
-                ELSE.
-                  "TBD what is to be done here?
-
-                ENDIF.
+                    ENDIF.
+                  CATCH zcx_2mse_extr3_classes_wr_type.
+                    " This attribute is indeed a type, but types are not stored to the model
+                    " Do nothing to ignore this attribute
+                ENDTRY.
 
               ENDIF.
 
