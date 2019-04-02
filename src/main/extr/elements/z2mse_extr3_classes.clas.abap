@@ -783,6 +783,10 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
         is_added = abap_true.
 
+        IF found_cmptype EQ 3. " Is type
+          RAISE EXCEPTION TYPE ZCX_2MSE_EXTR3_CLASSES_WR_TYPE.
+        ENDIF.
+
       ELSE.
 
         DATA: redefined_class_components TYPE ty_class_components,
