@@ -8,6 +8,10 @@ Legend
 + : added
 - : removed
 
+04.01.2019 v1.2.1
+-----------------
+* Dump because class component of type type was processed #114
+
 04.01.2019 v1.2
 -----------------
 * Change parameters and text of report #105
