@@ -20,8 +20,6 @@
 *OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 *SOFTWARE.
 
-" Generated 21.11.2016 17:49
-
 REPORT z2mse_translate_to_local.
 
 " The template
