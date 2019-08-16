@@ -5,8 +5,8 @@
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
-        <x>934.0</x>
-        <y>264.0</y>
+        <x>1194.0</x>
+        <y>320.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -131,8 +131,12 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
         <method>_SELECT_CLASS_METHOD</method>
-        <x>-301.0</x>
-        <y>205.0</y>
+        <x>-293.0</x>
+        <y>194.0</y>
+        <comment><![CDATA[A Comment]]>
+        </comment>
+        <commentx>-216.0</commentx>
+        <commenty>152.0</commenty>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
