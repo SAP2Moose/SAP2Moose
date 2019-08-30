@@ -649,7 +649,8 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
           IF <id_to_name3>-simple_name IS NOT INITIAL
           AND    <element>-elementname EQ 'FAMIX.Class'
               OR <element>-elementname EQ 'FAMIX.Package'
-              OR <element>-elementname EQ 'FAMIX.FileAnchor'.
+              OR <element>-elementname EQ 'FAMIX.FileAnchor'
+              OR <element>-elementname EQ 'FAMIX.CustomSourceLanguage'.
             <element>-concatenated_name = <id_to_name3>-simple_name.
           ELSE.
             <element>-concatenated_name = <id_to_name3>-concatenated_name.

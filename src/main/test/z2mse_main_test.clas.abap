@@ -244,6 +244,8 @@ CLASS z2mse_main_test IMPLEMENTATION.
 
     maker->to_change = equalized_harmonized_mse_exp.
 
+    maker->add_custom_source_language( |SAP| ).
+
     maker->add_package( package = |Z2MSE_TEST2_INITIAL| ).
 
     maker->add_function_group( EXPORTING name          = |Z2MSE_TEST2_I_FGR_A|
@@ -411,6 +413,8 @@ CLASS z2mse_main_test IMPLEMENTATION.
 
     maker->to_change = equalized_harmonized_mse_exp.
 
+    maker->add_custom_source_language( |SAP| ).
+
     maker->add_package( package = |Z2MSE_TEST2_INITIAL| ).
 
 *    maker->add_function_group( EXPORTING name          = |Z2MSE_TEST2_I_FGR_A|
@@ -556,7 +560,7 @@ CLASS z2mse_main_test IMPLEMENTATION.
     maker = NEW #( ).
 
     maker->to_change = equalized_harmonized_mse_exp.
-
+    maker->add_custom_source_language( |SAP| ).
     maker->add_package( package = |Z2MSE_TEST_INITIAL_SELECTION| ).
     maker->add_package( package = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
     maker->add_db_table(   name = |Z2MSE_TEST_A|     parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
@@ -724,6 +728,8 @@ CLASS z2mse_main_test IMPLEMENTATION.
     maker = NEW #( ).
 
     maker->to_change = equalized_harmonized_mse_exp.
+
+    maker->add_custom_source_language( |SAP| ).
 
     maker->add_package( package = |Z2MSE_TEST2_INITIAL| ).
 

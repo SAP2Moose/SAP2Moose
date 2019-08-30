@@ -105,7 +105,7 @@ CLASS ltcl_main IMPLEMENTATION.
 
 
     equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
-    equalized_harmonized_mse_exp = VALUE #(
+    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.CustomSourceLanguage SAP| )
                                             ( |FAMIX.Method PROGRAM_A>>PROGRAM_A signature PROGRAM_A| )
                                             ( |FAMIX.Class PROGRAM_A modifiers ABAPProgram| )
                                             ( |FAMIX.Class PROGRAM_A parentPackage PACKAGE1| )

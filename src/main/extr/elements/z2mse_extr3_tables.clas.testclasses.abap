@@ -89,7 +89,8 @@ CLASS ltcl_main IMPLEMENTATION.
 
 
     equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
-    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.Class TABLE_A modifiers DBTable| )
+    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.CustomSourceLanguage SAP| )
+                                            ( |FAMIX.Class TABLE_A modifiers DBTable| )
                                             ( |FAMIX.Attribute TABLE_A>>TABLE_A| )
                                             ( |FAMIX.Class TABLE_A parentPackage PACKAGE1| )
                                             ( |FAMIX.Package PACKAGE1| ) ).

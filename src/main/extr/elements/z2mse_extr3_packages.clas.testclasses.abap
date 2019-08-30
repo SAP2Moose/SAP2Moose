@@ -78,7 +78,8 @@ CLASS ltcl_main IMPLEMENTATION.
 
 
     equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
-    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.Package PACKAGE_A| ) ).
+    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.CustomSourceLanguage SAP| )
+                                            ( |FAMIX.Package PACKAGE_A| ) ).
 
     cl_abap_unit_assert=>assert_equals(
       EXPORTING

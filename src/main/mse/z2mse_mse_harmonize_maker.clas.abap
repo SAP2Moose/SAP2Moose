@@ -104,6 +104,8 @@ CLASS z2mse_mse_harmonize_maker DEFINITION
                 using       TYPE string OPTIONAL
                 used_group  TYPE string DEFAULT ''
                 used        TYPE string.
+    METHODS add_custom_source_language
+      IMPORTING language TYPE string.
   PROTECTED SECTION.
   PRIVATE SECTION.
     DATA last_grouping TYPE string.
@@ -112,10 +114,10 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_MSE_HARMONIZE_MAKER IMPLEMENTATION.
+CLASS z2mse_mse_harmonize_maker IMPLEMENTATION.
 
 
-  METHOD ACCESS.
+  METHOD access.
 
     IF using IS NOT SUPPLIED.
       DATA(ung) = last_grouping.
@@ -474,4 +476,8 @@ CLASS Z2MSE_MSE_HARMONIZE_MAKER IMPLEMENTATION.
     to_change = VALUE #( BASE to_change ( |FAMIX.Invocation sender { ung }>>{ my_using } candidates { udg }>>{ used } signature DUMMY| ) ).
 
   ENDMETHOD.
+  METHOD add_custom_source_language.
+    to_change = VALUE #( BASE to_change ( |FAMIX.CustomSourceLanguage { language }| ) ).
+  ENDMETHOD.
+
 ENDCLASS.

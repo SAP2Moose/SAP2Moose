@@ -102,7 +102,7 @@ CLASS ltcl_class IMPLEMENTATION.
 
 
     equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
-    equalized_harmonized_mse_exp = VALUE #(
+    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.CustomSourceLanguage SAP| )
                                             ( |FAMIX.Class WDY_COMP_A modifiers ABAPWebDynproComponent| )
                                             ( |FAMIX.Class WDY_COMP_A parentPackage PACKAGE1| )
                                             ( |FAMIX.Method WDY_COMP_A>>WDY_CONTR_1 signature WDY_CONTR_1| )
