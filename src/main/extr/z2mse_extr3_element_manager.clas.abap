@@ -11,7 +11,7 @@ CLASS z2mse_extr3_element_manager DEFINITION
     DATA famix_attribute     TYPE REF TO z2mse_famix_attribute.
     DATA famix_invocation     TYPE REF TO z2mse_famix_invocation.
     DATA famix_access     TYPE REF TO z2mse_famix_access.
-    data famix_file_anchor TYPE REF TO z2mse_famix_file_anchor.
+    DATA famix_file_anchor TYPE REF TO z2mse_famix_file_anchor.
     DATA exclude_found_sap_intf TYPE abap_bool READ-ONLY.
     "! A unique identifier for each object extracted
     TYPES element_id_type TYPE i.
@@ -76,7 +76,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
+CLASS z2mse_extr3_element_manager IMPLEMENTATION.
 
 
   METHOD add_association.
@@ -137,13 +137,17 @@ CLASS Z2MSE_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
 
     CREATE OBJECT model.
 
+    DATA f_custom_source_language TYPE REF TO z2mse_famix_custom_source_lng.
+    CREATE OBJECT f_custom_source_language EXPORTING model = model.
+    f_custom_source_language->add( name = 'SAP' name_group = z2mse_extr3=>ng_source_language ).
+
     CREATE OBJECT famix_package EXPORTING model = model.
     CREATE OBJECT famix_class EXPORTING model = model.
     CREATE OBJECT famix_method EXPORTING model = model.
     CREATE OBJECT famix_attribute EXPORTING model = model.
     CREATE OBJECT famix_invocation EXPORTING model = model.
     CREATE OBJECT famix_access EXPORTING model = model.
-    create OBJECT famix_file_anchor EXPORTING model = model.
+    CREATE OBJECT famix_file_anchor EXPORTING model = model.
 
   ENDMETHOD.
 
