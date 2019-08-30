@@ -1,7 +1,7 @@
-* generated on system NPL at 02.04.2019 on 11:19:47
+* generated on system NPL at 30.08.2019 on 13:15:54
 
 *
-* This is version 1.2.1
+* This is version 1.2.2
 *
 *The MIT License (MIT)
 *
@@ -1604,7 +1604,7 @@ CLASS cl_extr3_element_manager DEFINITION
     DATA famix_attribute     TYPE REF TO cl_famix_attribute.
     DATA famix_invocation     TYPE REF TO cl_famix_invocation.
     DATA famix_access     TYPE REF TO cl_famix_access.
-    data famix_file_anchor TYPE REF TO cl_famix_file_anchor.
+    DATA famix_file_anchor TYPE REF TO cl_famix_file_anchor.
     DATA exclude_found_sap_intf TYPE abap_bool READ-ONLY.
     "! A unique identifier for each object extracted
     TYPES element_id_type TYPE i.
@@ -5718,13 +5718,17 @@ CLASS CL_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
 
     CREATE OBJECT model.
 
+    DATA f_custom_source_language TYPE REF TO cl_famix_custom_source_lng.
+    CREATE OBJECT f_custom_source_language EXPORTING model = model.
+    f_custom_source_language->add( name = 'SAP' name_group = cl_extr3=>ng_source_language ).
+
     CREATE OBJECT famix_package EXPORTING model = model.
     CREATE OBJECT famix_class EXPORTING model = model.
     CREATE OBJECT famix_method EXPORTING model = model.
     CREATE OBJECT famix_attribute EXPORTING model = model.
     CREATE OBJECT famix_invocation EXPORTING model = model.
     CREATE OBJECT famix_access EXPORTING model = model.
-    create OBJECT famix_file_anchor EXPORTING model = model.
+    CREATE OBJECT famix_file_anchor EXPORTING model = model.
 
   ENDMETHOD.
   METHOD get_associations.
