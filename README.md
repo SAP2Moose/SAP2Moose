@@ -25,7 +25,9 @@ Earlier release v0.5.8: [Extractor](../../releases/download/v0.5.8/z_moose_extra
 
 # Compatibility
 
-Should work in ABAP 7.02 SP6, but there is currently only a limited test for this release done.
+ABAP releases higher than 7.02 SP6.
+
+There may be minor issues in older releases due to eroneous usage of modern ABAP statements, this should be easy to be fixed. You can do it yourself or open an issue for this.
 
 # abapGit for development
 
