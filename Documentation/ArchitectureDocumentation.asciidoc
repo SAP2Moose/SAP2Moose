@@ -91,15 +91,15 @@ Solution Strategy
 
 |===
 
-Building Block View {#section-building-block-view}
+Building Block View
 ===================
+The following diagram visualizes the main components that are called when an extraction is done.
 
 image::SAP2Moose Block Level 1.png[Block diagram level 1]
 
-
-
 Glossary
 ========
+
 
 .Glossary
 |===
