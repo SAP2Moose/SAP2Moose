@@ -1,3 +1,7 @@
+ifdef::env-github[]
+:imagesdir: foo/
+endif::[]
+
 :toc:
 :toc-placement!:
 toc::[]
@@ -43,17 +47,18 @@ Architecture Constraints
 - Has to be easy to install in the analyzed system. A single report with texts should suffice.
 - Does not write any information in the analyzed system.
 - Uses only a file import to extract informations. Web Calls and other techniques are not allowed.
-System Scope and Context {#section-system-scope-and-context}
+
+System Scope and Context
 ========================
 
-Business Context {#_business_context}
+Business Context
 ----------------
 
 **\<Diagram or Table\>**
 
 **\<optionally: Explanation of external domain interfaces\>**
 
-Technical Context {#_technical_context}
+Technical Context
 -----------------
 
 **\<Diagram or Table\>**
