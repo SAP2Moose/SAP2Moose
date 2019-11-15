@@ -10,10 +10,16 @@ Requirements Overview
 - Provides where used informations over multiple levels.
 - Provides informations what is used (Downsearch).
 
-Quality Goals {#_quality_goals}
+Quality Goals
 -------------
+- Easy to install
+- Easy to upgrade
+- Does not extract code (Potentially sensitive information shall not be extracted)
+- Does not write into the system (Does not destabilize the system)
+- Extracts an application that contains of about a view 1000 elements in a few minutes
+- Is not able to handle an inconsistent Where Used Index of the extracted SAP system
 
-Stakeholders {#_stakeholders}
+Stakeholders
 ------------
 
 +-------------+---------------------------+---------------------------+
