@@ -22,15 +22,21 @@ Quality Goals
 Stakeholders
 ------------
 
-+-------------+---------------------------+---------------------------+
-| Role/Name   | Contact                   | Expectations              |
-+=============+===========================+===========================+
-| *\<Role-1\> | *\<Contact-1\>*           | *\<Expectation-1\>*       |
-| *           |                           |                           |
-+-------------+---------------------------+---------------------------+
-| *\<Role-2\> | *\<Contact-2\>*           | *\<Expectation-2\>*       |
-| *           |                           |                           |
-+-------------+---------------------------+---------------------------+
+.Stake Holders
+|===
+| Role/Name |Expectations  
+
+|SAP Developer
+|Get an overview of the coding elements, there dependences and links to simplify opening them in an editor
+
+|Software Architect
+|Get an overwiew of the coding elements. Have the opportunity to display dependencies on class and package level.
+
+|System Owner
+|Protect coding. Prevent the system from activities that might destabilize it.
+|===
+
+
 
 Architecture Constraints {#section-architecture-constraints}
 ========================
