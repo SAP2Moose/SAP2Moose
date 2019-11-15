@@ -94,6 +94,8 @@ Solution Strategy
 Building Block View {#section-building-block-view}
 ===================
 
+image::SAP2Moose Block Level 1.png[Block diagram level 1]
+
 Whitebox Overall System {#_whitebox_overall_system}
 -----------------------
 
