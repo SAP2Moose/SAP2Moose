@@ -6,7 +6,10 @@ Introduction and Goals
 
 Requirements Overview
 ---------------------
-SAP2Moose
+- Extract model information from a SAP system to be analyzed with Moose and Moose2Model.
+- Provides where used informations over multiple levels.
+- Provides informations what is used (Downsearch).
+
 Quality Goals {#_quality_goals}
 -------------
 
