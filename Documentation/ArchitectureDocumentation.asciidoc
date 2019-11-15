@@ -51,7 +51,9 @@ Architecture Constraints
 System Scope and Context
 ========================
 Components of SAP2Moose. Contains also components to maintain, test and documentate (including images used to documentate).
+
 image::SAP2Moose Components.png[SAP2Moose Components]
+
 .Explanation
 |===
 |Component |Explanation
