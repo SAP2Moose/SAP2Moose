@@ -50,8 +50,27 @@ Architecture Constraints
 
 System Scope and Context
 ========================
+Components of SAP2Moose. Contains also components to maintain, test and documentate (including images used to documentate).
+image::SAP2Moose Components.png[SAP2Moose Components]
+.Explanation
+|===
+|Component |Explanation
 
-image::SAP2Moose Components.png[Sunset]
+|SAP2Moose (Global classes and report templates
+|To simplify the development, SAP2Moose is developed using global classes
+
+|Report to convert global to local classes to make a simple ABAP report
+|This is the coding that converts global classes to local classes of the report that runs in the analyzed SAP system
+
+|Github
+|This contains sub components to explain better how texts and images of the documentation are maintained
+
+|png file
+|The information how the png file is build is part of the image file. This is an option when it is exported from draw.io. Open the file with draw.io to be able to edit it and include a copy of the diagram when you export it.
+
+|===
+
+
 Business Context
 ----------------
 
