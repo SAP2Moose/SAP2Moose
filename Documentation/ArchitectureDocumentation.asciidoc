@@ -1,5 +1,5 @@
 ifdef::env-github[]
-:imagesdir: foo/
+:imagesdir: https://github.com/SAP2Moose/SAP2Moose/blob/master/Documentation/images/
 endif::[]
 
 :toc:
@@ -51,6 +51,7 @@ Architecture Constraints
 System Scope and Context
 ========================
 
+image::SAP2Moose Components.png[Sunset]
 Business Context
 ----------------
 
