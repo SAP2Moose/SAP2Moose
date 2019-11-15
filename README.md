@@ -15,6 +15,8 @@ Currently diagrams like this can be generated (With methods, attributes, classes
 
 The documentation is in the Wiki of this repository (Switch to the tab Wiki).
 
+[The architecture documentation is here.](Documentation/ArchitectureDocumentation.asciidoc)
+
 ## General
 
 There are currently not many changes in the extractor, just because I am happily using it nearto every day (Rainer Winkler).
