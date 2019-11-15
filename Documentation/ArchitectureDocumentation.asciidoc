@@ -73,24 +73,23 @@ image::SAP2Moose Components.png[SAP2Moose Components]
 |===
 
 
-Business Context
-----------------
-
-**\<Diagram or Table\>**
-
-**\<optionally: Explanation of external domain interfaces\>**
-
-Technical Context
------------------
-
-**\<Diagram or Table\>**
-
-**\<optionally: Explanation of technical interfaces\>**
-
-**\<Mapping Input/Output to Channels\>**
-
-Solution Strategy {#section-solution-strategy}
+Solution Strategy
 =================
+
+.Solution Strategy
+|===
+|Challenge |Solution
+
+|Install logic as a single report without making the development more complex
+|Develop with global classes. Convert the coding to local classes of a single report before installation.
+
+|The extractor shall run in older SAP releases
+|Do not use modern ABAP statements in the main logic. Use modern in unit tests and supporting code as these are not part of the single report that runs in the analyzed system
+
+|The extractor shall be fast and reliable
+|Do not use SAP method and functions to read code components and where used information. Reading the database tables is faster and more robust.
+
+|===
 
 Building Block View {#section-building-block-view}
 ===================
