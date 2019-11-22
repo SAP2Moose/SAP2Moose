@@ -5,6 +5,9 @@ endif::[]
 :toc:
 :toc-placement!:
 toc::[]
+
+This architecture documentation follows the arc42 template, see https://arc42.org/ .
+
 Introduction and Goals
 ======================
 
@@ -96,6 +99,43 @@ Building Block View
 The following diagram visualizes the main components that are called when an extraction is done.
 
 image::SAP2Moose Block Level 1.png[Block diagram level 1]
+
+Design Decisions
+================
+
+Read system informations
+------------------------
+.Decision Strategy reading
+|===
+| |
+
+|Criteria
+|Performant, stable, independend from SAP releases
+
+|Alternatives
+|1. Read database tables directly. 2. Access SAP functions or methods (preferrable API)
+
+|Decision
+|1. Reading database tables directly fullfills all criteria
+
+|===
+
+Determine dynamic usages
+------------------------
+.Decision Strategy dynamic usages
+|===
+| |
+
+|Criteria
+|Independend from the SAP2 Moose extractor, shall be able to use application specific logic, shall be able to reflect tables that specify dynamic calls.
+
+|Alternatives
+|1. Provide an application specific class that can be used by SAP2Moose during extraction. 2. Store informations about dynamic usages in Moose2Model
+
+|Decision
+|1. The possibility to implement an application specific class that can be used by SAP2Moose fullfills all criteria.
+
+|===
 
 Glossary
 ========
