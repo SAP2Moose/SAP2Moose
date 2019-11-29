@@ -6,7 +6,7 @@ endif::[]
 :toc-placement!:
 toc::[]
 
-This architecture documentation follows the arc42 template, see https://arc42.org/ .
+This documentation follows the arc42 template for architecture documentation (https://arc42.org/).
 
 Introduction and Goals
 ======================
