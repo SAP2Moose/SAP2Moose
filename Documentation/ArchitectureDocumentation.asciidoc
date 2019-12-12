@@ -100,6 +100,7 @@ The following diagram visualizes the main components that are called when an ext
 
 The following diagrams name the global classes and the report template Z2MSE_MOOSE_EXTRACTOR2 that is used during development.
 The report that is used for the extraction can have any arbitrarily name. The classes are then local classes with a slightly different name.
+
 image::SAP2Moose Block Level 1.png[Block diagram level 1]
 
 6 Design Decisions
