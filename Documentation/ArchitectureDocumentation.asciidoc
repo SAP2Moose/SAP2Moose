@@ -161,7 +161,7 @@ Especially the down search is currently quite unstable. Dumps occur often when t
 
 7.5 Runtime
 -----------
-The extraction takes for typical prjects often minutes. The down search is generally slower than the up search.
+The extraction takes for typical projects often minutes. The down search is generally slower than the up search.
 
 8 Glossary
 ==========
