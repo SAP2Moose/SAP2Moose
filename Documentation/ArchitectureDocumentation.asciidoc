@@ -147,23 +147,27 @@ image::SAP2Moose Block Level 1.png[Block diagram level 1]
 ------------------------------
 The documentation is sometimes confusing. There may be old informations. The installation is not completely explained. Users may experience problems when they install the development coding in some cases. This is not explained in the documentation.
 
-7.2 Release dependency
+7.2 No proper communication about the benefits and need for the tool
+--------------------------------------------------------------------
+Due to a failure to communicate the benefits and need for the tool, there is no community big enough to maintain and support the project in the long range.
+
+7.3 Release dependency
 ----------------------
 Using SAP2Moose to extract SAP systems with very different releases is currently not well supported in the project. There is only a single branch that focuses on the most recent SAP releases.
 
-7.3 Error handling
+7.4 Error handling
 ------------------
 Errors that could be deteckted during extraction are not reported to the user.
 
-7.4 Completeness
+7.5 Completeness
 ----------------
 It is not fully transparen what is extracted and what is not extracted. This is especially problematic in case of down search.
 
-7.5 No dumps
+7.6 No dumps
 ------------
 Especially the down search is currently quite unstable. Dumps occur often when the down search is done over many levels.
 
-7.6 Runtime
+7.7 Runtime
 -----------
 The extraction takes for typical projects often minutes. The down search is generally slower than the up search.
 
