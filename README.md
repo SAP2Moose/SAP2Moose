@@ -31,6 +31,18 @@ ABAP releases higher than 7.02 SP6.
 
 There may be minor issues in older releases due to eroneous usage of modern ABAP statements, this should be easy to be fixed. You can do it yourself or open an issue for this.
 
+# Installation
+
+## To analyze applications
+
+Create a new program in your SAP system. You need only the files z_moose_extractor.abap and z_moose_extractor_texts.txt. You find the most actual version on the tab Code. Or go to releases to get the code of a certain release.
+
+Open file z_moose_extractor.abap with a text editor and paste the coding in your program. Add texts for convenience. Run the program, select a package and download the file (preferable with extension .mse). Open with Moose Analysis or Moose2Model to analyze it.
+
+## To participate in development
+
+Use abapGit to install the coding in a local system. The package name has to be Z2MSE (Required so that test objects have the correct names).
+
 # abapGit for development
 
 This repository will use [abapGit](http://abapgit.org) for all objects relevant to the development. The extractor itself is a simple program and can be installed with copy and paste. See wiki for details.
