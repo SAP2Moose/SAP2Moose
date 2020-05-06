@@ -1,3 +1,5 @@
+<code>This project is actively maintained and used (May 2020). Please open an issue to get support :-)</code>
+
 # SAP2Moose
 
 This repository provides a program to extract model data from a SAP system into the analysis platform Moose on Pharo Smalltalk. It uses FAMIX as a flexible enhancable meta model.
