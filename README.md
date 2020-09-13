@@ -15,6 +15,10 @@ Currently diagrams like this can be generated (With methods, attributes, classes
 
 # Documentation
 
+Example how to analyze a class method:
+
+![Analyze a class method](https://github.com/SAP2Moose/SAP2Moose/blob/master/Documentation/images/SelectSingleClassMethod.png)
+
 The documentation is in the Wiki of this repository (Switch to the tab Wiki).
 
 [The architecture documentation is here.](Documentation/ArchitectureDocumentation.asciidoc)
