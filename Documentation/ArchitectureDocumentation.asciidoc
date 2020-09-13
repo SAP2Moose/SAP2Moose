@@ -8,17 +8,17 @@ toc::[]
 
 This documentation follows the arc42 template for architecture documentation (https://arc42.org/).
 
-Introduction and Goals
-======================
+1 Introduction and Goals
+========================
 
-Requirements Overview
----------------------
+1.1 Requirements Overview
+-------------------------
 - Extract model information from a SAP system to be analyzed with Moose and Moose2Model.
 - Provides where used informations over multiple levels.
 - Provides informations what is used (Downsearch).
 
-Quality Goals
--------------
+1.2 Quality Goals
+-----------------
 - Easy to install
 - Easy to upgrade
 - Does not extract code (Potentially sensitive information shall not be extracted)
@@ -26,8 +26,8 @@ Quality Goals
 - Extracts an application that contains of about a view 1000 elements in a few minutes
 - Is not able to handle an inconsistent Where Used Index of the extracted SAP system
 
-Stakeholders
-------------
+1.3 Stakeholders
+----------------
 
 .Stake Holders
 |===
@@ -45,14 +45,14 @@ Stakeholders
 
 
 
-Architecture Constraints
-========================
+2 Architecture Constraints
+==========================
 - Has to be easy to install in the analyzed system. A single report with texts should suffice.
 - Does not write any information in the analyzed system.
 - Uses only a file import to extract informations. Web Calls and other techniques are not allowed.
 
-System Scope and Context
-========================
+3 System Scope and Context
+==========================
 Components of SAP2Moose. Contains also components to maintain, test and documentate (including images used to documentate).
 
 image::SAP2Moose Components.png[SAP2Moose Components]
@@ -76,8 +76,8 @@ image::SAP2Moose Components.png[SAP2Moose Components]
 |===
 
 
-Solution Strategy
-=================
+4 Solution Strategy
+===================
 
 .Solution Strategy
 |===
@@ -94,17 +94,20 @@ Solution Strategy
 
 |===
 
-Building Block View
-===================
+5 Building Block View
+=====================
 The following diagram visualizes the main components that are called when an extraction is done.
+
+The diagrams in this chapter show the global classes and the report template Z2MSE_MOOSE_EXTRACTOR2 that are used during development.
+The report that is used for the extraction can have any arbitrarily name. The classes are then local classes with a slightly different name.
 
 image::SAP2Moose Block Level 1.png[Block diagram level 1]
 
-Design Decisions
-================
+6 Design Decisions
+==================
 
-Read system informations
-------------------------
+6.1 Read system informations
+----------------------------
 .Decision Strategy reading
 |===
 | |
@@ -120,8 +123,8 @@ Read system informations
 
 |===
 
-Determine dynamic usages
-------------------------
+6.2 Determine dynamic usages
+----------------------------
 .Decision Strategy dynamic usages
 |===
 | |
@@ -137,31 +140,39 @@ Determine dynamic usages
 
 |===
 
-Risks and Technical Debts
-=========================
+7 Risks and Technical Debts
+===========================
 
-Release dependency
-------------------
+7.1 Documentation insufficient
+------------------------------
+The documentation is sometimes confusing. There may be old informations. The installation is not completely explained. Users may experience problems when they install the development coding in some cases. This is not explained in the documentation.
+
+7.2 No proper communication about the benefits and need for the tool
+--------------------------------------------------------------------
+Due to a failure to communicate the benefits and need for the tool, there is no community big enough to maintain and support the project in the long range.
+
+7.3 Release dependency
+----------------------
 Using SAP2Moose to extract SAP systems with very different releases is currently not well supported in the project. There is only a single branch that focuses on the most recent SAP releases.
 
-Error handling
---------------
+7.4 Error handling
+------------------
 Errors that could be deteckted during extraction are not reported to the user.
 
-Completeness
-------------
+7.5 Completeness
+----------------
 It is not fully transparen what is extracted and what is not extracted. This is especially problematic in case of down search.
 
-No dumps
---------
+7.6 No dumps
+------------
 Especially the down search is currently quite unstable. Dumps occur often when the down search is done over many levels.
 
-Runtime
--------
-The extraction takes for typical prjects often minutes. The down search is generally slower than the up search.
+7.7 Runtime
+-----------
+The extraction takes for typical projects often minutes. The down search is generally slower than the up search.
 
-Glossary
-========
+8 Glossary
+==========
 
 
 .Glossary
