@@ -96,7 +96,7 @@ CLASS ltcl_test IMPLEMENTATION.
                        at_line = 13 ).
 
     t_exp = VALUE #( ( |FAMIX.Attribute Z2MSE_TEST_CL_A>>ATTRIBUTE_A sourceAnchor| )
-                     ( |FAMIX.FileAnchor ATTRIBUTE_A fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_a/source/main#start=13,1| ) ).
+                     ( |FAMIX.FileAnchor ATTRIBUTE_A fileName adt://{ sy-sysid }/sap/bc/adt/oo/classes/z2mse_test_cl_a/source/main#start=13,1| ) ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = f_cut->to_change ).
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = t_exp ).
