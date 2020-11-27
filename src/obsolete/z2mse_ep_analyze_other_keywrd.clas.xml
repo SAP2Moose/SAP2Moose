@@ -4,10 +4,8 @@
   <asx:values>
    <VSEOCLASS>
     <CLSNAME>Z2MSE_EP_ANALYZE_OTHER_KEYWRD</CLSNAME>
-    <VERSION>1</VERSION>
     <LANGU>E</LANGU>
     <DESCRIPT>cl_ep_analyze_other_keywrd</DESCRIPT>
-    <EXPOSURE>2</EXPOSURE>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

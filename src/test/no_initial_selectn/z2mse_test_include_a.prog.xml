@@ -4,8 +4,6 @@
   <asx:values>
    <PROGDIR>
     <NAME>Z2MSE_TEST_INCLUDE_A</NAME>
-    <STATE>A</STATE>
-    <VARCL>X</VARCL>
     <SUBC>I</SUBC>
     <RLOAD>E</RLOAD>
     <UCCHECK>X</UCCHECK>

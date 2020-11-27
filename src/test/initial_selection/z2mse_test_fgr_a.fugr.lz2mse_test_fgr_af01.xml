@@ -4,8 +4,6 @@
   <asx:values>
    <PROGDIR>
     <NAME>LZ2MSE_TEST_FGR_AF01</NAME>
-    <STATE>A</STATE>
-    <VARCL>X</VARCL>
     <SUBC>I</SUBC>
     <RLOAD>E</RLOAD>
     <UCCHECK>X</UCCHECK>
