@@ -60,7 +60,7 @@ CLASS ltcl_test IMPLEMENTATION.
 
     t_exp = VALUE #( ( |FAMIX.Class Z2MSE_TEST_CL_A modifiers ABAPGlobalClass| )
                      ( |FAMIX.Class Z2MSE_TEST_CL_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
-                     ( |FAMIX.FileAnchor Z2MSE_TEST_CL_A fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_a/source/main| )
+                     ( |FAMIX.FileAnchor Z2MSE_TEST_CL_A fileName adt://{ sy-sysid }/sap/bc/adt/oo/classes/z2mse_test_cl_a/source/main| )
                      ( |FAMIX.Class Z2MSE_TEST_CL_A sourceAnchor| )  ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = f_cut->to_change ).
@@ -78,7 +78,7 @@ CLASS ltcl_test IMPLEMENTATION.
                        at_line = 13 ).
 
     t_exp = VALUE #( ( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENTHANDLER_A signature EVENTHANDLER_A| )
-                     ( |FAMIX.FileAnchor EVENTHANDLER_A fileName adt://NPL/sap/bc/adt/oo/classes/z2mse_test_cl_a/source/main#start=13,1| )
+                     ( |FAMIX.FileAnchor EVENTHANDLER_A fileName adt://{ sy-sysid }/sap/bc/adt/oo/classes/z2mse_test_cl_a/source/main#start=13,1| )
                      ( |FAMIX.Method Z2MSE_TEST_CL_A>>EVENTHANDLER_A sourceAnchor| ) ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = f_cut->to_change ).
@@ -114,7 +114,7 @@ CLASS ltcl_test IMPLEMENTATION.
     t_exp = VALUE #( ( |FAMIX.Class Z2MSE_TEST_IF_A_00000000000000 isInterface true| )
                      ( |FAMIX.Class Z2MSE_TEST_IF_A_00000000000000 modifiers ABAPGlobalInterface| )
                      ( |FAMIX.Class Z2MSE_TEST_IF_A_00000000000000 parentPackage Z2MSE_TEST_NO_INITIAL_SELECTN| )
-                     ( |FAMIX.FileAnchor Z2MSE_TEST_IF_A_00000000000000 fileName adt://NPL/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main| )
+                     ( |FAMIX.FileAnchor Z2MSE_TEST_IF_A_00000000000000 fileName adt://{ sy-sysid }/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main| )
                      ( |FAMIX.Class Z2MSE_TEST_IF_A_00000000000000 sourceAnchor| )  ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = f_cut->to_change ).
@@ -133,7 +133,7 @@ CLASS ltcl_test IMPLEMENTATION.
 
     t_exp = VALUE #( ( |FAMIX.Method Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 signature METHOD_A_000000000000000000000| )
                      ( |FAMIX.Method Z2MSE_TEST_IF_A_00000000000000>>METHOD_A_000000000000000000000 sourceAnchor| )
-                     ( |FAMIX.FileAnchor METHOD_A_000000000000000000000 fileName adt://NPL/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main#start=9,1| ) ).
+                     ( |FAMIX.FileAnchor METHOD_A_000000000000000000000 fileName adt://{ sy-sysid }/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main#start=9,1| ) ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = f_cut->to_change ).
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = t_exp ).
@@ -150,7 +150,7 @@ CLASS ltcl_test IMPLEMENTATION.
                                       at_line = 5 ).
 
     t_exp = VALUE #( ( |FAMIX.Attribute Z2MSE_TEST_IF_A_00000000000000>>ATTRIBUTE_A_000000000000000000 sourceAnchor| )
-                     ( |FAMIX.FileAnchor ATTRIBUTE_A_000000000000000000 fileName adt://NPL/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main#start=5,1| ) ).
+                     ( |FAMIX.FileAnchor ATTRIBUTE_A_000000000000000000 fileName adt://{ sy-sysid }/sap/bc/adt/oo/interfaces/z2mse_test_if_a_00000000000000/source/main#start=5,1| ) ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = f_cut->to_change ).
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = t_exp ).
@@ -184,7 +184,7 @@ CLASS ltcl_test IMPLEMENTATION.
     t_exp = VALUE #( ( |FAMIX.Class Z2MSE_TEST_PROGRAM_A modifiers ABAPProgram| )
                      ( |FAMIX.Class Z2MSE_TEST_PROGRAM_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
                      ( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A sourceAnchor| )
-                     ( |FAMIX.FileAnchor Z2MSE_TEST_PROGRAM_A fileName adt://NPL/sap/bc/adt/programs/programs/z2mse_test_program_a| )
+                     ( |FAMIX.FileAnchor Z2MSE_TEST_PROGRAM_A fileName adt://{ sy-sysid }/sap/bc/adt/programs/programs/z2mse_test_program_a| )
                      ( |FAMIX.Method Z2MSE_TEST_PROGRAM_A>>Z2MSE_TEST_PROGRAM_A signature Z2MSE_TEST_PROGRAM_A| ) ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = f_cut->to_change ).
