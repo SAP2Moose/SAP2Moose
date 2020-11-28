@@ -44,6 +44,7 @@ CLASS z2mse_extr3_programs DEFINITION
       EXPORTING
         is_added       TYPE abap_bool
         new_element_id TYPE i.
+
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
     METHODS collect_infos REDEFINITION.
@@ -409,11 +410,17 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
     DATA: tranid           TYPE rstranid,
           function_group   TYPE rs38l_area,
           function         TYPE rs38l_fnam,
-          function_include TYPE string.
+          function_include TYPE string,
+          is_tested        TYPE abap_bool.
 
     CLEAR program_type.
     CLEAR program_attribute_1.
     CLEAR program_attribute_2.
+
+    IF i_element_program+0(3) EQ |ZGP|.
+      " Do check only when potentially needed to improve performance
+      is_tested = z2mse_main_test=>check_if_tested( ).
+    ENDIF.
 
     IF i_element_program+0(1) EQ |L|.
 
@@ -437,8 +444,8 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
       ENDIF.
 
-    ELSEIF sy-sysid EQ 'NPL' AND i_element_program+0(3) EQ |ZGP|. "Only on test system, currently no SAP BW working there
-
+    ELSEIF i_element_program+0(3) EQ |ZGP|. "Only on test system, currently no SAP BW working there
+      ##TODO " Find better way to determine Unit Test
       _extract_sap_bw_logic( EXPORTING i_element_program = i_element_program
                              IMPORTING tranid = tranid
                                        r_result = r_result ).
@@ -557,14 +564,20 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
           transformation_progr_id TYPE rstran_progid,
           length                  TYPE i,
           id_length               TYPE i,
-          transformation          TYPE rstran.
+          transformation          TYPE rstran,
+          is_tested               TYPE abap_bool.
 
     CLEAR tranid.
 
     element_program = i_element_program.
 
-    IF sy-sysid EQ 'NPL' AND element_program+0(3) = 'ZGP'.
-      SHIFT element_program LEFT BY 1 PLACES.
+    IF element_program+0(3) = 'ZGP'.
+      IF element_program = 'ZGP003N8S45LS1FG375G2BN69Q4G'.
+        is_tested = z2mse_main_test=>check_if_tested( ).
+        IF is_tested = 'X'.
+          SHIFT element_program LEFT BY 1 PLACES.
+        ENDIF.
+      ENDIF.
     ENDIF.
 
     length = strlen( i_element_program ).
@@ -572,7 +585,7 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
     transformation_progr_id = i_element_program+2(id_length).
 
-    IF sy-sysid EQ 'NPL' AND element_program = 'GP003N8S45LS1FG375G2BN69Q4G'.
+    IF element_program = 'GP003N8S45LS1FG375G2BN69Q4G' AND is_tested = 'X'.
       CLEAR transformation.
       transformation-tranid = |123|.
       transformation-sourcetype = |ODSO|.
@@ -609,4 +622,7 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
     CONCATENATE 'FGR-' i_element-program_attribute_1 INTO name_of_mapped_class.
 
   ENDMETHOD.
+
+
+
 ENDCLASS.
