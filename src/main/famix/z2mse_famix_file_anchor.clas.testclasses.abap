@@ -21,7 +21,7 @@ CLASS ltcl_ IMPLEMENTATION.
     f_cut = NEW #( model = testmodel ).
 
     f_cut->add( EXPORTING element_id = 1
-                          file_name  = |adt://NPL/main#start)1,1|
+                          file_name  = |adt://{ sy-sysid }/main#start)1,1|
                 IMPORTING id         = DATA(id_element_act) ).
 
     DATA(model) = testmodel->get_model( ).
@@ -30,7 +30,7 @@ CLASS ltcl_ IMPLEMENTATION.
 
     model_exp = VALUE #( ( element_id = 1 element_type = 'FAMIX.FileAnchor' is_id_required = abap_true
                            public_attributes = VALUE #( ( attribute_id = 1 attribute_type = 'element' reference = 1  )
-                                                        ( attribute_id = 2 attribute_type = 'fileName' string = |adt://NPL/main#start)1,1| ) ) ) ).
+                                                        ( attribute_id = 2 attribute_type = 'fileName' string = |adt://{ sy-sysid }/main#start)1,1| ) ) ) ).
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
         act                  = model
