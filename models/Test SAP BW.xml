@@ -5,8 +5,8 @@
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
-        <x>84.0</x>
-        <y>15.0</y>
+        <x>463.0</x>
+        <y>127.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -29,6 +29,47 @@
         <y>13.0</y>
         <comment><![CDATA[Special handling for SAP BW reports for test]]>
         </comment>
+        <commentx>-857.0</commentx>
+        <commenty>-45.0</commenty>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
+    </element>
+    <element>
+        <type>FAMIXPackage</type>
+        <package>SABP</package>
+        <x>49.0</x>
+        <y>41.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>FGR-SYUT</class>
+        <method>F-SYSTEM_CALLSTACK</method>
+        <x>-436.0</x>
+        <y>-55.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <attribute>TYPE_BW_TRANSFORMATION</attribute>
+        <x>-772.0</x>
+        <y>74.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>FGR-SYUT</class>
+        <x>-436.0</x>
+        <y>-44.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_MAIN_TEST</class>
+        <method>CHECK_IF_TESTED</method>
+        <x>-562.0</x>
+        <y>-76.0</y>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
@@ -38,10 +79,23 @@
     </element>
     <element>
         <type>FAMIXAttribute</type>
-        <class>Z2MSE_EXTR3_PROGRAMS</class>
-        <attribute>TYPE_BW_TRANSFORMATION</attribute>
-        <x>-772.0</x>
-        <y>74.0</y>
+        <class>Z2MSE_MAIN_TEST</class>
+        <attribute>G_CHECK_FOR_TEST_DONE</attribute>
+        <x>-658.0</x>
+        <y>-95.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_MAIN_TEST</class>
+        <attribute>G_IS_TESTED</attribute>
+        <x>-644.0</x>
+        <y>-63.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_MAIN_TEST</class>
+        <x>-606.0</x>
+        <y>-67.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -61,7 +115,7 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_PROGRAMS</class>
         <attribute>TYPE_PROGRAM</attribute>
-        <x>-794.0</x>
+        <x>-825.0</x>
         <y>99.0</y>
     </element>
     <element>
@@ -78,6 +132,8 @@
         <y>16.0</y>
         <comment><![CDATA[Special handling for SAP BW reports for test]]>
         </comment>
+        <commentx>-498.0</commentx>
+        <commenty>-13.0</commenty>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
@@ -91,5 +147,11 @@
         <method>_EXTRACT_FUNCTION_NAME</method>
         <x>-773.0</x>
         <y>124.0</y>
+    </element>
+    <element>
+        <type>FAMIXPackage</type>
+        <package>Z2MSE_MAIN_TEST</package>
+        <x>71.0</x>
+        <y>41.0</y>
     </element>
 </elements>
