@@ -1,6 +1,9 @@
 SAP2Moose changelog for releases in preparation
 ===================
 
++ Add report documentation #126
++ Example how to select #122
+
 Legend
 ------
 * : fixed
