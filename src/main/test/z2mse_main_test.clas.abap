@@ -9,7 +9,7 @@ CLASS z2mse_main_test DEFINITION
     METHODS: setup,
       z2mse_test_initial_selection,
       z2mse_test_initial_selection2,
-      specific_search,
+      specific_search_method,
       specific_search_program,
       specific_search_function.
   PROTECTED SECTION.
@@ -31,7 +31,7 @@ CLASS z2mse_main_test IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD specific_search.
+  METHOD specific_search_method.
 
     " This test is a stub, it will probably be replaced by new tests
 
