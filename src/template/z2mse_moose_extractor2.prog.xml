@@ -119,6 +119,328 @@
      <LENGTH>38</LENGTH>
     </item>
    </TPOOL>
+   <LONGTEXTS>
+    <item>
+     <DOKIL>
+      <ID>RE</ID>
+      <OBJECT>Z2MSE_MOOSE_EXTRACTOR2</OBJECT>
+      <LANGU>E</LANGU>
+      <TYP>E</TYP>
+      <VERSION>0001</VERSION>
+      <MASTERLANG>X</MASTERLANG>
+      <TXTLINES>00074</TXTLINES>
+      <DOKSTATE>R</DOKSTATE>
+     </DOKIL>
+     <HEAD>
+      <TDOBJECT>DOKU</TDOBJECT>
+      <TDNAME>Z2MSE_MOOSE_EXTRACTOR2</TDNAME>
+      <TDID>RE</TDID>
+      <TDSPRAS>E</TDSPRAS>
+      <TDFORM>S_DOCU_SHOW</TDFORM>
+      <TDSTYLE>S_DOCUS1</TDSTYLE>
+      <TDVERSION>00001</TDVERSION>
+      <TDLINESIZE>072</TDLINESIZE>
+     </HEAD>
+     <LINES>
+      <TLINE>
+       <TDFORMAT>U1</TDFORMAT>
+       <TDLINE>&amp;PURPOSE&amp;</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Extract informations to visualize relations between code with</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>Moose2Model (See www.moose2model.org).</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Display usage of code in a similar way as the standard where used</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>functionality (Provides features not supplied by the standard. But does</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>not provide all features the standard provides).</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Determines what is used by a coding (&quot;Where used in the reversed</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>direction&quot;).</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Shows usages by interfaces correct (The standard &quot;reverses&quot; the usage of</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>interfaces).</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Shows usages due to redefined methods (The standard does not show a</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>usage when a method with the same name of a super class is used).</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Can show dynamic usages when a special class with informations on this</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>is displayed (The standard has no solution for this).</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>U1</TDFORMAT>
+       <TDLINE>&amp;INTEGRATION&amp;</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>The created mse file is optimized to be displayed by Moose2Model.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>U1</TDFORMAT>
+       <TDLINE>&amp;PREREQUISITES&amp;</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Depends on a correct Where Used Index by the SAP standard. You may go to</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>the menu and do &quot;Update Navigation Index&quot; when some usages are not found</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>correctly.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>U1</TDFORMAT>
+       <TDLINE>&amp;FEATURES&amp;</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>U2</TDFORMAT>
+       <TDLINE>&amp;SELECTION&amp;</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Extract object of packages - Select a package for which all elements are</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>to be analyzed. Leave empty when only a specifc element shall be</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>analyzed.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Filter subpackages if required - You may exclude subpackages when</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>needed.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Element name - When a specific search is to be done, you specify here</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>for what type of element it is done. This field has a value help.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Parent name - Only when a specific search for Class is done. Enter the</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>name of the class in that case here.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Specific element - Only when a specific search is done. Enter the</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>element for which the search is done.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Extract subpackages - Set to include all subpackages.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Search up (-1 if no limit) - You may restrict the amount of using</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>elements which are found by specifying how often a using element is to</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>be searched. Normally you should use the default value (-1) so that all</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>using elements are included. You may specify a lower value either to</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>reduce the time for extraction or restrict the amounts of elements.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Search down (-1 if no limit) - Specify whether used elements shall be</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>shown. Default is 1&lt;(&gt;,&lt;)&gt; this is enough so that for instance elements</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>of the SAP standard are shown in the diagrams or result. When set to a</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>higher value problems in the extraction may occur when elements are</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>found where the extractor fails due to implementation errors.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>No Where-Used: SAP Interfaces - Normally required to prevent that too</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>many elements are found due to some standard SAP interfaces.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Classes to read dynamic usages - You may specify a class which provides</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>informations on dynamic usages to the extractor.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Download model to file - Do not select when you only want to display the</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>result.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Default prefix for file - Use to specify which kind of selections is</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>done. Typically each application is selected with a specifc combination</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>of parameters.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>U2</TDFORMAT>
+       <TDLINE>&amp;STANDARD_VARIANTS&amp;</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>You may save and store report variants to simplify extraction for</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>certain applications.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>U2</TDFORMAT>
+       <TDLINE>&amp;OUTPUT&amp;</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>The complete result which is related to the downloadable mse file is</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>displayed.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>U1</TDFORMAT>
+       <TDLINE>&amp;ACTIVITIES&amp;</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>You should restrict the amount of extracted elements. This prevents that</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>the report runs too long or finds more elements than can be displayed or</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>processed by Moose2Model.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>U1</TDFORMAT>
+       <TDLINE>&amp;EXAMPLE&amp;</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>A complete package:</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Extract object of packages: SAPBC_DATAMODEL</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Search up: 1 (Otherwise the report may dump)</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Default prefix: SAPBC_DATAMODEL (To get a hint what is selected to get</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>the mse file)</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>A table:</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Element name: Table</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Search up: 3 (Otherwise the report may dump)</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Default prefix: SAIRPORT</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>A method of a class:</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Element name: Class</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Parent name: CL_FPMGB_FORM_FLIGHT</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Specific element: ADD_DD_VALUES</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Search up: 3</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Search down: 1</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Download model to file: Do not set</TDLINE>
+      </TLINE>
+     </LINES>
+    </item>
+   </LONGTEXTS>
   </asx:values>
  </asx:abap>
 </abapGit>
