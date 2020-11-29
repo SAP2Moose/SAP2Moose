@@ -10,12 +10,33 @@ CLASS z2mse_main_test DEFINITION
       z2mse_test_initial_selection,
       z2mse_test_initial_selection2,
       specific_search_method,
+      specific_search_attribute,
+      specific_search_class,
       specific_search_program,
       specific_search_function.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA: g_check_for_test_done TYPE abap_bool,
                 g_is_tested           TYPE abap_bool.
+
+    DATA: mse_model_act                TYPE z2mse_model=>lines_type,
+          fes_act                      TYPE z2mse_extr3_model_builder=>found_elements_type,
+          fes_exp                      TYPE z2mse_extr3_model_builder=>found_elements_type,
+          equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse,
+          maker                        TYPE REF TO z2mse_mse_harmonize_maker.
+    METHODS _search_specific
+      IMPORTING
+        parent_name_filter  TYPE z2mse_extr3_initial_elements=>ty_filter
+        name_filter         TYPE z2mse_extr3_initial_elements=>ty_filter
+        dynamic_read        TYPE string
+        element_type_filter TYPE z2mse_extr3_initial_elements=>ty_filter.
+    METHODS _check_found_elements
+      IMPORTING
+        msg TYPE string.
+    METHODS _check_harmonized_mse
+      IMPORTING
+        msg TYPE string.
 ENDCLASS.
 
 
@@ -28,159 +49,112 @@ CLASS z2mse_main_test IMPLEMENTATION.
     " This is mandatory to decouple the separate unit tests
     z2mse_extr3=>clear_all( ).
 
+    CLEAR mse_model_act.
+    CLEAR equalized_harmonized_mse_act.
+    CLEAR equalized_harmonized_mse_exp.
+    CLEAR fes_act.
+    CLEAR fes_exp.
+
+    equalized_harmonized_mse_exp = VALUE #( ).
+
   ENDMETHOD.
 
 
   METHOD specific_search_method.
 
-    " This test is a stub, it will probably be replaced by new tests
-
-    DATA: mse_model_act TYPE z2mse_model=>lines_type.
-    DATA: nothing_done_act TYPE abap_bool.
-
-    DATA(initial_elements) = NEW z2mse_extr3_initial_elements( ).
-
-    DATA(model_builder) = NEW z2mse_extr3_model_builder( ).
-
-    DATA(element_manager) = NEW z2mse_extr3_element_manager( i_model_builder          = model_builder
-                                                             i_exclude_found_sap_intf = abap_true ).
-
-    model_builder->initialize( i_element_manager = element_manager
-                               i_dynamic_read = |Z2MSE_TEST_DYNAMIC_USAGE| ).
-
-
-    initial_elements->select_specific( EXPORTING model_builder         = model_builder
-                                                 element_manager       = element_manager
-                                                 i_element_type_filter = z2mse_extr3_initial_elements=>select_class_method
-                                                 i_parent_name_filter  = 'Z2MSE_TEST_CL_A'
-                                                 i_name_filter         = 'EVENT_A' ).
-
-    DATA(f_cut) = NEW z2mse_extract3( ).
-    f_cut->extract( EXPORTING model_builder            = model_builder
-                              element_manager          = element_manager
-                              initial_elements         = initial_elements
-                              i_search_up              = 1
-                              i_search_down            = 1
-                              i_exclude_found_sap_intf = abap_true
-                    IMPORTING mse_model             = mse_model_act
-                              nothing_done          = nothing_done_act ).
-
-    DATA: fes_act TYPE z2mse_extr3_model_builder=>found_elements_type,
-          fes_exp TYPE z2mse_extr3_model_builder=>found_elements_type.
-
-
-    model_builder->write_found_elements( EXPORTING write = abap_false
-                                         IMPORTING fes   = fes_act ).
+    _search_specific(
+          element_type_filter = z2mse_extr3_initial_elements=>select_class_method
+          dynamic_read        = |Z2MSE_TEST_DYNAMIC_USAGE|
+          parent_name_filter  = 'Z2MSE_TEST2_CL_A'
+          name_filter         = 'METHOD' ).
 
     fes_exp = VALUE #(
-( where = |I| level = 0 alternate_level = 0 element_type = |ABAPClassEvent| parent_name = |Z2MSE_TEST_CL_A| name = |EVENT_A| specific = |X| )
-( where = |I| level = 1 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST_CL_A| name = |METHOD_A| specific = |X| )
-*( where = |S| level = 2 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST_CL_A2| name = |METHOD_A| specific = |X| )
-*( where = |S| level = 2 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST_CL_B1| name = |METHOD_A| specific = |X| )
-*( where = |S| level = 2 alternate_level = 0 element_type = |ABAPProgramOrFunctionOrSAPBW| parent_name = || name = |BW-ODSO-Z2MSET001-CUBE-Z2MSET002| specific = |X| )
-*( where = |S| level = 2 alternate_level = 0 element_type = |ABAPProgramOrFunctionOrSAPBW| parent_name = || name = |F-Z2MSE_TEST_FUNCTION_A| specific = |X| )
-*( where = |S| level = 3 alternate_level = 0 element_type = |ABAPProgramOrFunctionOrSAPBW| parent_name = || name = |LZ2MSE_TEST_FGR_AF01| specific = |X| )
-*( where = |S| level = 2 alternate_level = 0 element_type = |ABAPProgramOrFunctionOrSAPBW| parent_name = || name = |Z2MSE_TEST_PROGRAM_A| specific = |X| )
-*( where = |S| level = 2 alternate_level = 0 element_type = |WebDynproController| parent_name = |Z2MSE_TEST_WDY_A| name = |COMPONENTCONTROLLER| specific = |X| )
-*( where = |S| level = 2 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST_CL_B1| name = |METHOD_B| specific = |X| )
-*( where = |S| level = 3 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST_CL_B2| name = |METHOD_A| specific = |X| )
-*( where = |I| level = 4 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST_CL_A| name = |Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| specific = |X| )
+( where = |I| level = 0 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST2_CL_A| name = |METHOD| specific = |X| )
+( where = |S| level = 1 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST2_CL_B| name = |METHOD| specific = |X| )
  ).
 
-    SORT fes_act.
-    SORT fes_exp.
-    cl_abap_unit_assert=>assert_equals( msg = 'Expect correct list of found elements' exp = fes_exp act = fes_act ).
-
-    DATA: equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
-          equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
-
-    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
-
-    equalized_harmonized_mse_exp = VALUE #( ).
-
-    DATA maker TYPE REF TO z2mse_mse_harmonize_maker.
+    _check_found_elements( 'Expect correct list of found elements' ).
 
     maker = NEW #( ).
-
     maker->to_change = equalized_harmonized_mse_exp.
+    maker->add_custom_source_language( language = |SAP| ).
+    maker->add_package( package = |Z2MSE_TEST2_CLASS_SPEC| ).
+    maker->add_class(      name = |Z2MSE_TEST2_CL_A| parentpackage = |Z2MSE_TEST2_CLASS_SPEC| ).
+    maker->add_attribute(         attribute = |ATTRIBUTE| at_line = 7 ).
+    maker->add_method(            method  = |METHOD| at_line = 8 ).
+    maker->add_class(      name = |Z2MSE_TEST2_CL_B| parentpackage = |Z2MSE_TEST2_CLASS_SPEC| ).
+    maker->add_method(            method  = |METHOD| at_line = 7 ).
+    maker->usage(                           used_group  = |Z2MSE_TEST2_CL_A| used = |METHOD| ).
 
-    maker->add_class(      name = |Z2MSE_TEST_CL_A| parentpackage = || ).
-    maker->add_attribute(         attribute = |Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000| ).
+    _check_harmonized_mse( 'Wrong mse file for specific search class component' ).
 
-    maker->add_method(            method  = |CONSTRUCTOR| at_line = 11 ).
+  ENDMETHOD.
 
-    maker->add_method(            method  = |EVENTHANDLER_A| at_line = 13 ).
-    maker->add_method(            method  = |EVENT_A| at_line = 9 ).
+  METHOD specific_search_attribute.
 
-    maker->add_method(            method  = |METHOD_A| at_line = 12 ).
-    maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |EVENT_A| ).
-    maker->usage(                           used_group  = |Z2MSE_TEST_CL_A2| used = |METHOD_A| ).
+    " Search for usage of attributes
 
-    maker->add_method(            method  = |Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000| ).
+    _search_specific(
+          element_type_filter = z2mse_extr3_initial_elements=>select_class_method
+          dynamic_read        = |Z2MSE_TEST_DYNAMIC_USAGE|
+          parent_name_filter  = 'Z2MSE_TEST2_CL_A'
+          name_filter         = 'ATTRIBUTE' ).
 
-    maker->add_method(            method  = |Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| ).
-    maker->usage(                           used_group  = |Z2MSE_TEST_CL_B2| used = |METHOD_A| ).
+    fes_exp = VALUE #(
+( where = |I| level = 0 alternate_level = 0 element_type = |ABAPClassAttribute| parent_name = |Z2MSE_TEST2_CL_A| name = |ATTRIBUTE| specific = |X| )
+( where = |S| level = 1 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST2_CL_B| name = |METHOD| specific = |X| )
+ ).
 
-    maker->add_class(      name = |Z2MSE_TEST_CL_A2| parentpackage = || ).
+    _check_found_elements( 'Expect correct list of found elements' ).
 
-    maker->add_method(            method  = |METHOD_A| at_line = 8 ).
-    maker->usage(                           used_group  = |Z2MSE_TEST_CL_B1| used = |METHOD_B| ).
+    maker = NEW #( ).
+    maker->to_change = equalized_harmonized_mse_exp.
+    maker->add_custom_source_language( language = |SAP| ).
+    maker->add_package( package = |Z2MSE_TEST2_CLASS_SPEC| ).
+    maker->add_class(      name = |Z2MSE_TEST2_CL_A| parentpackage = |Z2MSE_TEST2_CLASS_SPEC| ).
+    maker->add_attribute(         attribute = |ATTRIBUTE| at_line = 7 ).
+    maker->add_method(            method  = |METHOD| at_line = 8 ).
+    maker->add_class(      name = |Z2MSE_TEST2_CL_B| parentpackage = |Z2MSE_TEST2_CLASS_SPEC| ).
+    maker->add_method(            method  = |METHOD| at_line = 7 ).
+*    maker->usage(                           used_group  = |Z2MSE_TEST2_CL_A| used = |METHOD| ).
+    maker->access(                           used_group  = |Z2MSE_TEST2_CL_A| used = |ATTRIBUTE| ).
 
-    maker->add_class(      name = |Z2MSE_TEST_CL_B1| parentpackage = || ).
-    maker->add_method(            method  = |EVENT_A| at_line = 8 ).
+    _check_harmonized_mse( 'Wrong mse file for specific search class component' ).
 
-    maker->add_attribute(         attribute = |ATTRIBUTE_A| at_line = 13 ).
+  ENDMETHOD.
 
-    maker->add_method(            method  = |METHOD_A| at_line = 10 ).
-    maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |METHOD_A| ).
-    maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| ).
+  METHOD specific_search_class.
 
-    maker->add_method(            method  = |METHOD_B| at_line = 11 ).
-    maker->usage(                           used_group  = |Z2MSE_TEST_CL_B1| used = |METHOD_A| ).
-    maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |METHOD_A| ).
+    " Search for usage of all elements of a class
 
-    maker->add_class(      name = |Z2MSE_TEST_CL_B2| parentpackage = || ).
-    maker->add_attribute(         attribute = |Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000| ).
-    maker->add_method(            method  = |METHOD_A| at_line = 12 ).
-    maker->usage(                           used_group  = |Z2MSE_TEST_CL_B1| used = |METHOD_A| ).
-    maker->add_method(            method  = |Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000| ).
-    maker->add_method(            method  = |Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| ).
+    cl_abap_unit_assert=>fail( msg = 'Finalize test and coding to implement #122' ).
 
-    maker->add_interface(  name = |Z2MSE_TEST_IF_A_00000000000000| parentpackage = || ).
-    maker->add_interface_method(  method  = |EVENT_A_0000000000000000000000| at_line = 7 ).
-    maker->usage(                           used_group  = |Z2MSE_TEST_CL_B2| used = |Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000| ).
-    maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000| ).
-    maker->add_interface_method(  method  = |METHOD_A_000000000000000000000| at_line = 9 ).
-    maker->usage(                           used_group  = |Z2MSE_TEST_CL_B2| used = |Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| ).
-    maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| ).
-    maker->add_interface_attribute( attribute = |ATTRIBUTE_A_000000000000000000| at_line = 5 ).
+    _search_specific(
+          element_type_filter = z2mse_extr3_initial_elements=>select_class_method
+          dynamic_read        = |Z2MSE_TEST_DYNAMIC_USAGE|
+          parent_name_filter  = 'Z2MSE_TEST2_CL_A'
+          name_filter         = '' ).
 
-    maker->add_program(   name = |Z2MSE_TEST_PROGRAM_A| parentpackage = || ).
-    maker->usage(                used_group  = |Z2MSE_TEST_CL_A| used = |METHOD_A| ).
-    maker->usage(                used_group  = |Z2MSE_TEST_CL_B1| used = |METHOD_A| ).
-    maker->usage(                       used_group  = |FGR-Z2MSE_TEST_FGR_A| used = |F-Z2MSE_TEST_FUNCTION_A| ).
+    fes_exp = VALUE #(
+( where = |I| level = 0 alternate_level = 0 element_type = |ABAPClassAttribute| parent_name = |Z2MSE_TEST2_CL_A| name = |ATTRIBUTE| specific = |X| )
+( where = |S| level = 1 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST2_CL_B| name = |METHOD| specific = |X| )
+ ).
 
-    maker->add_bw_transformation( bw_transformation = |BW-ODSO-Z2MSET001-CUBE-Z2MSET002| at_line = 123 ).
-    maker->usage(                                     used_group  = |Z2MSE_TEST_CL_A| used = |METHOD_A| ).
+    _check_found_elements( 'Expect correct list of found elements' ).
 
-    maker->add_function_group( name = |Z2MSE_TEST_FGR_A| parentpackage = || ). " TBD Add Parentpackage
-    maker->add_function(              function = |Z2MSE_TEST_FUNCTION_A| ).
-    maker->usage(                                used_group  = |Z2MSE_TEST_CL_A| used = |METHOD_A| ).
-    maker->add_function_group_include( include = |LZ2MSE_TEST_FGR_AF01| ).
-    maker->usage(                                used_group  = |Z2MSE_TEST_CL_B1| used = |METHOD_A| ).
+    maker = NEW #( ).
+    maker->to_change = equalized_harmonized_mse_exp.
+    maker->add_custom_source_language( language = |SAP| ).
+    maker->add_package( package = |Z2MSE_TEST2_CLASS_SPEC| ).
+    maker->add_class(      name = |Z2MSE_TEST2_CL_A| parentpackage = |Z2MSE_TEST2_CLASS_SPEC| ).
+    maker->add_attribute(         attribute = |ATTRIBUTE| at_line = 7 ).
+    maker->add_method(            method  = |METHOD| at_line = 8 ).
+    maker->add_class(      name = |Z2MSE_TEST2_CL_B| parentpackage = |Z2MSE_TEST2_CLASS_SPEC| ).
+    maker->add_method(            method  = |METHOD| at_line = 7 ).
+    maker->usage(                           used_group  = |Z2MSE_TEST2_CL_A| used = |METHOD| ).
+    maker->access(                           used_group  = |Z2MSE_TEST2_CL_A| used = |ATTRIBUTE| ).
 
-    maker->add_web_dynpro_component( wda_name = |Z2MSE_TEST_WDY_A| parentpackage = || ).
-    maker->add_web_dynpro_component_view(       view = |COMPONENTCONTROLLER| ).
-    maker->usage(                                      used_group  = 'Z2MSE_TEST_CL_A' used = |METHOD_A| ).
-    maker->add_web_dynpro_component_view(       view = |EMPTYVIEW| ).
-    maker->add_web_dynpro_component_view(       view = |V_MAIN| ).
-    maker->add_web_dynpro_component_view(       view = |W_MAIN| ).
-
-    equalized_harmonized_mse_exp = maker->to_change.
-
-    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
-
-    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+    _check_harmonized_mse( 'Wrong mse file for specific search class component' ).
 
   ENDMETHOD.
 
@@ -859,6 +833,79 @@ CLASS z2mse_main_test IMPLEMENTATION.
       ENDIF.
 
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD _search_specific.
+
+    " search specific
+    DATA: nothing_done_act TYPE abap_bool.
+
+    DATA(initial_elements) = NEW z2mse_extr3_initial_elements( ).
+
+    DATA(model_builder) = NEW z2mse_extr3_model_builder( ).
+
+    DATA(element_manager) = NEW z2mse_extr3_element_manager( i_model_builder          = model_builder
+                                                             i_exclude_found_sap_intf = abap_true ).
+
+    model_builder->initialize( i_element_manager = element_manager
+                               i_dynamic_read    = dynamic_read ).
+
+
+    initial_elements->select_specific( EXPORTING model_builder         = model_builder
+                                                 element_manager       = element_manager
+                                                 i_element_type_filter = element_type_filter
+                                                 i_parent_name_filter  = parent_name_filter
+                                                 i_name_filter         = name_filter ).
+
+    DATA(f_cut) = NEW z2mse_extract3( ).
+    f_cut->extract( EXPORTING model_builder            = model_builder
+                              element_manager          = element_manager
+                              initial_elements         = initial_elements
+                              i_search_up              = 1
+                              i_search_down            = 1
+                              i_exclude_found_sap_intf = abap_true
+                    IMPORTING mse_model             = mse_model_act
+                              nothing_done          = nothing_done_act ).
+
+
+
+
+    model_builder->write_found_elements( EXPORTING write = abap_false
+                                         IMPORTING fes   = fes_act ).
+
+  ENDMETHOD.
+
+
+  METHOD _check_found_elements.
+
+    " Check found elements
+
+    SORT fes_act.
+    SORT fes_exp.
+    cl_abap_unit_assert=>assert_equals( msg = msg exp = fes_exp act = fes_act ).
+
+  ENDMETHOD.
+
+
+  METHOD _check_harmonized_mse.
+
+    " Check harmonized mse
+
+    equalized_harmonized_mse_exp = maker->to_change.
+
+    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
+
+    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
+    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
+    cl_abap_unit_assert=>assert_equals(
+      EXPORTING
+        act                  = equalized_harmonized_mse_act
+        exp                  = equalized_harmonized_mse_exp
+        msg                  = msg ).
 
   ENDMETHOD.
 
