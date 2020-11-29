@@ -1,3 +1,7 @@
+This is a copy of the documentation of report Z2MSE_MOOSE_EXTRACTOR2.
+Create a documentation for your version of the SAP2Moose extraction report and add this text.
+Do not overwrite parts marked with & & or otherwise the formatting will become wrong.
+
 &PURPOSE&
 Extract informations to visualize relations between code with Moose2Model (See www.moose2model.org).
 Display usage of code in a similar way as the standard where used functionality (Provides features not supplied by the standard. But does not provide all features the standard provides).
