@@ -1,0 +1,50 @@
+&PURPOSE&
+Extract informations to visualize relations between code with Moose2Model (See www.moose2model.org).
+Display usage of code in a similar way as the standard where used functionality (Provides features not supplied by the standard. But does not provide all features the standard provides).
+Determines what is used by a coding ("Where used in the reversed direction").
+Shows usages by interfaces correct (The standard "reverses" the usage of interfaces).
+Shows usages due to redefined methods (The standard does not show a usage when a method with the same name of a super class is used).
+Can show dynamic usages when a special class with informations on this is displayed (The standard has no solution for this).
+&INTEGRATION&
+The created mse file is optimized to be displayed by Moose2Model.
+&PREREQUISITES&
+Depends on a correct Where Used Index by the SAP standard. You may go to the menu and do "Update Navigation Index" when some usages are not found correctly.
+&FEATURES&
+
+&SELECTION&
+Extract object of packages - Select a package for which all elements are to be analyzed. Leave empty when only a specifc element shall be analyzed.
+Filter subpackages if required - You may exclude subpackages when needed.
+Element name - When a specific search is to be done, you specify here for what type of element it is done. This field has a value help.
+Parent name - Only when a specific search for Class is done. Enter the name of the class in that case here.
+Specific element - Only when a specific search is done. Enter the element for which the search is done.
+Extract subpackages - Set to include all subpackages.
+Search up (-1 if no limit) - You may restrict the amount of using elements which are found by specifying how often a using element is to be searched. Normally you should use the default value (-1) so that all using elements are included. You may specify a lower value either to reduce the time for extraction or restrict the amounts of elements.
+Search down (-1 if no limit) - Specify whether used elements shall be shown. Default is 1, this is enough so that for instance elements of the SAP standard are shown in the diagrams or result. When set to a higher value problems in the extraction may occur when elements are found where the extractor fails due to implementation errors.
+No Where-Used: SAP Interfaces - Normally required to prevent that too many elements are found due to some standard SAP interfaces.
+Classes to read dynamic usages - You may specify a class which provides informations on dynamic usages to the extractor.
+Download model to file - Do not select when you only want to display the result.
+Default prefix for file - Use to specify which kind of selections is done. Typically each application is selected with a specifc combination of parameters.
+&STANDARD_VARIANTS&
+You may save and store report variants to simplify extraction for certain applications.
+&OUTPUT&
+The complete result which is related to the downloadable mse file is displayed.
+&ACTIVITIES&
+You should restrict the amount of extracted elements. This prevents that the report runs too long or finds more elements than can be displayed or processed by Moose2Model.
+&EXAMPLE&
+A complete package:
+Extract object of packages: SAPBC_DATAMODEL
+Search up: 1 (Otherwise the report may dump)
+Default prefix: SAPBC_DATAMODEL (To get a hint what is selected to get the mse file)
+
+A table:
+Element name: Table
+Search up: 3 (Otherwise the report may dump)
+Default prefix: SAIRPORT
+
+A method of a class:
+Element name: Class
+Parent name: CL_FPMGB_FORM_FLIGHT
+Specific element: ADD_DD_VALUES
+Search up: 3
+Search down: 1
+Download model to file: Do not set
