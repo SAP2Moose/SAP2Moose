@@ -2,9 +2,11 @@
 
 # Installation to analyze applications
 
-Create a new program in your SAP system. You need only the files z_moose_extractor.abap and z_moose_extractor_texts.txt. You find the most actual version on the tab Code. Or go to releases to get the code of a certain release.
+Create a new program in your SAP system. You need only the files z_moose_extractor.abap, z_moose_extractor_texts.txt and z_moose_extractor_documentation.txt. You find the most actual version on the tab Code. Or go to releases to get the code of a certain release.
 
-Open file z_moose_extractor.abap with a text editor and paste the coding in your program. Add texts for convenience. Run the program, select a package and download the file (preferable with extension .mse). Open with Moose Analysis or Moose2Model to analyze it.
+Open file z_moose_extractor.abap with a text editor and paste the coding in your program. Add texts and documentation of the report for convenience using the other files. The documentation contains example which you may use for a first test. 
+
+You typically will run the program, select a package and download the file (preferable with extension .mse). The result is displayed by the report. To create diagrams, open with Moose Analysis or Moose2Model to analyze it.
 
 # SAP2Moose
 
