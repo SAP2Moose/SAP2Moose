@@ -5,27 +5,14 @@
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
-        <x>1194.0</x>
-        <y>320.0</y>
+        <x>84.0</x>
+        <y>15.0</y>
     </element>
     <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
-        <method>_SELECT_PROGRAM</method>
-        <x>-419.0</x>
-        <y>240.0</y>
-        <ACTSuppressOthers>
-            <type>ACDStandard</type>
-            <includeMe>true</includeMe>
-            <usedByLayers>1</usedByLayers>
-            <usingLayers>1</usingLayers>
-        </ACTSuppressOthers>
-    </element>
-    <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_EXTR3_PROGRAMS</class>
-        <x>-622.0</x>
-        <y>343.0</y>
+        <type>FAMIXPackage</type>
+        <package>Z2MSE_TEMPLATE</package>
+        <x>106.0</x>
+        <y>41.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -33,27 +20,6 @@
         <method>GET_INSTANCE</method>
         <x>-87.0</x>
         <y>228.0</y>
-    </element>
-    <element>
-        <type>FAMIXAttribute</type>
-        <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
-        <attribute>SELECT_FUNCTION</attribute>
-        <x>-506.0</x>
-        <y>178.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_PROGRAMS</class>
-        <method>ADD_FUNCTION</method>
-        <x>-657.0</x>
-        <y>314.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_PROGRAMS</class>
-        <method>GET_INSTANCE</method>
-        <x>-604.0</x>
-        <y>323.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -67,129 +33,6 @@
             <usedByLayers>1</usedByLayers>
             <usingLayers>1</usingLayers>
         </ACTSuppressOthers>
-    </element>
-    <element>
-        <type>FAMIXPackage</type>
-        <package>Z2MSE_MAIN_EXTR</package>
-        <x>408.0</x>
-        <y>197.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
-        <method>NEW_ELEMENT_ID</method>
-        <x>-332.0</x>
-        <y>328.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_TABLES</class>
-        <method>ADD</method>
-        <x>-199.0</x>
-        <y>336.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_PROGRAMS</class>
-        <method>ADD</method>
-        <x>-599.0</x>
-        <y>350.0</y>
-    </element>
-    <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_MAIN_TEST</class>
-        <x>-524.0</x>
-        <y>93.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_MAIN_TEST</class>
-        <method>SPECIFIC_SEARCH</method>
-        <x>-550.0</x>
-        <y>78.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
-        <method>_SELECT_FUNCTION</method>
-        <x>-497.0</x>
-        <y>235.0</y>
-        <ACTSuppressOthers>
-            <type>ACDStandard</type>
-            <includeMe>true</includeMe>
-            <usedByLayers>1</usedByLayers>
-            <usingLayers>1</usingLayers>
-        </ACTSuppressOthers>
-    </element>
-    <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_EXTR3_CLASSES</class>
-        <x>-124.0</x>
-        <y>250.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
-        <method>_SELECT_CLASS_METHOD</method>
-        <x>-293.0</x>
-        <y>194.0</y>
-        <comment><![CDATA[A Comment]]>
-        </comment>
-        <commentx>-216.0</commentx>
-        <commenty>152.0</commenty>
-        <ACTSuppressOthers>
-            <type>ACDStandard</type>
-            <includeMe>true</includeMe>
-            <usedByLayers>1</usedByLayers>
-            <usingLayers>1</usingLayers>
-        </ACTSuppressOthers>
-    </element>
-    <element>
-        <type>FAMIXAttribute</type>
-        <class>Z2MSE_EXTR3_ELEMENTS</class>
-        <attribute>TABLE_TYPE</attribute>
-        <x>-180.0</x>
-        <y>132.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_CLASSES</class>
-        <method>ADD_COMPONENT</method>
-        <x>-153.0</x>
-        <y>240.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
-        <method>SELECT_SPECIFIC</method>
-        <x>-393.0</x>
-        <y>205.0</y>
-        <ACTSuppressOthers>
-            <type>ACDStandard</type>
-            <includeMe>true</includeMe>
-            <usedByLayers>1</usedByLayers>
-            <usingLayers>1</usingLayers>
-        </ACTSuppressOthers>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_MAIN_TEST</class>
-        <method>SPECIFIC_SEARCH_FUNCTION</method>
-        <x>-580.0</x>
-        <y>97.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_MOOSE_EXTRACTOR2</class>
-        <method>Z2MSE_MOOSE_EXTRACTOR2</method>
-        <x>-310.0</x>
-        <y>95.0</y>
-    </element>
-    <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_EXTR3_TABLES</class>
-        <x>-170.0</x>
-        <y>347.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -206,30 +49,10 @@
     </element>
     <element>
         <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
-        <method>INITIAL_SELECTION_STARTED</method>
-        <x>-418.0</x>
-        <y>328.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_MAIN_TEST</class>
-        <method>SPECIFIC_SEARCH_PROGRAM</method>
-        <x>-481.0</x>
-        <y>69.0</y>
-    </element>
-    <element>
-        <type>FAMIXPackage</type>
-        <package>Z2MSE_MAIN_EXTR_ELEMENTS</package>
-        <x>396.0</x>
-        <y>69.0</y>
-    </element>
-    <element>
-        <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
-        <attribute>SELECT_TABLE</attribute>
-        <x>-306.0</x>
-        <y>165.0</y>
+        <method>_SELECT_PROGRAM</method>
+        <x>-419.0</x>
+        <y>240.0</y>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
@@ -238,29 +61,24 @@
         </ACTSuppressOthers>
     </element>
     <element>
-        <type>FAMIXAttribute</type>
-        <class>Z2MSE_EXTR3_ELEMENTS</class>
-        <attribute>CLASS_TYPE</attribute>
-        <x>-229.0</x>
-        <y>132.0</y>
-    </element>
-    <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
-        <x>-383.0</x>
-        <y>352.0</y>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_MAIN_TEST</class>
+        <method>SPECIFIC_SEARCH_CLASS</method>
+        <x>-675.0</x>
+        <y>62.0</y>
     </element>
     <element>
         <type>FAMIXPackage</type>
-        <package>Z2MSE_MAIN_TEST</package>
-        <x>680.0</x>
-        <y>41.0</y>
+        <package>Z2MSE_MAIN_EXTR_ELEMENTS</package>
+        <x>396.0</x>
+        <y>69.0</y>
     </element>
     <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_EXTR3_ELEMENTS</class>
-        <x>-204.0</x>
-        <y>142.0</y>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
+        <method>NEW_ELEMENT_ID</method>
+        <x>-332.0</x>
+        <y>328.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -269,23 +87,17 @@
         <y>216.0</y>
     </element>
     <element>
-        <type>FAMIXPackage</type>
-        <package>Z2MSE_TEMPLATE</package>
-        <x>106.0</x>
-        <y>41.0</y>
-    </element>
-    <element>
         <type>FAMIXClass</type>
-        <class>Z2MSE_MOOSE_EXTRACTOR2</class>
-        <x>-310.0</x>
-        <y>104.0</y>
+        <class>Z2MSE_EXTR3_ELEMENTS</class>
+        <x>-204.0</x>
+        <y>142.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
-        <method>USAGE_OF_SINGLE_ELEMENT</method>
-        <x>-385.0</x>
-        <y>355.0</y>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <method>ADD_FUNCTION</method>
+        <x>-657.0</x>
+        <y>314.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -305,6 +117,215 @@
         <class>Z2MSE_EXTR3_TABLES</class>
         <method>GET_INSTANCE</method>
         <x>-157.0</x>
+        <y>336.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_CLASSES</class>
+        <method>ADD_COMPONENT</method>
+        <x>-153.0</x>
+        <y>240.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_MAIN_TEST</class>
+        <method>SPECIFIC_SEARCH_METHOD</method>
+        <x>-615.0</x>
+        <y>37.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_MOOSE_EXTRACTOR2</class>
+        <x>-310.0</x>
+        <y>104.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_MOOSE_EXTRACTOR2</class>
+        <method>Z2MSE_MOOSE_EXTRACTOR2</method>
+        <x>-310.0</x>
+        <y>95.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
+        <method>_SELECT_FUNCTION</method>
+        <x>-497.0</x>
+        <y>235.0</y>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_MAIN_TEST</class>
+        <method>_SEARCH_SPECIFIC</method>
+        <x>-569.0</x>
+        <y>97.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_MAIN_TEST</class>
+        <x>-670.0</x>
+        <y>92.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
+        <attribute>SELECT_FUNCTION</attribute>
+        <x>-506.0</x>
+        <y>178.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
+        <method>SELECT_SPECIFIC</method>
+        <x>-393.0</x>
+        <y>205.0</y>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
+        <method>INITIAL_SELECTION_STARTED</method>
+        <x>-418.0</x>
+        <y>328.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_ELEMENTS</class>
+        <attribute>TABLE_TYPE</attribute>
+        <x>-180.0</x>
+        <y>132.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <method>ADD</method>
+        <x>-599.0</x>
+        <y>350.0</y>
+    </element>
+    <element>
+        <type>FAMIXPackage</type>
+        <package>Z2MSE_MAIN_EXTR</package>
+        <x>408.0</x>
+        <y>197.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
+        <x>-383.0</x>
+        <y>352.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_EXTR3_TABLES</class>
+        <x>-170.0</x>
+        <y>347.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
+        <attribute>SELECT_TABLE</attribute>
+        <x>-306.0</x>
+        <y>165.0</y>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
+        <method>_SELECT_CLASS_METHOD</method>
+        <x>-293.0</x>
+        <y>194.0</y>
+        <comment><![CDATA[A Comment]]>
+        </comment>
+        <commentx>-216.0</commentx>
+        <commenty>152.0</commenty>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <x>-622.0</x>
+        <y>343.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
+        <method>USAGE_OF_SINGLE_ELEMENT</method>
+        <x>-385.0</x>
+        <y>355.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_EXTR3_CLASSES</class>
+        <x>-124.0</x>
+        <y>250.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_MAIN_TEST</class>
+        <method>SPECIFIC_SEARCH_ATTRIBUTE</method>
+        <x>-773.0</x>
+        <y>72.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_PROGRAMS</class>
+        <method>GET_INSTANCE</method>
+        <x>-604.0</x>
+        <y>323.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_MAIN_TEST</class>
+        <method>SPECIFIC_SEARCH_PROGRAM</method>
+        <x>-533.0</x>
+        <y>53.0</y>
+    </element>
+    <element>
+        <type>FAMIXPackage</type>
+        <package>Z2MSE_MAIN_TEST</package>
+        <x>680.0</x>
+        <y>41.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_MAIN_TEST</class>
+        <method>SPECIFIC_SEARCH_FUNCTION</method>
+        <x>-759.0</x>
+        <y>100.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_ELEMENTS</class>
+        <attribute>CLASS_TYPE</attribute>
+        <x>-229.0</x>
+        <y>132.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_TABLES</class>
+        <method>ADD</method>
+        <x>-199.0</x>
         <y>336.0</y>
     </element>
 </elements>
