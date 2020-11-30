@@ -324,15 +324,7 @@ START-OF-SELECTION.
 
     ELSEIF p_eltyp_string EQ z2mse_extr3_initial_elements=>select_class_method.
 
-      IF p_elpar_string IS INITIAL.
-
-        FORMAT COLOR COL_NEGATIVE.
-        WRITE: / 'Enter a parent name for this type of element, in case of methods this is the class'.
-        FORMAT COLOR COL_BACKGROUND.
-
-        RETURN.
-
-      ENDIF.
+      " The parentname is empty when a whole class is analyzed and filled when only a component is analyzed
 
     ELSE.
 
@@ -342,7 +334,7 @@ START-OF-SELECTION.
       WRITE: / |The text you entered is not valid|.
       WRITE: / |Click into the field to get a value help|.
 
-        RETURN.
+      RETURN.
 
     ENDIF.
 

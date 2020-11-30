@@ -76,6 +76,12 @@ CLASS z2mse_extr3_initial_elements DEFINITION
         i_packages_to_search_sub TYPE ty_packages_to_search_sub
       RETURNING
         VALUE(r_packages)        TYPE z2mse_extr3_packages=>ty_packages.
+    METHODS _select_class
+      IMPORTING
+        name_filter           TYPE z2mse_extr3_initial_elements=>ty_filter
+        element_manager       TYPE REF TO z2mse_extr3_element_manager
+      RETURNING
+        VALUE(new_element_id) TYPE i.
     METHODS _select_class_method
       IMPORTING
         name_filter           TYPE z2mse_extr3_initial_elements=>ty_filter
@@ -207,10 +213,18 @@ CLASS z2mse_extr3_initial_elements IMPLEMENTATION.
     CASE i_element_type_filter.
       WHEN z2mse_extr3_initial_elements=>select_class_method.
 
-        new_element_id = _select_class_method( name_filter        = i_name_filter
-                                               parent_name_filter = i_parent_name_filter
-                                               element_manager    = element_manager ).
+        IF i_parent_name_filter IS INITIAL.
 
+          new_element_id = _select_class( name_filter        = i_name_filter
+                                          element_manager    = element_manager ).
+
+        ELSE.
+
+          new_element_id = _select_class_method( name_filter        = i_name_filter
+                                                 parent_name_filter = i_parent_name_filter
+                                                 element_manager    = element_manager ).
+
+        ENDIF.
 
       WHEN z2mse_extr3_initial_elements=>select_table.
 
@@ -293,6 +307,26 @@ CLASS z2mse_extr3_initial_elements IMPLEMENTATION.
                                       cmpname        = name_filter
                                       is_specific    = abap_false
                             IMPORTING new_element_id = new_element_id ).
+
+  ENDMETHOD.
+
+  METHOD _select_class.
+
+    DATA: classes          TYPE REF TO z2mse_extr3_classes,
+          class_components TYPE z2mse_extr3_classes=>ty_class_components,
+          cc               TYPE z2mse_extr3_classes=>ty_class_component.
+    classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
+    classes->add( EXPORTING class            = name_filter
+                  IMPORTING new_element_id   = new_element_id
+                            class_components = class_components ).
+
+    LOOP AT class_components INTO cc.
+      classes->add_component(
+        EXPORTING
+          clsname        = cc-clsname
+          cmpname        = cc-cmpname
+          is_specific    = abap_true ).
+    ENDLOOP.
 
   ENDMETHOD.
 

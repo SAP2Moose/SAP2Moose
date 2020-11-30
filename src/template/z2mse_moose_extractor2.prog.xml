@@ -126,10 +126,10 @@
       <OBJECT>Z2MSE_MOOSE_EXTRACTOR2</OBJECT>
       <LANGU>E</LANGU>
       <TYP>E</TYP>
-      <VERSION>0001</VERSION>
+      <VERSION>0003</VERSION>
       <MASTERLANG>X</MASTERLANG>
-      <TXTLINES>00074</TXTLINES>
-      <DOKSTATE>R</DOKSTATE>
+      <TXTLINES>00076</TXTLINES>
+      <DOKSTATE>A</DOKSTATE>
      </DOKIL>
      <HEAD>
       <TDOBJECT>DOKU</TDOBJECT>
@@ -138,7 +138,7 @@
       <TDSPRAS>E</TDSPRAS>
       <TDFORM>S_DOCU_SHOW</TDFORM>
       <TDSTYLE>S_DOCUS1</TDSTYLE>
-      <TDVERSION>00001</TDVERSION>
+      <TDVERSION>00003</TDVERSION>
       <TDLINESIZE>072</TDLINESIZE>
      </HEAD>
      <LINES>
@@ -250,10 +250,16 @@
       </TLINE>
       <TLINE>
        <TDFORMAT>AS</TDFORMAT>
-       <TDLINE>Parent name - Only when a specific search for Class is done. Enter the</TDLINE>
+       <TDLINE>Parent name - Only when a specific search for an attribute, method or</TDLINE>
       </TLINE>
       <TLINE>
-       <TDLINE>name of the class in that case here.</TDLINE>
+       <TDLINE>event of a class is done. Enter the name of the class in that case here.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>Leave also empty when a specific search for a whole class shall be done,</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>in that case enter the class name in the field &quot;Specific element&quot;.</TDLINE>
       </TLINE>
       <TLINE>
        <TDFORMAT>AS</TDFORMAT>
@@ -287,16 +293,16 @@
        <TDLINE>Search down (-1 if no limit) - Specify whether used elements shall be</TDLINE>
       </TLINE>
       <TLINE>
-       <TDLINE>shown. Default is 1&lt;(&gt;,&lt;)&gt; this is enough so that for instance elements</TDLINE>
+       <TDLINE>shown. Default is 1, this is enough so that for instance elements of the</TDLINE>
       </TLINE>
       <TLINE>
-       <TDLINE>of the SAP standard are shown in the diagrams or result. When set to a</TDLINE>
+       <TDLINE>SAP standard are shown in the diagrams or result. When set to a higher</TDLINE>
       </TLINE>
       <TLINE>
-       <TDLINE>higher value problems in the extraction may occur when elements are</TDLINE>
+       <TDLINE>value problems in the extraction may occur when elements are found where</TDLINE>
       </TLINE>
       <TLINE>
-       <TDLINE>found where the extractor fails due to implementation errors.</TDLINE>
+       <TDLINE>the extractor fails due to implementation errors.</TDLINE>
       </TLINE>
       <TLINE>
        <TDFORMAT>AS</TDFORMAT>
