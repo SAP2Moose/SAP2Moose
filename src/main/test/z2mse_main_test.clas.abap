@@ -127,16 +127,18 @@ CLASS z2mse_main_test IMPLEMENTATION.
 
     " Search for usage of all elements of a class
 
-    cl_abap_unit_assert=>fail( msg = 'Finalize test and coding to implement #122' ).
+*    cl_abap_unit_assert=>fail( msg = 'Finalize test and coding to implement #122' ).
 
     _search_specific(
           element_type_filter = z2mse_extr3_initial_elements=>select_class_method
           dynamic_read        = |Z2MSE_TEST_DYNAMIC_USAGE|
-          parent_name_filter  = 'Z2MSE_TEST2_CL_A'
-          name_filter         = '' ).
+          parent_name_filter  = ''
+          name_filter         = 'Z2MSE_TEST2_CL_A' ).
 
     fes_exp = VALUE #(
+( where = |I| level = 0 alternate_level = 0 element_type = |ABAPClass| parent_name = || name = |Z2MSE_TEST2_CL_A| specific = |X| )
 ( where = |I| level = 0 alternate_level = 0 element_type = |ABAPClassAttribute| parent_name = |Z2MSE_TEST2_CL_A| name = |ATTRIBUTE| specific = |X| )
+( where = |I| level = 0 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST2_CL_A| name = |METHOD| specific = |X| )
 ( where = |S| level = 1 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST2_CL_B| name = |METHOD| specific = |X| )
  ).
 
