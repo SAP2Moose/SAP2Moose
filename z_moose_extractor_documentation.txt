@@ -19,7 +19,7 @@ Depends on a correct Where Used Index by the SAP standard. You may go to the men
 Extract object of packages - Select a package for which all elements are to be analyzed. Leave empty when only a specifc element shall be analyzed.
 Filter subpackages if required - You may exclude subpackages when needed.
 Element name - When a specific search is to be done, you specify here for what type of element it is done. This field has a value help.
-Parent name - Only when a specific search for Class is done. Enter the name of the class in that case here.
+Parent name - Only when a specific search for an attribute, method or event of a class is done. Enter the name of the class in that case here. Leave also empty when a specific search for a whole class shall be done, in that case enter the class name in the field "Specific element".
 Specific element - Only when a specific search is done. Enter the element for which the search is done.
 Extract subpackages - Set to include all subpackages.
 Search up (-1 if no limit) - You may restrict the amount of using elements which are found by specifying how often a using element is to be searched. Normally you should use the default value (-1) so that all using elements are included. You may specify a lower value either to reduce the time for extraction or restrict the amounts of elements.
@@ -28,6 +28,7 @@ No Where-Used: SAP Interfaces - Normally required to prevent that too many eleme
 Classes to read dynamic usages - You may specify a class which provides informations on dynamic usages to the extractor.
 Download model to file - Do not select when you only want to display the result.
 Default prefix for file - Use to specify which kind of selections is done. Typically each application is selected with a specifc combination of parameters.
+
 &STANDARD_VARIANTS&
 You may save and store report variants to simplify extraction for certain applications.
 &OUTPUT&
