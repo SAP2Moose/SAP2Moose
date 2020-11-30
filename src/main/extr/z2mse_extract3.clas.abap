@@ -5,6 +5,9 @@ CLASS z2mse_extract3 DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    CLASS-METHODS: check_if_tested
+      RETURNING
+        VALUE(is_tested) TYPE abap_bool.
     TYPES: ty_s_pack TYPE RANGE OF tadir-devclass .
     TYPES: ty_string_range TYPE RANGE OF char45.
     CONSTANTS modifier_abapglobalclass TYPE string VALUE 'ABAPGlobalClass' ##NO_TEXT.
@@ -34,6 +37,8 @@ CLASS z2mse_extract3 DEFINITION
         VALUE(nothing_done)      TYPE abap_bool .
   PROTECTED SECTION.
   PRIVATE SECTION.
+    CLASS-DATA: g_check_for_test_done TYPE abap_bool,
+                g_is_tested           TYPE abap_bool.
 ENDCLASS.
 
 
@@ -89,4 +94,29 @@ CLASS z2mse_extract3 IMPLEMENTATION.
     mse_model = element_manager->make_model( ).
 
   ENDMETHOD.
+
+  METHOD check_if_tested.
+
+    IF g_check_for_test_done EQ 'X'.
+      " Buffer result of call to call stack
+      is_tested = g_is_tested.
+    ELSE.
+
+      DATA et_callstack  TYPE sys_callst  .
+      CALL FUNCTION 'SYSTEM_CALLSTACK'
+        IMPORTING
+          et_callstack = et_callstack.
+
+      READ TABLE et_callstack TRANSPORTING NO FIELDS WITH KEY eventname = 'INVOKE_TEST_METHOD'.
+
+      IF sy-subrc EQ 0.
+        g_is_tested = 'X'.
+        is_tested = 'X'.
+        g_check_for_test_done = 'X'.
+      ENDIF.
+
+    ENDIF.
+
+  ENDMETHOD.
+
 ENDCLASS.

@@ -419,7 +419,7 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
     IF i_element_program+0(3) EQ |ZGP|.
       " Do check only when potentially needed to improve performance
-      is_tested = z2mse_main_test=>check_if_tested( ).
+      is_tested = z2mse_extract3=>check_if_tested( ).
     ENDIF.
 
     IF i_element_program+0(1) EQ |L|.
@@ -573,7 +573,7 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
     IF element_program+0(3) = 'ZGP'.
       IF element_program = 'ZGP003N8S45LS1FG375G2BN69Q4G'.
-        is_tested = z2mse_main_test=>check_if_tested( ).
+        is_tested = z2mse_extract3=>check_if_tested( ).
         IF is_tested = 'X'.
           SHIFT element_program LEFT BY 1 PLACES.
         ENDIF.

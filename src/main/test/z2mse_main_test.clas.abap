@@ -3,9 +3,6 @@ CLASS z2mse_main_test DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
-    CLASS-METHODS: check_if_tested
-      RETURNING
-        VALUE(is_tested) TYPE abap_bool.
     METHODS: setup,
       z2mse_test_initial_selection,
       z2mse_test_initial_selection2,
@@ -16,8 +13,6 @@ CLASS z2mse_main_test DEFINITION
       specific_search_function.
   PROTECTED SECTION.
   PRIVATE SECTION.
-    CLASS-DATA: g_check_for_test_done TYPE abap_bool,
-                g_is_tested           TYPE abap_bool.
 
     DATA: mse_model_act                TYPE z2mse_model=>lines_type,
           fes_act                      TYPE z2mse_extr3_model_builder=>found_elements_type,
@@ -811,30 +806,6 @@ CLASS z2mse_main_test IMPLEMENTATION.
         act                  = equalized_harmonized_mse_act
         exp                  = equalized_harmonized_mse_exp
         msg                  = 'Wrong mse file' ).
-
-  ENDMETHOD.
-
-  METHOD check_if_tested.
-
-    IF g_check_for_test_done EQ 'X'.
-      " Buffer result of call to call stack
-      is_tested = g_is_tested.
-    ELSE.
-
-      DATA et_callstack  TYPE sys_callst  .
-      CALL FUNCTION 'SYSTEM_CALLSTACK'
-        IMPORTING
-          et_callstack = et_callstack.
-
-      READ TABLE et_callstack TRANSPORTING NO FIELDS WITH KEY eventname = 'INVOKE_TEST_METHOD'.
-
-      IF sy-subrc EQ 0.
-        g_is_tested = 'X'.
-        is_tested = 'X'.
-        g_check_for_test_done = 'X'.
-      ENDIF.
-
-    ENDIF.
 
   ENDMETHOD.
 
