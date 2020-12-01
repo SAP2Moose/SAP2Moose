@@ -1,4 +1,4 @@
-* generated on system NPL at 30.08.2019 on 13:15:54
+* generated on system T80 at 30.11.2020 on 19:23:17
 
 *
 * This is version 1.2.2
@@ -260,6 +260,7 @@ CLASS cl_model DEFINITION
       RETURNING VALUE(public_elements) TYPE public_elements_type.
 
 
+protected section.
   PRIVATE SECTION.
     TYPES: BEGIN OF element_in_model_type,
              element_id      TYPE i,
@@ -633,6 +634,8 @@ CLASS cl_output_model DEFINITION
         mse_model                 TYPE cl_model=>lines_type
         g_parameter_download_file TYPE abap_bool
         i_default_prefix          TYPE string.
+protected section.
+private section.
 ENDCLASS.
 CLASS CL_OUTPUT_MODEL IMPLEMENTATION.
   METHOD make.
@@ -708,6 +711,7 @@ CLASS cl_famix_entity DEFINITION ABSTRACT
     DATA g_elementname TYPE string.
     DATA g_model TYPE REF TO cl_model.
     DATA g_last_used_id TYPE i.
+private section.
 ENDCLASS.
 CLASS CL_FAMIX_ENTITY IMPLEMENTATION.
   METHOD constructor.
@@ -735,6 +739,8 @@ CLASS cl_famix_sourced_entity DEFINITION ABSTRACT INHERITING FROM cl_famix_entit
         element_name            TYPE clike OPTIONAL
         source_language_element TYPE clike
         source_language_name    TYPE clike.
+protected section.
+private section.
 ENDCLASS.
 CLASS CL_FAMIX_SOURCED_ENTITY IMPLEMENTATION.
   METHOD set_declared_source_language.
@@ -833,6 +839,7 @@ CLASS cl_famix_named_entity DEFINITION INHERITING FROM cl_famix_sourced_entity A
 
   PROTECTED SECTION.
 
+private section.
 ENDCLASS.
 CLASS CL_FAMIX_NAMED_ENTITY IMPLEMENTATION.
   METHOD add.
@@ -921,6 +928,7 @@ CLASS cl_famix_attribute DEFINITION INHERITING FROM cl_famix_named_entity
         parent_name_group  TYPE clike OPTIONAL
         parent_name        TYPE clike OPTIONAL
         parent_id          TYPE i     OPTIONAL.
+protected section.
   PRIVATE SECTION.
     TYPES: BEGIN OF attribute_id_type,
              name_group TYPE string,
@@ -1020,6 +1028,7 @@ CLASS cl_famix_container_entity DEFINITION INHERITING FROM cl_famix_named_entity
                                           parent_container_id TYPE i.
   PROTECTED SECTION.
 
+private section.
 ENDCLASS.
 CLASS CL_FAMIX_CONTAINER_ENTITY IMPLEMENTATION.
   METHOD set_container.
@@ -1063,6 +1072,8 @@ CLASS cl_famix_behavioural_entty DEFINITION INHERITING FROM CL_famix_container_e
                             element_name       TYPE clike OPTIONAL
                             signature          TYPE clike.
 
+protected section.
+private section.
 ENDCLASS.
 CLASS CL_FAMIX_BEHAVIOURAL_ENTTY IMPLEMENTATION.
   METHOD set_signature.
@@ -1085,6 +1096,8 @@ CLASS cl_famix_package DEFINITION INHERITING FROM cl_famix_named_entity
 
     METHODS add REDEFINITION.
 
+protected section.
+private section.
 ENDCLASS.
 CLASS CL_FAMIX_PACKAGE IMPLEMENTATION.
   METHOD add.
@@ -1155,6 +1168,7 @@ CLASS cl_famix_method DEFINITION INHERITING FROM CL_famix_behavioural_entty
                 method_name_group TYPE clike
                 method            TYPE clike
       RETURNING VALUE(id)         TYPE i.
+protected section.
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_method_id,
              class_name_group  TYPE string,
@@ -1242,6 +1256,8 @@ CLASS cl_famix_class DEFINITION INHERITING FROM CL_famix_container_entity
         element_type       TYPE clike OPTIONAL
         element_name_group TYPE clike OPTIONAL
         element_name       TYPE clike OPTIONAL .
+protected section.
+private section.
 ENDCLASS.
 CLASS CL_FAMIX_CLASS IMPLEMENTATION.
   METHOD constructor.
@@ -1265,6 +1281,8 @@ CLASS cl_famix_association DEFINITION INHERITING FROM cl_famix_sourced_entity AB
   PUBLIC SECTION.
     METHODS add
       RETURNING VALUE(id) TYPE i.
+protected section.
+private section.
 ENDCLASS.
 CLASS CL_FAMIX_ASSOCIATION IMPLEMENTATION.
   METHOD add.
@@ -1306,6 +1324,7 @@ CLASS cl_famix_access DEFINITION INHERITING FROM CL_famix_association
         element_name       TYPE clike OPTIONAL
         accessor_id        TYPE i
         variable_id        TYPE i.
+protected section.
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_accessor_variable_id,
              accessor_id TYPE i,
@@ -1383,6 +1402,7 @@ CLASS cl_famix_invocation DEFINITION INHERITING FROM CL_famix_association
         signature            TYPE clike OPTIONAL
         receiver_source_code TYPE clike OPTIONAL.
 
+protected section.
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_sender_candidate,
              sender_id     TYPE i,
@@ -1473,6 +1493,8 @@ CLASS cl_famix_inheritance DEFINITION INHERITING FROM CL_famix_association
         superclass_name_group TYPE clike
         superclass_name       TYPE clike.
 
+protected section.
+private section.
 ENDCLASS.
 CLASS CL_FAMIX_INHERITANCE IMPLEMENTATION.
   METHOD constructor.
@@ -1505,6 +1527,8 @@ CLASS cl_famix_custom_source_lng DEFINITION INHERITING FROM cl_famix_entity
                 EXPORTING VALUE(exists_already_with_id) TYPE i
                           VALUE(id)                     TYPE i.
     METHODS constructor IMPORTING model TYPE REF TO cl_model.
+protected section.
+private section.
 ENDCLASS.
 CLASS CL_FAMIX_CUSTOM_SOURCE_LNG IMPLEMENTATION.
   METHOD add.
@@ -1566,6 +1590,8 @@ CLASS cl_famix_module DEFINITION INHERITING FROM cl_famix_named_entity
 
     METHODS add REDEFINITION.
 
+protected section.
+private section.
 ENDCLASS.
 CLASS CL_FAMIX_MODULE IMPLEMENTATION.
   METHOD add.
@@ -2091,6 +2117,7 @@ CLASS cl_extr3_programs DEFINITION
       EXPORTING
         is_added       TYPE abap_bool
         new_element_id TYPE i.
+
     METHODS make_model REDEFINITION.
     METHODS name REDEFINITION.
     METHODS collect_infos REDEFINITION.
@@ -2378,6 +2405,12 @@ CLASS cl_extr3_initial_elements DEFINITION
         i_packages_to_search_sub TYPE ty_packages_to_search_sub
       RETURNING
         VALUE(r_packages)        TYPE cl_extr3_packages=>ty_packages.
+    METHODS _select_class
+      IMPORTING
+        name_filter           TYPE cl_extr3_initial_elements=>ty_filter
+        element_manager       TYPE REF TO cl_extr3_element_manager
+      RETURNING
+        VALUE(new_element_id) TYPE i.
     METHODS _select_class_method
       IMPORTING
         name_filter           TYPE cl_extr3_initial_elements=>ty_filter
@@ -2508,6 +2541,9 @@ CLASS cl_extract3 DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    CLASS-METHODS: check_if_tested
+      RETURNING
+        VALUE(is_tested) TYPE abap_bool.
     TYPES: ty_s_pack TYPE RANGE OF tadir-devclass .
     TYPES: ty_string_range TYPE RANGE OF char45.
     CONSTANTS modifier_abapglobalclass TYPE string VALUE 'ABAPGlobalClass' ##NO_TEXT.
@@ -2537,6 +2573,8 @@ CLASS cl_extract3 DEFINITION
         VALUE(nothing_done)      TYPE abap_bool .
   PROTECTED SECTION.
   PRIVATE SECTION.
+    CLASS-DATA: g_check_for_test_done TYPE abap_bool,
+                g_is_tested           TYPE abap_bool.
 ENDCLASS.
 
 
@@ -4839,6 +4877,56 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+  METHOD add_function.
+
+    DATA: program_found TYPE progname,
+          tf            TYPE tfdir.
+    " TBD find a better solution for this
+    SELECT SINGLE * FROM tfdir INTO tf WHERE funcname = function .
+    IF tf IS NOT INITIAL.
+      "TBD handle error
+    ENDIF.
+    program_found = tf-pname.
+    SHIFT program_found LEFT BY 3 PLACES.
+    program_found = program_found && |U| && tf-include.
+
+    add( EXPORTING program        = program_found
+         IMPORTING is_added       = is_added
+                   new_element_id = new_element_id ).
+
+  ENDMETHOD.
+  METHOD add_function_group.
+
+    DATA pname TYPE pname.
+
+    TYPES: BEGIN OF ty_function_group,
+             include TYPE includenr,
+           END OF ty_function_group.
+
+    DATA: fg  TYPE ty_function_group,
+          fgs TYPE STANDARD TABLE OF ty_function_group WITH DEFAULT KEY.
+
+    pname = |SAPL| && fgr.
+
+    SELECT include FROM tfdir INTO TABLE fgs WHERE pname = pname.
+
+    LOOP AT fgs INTO fg.
+
+      DATA progname TYPE progname.
+
+      progname = |L| && fgr && |U| && fg-include.
+
+      DATA is_found TYPE abap_bool.
+
+      DATA: fg_new_element_id TYPE cl_extr3_element_manager=>element_id_type.
+
+      add( EXPORTING program        = progname
+           IMPORTING is_added       = is_found
+                     new_element_id = fg_new_element_id ).
+
+    ENDLOOP.
+
+  ENDMETHOD.
   METHOD clear.
     CLEAR instance.
   ENDMETHOD.
@@ -5043,11 +5131,17 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
     DATA: tranid           TYPE rstranid,
           function_group   TYPE rs38l_area,
           function         TYPE rs38l_fnam,
-          function_include TYPE string.
+          function_include TYPE string,
+          is_tested        TYPE abap_bool.
 
     CLEAR program_type.
     CLEAR program_attribute_1.
     CLEAR program_attribute_2.
+
+    IF i_element_program+0(3) EQ |ZGP|.
+      " Do check only when potentially needed to improve performance
+      is_tested = cl_extract3=>check_if_tested( ).
+    ENDIF.
 
     IF i_element_program+0(1) EQ |L|.
 
@@ -5071,8 +5165,8 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
 
       ENDIF.
 
-    ELSEIF sy-sysid EQ 'NPL' AND i_element_program+0(3) EQ |ZGP|. "Only on test system, currently no SAP BW working there
-
+    ELSEIF i_element_program+0(3) EQ |ZGP|. "Only on test system, currently no SAP BW working there
+      ##TODO " Find better way to determine Unit Test
       _extract_sap_bw_logic( EXPORTING i_element_program = i_element_program
                              IMPORTING tranid = tranid
                                        r_result = r_result ).
@@ -5185,14 +5279,20 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
           transformation_progr_id TYPE rstran_progid,
           length                  TYPE i,
           id_length               TYPE i,
-          transformation          TYPE rstran.
+          transformation          TYPE rstran,
+          is_tested               TYPE abap_bool.
 
     CLEAR tranid.
 
     element_program = i_element_program.
 
-    IF sy-sysid EQ 'NPL' AND element_program+0(3) = 'ZGP'.
-      SHIFT element_program LEFT BY 1 PLACES.
+    IF element_program+0(3) = 'ZGP'.
+      IF element_program = 'ZGP003N8S45LS1FG375G2BN69Q4G'.
+        is_tested = cl_extract3=>check_if_tested( ).
+        IF is_tested = 'X'.
+          SHIFT element_program LEFT BY 1 PLACES.
+        ENDIF.
+      ENDIF.
     ENDIF.
 
     length = strlen( i_element_program ).
@@ -5200,7 +5300,7 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
 
     transformation_progr_id = i_element_program+2(id_length).
 
-    IF sy-sysid EQ 'NPL' AND element_program = 'GP003N8S45LS1FG375G2BN69Q4G'.
+    IF element_program = 'GP003N8S45LS1FG375G2BN69Q4G' AND is_tested = 'X'.
       CLEAR transformation.
       transformation-tranid = |123|.
       transformation-sourcetype = |ODSO|.
@@ -5233,56 +5333,6 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
   METHOD _get_names_for_function_groups.
 
     CONCATENATE 'FGR-' i_element-program_attribute_1 INTO name_of_mapped_class.
-
-  ENDMETHOD.
-  METHOD add_function_group.
-
-    DATA pname TYPE pname.
-
-    TYPES: BEGIN OF ty_function_group,
-             include TYPE includenr,
-           END OF ty_function_group.
-
-    DATA: fg  TYPE ty_function_group,
-          fgs TYPE STANDARD TABLE OF ty_function_group WITH DEFAULT KEY.
-
-    pname = |SAPL| && fgr.
-
-    SELECT include FROM tfdir INTO TABLE fgs WHERE pname = pname.
-
-    LOOP AT fgs INTO fg.
-
-      DATA progname TYPE progname.
-
-      progname = |L| && fgr && |U| && fg-include.
-
-      DATA is_found TYPE abap_bool.
-
-      DATA: fg_new_element_id TYPE cl_extr3_element_manager=>element_id_type.
-
-      add( EXPORTING program        = progname
-           IMPORTING is_added       = is_found
-                     new_element_id = fg_new_element_id ).
-
-    ENDLOOP.
-
-  ENDMETHOD.
-  METHOD add_function.
-
-    DATA: program_found TYPE progname,
-          tf            TYPE tfdir.
-    " TBD find a better solution for this
-    SELECT SINGLE * FROM tfdir INTO tf WHERE funcname = function .
-    IF tf IS NOT INITIAL.
-      "TBD handle error
-    ENDIF.
-    program_found = tf-pname.
-    SHIFT program_found LEFT BY 3 PLACES.
-    program_found = program_found && |U| && tf-include.
-
-    add( EXPORTING program        = program_found
-         IMPORTING is_added       = is_added
-                   new_element_id = new_element_id ).
 
   ENDMETHOD.
 ENDCLASS.
@@ -5909,10 +5959,18 @@ CLASS CL_EXTR3_INITIAL_ELEMENTS IMPLEMENTATION.
     CASE i_element_type_filter.
       WHEN cl_extr3_initial_elements=>select_class_method.
 
-        new_element_id = _select_class_method( name_filter        = i_name_filter
-                                               parent_name_filter = i_parent_name_filter
-                                               element_manager    = element_manager ).
+        IF i_parent_name_filter IS INITIAL.
 
+          new_element_id = _select_class( name_filter        = i_name_filter
+                                          element_manager    = element_manager ).
+
+        ELSE.
+
+          new_element_id = _select_class_method( name_filter        = i_name_filter
+                                                 parent_name_filter = i_parent_name_filter
+                                                 element_manager    = element_manager ).
+
+        ENDIF.
 
       WHEN cl_extr3_initial_elements=>select_table.
 
@@ -5935,6 +5993,42 @@ CLASS CL_EXTR3_INITIAL_ELEMENTS IMPLEMENTATION.
 
     model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
                                              i_is_specific = abap_true ).
+
+  ENDMETHOD.
+  METHOD _select_class_method.
+
+    " Select class method
+
+    DATA classes TYPE REF TO cl_extr3_classes.
+    classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
+    classes->add_component( EXPORTING clsname        = parent_name_filter
+                                      cmpname        = name_filter
+                                      is_specific    = abap_false
+                            IMPORTING new_element_id = new_element_id ).
+
+  ENDMETHOD.
+  METHOD _select_function.
+
+    " Select function
+
+    DATA programs2 TYPE REF TO cl_extr3_programs.
+    programs2 = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
+    programs2->add_function( EXPORTING function       = name_filter
+                             IMPORTING new_element_id = new_element_id ).
+
+  ENDMETHOD.
+  METHOD _select_program.
+
+    " Select program
+
+    DATA programname TYPE program.
+    programname = name_filter.
+
+    DATA programs TYPE REF TO cl_extr3_programs.
+    programs = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
+    programs->add( EXPORTING program        = programname
+                   IMPORTING new_element_id = new_element_id
+    ).
 
   ENDMETHOD.
   METHOD _select_sub_packages.
@@ -5964,6 +6058,16 @@ CLASS CL_EXTR3_INITIAL_ELEMENTS IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+  METHOD _select_table.
+
+    " Select table
+
+    DATA tables TYPE REF TO cl_extr3_tables.
+    tables = cl_extr3_tables=>get_instance( i_element_manager = element_manager ).
+    tables->add( EXPORTING table          = name_filter
+                 IMPORTING new_element_id = new_element_id ).
+
+  ENDMETHOD.
   METHOD _select_top_packages.
 
     CLEAR r_packages.
@@ -5980,50 +6084,23 @@ CLASS CL_EXTR3_INITIAL_ELEMENTS IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD _select_class_method.
+  METHOD _select_class.
 
-    " Select class method
-
-    DATA classes TYPE REF TO cl_extr3_classes.
+    DATA: classes          TYPE REF TO cl_extr3_classes,
+          class_components TYPE cl_extr3_classes=>ty_class_components,
+          cc               TYPE cl_extr3_classes=>ty_class_component.
     classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
-    classes->add_component( EXPORTING clsname        = parent_name_filter
-                                      cmpname        = name_filter
-                                      is_specific    = abap_false
-                            IMPORTING new_element_id = new_element_id ).
+    classes->add( EXPORTING class            = name_filter
+                  IMPORTING new_element_id   = new_element_id
+                            class_components = class_components ).
 
-  ENDMETHOD.
-  METHOD _select_table.
-
-    " Select table
-
-    DATA tables TYPE REF TO cl_extr3_tables.
-    tables = cl_extr3_tables=>get_instance( i_element_manager = element_manager ).
-    tables->add( EXPORTING table          = name_filter
-                 IMPORTING new_element_id = new_element_id ).
-
-  ENDMETHOD.
-  METHOD _select_program.
-
-    " Select program
-
-    DATA programname TYPE program.
-    programname = name_filter.
-
-    DATA programs TYPE REF TO cl_extr3_programs.
-    programs = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
-    programs->add( EXPORTING program        = programname
-                   IMPORTING new_element_id = new_element_id
-    ).
-
-  ENDMETHOD.
-  METHOD _select_function.
-
-    " Select function
-
-    DATA programs2 TYPE REF TO cl_extr3_programs.
-    programs2 = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
-    programs2->add_function( EXPORTING function       = name_filter
-                             IMPORTING new_element_id = new_element_id ).
+    LOOP AT class_components INTO cc.
+      classes->add_component(
+        EXPORTING
+          clsname        = cc-clsname
+          cmpname        = cc-cmpname
+          is_specific    = abap_true ).
+    ENDLOOP.
 
   ENDMETHOD.
 ENDCLASS.
@@ -6249,39 +6326,6 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD _post_search.
-
-    DATA found_in_level TYPE cl_extr3_model_builder=>found_in_level_type.
-    DATA association_builder TYPE cl_extr3_model_builder=>builder_type.
-
-    " Post search
-
-    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Final actions of search'.
-
-    is_post_selection = abap_true.
-
-    DATA all_elements TYPE found_in_levels_type.
-
-    all_elements = found_in_levels.
-
-    LOOP AT association_builders_post INTO association_builder.
-
-      LOOP AT all_elements INTO found_in_level.
-
-*        IF     is_usage_of_single_element EQ abap_true
-*           AND found_in_level-specific EQ abap_false.
-*          CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
-*        ENDIF.
-
-        association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
-
-      ENDLOOP.
-
-    ENDLOOP.
-
-    is_post_selection = abap_false.
-
-  ENDMETHOD.
   METHOD _initial_search.
 
     " Initial search
@@ -6328,66 +6372,37 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD _search_up.
+  METHOD _post_search.
 
-    " Search up
+    DATA found_in_level TYPE cl_extr3_model_builder=>found_in_level_type.
+    DATA association_builder TYPE cl_extr3_model_builder=>builder_type.
 
-    is_up_search = abap_true.
+    " Post search
 
-    DATA: level_to_search_up      TYPE i,
-          something_to_be_done_up TYPE abap_bool.
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = 'Final actions of search'.
 
-    IF i_search_up <> 0.
+    is_post_selection = abap_true.
 
-      something_to_be_done_up = abap_true.
+    DATA all_elements TYPE found_in_levels_type.
 
-      WHILE something_to_be_done_up EQ abap_true.
+    all_elements = found_in_levels.
 
-        DATA temp TYPE string.
-        temp = |Search up for level { level_to_search_up }|. "To be 7.02 compatible
-        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
+    LOOP AT association_builders_post INTO association_builder.
 
-        something_to_be_done_up = abap_false.
+      LOOP AT all_elements INTO found_in_level.
 
-        FIELD-SYMBOLS: <fil>         TYPE found_in_level_type.
-        LOOP AT found_in_levels ASSIGNING <fil> WHERE found_in_level_upsearch = level_to_search_up.
+*        IF     is_usage_of_single_element EQ abap_true
+*           AND found_in_level-specific EQ abap_false.
+*          CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+*        ENDIF.
 
-          IF <fil>-specific EQ abap_false.
+        association_builder-association_builder->search_up( element_id = found_in_level-element_id ).
 
-            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+      ENDLOOP.
 
-          ENDIF.
+    ENDLOOP.
 
-          level_for_found_in_upsearch = <fil>-found_in_level_upsearch + 1.
-
-          DATA association_builder TYPE cl_extr3_model_builder=>builder_type.
-
-          LOOP AT association_builders INTO association_builder.
-
-            association_builder-association_builder->search_up( element_id = <fil>-element_id ).
-
-          ENDLOOP.
-
-          something_to_be_done_up = abap_true.
-
-        ENDLOOP.
-
-        ADD 1 TO level_to_search_up.
-
-        IF i_search_up >= 0 AND i_search_up <= level_to_search_up.
-
-          something_to_be_done_up = abap_false.
-
-        ENDIF.
-
-      ENDWHILE.
-
-    ENDIF.
-
-    " SAP_2_FAMIX_68        When more than a single level is searched up, the up search is not done for elements that where found in the search down
-    " Fullfilled because the search down starts here
-
-    is_up_search = abap_false.
+    is_post_selection = abap_false.
 
   ENDMETHOD.
   METHOD _search_down.
@@ -6463,6 +6478,68 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
     is_down_search = abap_false.
 
   ENDMETHOD.
+  METHOD _search_up.
+
+    " Search up
+
+    is_up_search = abap_true.
+
+    DATA: level_to_search_up      TYPE i,
+          something_to_be_done_up TYPE abap_bool.
+
+    IF i_search_up <> 0.
+
+      something_to_be_done_up = abap_true.
+
+      WHILE something_to_be_done_up EQ abap_true.
+
+        DATA temp TYPE string.
+        temp = |Search up for level { level_to_search_up }|. "To be 7.02 compatible
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR' EXPORTING text = temp.
+
+        something_to_be_done_up = abap_false.
+
+        FIELD-SYMBOLS: <fil>         TYPE found_in_level_type.
+        LOOP AT found_in_levels ASSIGNING <fil> WHERE found_in_level_upsearch = level_to_search_up.
+
+          IF <fil>-specific EQ abap_false.
+
+            CONTINUE. " Only a single element is analyzed, include only specific elements into where used analysis
+
+          ENDIF.
+
+          level_for_found_in_upsearch = <fil>-found_in_level_upsearch + 1.
+
+          DATA association_builder TYPE cl_extr3_model_builder=>builder_type.
+
+          LOOP AT association_builders INTO association_builder.
+
+            association_builder-association_builder->search_up( element_id = <fil>-element_id ).
+
+          ENDLOOP.
+
+          something_to_be_done_up = abap_true.
+
+        ENDLOOP.
+
+        ADD 1 TO level_to_search_up.
+
+        IF i_search_up >= 0 AND i_search_up <= level_to_search_up.
+
+          something_to_be_done_up = abap_false.
+
+        ENDIF.
+
+      ENDWHILE.
+
+    ENDIF.
+
+    " SAP_2_FAMIX_68        When more than a single level is searched up, the up search is not done for elements that where found in the search down
+    " Fullfilled because the search down starts here
+
+    is_up_search = abap_false.
+
+  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTRACT3 IMPLEMENTATION.
   METHOD constructor.
@@ -6509,6 +6586,29 @@ CLASS CL_EXTRACT3 IMPLEMENTATION.
     element_manager->collect_infos( sysid ).
 
     mse_model = element_manager->make_model( ).
+
+  ENDMETHOD.
+  METHOD check_if_tested.
+
+    IF g_check_for_test_done EQ 'X'.
+      " Buffer result of call to call stack
+      is_tested = g_is_tested.
+    ELSE.
+
+      DATA et_callstack  TYPE sys_callst  .
+      CALL FUNCTION 'SYSTEM_CALLSTACK'
+        IMPORTING
+          et_callstack = et_callstack.
+
+      READ TABLE et_callstack TRANSPORTING NO FIELDS WITH KEY eventname = 'INVOKE_TEST_METHOD'.
+
+      IF sy-subrc EQ 0.
+        g_is_tested = 'X'.
+        is_tested = 'X'.
+        g_check_for_test_done = 'X'.
+      ENDIF.
+
+    ENDIF.
 
   ENDMETHOD.
 ENDCLASS.
@@ -6615,15 +6715,7 @@ START-OF-SELECTION.
 
     ELSEIF p_eltyp_string EQ cl_extr3_initial_elements=>select_class_method.
 
-      IF p_elpar_string IS INITIAL.
-
-        FORMAT COLOR COL_NEGATIVE.
-        WRITE: / 'Enter a parent name for this type of element, in case of methods this is the class'.
-        FORMAT COLOR COL_BACKGROUND.
-
-        RETURN.
-
-      ENDIF.
+      " The parentname is empty when a whole class is analyzed and filled when only a component is analyzed
 
     ELSE.
 
@@ -6633,7 +6725,7 @@ START-OF-SELECTION.
       WRITE: / |The text you entered is not valid|.
       WRITE: / |Click into the field to get a value help|.
 
-        RETURN.
+      RETURN.
 
     ENDIF.
 
