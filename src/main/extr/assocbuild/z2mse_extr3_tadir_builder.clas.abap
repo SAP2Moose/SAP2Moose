@@ -81,6 +81,7 @@ CLASS z2mse_extr3_tadir_builder IMPLEMENTATION.
 
                 class_name = tadir-obj_name.
                 classes->add( EXPORTING class          = class_name
+                                        is_specific    = abap_true
                               IMPORTING is_added       = is_found
                                         new_element_id = new_element_id ).
 

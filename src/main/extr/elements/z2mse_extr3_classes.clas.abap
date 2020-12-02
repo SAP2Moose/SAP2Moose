@@ -30,6 +30,7 @@ CLASS z2mse_extr3_classes DEFINITION
     METHODS add
       IMPORTING
         class                   TYPE string
+        is_specific             TYPE abap_bool
       EXPORTING
         VALUE(is_added)         TYPE abap_bool
         VALUE(new_element_id)   TYPE z2mse_extr3_element_manager=>element_id_type
@@ -114,6 +115,7 @@ CLASS z2mse_extr3_classes DEFINITION
       IMPORTING
         clsname               TYPE string
         cmpname               TYPE string
+        is_specific           TYPE abap_bool
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
         VALUE(is_added_now)   TYPE abap_bool
@@ -121,7 +123,8 @@ CLASS z2mse_extr3_classes DEFINITION
 
     METHODS _add_metarel
       IMPORTING
-        clsname TYPE string.
+        clsname     TYPE string
+        is_specific TYPE abap_bool.
 
     "! Call me only after checking that the component to be added is not already added.
     METHODS _add_single_component_to_class
@@ -130,6 +133,7 @@ CLASS z2mse_extr3_classes DEFINITION
         i_found_cmpname         TYPE string
         i_found_cmptype         TYPE seocmptype
         i_found_mtdtype         TYPE seomtdtype
+        is_specific             TYPE abap_bool
       RETURNING
         VALUE(r_new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
 
@@ -181,7 +185,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       IF is_added EQ abap_true.
 
         new_element_id = element_manager->add_element( element = me
-                                                       is_specific = abap_false ).
+                                                       is_specific = is_specific ).
         element-element_id = new_element_id.
         element-class_name = class.
         element-clstype = found_class_type.
@@ -205,45 +209,6 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
       redefined_class_components = _get_redefined( class ).
 
-*      DATA: redefined_components TYPE STANDARD TABLE OF redefined_type WITH DEFAULT KEY,
-*            redefined_component  TYPE redefined_type.
-*
-*      TEST-SEAM seoredef.
-*
-*        SELECT clsname refclsname mtdname FROM seoredef INTO TABLE redefined_components
-*          WHERE clsname = class
-*            AND version = 1.
-*
-*      END-TEST-SEAM.
-*
-*      IF sy-subrc EQ 0.
-*
-*        DATA: referenced_class_component TYPE z2mse_extr3_classes=>ty_class_component.
-*
-*        LOOP AT redefined_components INTO redefined_component.
-*
-*          TEST-SEAM seocompo_3.
-*
-*            SELECT SINGLE clsname cmpname cmptype mtdtype
-*              FROM seocompo
-*              INTO CORRESPONDING FIELDS OF referenced_class_component
-*              WHERE cmptype <> 3 " A type
-*                AND clsname = class
-*                AND cmpname = redefined_component-mtdname.
-*
-*          END-TEST-SEAM.
-*
-*          IF sy-subrc <> 0.
-*            "Inconsistency
-*          ELSE.
-*            INSERT referenced_class_component INTO TABLE class_components.
-*            ASSERT sy-subrc EQ 0.
-*          ENDIF.
-*
-*        ENDLOOP.
-*
-*      ENDIF.
-
       LOOP AT redefined_class_components INTO redefined_class_component.
         INSERT redefined_class_component INTO TABLE class_components.
       ENDLOOP.
@@ -251,11 +216,13 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       LOOP AT class_components INTO class_component.
 
         _add_component( EXPORTING clsname        = class_component-clsname
-                                  cmpname        = class_component-cmpname ).
+                                  cmpname        = class_component-cmpname
+                                  is_specific    = is_specific ).
 
       ENDLOOP.
 
-      _add_metarel( clsname = class ).
+      _add_metarel( clsname        = class
+                    is_specific    = is_specific ). ##TODO " Is it correct to set this specific?
 
     ENDIF.
 
@@ -267,12 +234,14 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
     DATA: is_added_now TYPE abap_bool.
 
     add( EXPORTING class          = clsname
+                    is_specific   = is_specific
          IMPORTING is_added       = is_added ).
 
     IF is_added EQ abap_true.
 
       _add_component( EXPORTING clsname        = clsname
                                 cmpname        = cmpname
+                                is_specific    = is_specific
                       IMPORTING is_added       = is_added
                                 new_element_id = new_element_id
                                 is_added_now   = is_added_now ).
@@ -784,7 +753,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
         is_added = abap_true.
 
         IF found_cmptype EQ 3. " Is type
-          RAISE EXCEPTION TYPE ZCX_2MSE_EXTR3_CLASSES_WR_TYPE.
+          RAISE EXCEPTION TYPE zcx_2mse_extr3_classes_wr_type.
         ENDIF.
 
       ELSE.
@@ -814,7 +783,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
         new_element_id = _add_single_component_to_class( i_found_class_name = found_class_name
                                                          i_found_cmpname    = found_cmpname
                                                          i_found_cmptype    = found_cmptype
-                                                         i_found_mtdtype    = found_mtdtype ).
+                                                         i_found_mtdtype    = found_mtdtype
+                                                         is_specific        = is_specific ).
         is_added_now = abap_true.
       ENDIF.
 
@@ -863,6 +833,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
         reclsname_string = relation-refclsname.
 
         me->add( EXPORTING class            = reclsname_string
+                           is_specific      = is_specific
                  IMPORTING is_added         = is_added
                            new_element_id   = new_element_id
                            class_components = interface_class_components ).
@@ -872,13 +843,14 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
           new_element_id = _add_single_component_to_class( i_found_class_name = clsname
                                                            i_found_cmpname    = |{ interface_class_component-clsname }~{ interface_class_component-cmpname }|
                                                            i_found_cmptype    = interface_class_component-cmptype
-                                                           i_found_mtdtype    = interface_class_component-mtdtype ).
+                                                           i_found_mtdtype    = interface_class_component-mtdtype
+                                                           is_specific        = is_specific  ).
 
           DATA interface_element_id TYPE z2mse_extr3_element_manager=>element_id_type .
 
           me->add_component( EXPORTING clsname        = interface_class_component-clsname
                                        cmpname        = interface_class_component-cmpname
-                                       is_specific    = abap_false
+                                       is_specific    = is_specific
                               IMPORTING "*              is_added       =
                                         new_element_id = interface_element_id ).
 
@@ -915,7 +887,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
     ASSERT i_found_cmpname IS NOT INITIAL.
 
     r_new_element_id = element_manager->add_element( element = me
-                                                     is_specific = abap_false ).
+                                                     is_specific = is_specific ).
     element_comp2-element_id = r_new_element_id.
     element_comp2-clsname = i_found_class_name.
     element_comp2-cmpname = i_found_cmpname.

@@ -166,46 +166,56 @@ CLASS z2mse_extr3_model_builder IMPLEMENTATION.
     ELSEIF is_up_search EQ abap_true.
 
       IF <found_in_level>-found_in_level_upsearch IS INITIAL.
+        IF <found_in_level>-found_in_initial_selection EQ 'X' AND <found_in_level>-specific EQ 'X'.
+          " Do overwrite elements which are initially found and specific with a different level.
+          " This would cause errors in down search.
+        ELSE.
 
-        <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
+          <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
+
+        ENDIF.
 
       ENDIF.
 
       IF i_is_specific EQ abap_true AND <found_in_level>-specific EQ abap_false.
+        IF <found_in_level>-found_in_initial_selection EQ 'X' AND <found_in_level>-specific EQ 'X'.
+          " Do overwrite elements which are initially found and specific with a different level.
+          " This would cause errors in down search.
+        ELSE.
 
-        <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
-        <found_in_level>-specific = abap_true.
+          <found_in_level>-found_in_level_upsearch = level_for_found_in_upsearch.
+          <found_in_level>-specific = abap_true.
+
+        ENDIF.
 
       ENDIF.
-
-*      IF     <found_in_level>-found_in_level_upsearch EQ level_for_found_in_upsearch
-*         AND i_is_specific EQ abap_true.
-*
-*        <found_in_level>-specific = abap_true.
-*
-*      ENDIF.
 
     ELSEIF is_down_search EQ abap_true.
 
       IF <found_in_level>-found_in_level_downsearch IS INITIAL.
+        IF <found_in_level>-found_in_initial_selection EQ 'X' AND <found_in_level>-specific EQ 'X'.
+          " Do overwrite elements which are initially found and specific with a different level.
+          " This would not be correct
+        ELSE.
 
-        <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
+          <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
+
+        ENDIF.
 
       ENDIF.
 
       IF i_is_specific EQ abap_true AND <found_in_level>-specific EQ abap_false.
+        IF <found_in_level>-found_in_initial_selection EQ 'X' AND <found_in_level>-specific EQ 'X'.
+          " Do overwrite elements which are initially found and specific with a different level.
+          " This would not be correct
+        ELSE.
 
-        <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
-        <found_in_level>-specific = abap_true.
+          <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch.
+          <found_in_level>-specific = abap_true.
+
+        ENDIF.
 
       ENDIF.
-
-*      IF     <found_in_level>-found_in_level_downsearch = level_for_found_in_downsearch
-*         AND i_is_specific EQ abap_true.
-*
-*        <found_in_level>-specific = abap_true.
-*
-*      ENDIF.
 
     ELSEIF is_post_selection EQ abap_true.
 

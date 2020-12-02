@@ -21,12 +21,6 @@ CLASS ltcl_class IMPLEMENTATION.
     TEST-INJECTION seocompo_3.
       cl_abap_unit_assert=>fail( msg = 'Redefine me' ).
     END-TEST-INJECTION.
-*    TEST-INJECTION seoredef_2.
-*      cl_abap_unit_assert=>fail( msg = 'Redefine me' ).
-*    END-TEST-INJECTION.
-*    TEST-INJECTION seocompo_4.
-*      cl_abap_unit_assert=>fail( msg = 'Redefine me' ).
-*    END-TEST-INJECTION.
     model_builder = NEW #( ).
     model_builder->initial_selection_started( ).
     element_manager = NEW #( i_model_builder = model_builder
@@ -87,6 +81,7 @@ CLASS ltcl_class IMPLEMENTATION.
     END-TEST-INJECTION.
 
     f_cut->add( EXPORTING class = 'CLASS_A'
+                          is_specific = abap_false
                 IMPORTING is_added       = is_found
                           new_element_id = new_element_id ).
 
@@ -97,6 +92,7 @@ CLASS ltcl_class IMPLEMENTATION.
     " Add an existing class
 
     f_cut->add( EXPORTING class = 'CLASS_A'
+                          is_specific = abap_false
                 IMPORTING is_added       = is_found
                           new_element_id = new_element_id ).
 
@@ -204,6 +200,7 @@ CLASS ltcl_interface IMPLEMENTATION.
     END-TEST-INJECTION.
 
     f_cut->add( EXPORTING class = 'INTERFACE_A'
+                          is_specific = abap_false
                 IMPORTING is_added       = is_found
                           new_element_id = new_element_id ).
 

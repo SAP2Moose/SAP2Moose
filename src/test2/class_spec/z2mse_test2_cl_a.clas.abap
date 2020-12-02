@@ -1,20 +1,24 @@
-class Z2MSE_TEST2_CL_A definition
-  public
-  final
-  create public .
+CLASS z2mse_test2_cl_a DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
 
-public section.
-  data: attribute TYPE c LENGTH 1.
-  methods method.
-protected section.
-private section.
+  PUBLIC SECTION.
+    DATA: attribute TYPE c LENGTH 1.
+    METHODS method.
+    METHODS method2.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS Z2MSE_TEST2_CL_A IMPLEMENTATION.
-  METHOD METHOD.
-
+CLASS z2mse_test2_cl_a IMPLEMENTATION.
+  METHOD method.
+  ENDMETHOD.
+  METHOD method2.
+    method( ).
+    SELECT * INTO TABLE @DATA(s) FROM sflight.
   ENDMETHOD.
 
 ENDCLASS.

@@ -25,7 +25,9 @@ CLASS z2mse_main_test DEFINITION
         parent_name_filter  TYPE z2mse_extr3_initial_elements=>ty_filter
         name_filter         TYPE z2mse_extr3_initial_elements=>ty_filter
         dynamic_read        TYPE string
-        element_type_filter TYPE z2mse_extr3_initial_elements=>ty_filter.
+        element_type_filter TYPE z2mse_extr3_initial_elements=>ty_filter
+        i_search_up              TYPE i
+        i_search_down            TYPE i.
     METHODS _check_found_elements
       IMPORTING
         msg TYPE string.
@@ -58,6 +60,8 @@ CLASS z2mse_main_test IMPLEMENTATION.
   METHOD specific_search_method.
 
     _search_specific(
+          i_search_up = 1
+          i_search_down = 1
           element_type_filter = z2mse_extr3_initial_elements=>select_class_method
           dynamic_read        = |Z2MSE_TEST_DYNAMIC_USAGE|
           parent_name_filter  = 'Z2MSE_TEST2_CL_A'
@@ -65,6 +69,7 @@ CLASS z2mse_main_test IMPLEMENTATION.
 
     fes_exp = VALUE #(
 ( where = |I| level = 0 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST2_CL_A| name = |METHOD| specific = |X| )
+( where = |I| level = 1 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST2_CL_A| name = |METHOD2| specific = |X| )
 ( where = |S| level = 1 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST2_CL_B| name = |METHOD| specific = |X| )
  ).
 
@@ -77,6 +82,8 @@ CLASS z2mse_main_test IMPLEMENTATION.
     maker->add_class(      name = |Z2MSE_TEST2_CL_A| parentpackage = |Z2MSE_TEST2_CLASS_SPEC| ).
     maker->add_attribute(         attribute = |ATTRIBUTE| at_line = 7 ).
     maker->add_method(            method  = |METHOD| at_line = 8 ).
+    maker->add_method(            method  = |METHOD2| at_line = 9 ).
+    maker->usage(                           used_group  = |Z2MSE_TEST2_CL_A| used = |METHOD| ).
     maker->add_class(      name = |Z2MSE_TEST2_CL_B| parentpackage = |Z2MSE_TEST2_CLASS_SPEC| ).
     maker->add_method(            method  = |METHOD| at_line = 7 ).
     maker->usage(                           used_group  = |Z2MSE_TEST2_CL_A| used = |METHOD| ).
@@ -90,6 +97,8 @@ CLASS z2mse_main_test IMPLEMENTATION.
     " Search for usage of attributes
 
     _search_specific(
+          i_search_up = 1
+          i_search_down = 1
           element_type_filter = z2mse_extr3_initial_elements=>select_class_method
           dynamic_read        = |Z2MSE_TEST_DYNAMIC_USAGE|
           parent_name_filter  = 'Z2MSE_TEST2_CL_A'
@@ -109,6 +118,7 @@ CLASS z2mse_main_test IMPLEMENTATION.
     maker->add_class(      name = |Z2MSE_TEST2_CL_A| parentpackage = |Z2MSE_TEST2_CLASS_SPEC| ).
     maker->add_attribute(         attribute = |ATTRIBUTE| at_line = 7 ).
     maker->add_method(            method  = |METHOD| at_line = 8 ).
+    maker->add_method(            method  = |METHOD2| at_line = 9 ).
     maker->add_class(      name = |Z2MSE_TEST2_CL_B| parentpackage = |Z2MSE_TEST2_CLASS_SPEC| ).
     maker->add_method(            method  = |METHOD| at_line = 7 ).
 *    maker->usage(                           used_group  = |Z2MSE_TEST2_CL_A| used = |METHOD| ).
@@ -125,15 +135,19 @@ CLASS z2mse_main_test IMPLEMENTATION.
 *    cl_abap_unit_assert=>fail( msg = 'Finalize test and coding to implement #122' ).
 
     _search_specific(
+          i_search_up = 1
+          i_search_down = 1
           element_type_filter = z2mse_extr3_initial_elements=>select_class_method
           dynamic_read        = |Z2MSE_TEST_DYNAMIC_USAGE|
           parent_name_filter  = ''
           name_filter         = 'Z2MSE_TEST2_CL_A' ).
 
     fes_exp = VALUE #(
+( where = |S| level = -1 alternate_level = 0 element_type = |ABAPDatabaseTable| parent_name = || name = |SFLIGHT| specific = |X| )
 ( where = |I| level = 0 alternate_level = 0 element_type = |ABAPClass| parent_name = || name = |Z2MSE_TEST2_CL_A| specific = |X| )
 ( where = |I| level = 0 alternate_level = 0 element_type = |ABAPClassAttribute| parent_name = |Z2MSE_TEST2_CL_A| name = |ATTRIBUTE| specific = |X| )
 ( where = |I| level = 0 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST2_CL_A| name = |METHOD| specific = |X| )
+( where = |I| level = 0 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST2_CL_A| name = |METHOD2| specific = |X| )
 ( where = |S| level = 1 alternate_level = 0 element_type = |ABAPClassMethod| parent_name = |Z2MSE_TEST2_CL_B| name = |METHOD| specific = |X| )
  ).
 
@@ -143,9 +157,14 @@ CLASS z2mse_main_test IMPLEMENTATION.
     maker->to_change = equalized_harmonized_mse_exp.
     maker->add_custom_source_language( language = |SAP| ).
     maker->add_package( package = |Z2MSE_TEST2_CLASS_SPEC| ).
+    maker->add_package( package = |SAPBC_DATAMODEL| ).
+    maker->add_db_table(  name          = |SFLIGHT| parentpackage = |SAPBC_DATAMODEL| ).
     maker->add_class(      name = |Z2MSE_TEST2_CL_A| parentpackage = |Z2MSE_TEST2_CLASS_SPEC| ).
     maker->add_attribute(         attribute = |ATTRIBUTE| at_line = 7 ).
     maker->add_method(            method  = |METHOD| at_line = 8 ).
+    maker->add_method(            method  = |METHOD2| at_line = 9 ).
+    maker->access(                    used_group  = 'SFLIGHT' used        = 'SFLIGHT' ).
+    maker->usage(                           used_group  = |Z2MSE_TEST2_CL_A| used = |METHOD| ).
     maker->add_class(      name = |Z2MSE_TEST2_CL_B| parentpackage = |Z2MSE_TEST2_CLASS_SPEC| ).
     maker->add_method(            method  = |METHOD| at_line = 7 ).
     maker->usage(                           used_group  = |Z2MSE_TEST2_CL_A| used = |METHOD| ).
@@ -366,6 +385,7 @@ CLASS z2mse_main_test IMPLEMENTATION.
 
     fes_exp = VALUE #(
 ( where = |S| level = -2 alternate_level = 0 element_type = |ABAPProgramOrFunctionOrSAPBW| parent_name = ||                    name = |F-Z2MSE_TEST2_M2_FUNCTION_A| specific = |X| )
+( where = |S| level = -1 alternate_level = 0 element_type = |ABAPClass|                    parent_name = ||                    name = |Z2MSE_TEST2_M1_CL_A| specific = |X| )
 ( where = |S| level = -1 alternate_level = 0 element_type = |ABAPClassMethod|              parent_name = |Z2MSE_TEST2_M1_CL_A| name = |STATIC_METHOD_A| specific = |X| )
 ( where = |S| level = -1 alternate_level = 0 element_type = |ABAPProgramOrFunctionOrSAPBW| parent_name = ||                    name = |F-Z2MSE_TEST2_M1_FUNCTION_A| specific = |X| )
 ( where = |I| level =  0 alternate_level = 0 element_type = |ABAPProgramOrFunctionOrSAPBW| parent_name = ||                    name = |Z2MSE_TEST2_I_PROGRAM| specific = |X| )
@@ -836,8 +856,8 @@ CLASS z2mse_main_test IMPLEMENTATION.
     f_cut->extract( EXPORTING model_builder            = model_builder
                               element_manager          = element_manager
                               initial_elements         = initial_elements
-                              i_search_up              = 1
-                              i_search_down            = 1
+                              i_search_up              = i_search_up
+                              i_search_down            = i_search_down
                               i_exclude_found_sap_intf = abap_true
                     IMPORTING mse_model             = mse_model_act
                               nothing_done          = nothing_done_act ).

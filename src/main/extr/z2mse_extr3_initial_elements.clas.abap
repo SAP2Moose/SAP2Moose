@@ -317,6 +317,7 @@ CLASS z2mse_extr3_initial_elements IMPLEMENTATION.
           cc               TYPE z2mse_extr3_classes=>ty_class_component.
     classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
     classes->add( EXPORTING class            = name_filter
+                            is_specific      = abap_true
                   IMPORTING new_element_id   = new_element_id
                             class_components = class_components ).
 
