@@ -5,8 +5,8 @@
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
-        <x>760.0</x>
-        <y>320.0</y>
+        <x>84.0</x>
+        <y>544.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -106,6 +106,10 @@
         <method>NEW_ELEMENT_ID</method>
         <x>-294.0</x>
         <y>386.0</y>
+        <comment><![CDATA[Contains important logic to correctly add found elements.]]>
+        </comment>
+        <commentx>-182.0</commentx>
+        <commenty>427.0</commenty>
     </element>
     <element>
         <type>FAMIXClass</type>
