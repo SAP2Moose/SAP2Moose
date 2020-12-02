@@ -2,7 +2,8 @@ SAP2Moose changelog for releases in preparation
 ===================
 
 + Add report documentation #126
-+ Example how to select #122
++ Search for all elements of a class #122
+* Downsearch fails when initially found element is also found in upsearch #128
 
 Legend
 ------
