@@ -5,62 +5,66 @@
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
-        <x>584.0</x>
-        <y>159.0</y>
+        <x>84.0</x>
+        <y>587.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_TABLES</class>
-        <method>NAME</method>
-        <x>-595.0</x>
-        <y>186.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_WHERE_USED_BUILDER</class>
-        <method>SEARCH_UP</method>
-        <x>-367.0</x>
-        <y>61.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_ELEMENT_MANAGER</class>
-        <method>ADD_ELEMENT</method>
-        <x>-409.0</x>
-        <y>243.0</y>
-    </element>
-    <element>
-        <type>FAMIXPackage</type>
-        <package>Z2MSE_MAIN_EXTR</package>
-        <x>675.0</x>
-        <y>69.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_TABLES</class>
-        <method>ADD</method>
-        <x>-631.0</x>
-        <y>130.0</y>
-        <ACTSuppressOthers>
-            <type>ACDStandard</type>
-            <includeMe>true</includeMe>
-            <usedByLayers>1</usedByLayers>
-            <usingLayers>1</usingLayers>
-        </ACTSuppressOthers>
+        <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
+        <method>_SELECT_TABLE</method>
+        <x>-514.0</x>
+        <y>-50.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3</class>
         <attribute>ELEMENT_MANAGER</attribute>
-        <x>-923.0</x>
-        <y>-32.0</y>
+        <x>-692.0</x>
+        <y>-109.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_TADIR_BUILDER</class>
+        <method>SEARCH_DOWN</method>
+        <x>-794.0</x>
+        <y>38.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_TADIR_BUILDER</class>
+        <method>SEARCH_UP</method>
+        <x>-848.0</x>
+        <y>38.0</y>
+    </element>
+    <element>
+        <type>FAMIXPackage</type>
+        <package>Z2MSE_MAIN_EXTR_ELEMENTS</package>
+        <x>107.0</x>
+        <y>54.0</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>Z2MSE_EXTR3_TABLES</class>
+        <attribute>ELEMENTS_ELEMENT_ID</attribute>
+        <x>-692.0</x>
+        <y>191.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
+        <x>-514.0</x>
+        <y>-38.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_TABLES</class>
         <method>TABLE_NAME</method>
-        <x>-713.0</x>
-        <y>189.0</y>
+        <x>-758.0</x>
+        <y>141.0</y>
+        <comment><![CDATA[Return database table name for ID]]>
+        </comment>
+        <commentx>-861.0</commentx>
+        <commenty>119.0</commenty>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
@@ -69,11 +73,55 @@
         </ACTSuppressOthers>
     </element>
     <element>
+        <type>FAMIXClass</type>
+        <class>DD02L</class>
+        <x>525.0</x>
+        <y>132.5</y>
+    </element>
+    <element>
+        <type>FAMIXAttribute</type>
+        <class>DD02L</class>
+        <attribute>DD02L</attribute>
+        <x>-479.0</x>
+        <y>149.0</y>
+        <comment><![CDATA[Database Table with all<br>database tables<br>used in the SAP system]]>
+        </comment>
+        <commentx>-415.0</commentx>
+        <commenty>115.0</commenty>
+    </element>
+    <element>
         <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_TADIR_BUILDER</class>
+        <class>Z2MSE_EXTR3_ACCESS_OR_INVOCATN</class>
+        <method>_GET_FAMIX_ID_USED_AND_USING</method>
+        <x>-820.0</x>
+        <y>-39.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_WHERE_USED_BUILDER</class>
         <method>SEARCH_UP</method>
-        <x>-492.0</x>
-        <y>-139.0</y>
+        <x>-536.0</x>
+        <y>40.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_TABLES</class>
+        <method>NAME</method>
+        <x>-758.0</x>
+        <y>191.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_EXTR3_ACCESS_OR_INVOCATN</class>
+        <x>-819.0</x>
+        <y>-29.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_WHERE_USED_BUILDER</class>
+        <method>SEARCH_DOWN</method>
+        <x>-479.0</x>
+        <y>40.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -83,86 +131,10 @@
         <y>-39.0</y>
     </element>
     <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_EXTR3_WHERE_USED_BUILDER</class>
-        <x>-415.0</x>
-        <y>73.0</y>
-    </element>
-    <element>
         <type>FAMIXPackage</type>
-        <package>Z2MSE_MAIN_EXTR_ASSOCIATIONS</package>
-        <x>355.0</x>
-        <y>41.0</y>
-    </element>
-    <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_EXTR3_TABLES</class>
-        <x>-641.0</x>
-        <y>186.0</y>
-    </element>
-    <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_EXTR3_TADIR_BUILDER</class>
-        <x>-461.0</x>
-        <y>-126.0</y>
-    </element>
-    <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_EXTR3_ELEMENT_MANAGER</class>
-        <x>-409.0</x>
-        <y>254.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_ACCESS_OR_INVOCATN</class>
-        <method>_GET_FAMIX_ID_USED_AND_USING</method>
-        <x>-783.0</x>
-        <y>63.0</y>
-    </element>
-    <element>
-        <type>FAMIXPackage</type>
-        <package>Z2MSE_MAIN_EXTR_ELEMENTS</package>
-        <x>107.0</x>
-        <y>54.0</y>
-    </element>
-    <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_EXTR3_ACCESS_OR_INVOCATN</class>
-        <x>-783.0</x>
-        <y>74.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_WHERE_USED_BUILDER</class>
-        <method>SEARCH_DOWN</method>
-        <x>-439.0</x>
-        <y>62.0</y>
-    </element>
-    <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_EXTR3_INITIAL_ELEMENTS</class>
-        <x>-692.0</x>
-        <y>-28.0</y>
-    </element>
-    <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_EXTR3</class>
-        <x>-923.0</x>
-        <y>-21.0</y>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_TADIR_BUILDER</class>
-        <method>SEARCH_DOWN</method>
-        <x>-420.0</x>
-        <y>-138.0</y>
-    </element>
-    <element>
-        <type>FAMIXAttribute</type>
-        <class>Z2MSE_EXTR3_TABLES</class>
-        <attribute>ELEMENTS_TABNAME</attribute>
-        <x>-607.0</x>
-        <y>164.0</y>
+        <package>Z2MSE_MAIN_EXTR</package>
+        <x>675.0</x>
+        <y>69.0</y>
     </element>
     <element>
         <type>FAMIXPackage</type>
@@ -171,10 +143,76 @@
         <y>184.0</y>
     </element>
     <element>
+        <type>FAMIXPackage</type>
+        <package>SDIC</package>
+        <x>525.0</x>
+        <y>122.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_EXTR3</class>
+        <x>-694.0</x>
+        <y>-97.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_EXTR3_TADIR_BUILDER</class>
+        <x>-819.0</x>
+        <y>49.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_ELEMENT_MANAGER</class>
+        <method>ADD_ELEMENT</method>
+        <x>-452.0</x>
+        <y>194.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_EXTR3_TABLES</class>
+        <x>-679.0</x>
+        <y>180.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_EXTR3_ELEMENT_MANAGER</class>
+        <x>-453.0</x>
+        <y>205.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_EXTR3_WHERE_USED_BUILDER</class>
+        <x>-509.0</x>
+        <y>49.0</y>
+    </element>
+    <element>
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_TABLES</class>
-        <attribute>ELEMENTS_ELEMENT_ID</attribute>
-        <x>-693.0</x>
-        <y>164.0</y>
+        <attribute>ELEMENTS_TABNAME</attribute>
+        <x>-608.0</x>
+        <y>191.0</y>
+    </element>
+    <element>
+        <type>FAMIXPackage</type>
+        <package>Z2MSE_MAIN_EXTR_ASSOCIATIONS</package>
+        <x>355.0</x>
+        <y>41.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_TABLES</class>
+        <method>ADD</method>
+        <x>-692.0</x>
+        <y>149.0</y>
+        <comment><![CDATA[Adds database table to model]]>
+        </comment>
+        <commentx>-636.0</commentx>
+        <commenty>105.0</commenty>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
     </element>
 </elements>
