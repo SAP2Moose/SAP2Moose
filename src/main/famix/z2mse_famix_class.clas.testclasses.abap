@@ -53,7 +53,7 @@ CLASS ltcl_test IMPLEMENTATION.
     f_cut->set_container( EXPORTING element_id         = id_class1
                                     container_element  = 'FAMIX.Module'
                                     parent_container   = 'AProgram'
-                                    parent_container_name_group = 'ModulNames').
+                                    parent_container_name_group = 'ModulNames' ).
     f_cut->set_container_by_id( EXPORTING element_id          = id_class2
                                           container_element   = 'FAMIX.Module'
                                           parent_container_id = id_module ).
