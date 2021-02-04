@@ -42,6 +42,12 @@
      <LENGTH>58</LENGTH>
     </item>
     <item>
+     <ID>I</ID>
+     <KEY>200</KEY>
+     <ENTRY>Customizations</ENTRY>
+     <LENGTH>23</LENGTH>
+    </item>
+    <item>
      <ID>R</ID>
      <ENTRY>Program to call global copy of moose extractor</ENTRY>
      <LENGTH>46</LENGTH>
@@ -87,6 +93,12 @@
      <KEY>P_EX</KEY>
      <ENTRY>No Where-Used: SAP Interfaces</ENTRY>
      <LENGTH>37</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_INTREV</KEY>
+     <ENTRY>Interface Methods reversed</ENTRY>
+     <LENGTH>34</LENGTH>
     </item>
     <item>
      <ID>S</ID>

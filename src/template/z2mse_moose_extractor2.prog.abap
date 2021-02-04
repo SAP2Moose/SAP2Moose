@@ -107,6 +107,12 @@ PARAMETERS: p_down AS CHECKBOX DEFAULT 'X',
 *g_parameter_download_file = p_down.
 SELECTION-SCREEN END OF BLOCK bl_model_settings.
 
+SELECTION-SCREEN BEGIN OF BLOCK bl_customize WITH FRAME TITLE TEXT-200.
+
+PARAMETERS: p_intrev AS CHECKBOX DEFAULT ''.
+
+SELECTION-SCREEN END OF BLOCK bl_customize.
+
 
 * REPLACE Z2MSE_model
 
