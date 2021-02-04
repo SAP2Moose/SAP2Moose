@@ -863,8 +863,19 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
           ELSE.
 
-            invocation->add( EXPORTING invoced_element_id1  = new_element_id
-                                       invocing_element_id2 = interface_element_id ).
+            IF sy-datum EQ '20210204'.
+
+              " Test #131
+
+              invocation->add( EXPORTING invoced_element_id1  = interface_element_id
+                                         invocing_element_id2 = new_element_id ).
+
+            ELSE.
+
+              invocation->add( EXPORTING invoced_element_id1  = new_element_id
+                                         invocing_element_id2 = interface_element_id ).
+
+            ENDIF.
 
           ENDIF.
 
