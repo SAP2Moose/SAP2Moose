@@ -7,8 +7,17 @@ P_ELNAM	Specific element
 P_ELPAR	Parent name
 P_ELTYP	Element name
 P_EX	No Where-Used: SAP Interfaces
+P_INTREV	Interface Methods reversed
 P_NDOWN	Search down (-1 if no limit)
 P_NUP	Search up (-1 if no limit)
 P_SUB	Extract subpackages
 S_PACK	Extract object of packages
 S_SPACK	Filter subpackages if required
+
+Text Symbols:
+001	Select global source for model data
+002	Select SAP components that are part of initial selection
+003	Handle using components
+004	Infos during processing
+100	Settings for processing model
+200	Customizations

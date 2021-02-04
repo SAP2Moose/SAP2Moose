@@ -16,6 +16,7 @@ Depends on a correct Where Used Index by the SAP standard. You may go to the men
 &FEATURES&
 
 &SELECTION&
+Select SAP components that are part of initial selection:
 Extract object of packages - Select a package for which all elements are to be analyzed. Leave empty when only a specifc element shall be analyzed.
 Filter subpackages if required - You may exclude subpackages when needed.
 Element name - When a specific search is to be done, you specify here for what type of element it is done. This field has a value help.
@@ -26,8 +27,11 @@ Search up (-1 if no limit) - You may restrict the amount of using elements which
 Search down (-1 if no limit) - Specify whether used elements shall be shown. Default is 1, this is enough so that for instance elements of the SAP standard are shown in the diagrams or result. When set to a higher value problems in the extraction may occur when elements are found where the extractor fails due to implementation errors.
 No Where-Used: SAP Interfaces - Normally required to prevent that too many elements are found due to some standard SAP interfaces.
 Classes to read dynamic usages - You may specify a class which provides informations on dynamic usages to the extractor.
+Settings for processing model:
 Download model to file - Do not select when you only want to display the result.
 Default prefix for file - Use to specify which kind of selections is done. Typically each application is selected with a specifc combination of parameters.
+Customizations:
+Interface Methods reversed - Set when a method that implements an interface shall use the method of the interface it implements. This prevents that the arrows will point always from a method to the method which implements an interface method. You will normally not need to set this flag.
 
 &STANDARD_VARIANTS&
 You may save and store report variants to simplify extraction for certain applications.
