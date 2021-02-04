@@ -138,9 +138,9 @@
       <OBJECT>Z2MSE_MOOSE_EXTRACTOR2</OBJECT>
       <LANGU>E</LANGU>
       <TYP>E</TYP>
-      <VERSION>0003</VERSION>
+      <VERSION>0005</VERSION>
       <MASTERLANG>X</MASTERLANG>
-      <TXTLINES>00076</TXTLINES>
+      <TXTLINES>00084</TXTLINES>
       <DOKSTATE>A</DOKSTATE>
      </DOKIL>
      <HEAD>
@@ -150,7 +150,7 @@
       <TDSPRAS>E</TDSPRAS>
       <TDFORM>S_DOCU_SHOW</TDFORM>
       <TDSTYLE>S_DOCUS1</TDSTYLE>
-      <TDVERSION>00003</TDVERSION>
+      <TDVERSION>00005</TDVERSION>
       <TDLINESIZE>072</TDLINESIZE>
      </HEAD>
      <LINES>
@@ -235,6 +235,10 @@
       <TLINE>
        <TDFORMAT>U2</TDFORMAT>
        <TDLINE>&amp;SELECTION&amp;</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Select SAP components that are part of initial selection:</TDLINE>
       </TLINE>
       <TLINE>
        <TDFORMAT>AS</TDFORMAT>
@@ -332,6 +336,10 @@
       </TLINE>
       <TLINE>
        <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Settings for processing model:</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
        <TDLINE>Download model to file - Do not select when you only want to display the</TDLINE>
       </TLINE>
       <TLINE>
@@ -346,6 +354,26 @@
       </TLINE>
       <TLINE>
        <TDLINE>of parameters.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Customizations:</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>AS</TDFORMAT>
+       <TDLINE>Interface Methods reversed - Set when a method that implements an</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>interface shall use the method of the interface it implements. This</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>prevents that the arrows will point always from a method to the method</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>which implements an interface method. You will normally not need to set</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>this flag.</TDLINE>
       </TLINE>
       <TLINE>
        <TDFORMAT>U2</TDFORMAT>
