@@ -1,4 +1,4 @@
-* generated on system T80 at 02.12.2020 on 19:49:27
+* generated on system T57 at 05.02.2021 on 13:24:39
 
 *
 * This is version 1.2.2
@@ -108,6 +108,12 @@ PARAMETERS: p_down AS CHECKBOX DEFAULT 'X',
 *DATA g_parameter_download_file TYPE abap_bool.
 *g_parameter_download_file = p_down.
 SELECTION-SCREEN END OF BLOCK bl_model_settings.
+
+SELECTION-SCREEN BEGIN OF BLOCK bl_customize WITH FRAME TITLE TEXT-200.
+
+PARAMETERS: p_intrev AS CHECKBOX DEFAULT ''.
+
+SELECTION-SCREEN END OF BLOCK bl_customize.
 
 
 
@@ -1632,6 +1638,7 @@ CLASS cl_extr3_element_manager DEFINITION
     DATA famix_access     TYPE REF TO cl_famix_access.
     DATA famix_file_anchor TYPE REF TO cl_famix_file_anchor.
     DATA exclude_found_sap_intf TYPE abap_bool READ-ONLY.
+    DATA interface_use_structure TYPE abap_bool READ-ONLY.
     "! A unique identifier for each object extracted
     TYPES element_id_type TYPE i.
 
@@ -1644,7 +1651,8 @@ CLASS cl_extr3_element_manager DEFINITION
     TYPES associations_type TYPE STANDARD TABLE OF association_type WITH KEY element_id1 element_id2 ass_type association.
     METHODS constructor
       IMPORTING i_model_builder          TYPE REF TO cl_extr3_model_builder
-                i_exclude_found_sap_intf TYPE abap_bool.
+                i_exclude_found_sap_intf TYPE abap_bool
+                i_interface_use_structure     TYPE abap_bool.
     "! Call if an element might be added.
     "! Add the element if it is not already part of the model.
     METHODS add_element
@@ -4598,8 +4606,17 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
 
           ELSE.
 
-            invocation->add( EXPORTING invoced_element_id1  = new_element_id
-                                       invocing_element_id2 = interface_element_id ).
+            IF element_manager->interface_use_structure EQ abap_true.
+
+              invocation->add( EXPORTING invoced_element_id1  = interface_element_id
+                                         invocing_element_id2 = new_element_id ).
+
+            ELSE.
+
+              invocation->add( EXPORTING invoced_element_id1  = new_element_id
+                                         invocing_element_id2 = interface_element_id ).
+
+            ENDIF.
 
           ENDIF.
 
@@ -5737,6 +5754,8 @@ CLASS CL_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
 
     exclude_found_sap_intf = i_exclude_found_sap_intf.
 
+    interface_use_structure = i_interface_use_structure.
+
     next_element_id = 1.
 
     CREATE OBJECT model.
@@ -5968,6 +5987,26 @@ CLASS CL_EXTR3_INITIAL_ELEMENTS IMPLEMENTATION.
                                              i_is_specific = abap_true ).
 
   ENDMETHOD.
+  METHOD _select_class.
+
+    DATA: classes          TYPE REF TO cl_extr3_classes,
+          class_components TYPE cl_extr3_classes=>ty_class_components,
+          cc               TYPE cl_extr3_classes=>ty_class_component.
+    classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
+    classes->add( EXPORTING class            = name_filter
+                            is_specific      = abap_true
+                  IMPORTING new_element_id   = new_element_id
+                            class_components = class_components ).
+
+    LOOP AT class_components INTO cc.
+      classes->add_component(
+        EXPORTING
+          clsname        = cc-clsname
+          cmpname        = cc-cmpname
+          is_specific    = abap_true ).
+    ENDLOOP.
+
+  ENDMETHOD.
   METHOD _select_class_method.
 
     " Select class method
@@ -6055,26 +6094,6 @@ CLASS CL_EXTR3_INITIAL_ELEMENTS IMPLEMENTATION.
       ENDLOOP.
       SORT r_packages BY package.
     ENDIF.
-
-  ENDMETHOD.
-  METHOD _select_class.
-
-    DATA: classes          TYPE REF TO cl_extr3_classes,
-          class_components TYPE cl_extr3_classes=>ty_class_components,
-          cc               TYPE cl_extr3_classes=>ty_class_component.
-    classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
-    classes->add( EXPORTING class            = name_filter
-                            is_specific      = abap_true
-                  IMPORTING new_element_id   = new_element_id
-                            class_components = class_components ).
-
-    LOOP AT class_components INTO cc.
-      classes->add_component(
-        EXPORTING
-          clsname        = cc-clsname
-          cmpname        = cc-cmpname
-          is_specific    = abap_true ).
-    ENDLOOP.
 
   ENDMETHOD.
 ENDCLASS.
@@ -6526,6 +6545,29 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTRACT3 IMPLEMENTATION.
+  METHOD check_if_tested.
+
+    IF g_check_for_test_done EQ 'X'.
+      " Buffer result of call to call stack
+      is_tested = g_is_tested.
+    ELSE.
+
+      DATA et_callstack  TYPE sys_callst  .
+      CALL FUNCTION 'SYSTEM_CALLSTACK'
+        IMPORTING
+          et_callstack = et_callstack.
+
+      READ TABLE et_callstack TRANSPORTING NO FIELDS WITH KEY eventname = 'INVOKE_TEST_METHOD'.
+
+      IF sy-subrc EQ 0.
+        g_is_tested = 'X'.
+        is_tested = 'X'.
+        g_check_for_test_done = 'X'.
+      ENDIF.
+
+    ENDIF.
+
+  ENDMETHOD.
   METHOD constructor.
 
   ENDMETHOD.
@@ -6570,29 +6612,6 @@ CLASS CL_EXTRACT3 IMPLEMENTATION.
     element_manager->collect_infos( sysid ).
 
     mse_model = element_manager->make_model( ).
-
-  ENDMETHOD.
-  METHOD check_if_tested.
-
-    IF g_check_for_test_done EQ 'X'.
-      " Buffer result of call to call stack
-      is_tested = g_is_tested.
-    ELSE.
-
-      DATA et_callstack  TYPE sys_callst  .
-      CALL FUNCTION 'SYSTEM_CALLSTACK'
-        IMPORTING
-          et_callstack = et_callstack.
-
-      READ TABLE et_callstack TRANSPORTING NO FIELDS WITH KEY eventname = 'INVOKE_TEST_METHOD'.
-
-      IF sy-subrc EQ 0.
-        g_is_tested = 'X'.
-        is_tested = 'X'.
-        g_check_for_test_done = 'X'.
-      ENDIF.
-
-    ENDIF.
 
   ENDMETHOD.
 ENDCLASS.
@@ -6648,7 +6667,8 @@ START-OF-SELECTION.
   CREATE OBJECT element_manager
     EXPORTING
       i_model_builder          = model_builder
-      i_exclude_found_sap_intf = p_ex.
+      i_exclude_found_sap_intf = p_ex
+      i_interface_use_structure = p_intrev.
 
   model_builder->initialize( i_element_manager = element_manager
                               i_dynamic_read = p_dyn ).
