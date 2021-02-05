@@ -47,7 +47,7 @@ There may be minor issues in older releases due to eroneous usage of modern ABAP
 
 # Installation to participate in development
 
-Use abapGit to install the coding in a local system. The package name has to be Z2MSE (Required so that test objects have the correct names).
+Use abapGit to install the coding in a local system. The package name has to be Z2MSE (Required so that test objects have the correct names). The folder logic is prefix, but you should still use package Z2MSE to ensure that all tests work correct.
 
 # abapGit for development
 
