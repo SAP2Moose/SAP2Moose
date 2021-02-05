@@ -15,7 +15,8 @@ CLASS ltcl_main IMPLEMENTATION.
   METHOD main.
     model_builder = NEW #( ).
     f_cut = NEW #( i_model_builder = model_builder
-                   i_exclude_found_sap_intf = abap_true ).
+                   i_exclude_found_sap_intf = abap_true
+                   i_interface_use_structure = abap_false ).
     DATA element TYPE REF TO z2mse_extr3_elements_mock.
     DATA element_act TYPE REF TO z2mse_extr3_elements.
     element = NEW #( i_element_manager = f_cut ).
