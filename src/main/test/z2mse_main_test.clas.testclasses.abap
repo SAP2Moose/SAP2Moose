@@ -8,7 +8,6 @@ CLASS ltcl_main DEFINITION FINAL FOR TESTING
     METHODS:
       setup,
       z2mse_test_initial_selection FOR TESTING RAISING cx_static_check,
-      z2mse_test_initial_selectn_v2 FOR TESTING RAISING cx_static_check,
       z2mse_test_initial_selection2 FOR TESTING RAISING cx_static_check,
       specific_search_method FOR TESTING RAISING cx_static_check,
       specific_search_attribute FOR TESTING RAISING cx_static_check,
@@ -28,16 +27,6 @@ CLASS ltcl_main IMPLEMENTATION.
 
     DATA(test) = NEW z2mse_main_test( ).
     test->z2mse_test_initial_selection( ).
-
-  ENDMETHOD.
-
-  METHOD z2mse_test_initial_selectn_v2.
-
-    " The SAP2Moose extractor does not analyze test methods.
-    " Performing the test in the normal methods add them to the extracted model data.
-
-    DATA(test) = NEW z2mse_main_test( ).
-    test->z2mse_test_initial_selectn_v2( ).
 
   ENDMETHOD.
 

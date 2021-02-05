@@ -863,9 +863,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
           ELSE.
 
-            IF sy-datum EQ '20210204'.
-
-              " Test #131
+            IF element_manager->interface_use_structure EQ abap_true.
 
               invocation->add( EXPORTING invoced_element_id1  = interface_element_id
                                          invocing_element_id2 = new_element_id ).

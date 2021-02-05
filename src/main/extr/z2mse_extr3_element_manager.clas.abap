@@ -13,6 +13,7 @@ CLASS z2mse_extr3_element_manager DEFINITION
     DATA famix_access     TYPE REF TO z2mse_famix_access.
     DATA famix_file_anchor TYPE REF TO z2mse_famix_file_anchor.
     DATA exclude_found_sap_intf TYPE abap_bool READ-ONLY.
+    DATA interface_use_structure TYPE abap_bool READ-ONLY.
     "! A unique identifier for each object extracted
     TYPES element_id_type TYPE i.
 
@@ -25,7 +26,8 @@ CLASS z2mse_extr3_element_manager DEFINITION
     TYPES associations_type TYPE STANDARD TABLE OF association_type WITH KEY element_id1 element_id2 ass_type association.
     METHODS constructor
       IMPORTING i_model_builder          TYPE REF TO z2mse_extr3_model_builder
-                i_exclude_found_sap_intf TYPE abap_bool.
+                i_exclude_found_sap_intf TYPE abap_bool
+                i_interface_use_structure     TYPE abap_bool.
     "! Call if an element might be added.
     "! Add the element if it is not already part of the model.
     METHODS add_element
@@ -132,6 +134,8 @@ CLASS z2mse_extr3_element_manager IMPLEMENTATION.
     model_builder = i_model_builder.
 
     exclude_found_sap_intf = i_exclude_found_sap_intf.
+
+    interface_use_structure = i_interface_use_structure.
 
     next_element_id = 1.
 

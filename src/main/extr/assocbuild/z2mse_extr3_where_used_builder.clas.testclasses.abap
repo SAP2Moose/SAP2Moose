@@ -22,7 +22,8 @@ CLASS ltcl_test IMPLEMENTATION.
     CREATE OBJECT element_manager
       EXPORTING
         i_model_builder          = model_builder
-        i_exclude_found_sap_intf = abap_true.
+        i_exclude_found_sap_intf = abap_true
+        i_interface_use_structure = abap_false.
     f_cut = NEW #( i_element_manager = element_manager ).
 
     f_cut->set_dynamic_read(
