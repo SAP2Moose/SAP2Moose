@@ -10,7 +10,8 @@ CLASS z2mse_main_test DEFINITION
       specific_search_attribute,
       specific_search_class,
       specific_search_program,
-      specific_search_function.
+      specific_search_function,
+      z2mse_test_2021.
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -958,6 +959,176 @@ CLASS z2mse_main_test IMPLEMENTATION.
         act                  = equalized_harmonized_mse_act
         exp                  = equalized_harmonized_mse_exp
         msg                  = msg ).
+
+  ENDMETHOD.
+
+
+  METHOD z2mse_test_2021.
+
+    DATA: mse_model_act TYPE z2mse_model=>lines_type.
+    DATA: nothing_done_act TYPE abap_bool.
+    DATA(top_packages) = VALUE z2mse_extr3_initial_elements=>ty_s_pack( ( sign = 'I' option = 'EQ' low = 'Z2MSE_TEST_2021' ) ).
+    DATA(sub_packages_filter) = VALUE z2mse_extr3_initial_elements=>ty_s_pack( ).
+
+    DATA(initial_elements) = NEW z2mse_extr3_initial_elements( ).
+    initial_elements->select_packages( EXPORTING top_packages           = top_packages
+                                                 sub_packages_filter    = sub_packages_filter
+                                                 including_sub_packages = abap_true ).
+
+    DATA(model_builder) = NEW z2mse_extr3_model_builder( ).
+
+    DATA(element_manager) = NEW z2mse_extr3_element_manager( i_model_builder          = model_builder
+                                                             i_exclude_found_sap_intf = abap_true
+                                                             i_interface_use_structure = abap_false ).
+
+    model_builder->initialize( i_element_manager = element_manager ).
+
+    DATA(f_cut) = NEW z2mse_extract3( ).
+    f_cut->extract( EXPORTING model_builder            = model_builder
+                              element_manager          = element_manager
+                              initial_elements         = initial_elements
+                              i_search_up              = 2
+                              i_search_down            = 2
+                              i_exclude_found_sap_intf = abap_true
+                    IMPORTING mse_model             = mse_model_act
+                              nothing_done          = nothing_done_act ).
+
+    DATA: equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
+
+    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
+
+    equalized_harmonized_mse_exp = VALUE #( ).
+
+    DATA maker TYPE REF TO z2mse_mse_harmonize_maker.
+
+    maker = NEW #( ).
+
+    maker->to_change = equalized_harmonized_mse_exp.
+
+    maker->add_custom_source_language( |SAP| ).
+
+    maker->add_package( package = |Z2MSE_TEST_2021| ).
+
+*    maker->add_function_group( EXPORTING name          = |Z2MSE_TEST2_I_FGR_A|
+*                                         parentpackage = |Z2MSE_TEST2_INITIAL| ).
+*
+*    maker->add_function( EXPORTING       function      = |Z2MSE_TEST2_I_FUNCTION_A| ).
+*
+*    " This is to be found with the down search for functions
+*
+*    maker->add_package( package = |Z2MSE_TEST2_M1| ).
+*
+*    maker->add_function_group( EXPORTING name          = |Z2MSE_TEST2_M1_FGR_A|
+*                                         parentpackage = |Z2MSE_TEST2_M1| ).
+*
+*    maker->add_function( EXPORTING       function      = |Z2MSE_TEST2_M1_FUNCTION_A| ).
+*
+*    maker->usage( EXPORTING              using_group = |FGR-Z2MSE_TEST2_I_FGR_A|
+*                                         using       = |F-Z2MSE_TEST2_I_FUNCTION_A|
+*                                         used_group  = |FGR-Z2MSE_TEST2_M1_FGR_A|
+*                                         used        = |F-Z2MSE_TEST2_M1_FUNCTION_A| ).
+*
+*    " This is now found with the up search for functions:
+*
+*    maker->add_package( package = |Z2MSE_TEST2_P1| ).
+*
+*    maker->add_function_group( EXPORTING name          = |Z2MSE_TEST2_P1_FGR_A|
+*                                         parentpackage = |Z2MSE_TEST2_P1| ).
+*
+*    maker->add_function( EXPORTING       function      = |Z2MSE_TEST2_P1_FUNCTION_A| ).
+*
+*    maker->usage( EXPORTING              used_group  = |FGR-Z2MSE_TEST2_I_FGR_A|
+*                                         used        = |F-Z2MSE_TEST2_I_FUNCTION_A| ).
+*
+*    " Test downsearch for programs
+*
+*    maker->add_program( EXPORTING        name          = |Z2MSE_TEST2_I_PROGRAM|
+*                                         parentpackage = |Z2MSE_TEST2_INITIAL| ).
+*
+*    " Test function used by program is found
+*
+*    maker->usage( EXPORTING              used_group  = |FGR-Z2MSE_TEST2_M1_FGR_A|
+*                                         used        = |F-Z2MSE_TEST2_M1_FUNCTION_A| ).
+
+    " Test class used by program is found
+
+    maker->add_class( EXPORTING          name          = |Z2MSE_TEST_CL_CC|
+                                         parentpackage = |Z2MSE_TEST_2021| ).
+
+    maker->add_method( EXPORTING         method  = |Z2MSE_TEST_IF_C1~METHOD2|
+                                         at_line = 8 ).
+
+    maker->add_class( EXPORTING          name          = |Z2MSE_TEST_CL_CP|
+                                         parentpackage = |Z2MSE_TEST_2021| ).
+
+    maker->add_method( EXPORTING         method  = |Z2MSE_TEST_IF_C1~METHOD2|
+                                         at_line = 8 ).
+
+    maker->add_interface( EXPORTING     name           = |Z2MSE_TEST_IF_C1|
+                                        parentpackage  = |Z2MSE_TEST_2021| ).
+
+    maker->add_interface_method( EXPORTING method    = |METHOD2|
+                                        at_line   = 5 ).
+
+    maker->usage( EXPORTING using_group = |Z2MSE_TEST_CL_CP|
+                            using       = |Z2MSE_TEST_IF_C1~METHOD2|
+                            used_group  = |Z2MSE_TEST_CL_CC|
+                            used        = |Z2MSE_TEST_IF_C1~METHOD2| ).
+
+    maker->usage( EXPORTING using_group = |Z2MSE_TEST_IF_C1|
+                            using       = |METHOD2|
+                            used_group  = |Z2MSE_TEST_CL_CC|
+                            used        = |Z2MSE_TEST_IF_C1~METHOD2| ).
+
+*    maker->usage( EXPORTING              using_group = ||
+*                                         using       = |Z2MSE_TEST2_I_PROGRAM|
+*                                         used_group  = |Z2MSE_TEST2_M1_CL_A|
+*                                         used        = |STATIC_METHOD_A| ).
+
+*    " Test function used by function is found in down search
+*
+*    maker->add_package( package = |Z2MSE_TEST2_M2| ).
+*
+*    maker->add_function_group( EXPORTING name          = |Z2MSE_TEST2_M2_FGR_A|
+*                                         parentpackage = |Z2MSE_TEST2_M2| ).
+*
+*    maker->add_function( EXPORTING       function      = |Z2MSE_TEST2_M2_FUNCTION_A| ).
+*
+*    maker->usage( EXPORTING              using_group = |FGR-Z2MSE_TEST2_M1_FGR_A|
+*                                         using       = |F-Z2MSE_TEST2_M1_FUNCTION_A|
+*                                         used_group  = |FGR-Z2MSE_TEST2_M2_FGR_A|
+*                                         used        = |F-Z2MSE_TEST2_M2_FUNCTION_A| ).
+*
+*    " Test function used by function is found in up search
+*
+*    maker->add_package( package = |Z2MSE_TEST2_P2| ).
+*
+*    maker->add_function_group( EXPORTING name          = |Z2MSE_TEST2_P2_FGR_A|
+*                                         parentpackage = |Z2MSE_TEST2_P2| ).
+*
+*    maker->add_function( EXPORTING       function      = |Z2MSE_TEST2_P2_FUNCTION_A| ).
+*
+*    maker->usage( EXPORTING              used_group  = |FGR-Z2MSE_TEST2_P1_FGR_A|
+*                                         used        = |F-Z2MSE_TEST2_P1_FUNCTION_A| ).
+*
+*    " Test program that uses a program is found in up search
+*
+*    maker->add_program( EXPORTING        name          = |Z2MSE_TEST2_P1_PROGRAM|
+*                                         parentpackage = |Z2MSE_TEST2_P1| ).
+*
+*    maker->usage(  EXPORTING             used_group  = ||
+*                                         used        = |Z2MSE_TEST2_I_PROGRAM| ).
+
+    equalized_harmonized_mse_exp = maker->to_change.
+
+    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
+    cl_abap_unit_assert=>assert_equals(
+      EXPORTING
+        act                  = equalized_harmonized_mse_act
+        exp                  = equalized_harmonized_mse_exp
+        msg                  = 'Wrong mse file' ).
 
   ENDMETHOD.
 

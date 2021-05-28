@@ -204,6 +204,24 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
       END-TEST-SEAM.
 
+      " Redefined methods may be in table SEOREDEF
+
+      DATA: redefined_methods TYPE STANDARD TABLE OF seoredef WITH DEFAULT KEY,
+            rm                TYPE seoredef.
+
+      SELECT * FROM seoredef INTO TABLE redefined_methods WHERE clsname = class.
+      DATA: cp TYPE ty_class_component.
+      LOOP AT redefined_methods INTO rm.
+        CLEAR cp.
+        cp-clsname = class.
+        cp-cmpname = rm-mtdname.
+        cp-cmptype = 1. " Method
+        cp-mtdtype = 0. " Method
+        APPEND cp TO class_components.
+      ENDLOOP.
+
+
+
       DATA: redefined_class_components TYPE ty_class_components,
             redefined_class_component  TYPE ty_class_component.
 
@@ -212,6 +230,9 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       LOOP AT redefined_class_components INTO redefined_class_component.
         INSERT redefined_class_component INTO TABLE class_components.
       ENDLOOP.
+
+      SORT class_components.
+      DELETE ADJACENT DUPLICATES FROM class_components.
 
       LOOP AT class_components INTO class_component.
 
@@ -747,6 +768,26 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
           INTO (found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = clsname
                                                                                    AND cmpname = cmpname.
       END-TEST-SEAM.
+
+      IF found_class_name IS INITIAL.
+        " Is it a redefined method?
+
+        DATA: redefined_methods TYPE STANDARD TABLE OF seoredef WITH DEFAULT KEY,
+              rm                TYPE seoredef.
+
+        SELECT * FROM seoredef INTO TABLE redefined_methods WHERE clsname = clsname
+                                                              AND mtdname = cmpname.
+
+        LOOP AT redefined_methods INTO rm.
+          found_class_name = clsname.
+          found_cmpname = rm-mtdname.
+          found_cmptype = 1. " Method
+          found_mtdtype = 0. " Method
+          " A method name has to be unique, so assume only a single entry here
+          EXIT.
+        ENDLOOP.
+
+      ENDIF.
 
       IF found_class_name IS NOT INITIAL.
 
