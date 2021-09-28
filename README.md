@@ -1,4 +1,4 @@
-<code>This project is actively maintained and used (July 2021). Please open an issue to get support :-)</code>
+<code>This project is actively maintained and used (September 2021). Please open an issue to get support :-)</code>
 
 # Installation to analyze applications
 
