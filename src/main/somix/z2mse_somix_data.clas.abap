@@ -7,6 +7,8 @@ class Z2MSE_SOMIX_DATA definition
 public section.
 protected section.
 private section.
+
+  data IS_PERSISTENT type ABAP_BOOL .
 ENDCLASS.
 
 

@@ -11,6 +11,14 @@
     <FIXPT>X</FIXPT>
     <UNICODE>X</UNICODE>
    </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>Z2MSE_SOMIX_COMPONENT</CLSNAME>
+     <CMPNAME>IS_PART_OF</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>SOMIX.Component</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
   </asx:values>
  </asx:abap>
 </abapGit>

@@ -1,6 +1,7 @@
 class Z2MSE_SOMIX_COUPLING definition
   public
-  inheriting from Z2MSE_SOMIX_ELEMENT
+  inheriting from Z2MSE_SOMIX_ENTITY
+  abstract
   create public .
 
 public section.

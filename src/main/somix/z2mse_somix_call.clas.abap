@@ -7,6 +7,9 @@ class Z2MSE_SOMIX_CALL definition
 public section.
 protected section.
 private section.
+
+  data CALLER type ref to Z2MSE_SOMIX_CODE .
+  data CALLED type ref to Z2MSE_SOMIX_CODE .
 ENDCLASS.
 
 

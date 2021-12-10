@@ -1,5 +1,6 @@
 class Z2MSE_SOMIX_EXTRACTION definition
   public
+  inheriting from Z2MSE_SOMIX_ENTITY
   abstract
   create public .
 

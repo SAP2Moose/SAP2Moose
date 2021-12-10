@@ -6,6 +6,9 @@ class Z2MSE_SOMIX_COMPONENT definition
 
 public section.
 protected section.
+
+  data IS_PART_OF type ref to Z2MSE_SOMIX_COMPONENT .
+  data PART_SPECIFICATION type STRING .
 private section.
 ENDCLASS.
 
