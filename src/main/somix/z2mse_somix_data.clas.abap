@@ -5,6 +5,10 @@ class Z2MSE_SOMIX_DATA definition
   create public .
 
 public section.
+
+  methods CONSTRUCTOR
+    importing
+      !MODEL type ref to Z2MSE_MODEL .
 protected section.
 private section.
 
@@ -14,4 +18,10 @@ ENDCLASS.
 
 
 CLASS Z2MSE_SOMIX_DATA IMPLEMENTATION.
+
+
+  METHOD constructor.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'SOMIX.Data'.
+  ENDMETHOD.
 ENDCLASS.

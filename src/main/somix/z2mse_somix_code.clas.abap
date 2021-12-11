@@ -5,6 +5,10 @@ class Z2MSE_SOMIX_CODE definition
   create public .
 
 public section.
+
+  methods CONSTRUCTOR
+    importing
+      !MODEL type ref to Z2MSE_MODEL .
 protected section.
 private section.
 ENDCLASS.
@@ -12,4 +16,10 @@ ENDCLASS.
 
 
 CLASS Z2MSE_SOMIX_CODE IMPLEMENTATION.
+
+
+  method CONSTRUCTOR.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'SOMIX.Code'.
+  endmethod.
 ENDCLASS.

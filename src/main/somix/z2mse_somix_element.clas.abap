@@ -1,18 +1,19 @@
-CLASS z2mse_somix_element DEFINITION
-  PUBLIC
-  INHERITING FROM z2mse_somix_entity
-  ABSTRACT
-  CREATE PUBLIC .
+class Z2MSE_SOMIX_ELEMENT definition
+  public
+  inheriting from Z2MSE_SOMIX_ENTITY
+  abstract
+  create public .
 
-  PUBLIC SECTION.
-    METHODS add
-      IMPORTING
-        !name_group                   TYPE clike OPTIONAL
-        !name                         TYPE clike
-        technical_type                TYPE clike OPTIONAL
-      EXPORTING
-        VALUE(exists_already_with_id) TYPE i
-        VALUE(id)                     TYPE i .
+public section.
+
+  methods ADD
+    importing
+      !NAME_GROUP type CLIKE optional
+      !NAME type CLIKE
+      !TECHNICAL_TYPE type CLIKE
+    exporting
+      value(EXISTS_ALREADY_WITH_ID) type I
+      value(ID) type I .
   PROTECTED SECTION.
 
     DATA name TYPE string .
@@ -24,7 +25,8 @@ ENDCLASS.
 
 
 
-CLASS z2mse_somix_element IMPLEMENTATION.
+CLASS Z2MSE_SOMIX_ELEMENT IMPLEMENTATION.
+
 
   METHOD add.
     g_model->add_entity( EXPORTING elementname = g_elementname
@@ -34,11 +36,11 @@ CLASS z2mse_somix_element IMPLEMENTATION.
                                         name = name
                               IMPORTING exists_already_with_id = exists_already_with_id
                                         processed_id = id ).
-    IF technical_type IS SUPPLIED.
-      g_model->add_string( EXPORTING element_id     = id
-                                     attribute_name = 'technicalType'
-                                     string         = technical_type ).
-    ENDIF.
+
+    g_model->add_string( EXPORTING element_id     = id
+                                   attribute_name = 'technicalType'
+                                   string         = technical_type ).
+
     g_last_used_id = id.
   ENDMETHOD.
 ENDCLASS.

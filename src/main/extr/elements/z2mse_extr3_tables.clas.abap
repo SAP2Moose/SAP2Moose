@@ -143,8 +143,20 @@ CLASS Z2MSE_EXTR3_TABLES IMPLEMENTATION.
 
     DATA dummy_attribute_id TYPE i.
     " SAP_2_FAMIX_56      Add a dummy attribute with the name of the table
-    element_manager->famix_attribute->add( EXPORTING name                   = element-tabname
-                          IMPORTING id                     = dummy_attribute_id ).
+
+    IF element_manager->use_somix EQ 'X'.
+
+      element_manager->somix_data->add( EXPORTING name           = element-tabname
+                                                  name_group     = ng_sap_table
+                                                  technical_type = z2mse_extract3=>modifier_dbtable
+                                        IMPORTING id                     = dummy_attribute_id ).
+
+    ELSE.
+
+      element_manager->famix_attribute->add( EXPORTING name                   = element-tabname
+                                             IMPORTING id                     = dummy_attribute_id ).
+
+    ENDIF.
 
     element_manager->famix_attribute->set_parent_type( EXPORTING element_id         = dummy_attribute_id
                                                 parent_id          = last_id ).

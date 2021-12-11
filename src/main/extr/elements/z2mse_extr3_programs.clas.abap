@@ -347,16 +347,27 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
 
     DATA dummy_method_id TYPE i.
 
-    element_manager->famix_method->add( EXPORTING name = element-external_program_name
-                                        IMPORTING id   = dummy_method_id ).
+    IF element_manager->use_somix EQ 'X'.
 
-    element_manager->famix_method->set_signature( element_id = dummy_method_id
-                                                   signature = element-external_program_name ).
+      element_manager->somix_code->add( EXPORTING name           = element-external_program_name
+                                                  name_group     = z2mse_extr3=>ng_abap_program
+                                                  technical_type = z2mse_extract3=>modifier_program
+                                        IMPORTING id             = dummy_method_id ).
 
-    element_manager->famix_method->set_parent_type( EXPORTING element_id        = dummy_method_id
-                                                              parent_element    = 'FAMIX.Class'
-                                                              parent_name_group = name_group
-                                                              parent_name       = name_of_mapped_class ).
+    ELSE.
+
+      element_manager->famix_method->add( EXPORTING name = element-external_program_name
+                                          IMPORTING id   = dummy_method_id ).
+
+      element_manager->famix_method->set_signature( element_id = dummy_method_id
+                                                     signature = element-external_program_name ).
+
+      element_manager->famix_method->set_parent_type( EXPORTING element_id        = dummy_method_id
+                                                                parent_element    = 'FAMIX.Class'
+                                                                parent_name_group = name_group
+                                                                parent_name       = name_of_mapped_class ).
+
+    ENDIF.
 
 
     element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_program

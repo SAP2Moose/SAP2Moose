@@ -12,6 +12,9 @@ public section.
     ty_string_range TYPE RANGE OF char45 .
 
   constants TECHTYPE_ABAPPACKAGE type STRING value 'ABAPPackage' ##NO_TEXT.
+  constants TECHTYPE_ABAPMETHOD type STRING value 'ABAPMethod' ##NO_TEXT.
+  constants TECHTYPE_ABAPCLASSATTRIBUTE type STRING value 'ABAPClassAttribute' ##NO_TEXT.
+  constants TECHTYPE_WEBDYNPRO_CONTROLLER type STRING value 'ABAPWebDynproController' ##NO_TEXT.
   constants MODIFIER_ABAPGLOBALCLASS type STRING value 'ABAPGlobalClass' ##NO_TEXT.
   constants MODIFIER_ABAPGLOBALINTERFACE type STRING value 'ABAPGlobalInterface' ##NO_TEXT.
   constants MODIFIER_WEBDYNPRO_COMPONENT type STRING value 'ABAPWebDynproComponent' ##NO_TEXT.

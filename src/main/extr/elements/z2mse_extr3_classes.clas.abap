@@ -635,7 +635,20 @@ CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
 
 
 *    DATA last_id TYPE i.!
-          element_manager->famix_attribute->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
+
+          IF element_manager->use_somix EQ 'X'.
+
+            element_manager->somix_data->add( EXPORTING name = element_comp-cmpname
+                                                        ##TODO " namegroup needed?
+                                                        technical_type = z2mse_extract3=>techtype_abapclassattribute
+                                              IMPORTING id = last_id ).
+
+          ELSE.
+
+            element_manager->famix_attribute->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
+
+          ENDIF.
+
           element_manager->famix_attribute->set_parent_type( EXPORTING element_id = last_id
                                                         parent_element = 'FAMIX.Class'
                                                         parent_name_group = ng_abap_class
@@ -667,7 +680,19 @@ CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
         WHEN method_type OR event_type.
           " SAP_2_FAMIX_15        Map methods of classes to FAMIX.Method
           " SAP_2_FAMIX_16        Map methods of interfaces to FAMIX.Method
-          element_manager->famix_method->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
+
+          IF element_manager->use_somix EQ 'X'.
+
+            element_manager->somix_code->add( EXPORTING name = element_comp-cmpname
+                                                        name_group = z2mse_extr3=>ng_abap_method
+                                                        technical_type = z2mse_extract3=>techtype_abapmethod
+                                              IMPORTING id = last_id ).
+
+          ELSE.
+
+            element_manager->famix_method->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
+
+          ENDIF.
 
           " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
           " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
