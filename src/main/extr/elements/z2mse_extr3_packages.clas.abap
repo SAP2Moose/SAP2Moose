@@ -50,11 +50,8 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_packages IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_PACKAGES IMPLEMENTATION.
 
-  METHOD clear.
-    CLEAR instance.
-  ENDMETHOD.
 
   METHOD add.
 
@@ -87,6 +84,15 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
+
+
+  METHOD collect_infos.
+  ENDMETHOD.
+
+
   METHOD devclass.
 
     DATA element TYPE element_type.
@@ -110,10 +116,6 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD collect_infos.
-  ENDMETHOD.
-
-
   METHOD make_model.
 
     DATA element TYPE element_type.
@@ -121,8 +123,31 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
     ASSERT sy-subrc EQ 0.
 
-    element_manager->famix_package->add( name       = element-devclass
-                                         name_group = ng_abap_package ).
+    IF element_manager->use_somix EQ 'X'.
+
+      element_manager->somix_grouping->add( name            = element-devclass
+                                            name_group      = ng_abap_package
+                                            technical_type  = z2mse_extract3=>techtype_abappackage ).
+
+    ELSE.
+
+      element_manager->famix_package->add( name       = element-devclass
+                                           name_group = ng_abap_package ).
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD name.
+
+    DATA devclass TYPE devclass.
+    devclass = devclass( i_element_id = element_id ).
+
+    element_type = |ABAPPackage|.
+    parent_name = ||.
+    name = devclass.
+
 
   ENDMETHOD.
 
@@ -151,16 +176,4 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-  METHOD name.
-
-    DATA devclass TYPE devclass.
-    devclass = devclass( i_element_id = element_id ).
-
-    element_type = |ABAPPackage|.
-    parent_name = ||.
-    name = devclass.
-
-
-  ENDMETHOD.
-
 ENDCLASS.

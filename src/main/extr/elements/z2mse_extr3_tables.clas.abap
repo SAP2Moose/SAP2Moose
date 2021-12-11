@@ -39,11 +39,8 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_tables IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_TABLES IMPLEMENTATION.
 
-  METHOD clear.
-    CLEAR instance.
-  ENDMETHOD.
 
   METHOD add.
 
@@ -85,6 +82,16 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
+
+
+  METHOD collect_infos.
+  ENDMETHOD.
+
+
   METHOD get_instance.
     IF instance IS NOT BOUND.
       CREATE OBJECT instance
@@ -93,10 +100,6 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
     ENDIF.
     instance->type = table_type.
     r_instance = instance.
-  ENDMETHOD.
-
-
-  METHOD collect_infos.
   ENDMETHOD.
 
 
@@ -112,10 +115,20 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
 
     " SAP_2_FAMIX_54        Map database tables to FAMIX Class
     " SAP_2_FAMIX_58        Mark the FAMIX Class with the attribute modifiers = 'DBTable'
-    element_manager->famix_class->add( EXPORTING name_group             = 'ABAP_TABLE'
-                                                 name                   = element-tabname
-                                                 modifiers              = z2mse_extract3=>modifier_dbtable
-                                       IMPORTING id         = last_id ).
+
+    IF element_manager->use_somix EQ 'X'.
+
+      " Determine later how to group database table
+
+    ELSE.
+
+      element_manager->famix_class->add( EXPORTING name_group             = 'ABAP_TABLE'
+                                                   name                   = element-tabname
+                                                   modifiers              = z2mse_extract3=>modifier_dbtable
+                                         IMPORTING id         = last_id ).
+
+    ENDIF.
+
     DATA association TYPE z2mse_extr3_element_manager=>association_type.
     LOOP AT associations INTO association WHERE element_id1 = element_id
                                             AND association->type = z2mse_extr3_association=>parent_package_ass.
@@ -152,17 +165,6 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD table_name.
-
-    DATA element TYPE element_type.
-
-    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = i_element_id.
-    ASSERT sy-subrc EQ 0.
-
-    r_result = element-tabname.
-
-  ENDMETHOD.
-
   METHOD name.
 
     DATA: table TYPE tabname.
@@ -175,4 +177,15 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD table_name.
+
+    DATA element TYPE element_type.
+
+    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = i_element_id.
+    ASSERT sy-subrc EQ 0.
+
+    r_result = element-tabname.
+
+  ENDMETHOD.
 ENDCLASS.

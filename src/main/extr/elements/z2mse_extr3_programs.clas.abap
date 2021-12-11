@@ -94,7 +94,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_programs IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
 
 
   METHOD add.
@@ -303,10 +303,23 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
     " SAP_2_FAMIX_54        Map database tables to FAMIX Class
     " SAP_2_FAMIX_58        Mark the FAMIX Class with the attribute modifiers = 'DBTable'
-    element_manager->famix_class->add( EXPORTING name_group             = name_group
-                                                 name                   = name_of_mapped_class
-                                                 modifiers              = modifier
-                                       IMPORTING id         = last_id ).
+
+    IF element_manager->use_somix EQ 'X'.
+
+      element_manager->somix_grouping->add( EXPORTING name_group      = name_group
+                                                      name            = name_of_mapped_class
+                                                      technical_type  = modifier
+                                            IMPORTING id              = last_id ).
+
+    ELSE.
+
+      element_manager->famix_class->add( EXPORTING name_group             = name_group
+                                                   name                   = name_of_mapped_class
+                                                   modifiers              = modifier
+                                         IMPORTING id         = last_id ).
+
+    ENDIF.
+
     DATA association TYPE z2mse_extr3_element_manager=>association_type.
 *    DATA: package_set TYPE abap_bool.
     LOOP AT associations INTO association WHERE element_id1 = element_id
@@ -622,7 +635,4 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
     CONCATENATE 'FGR-' i_element-program_attribute_1 INTO name_of_mapped_class.
 
   ENDMETHOD.
-
-
-
 ENDCLASS.

@@ -11,6 +11,8 @@ public section.
 protected section.
 
   data G_MODEL type ref to Z2MSE_MODEL .
+  data G_ELEMENTNAME type STRING .
+  data G_LAST_USED_ID type I .
 private section.
 ENDCLASS.
 

@@ -147,7 +147,7 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_classes IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
 
 
   METHOD add.
@@ -504,6 +504,39 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD is_redefinition_of_method.
+
+    DATA: invoced  TYPE element_comp_type,
+          invocing TYPE element_comp_type.
+
+    READ TABLE elements_comp_element_id INTO invoced WITH KEY element_id = invoced_element_id1.
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
+    READ TABLE elements_comp_element_id INTO invocing WITH KEY element_id = invocing_element_id2.
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
+    IF invoced-cmpname <> invocing-cmpname.
+      RETURN.
+    ENDIF.
+
+    DATA: r TYPE redefined_method_type.
+
+    READ TABLE redefined_methods INTO r WITH TABLE KEY method = invocing-cmpname
+                                                       clsname = invocing-clsname
+                                                       defined_in_clsname = invoced-clsname.
+
+    IF sy-subrc EQ 0.
+      r_result = 'X'.
+    ENDIF.
+
+
+  ENDMETHOD.
+
+
   METHOD make_model.
 
     DATA element TYPE element_type.
@@ -517,10 +550,21 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       IF element-clstype EQ is_class_type.
         " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
         " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
-        element_manager->famix_class->add( EXPORTING name_group = ng_abap_class
-                                                     name       = element-class_name
-                                                     modifiers  = z2mse_extract3=>modifier_abapglobalclass
-                                           IMPORTING id         = last_id ).
+        IF element_manager->use_somix EQ 'X'.
+
+          element_manager->somix_grouping->add( EXPORTING name_group      = ng_abap_class
+                                                          name            = element-class_name
+                                                          technical_type  = z2mse_extract3=>modifier_abapglobalclass
+                                                IMPORTING id              = last_id ).
+
+        ELSE.
+
+          element_manager->famix_class->add( EXPORTING name_group = ng_abap_class
+                                                       name       = element-class_name
+                                                       modifiers  = z2mse_extract3=>modifier_abapglobalclass
+                                             IMPORTING id         = last_id ).
+
+        ENDIF.
 
         IF element-adt_link IS NOT INITIAL.
 
@@ -1021,37 +1065,4 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
-
-  METHOD is_redefinition_of_method.
-
-    DATA: invoced  TYPE element_comp_type,
-          invocing TYPE element_comp_type.
-
-    READ TABLE elements_comp_element_id INTO invoced WITH KEY element_id = invoced_element_id1.
-    IF sy-subrc <> 0.
-      RETURN.
-    ENDIF.
-
-    READ TABLE elements_comp_element_id INTO invocing WITH KEY element_id = invocing_element_id2.
-    IF sy-subrc <> 0.
-      RETURN.
-    ENDIF.
-
-    IF invoced-cmpname <> invocing-cmpname.
-      RETURN.
-    ENDIF.
-
-    DATA: r TYPE redefined_method_type.
-
-    READ TABLE redefined_methods INTO r WITH TABLE KEY method = invocing-cmpname
-                                                       clsname = invocing-clsname
-                                                       defined_in_clsname = invoced-clsname.
-
-    IF sy-subrc EQ 0.
-      r_result = 'X'.
-    ENDIF.
-
-
-  ENDMETHOD.
-
 ENDCLASS.

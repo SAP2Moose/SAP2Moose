@@ -65,21 +65,8 @@ ENDCLASS.
 
 
 
-CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
+CLASS Z2MSE_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
 
-  METHOD clear.
-    CLEAR instance.
-  ENDMETHOD.
-
-  METHOD get_instance.
-    IF instance IS NOT BOUND.
-      CREATE OBJECT instance
-        EXPORTING
-          i_element_manager = element_manager.
-    ENDIF.
-    instance->type = web_dynpro_comps_type.
-    r_instance = instance.
-  ENDMETHOD.
 
   METHOD add.
     " WDY_COMPONENT
@@ -146,6 +133,168 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD add_component.
+
+    add( EXPORTING wdy_component_name = wdy_component_name
+         IMPORTING is_added           = is_added ).
+
+    IF is_added EQ abap_true.
+
+      _add_component( EXPORTING wdy_component_name  = wdy_component_name
+                                wdy_controller_name = wdy_controller_name
+                      IMPORTING is_added            = is_added
+                                new_element_id      = new_element_id ).
+
+      element_manager->model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
+                                                                i_is_specific = abap_true ).
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD clear.
+    CLEAR instance.
+  ENDMETHOD.
+
+
+  METHOD collect_infos.
+  ENDMETHOD.
+
+
+  METHOD get_instance.
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = element_manager.
+    ENDIF.
+    instance->type = web_dynpro_comps_type.
+    r_instance = instance.
+  ENDMETHOD.
+
+
+  METHOD make_model.
+
+    DATA: element           TYPE element_type,
+          element_component TYPE element_comp_type.
+
+    DATA class_id TYPE i.
+    DATA method_id TYPE i.
+
+    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
+    IF sy-subrc EQ 0.
+
+      IF element_manager->use_somix EQ 'X'.
+
+        element_manager->somix_grouping->add( EXPORTING name_group      = ng_abap_webdynpro
+                                                        name            = element-wdy_component_name
+                                                        technical_type  = z2mse_extract3=>modifier_webdynpro_component
+                                              IMPORTING id              = class_id ).
+
+      ELSE.
+
+        element_manager->famix_class->add( EXPORTING name_group = ng_abap_webdynpro
+                                                     name       = element-wdy_component_name
+                                                     modifiers  = z2mse_extract3=>modifier_webdynpro_component
+                                           IMPORTING id         = class_id ).
+
+      ENDIF.
+
+      DATA association TYPE z2mse_extr3_element_manager=>association_type.
+      LOOP AT associations INTO association WHERE element_id1 = element_id
+                                              AND association->type = z2mse_extr3_association=>parent_package_ass.
+        DATA package TYPE REF TO z2mse_extr3_packages.
+        package ?= element_manager->get_element( i_element_id = association-element_id2 ).
+        element_manager->famix_class->set_parent_package( element_id     = class_id
+                                                          parent_package = package->devclass( i_element_id = association-element_id2 )
+                                                          parent_package_name_group = ng_abap_package ).
+
+      ENDLOOP.
+
+      LOOP AT elements_comp_comp_contr_name INTO element_component WHERE wdy_component_name = element-wdy_component_name.
+        element_manager->famix_method->add( EXPORTING name = element_component-wdy_controller_name
+                                            IMPORTING id = method_id ).
+
+        element_manager->famix_method->set_signature( element_id = method_id
+                                       signature = element_component-wdy_controller_name ).
+        element_manager->famix_method->set_parent_type(
+          EXPORTING
+            element_id         = method_id
+            parent_element     = 'FAMIX.Class'
+            parent_id          = class_id ).
+
+        "! TBD Really required, this appears to be not exact, no namegroup, ...
+        element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_webdynpro
+                                                           class  = element-wdy_component_name
+                                                           method_name_group = ng_abap_webdynpro
+                                                           method = element_component-wdy_controller_name ).
+
+      ENDLOOP.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD name.
+
+    DATA: wdy_component_name TYPE wdy_component_name.
+
+    wdy_component_name( EXPORTING element_id         = element_id
+                        IMPORTING wdy_component_name = wdy_component_name ).
+
+    IF wdy_component_name IS NOT INITIAL.
+      element_type = |WebDynproComponent|.
+      parent_name = ||.
+      name = wdy_component_name.
+    ELSE.
+
+      DATA: wdy_controller_name TYPE wdy_controller_name.
+
+      wdy_controller_name( EXPORTING element_id         = element_id
+                           IMPORTING wdy_component_name  = wdy_component_name
+                                     wdy_controller_name = wdy_controller_name ).
+
+      ASSERT wdy_controller_name IS NOT INITIAL.
+      element_type = |WebDynproController|.
+      parent_name = wdy_component_name.
+      name = wdy_controller_name.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD wdy_component_name.
+
+    DATA element TYPE element_type.
+
+    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
+    IF sy-subrc EQ 0.
+
+      wdy_component_name = element-wdy_component_name.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD wdy_controller_name.
+
+    DATA element_comp TYPE element_comp_type.
+
+    READ TABLE elements_comp_element_id INTO element_comp WITH KEY element_id = element_id.
+    IF sy-subrc EQ 0.
+
+      wdy_component_name = element_comp-wdy_component_name.
+      wdy_controller_name = element_comp-wdy_controller_name.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD _add_component.
 
     DATA element_comp TYPE element_comp_type.
@@ -190,134 +339,4 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
 
 
   ENDMETHOD.
-
-  METHOD add_component.
-
-    add( EXPORTING wdy_component_name = wdy_component_name
-         IMPORTING is_added           = is_added ).
-
-    IF is_added EQ abap_true.
-
-      _add_component( EXPORTING wdy_component_name  = wdy_component_name
-                                wdy_controller_name = wdy_controller_name
-                      IMPORTING is_added            = is_added
-                                new_element_id      = new_element_id ).
-
-      element_manager->model_builder->new_element_id( EXPORTING i_element_id  = new_element_id
-                                                                i_is_specific = abap_true ).
-
-    ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD collect_infos.
-  ENDMETHOD.
-
-  METHOD make_model.
-
-    DATA: element           TYPE element_type,
-          element_component TYPE element_comp_type.
-
-    DATA class_id TYPE i.
-    DATA method_id TYPE i.
-
-    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
-    IF sy-subrc EQ 0.
-
-      element_manager->famix_class->add( EXPORTING name_group = 'WEB_DYNPRO'
-                                                   name       = element-wdy_component_name
-                                                   modifiers  = 'ABAPWebDynproComponent'
-                                         IMPORTING id         = class_id ).
-
-      DATA association TYPE z2mse_extr3_element_manager=>association_type.
-      LOOP AT associations INTO association WHERE element_id1 = element_id
-                                              AND association->type = z2mse_extr3_association=>parent_package_ass.
-        DATA package TYPE REF TO z2mse_extr3_packages.
-        package ?= element_manager->get_element( i_element_id = association-element_id2 ).
-        element_manager->famix_class->set_parent_package( element_id     = class_id
-                                                          parent_package = package->devclass( i_element_id = association-element_id2 )
-                                                          parent_package_name_group = ng_abap_package ).
-
-      ENDLOOP.
-
-      LOOP AT elements_comp_comp_contr_name INTO element_component WHERE wdy_component_name = element-wdy_component_name.
-        element_manager->famix_method->add( EXPORTING name = element_component-wdy_controller_name
-                                            IMPORTING id = method_id ).
-
-        element_manager->famix_method->set_signature( element_id = method_id
-                                       signature = element_component-wdy_controller_name ).
-        element_manager->famix_method->set_parent_type(
-          EXPORTING
-            element_id         = method_id
-            parent_element     = 'FAMIX.Class'
-            parent_id          = class_id ).
-
-        "! TBD Really required, this appears to be not exact, no namegroup, ...
-        element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_webdynpro
-                                                           class  = element-wdy_component_name
-                                                           method_name_group = ng_abap_webdynpro
-                                                           method = element_component-wdy_controller_name ).
-
-      ENDLOOP.
-
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD wdy_component_name.
-
-    DATA element TYPE element_type.
-
-    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
-    IF sy-subrc EQ 0.
-
-      wdy_component_name = element-wdy_component_name.
-
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD wdy_controller_name.
-
-    DATA element_comp TYPE element_comp_type.
-
-    READ TABLE elements_comp_element_id INTO element_comp WITH KEY element_id = element_id.
-    IF sy-subrc EQ 0.
-
-      wdy_component_name = element_comp-wdy_component_name.
-      wdy_controller_name = element_comp-wdy_controller_name.
-
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD name.
-
-    DATA: wdy_component_name TYPE wdy_component_name.
-
-    wdy_component_name( EXPORTING element_id         = element_id
-                        IMPORTING wdy_component_name = wdy_component_name ).
-
-    IF wdy_component_name IS NOT INITIAL.
-      element_type = |WebDynproComponent|.
-      parent_name = ||.
-      name = wdy_component_name.
-    ELSE.
-
-      DATA: wdy_controller_name TYPE wdy_controller_name.
-
-      wdy_controller_name( EXPORTING element_id         = element_id
-                           IMPORTING wdy_component_name  = wdy_component_name
-                                     wdy_controller_name = wdy_controller_name ).
-
-      ASSERT wdy_controller_name IS NOT INITIAL.
-      element_type = |WebDynproController|.
-      parent_name = wdy_component_name.
-      name = wdy_controller_name.
-
-    ENDIF.
-
-  ENDMETHOD.
-
 ENDCLASS.

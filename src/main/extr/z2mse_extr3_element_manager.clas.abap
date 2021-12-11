@@ -1,65 +1,82 @@
 "! I know all elements and associations between elements that are currently known.
 "! I provide general methods to add new elements and associations between elements.
 CLASS z2mse_extr3_element_manager DEFINITION
-  PUBLIC.
+  PUBLIC
+  CREATE PUBLIC .
 
   PUBLIC SECTION.
-    DATA model            TYPE REF TO z2mse_model.
-    DATA famix_package     TYPE REF TO z2mse_famix_package.
-    DATA famix_class     TYPE REF TO z2mse_famix_class.
-    DATA famix_method     TYPE REF TO z2mse_famix_method.
-    DATA famix_attribute     TYPE REF TO z2mse_famix_attribute.
-    DATA famix_invocation     TYPE REF TO z2mse_famix_invocation.
-    DATA famix_access     TYPE REF TO z2mse_famix_access.
-    DATA famix_file_anchor TYPE REF TO z2mse_famix_file_anchor.
-    DATA exclude_found_sap_intf TYPE abap_bool READ-ONLY.
-    DATA interface_use_structure TYPE abap_bool READ-ONLY.
-    "! A unique identifier for each object extracted
-    TYPES element_id_type TYPE i.
 
-    TYPES: BEGIN OF association_type,
-             element_id1 TYPE element_id_type,
-             element_id2 TYPE element_id_type,
-             ass_type    TYPE c LENGTH 30, "To prevent problem with local classes, better would be: z2mse_extr3_association=>ass_type,
-             association TYPE REF TO z2mse_extr3_association,
-           END OF association_type.
-    TYPES associations_type TYPE STANDARD TABLE OF association_type WITH KEY element_id1 element_id2 ass_type association.
+    "! A unique identifier for each object extracted
+    TYPES element_id_type TYPE i .
+    TYPES:
+      BEGIN OF association_type,
+        element_id1 TYPE element_id_type,
+        element_id2 TYPE element_id_type,
+        ass_type    TYPE c LENGTH 30, "To prevent problem with local classes, better would be: z2mse_extr3_association=>ass_type,
+        association TYPE REF TO z2mse_extr3_association,
+      END OF association_type .
+    TYPES:
+      associations_type TYPE STANDARD TABLE OF association_type WITH KEY element_id1 element_id2 ass_type association .
+
+    DATA model TYPE REF TO z2mse_model .
+    DATA famix_package TYPE REF TO z2mse_famix_package .
+    DATA famix_class TYPE REF TO z2mse_famix_class .
+    DATA famix_method TYPE REF TO z2mse_famix_method .
+    DATA famix_attribute TYPE REF TO z2mse_famix_attribute .
+    DATA famix_invocation TYPE REF TO z2mse_famix_invocation .
+    DATA famix_access TYPE REF TO z2mse_famix_access .
+    DATA famix_file_anchor TYPE REF TO z2mse_famix_file_anchor .
+
+    DATA somix_extraction TYPE REF TO z2mse_somix_extraction.
+    DATA somix_grouping TYPE REF TO z2mse_somix_grouping.
+    DATA somix_code TYPE REF TO z2mse_somix_code.
+    DATA somix_data TYPE REF TO z2mse_somix_data.
+    DATA somix_call TYPE REF TO z2mse_somix_call.
+    DATA somix_access TYPE REF TO z2mse_somix_access.
+    DATA somix_parentchild TYPE REF TO z2mse_somix_parentchild.
+
+    DATA exclude_found_sap_intf TYPE abap_bool READ-ONLY .
+    DATA interface_use_structure TYPE abap_bool READ-ONLY .
+    DATA model_builder TYPE REF TO z2mse_extr3_model_builder .
+    DATA use_somix TYPE abap_bool READ-ONLY .
+
     METHODS constructor
-      IMPORTING i_model_builder          TYPE REF TO z2mse_extr3_model_builder
-                i_exclude_found_sap_intf TYPE abap_bool
-                i_interface_use_structure     TYPE abap_bool.
+      IMPORTING
+        !i_model_builder           TYPE REF TO z2mse_extr3_model_builder
+        !i_exclude_found_sap_intf  TYPE abap_bool
+        !i_interface_use_structure TYPE abap_bool
+        !i_use_somix               TYPE abap_bool OPTIONAL .
     "! Call if an element might be added.
     "! Add the element if it is not already part of the model.
     METHODS add_element
       IMPORTING
-                element           TYPE REF TO z2mse_extr3_elements
-                is_specific       TYPE abap_bool
-      RETURNING VALUE(element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
+        !element          TYPE REF TO z2mse_extr3_elements
+        !is_specific      TYPE abap_bool
+      RETURNING
+        VALUE(element_id) TYPE z2mse_extr3_element_manager=>element_id_type .
     METHODS add_association
       IMPORTING
-        element_1   TYPE element_id_type
-        element_2   TYPE element_id_type
-        association TYPE REF TO z2mse_extr3_association.
+        !element_1   TYPE element_id_type
+        !element_2   TYPE element_id_type
+        !association TYPE REF TO z2mse_extr3_association .
     "! Call so that the classes that contain the collected elements determine further informations that are required for the model.
     METHODS collect_infos
       IMPORTING
-        sysid TYPE string OPTIONAL.
+        !sysid TYPE string OPTIONAL .
     "! Call to build the mse model
     METHODS make_model
       RETURNING
-        VALUE(r_result) TYPE z2mse_model=>lines_type.
+        VALUE(r_result) TYPE z2mse_model=>lines_type .
     METHODS get_element
       IMPORTING
-        i_element_id    TYPE element_id_type
+        !i_element_id   TYPE element_id_type
       RETURNING
-        VALUE(r_result) TYPE REF TO z2mse_extr3_elements.
+        VALUE(r_result) TYPE REF TO z2mse_extr3_elements .
     METHODS get_associations
       IMPORTING
-                i_element_id        TYPE element_id_type
-      RETURNING VALUE(associations) TYPE associations_type.
-    DATA model_builder TYPE REF TO z2mse_extr3_model_builder.
-
-
+        !i_element_id       TYPE element_id_type
+      RETURNING
+        VALUE(associations) TYPE associations_type .
   PROTECTED SECTION.
   PRIVATE SECTION.
     TYPES: BEGIN OF element_type,
@@ -137,6 +154,8 @@ CLASS z2mse_extr3_element_manager IMPLEMENTATION.
 
     interface_use_structure = i_interface_use_structure.
 
+    use_somix = i_use_somix.
+
     next_element_id = 1.
 
     CREATE OBJECT model.
@@ -152,6 +171,14 @@ CLASS z2mse_extr3_element_manager IMPLEMENTATION.
     CREATE OBJECT famix_invocation EXPORTING model = model.
     CREATE OBJECT famix_access EXPORTING model = model.
     CREATE OBJECT famix_file_anchor EXPORTING model = model.
+
+    CREATE OBJECT somix_extraction EXPORTING model = model.
+    CREATE OBJECT somix_grouping EXPORTING model = model.
+    CREATE OBJECT somix_code EXPORTING model = model.
+    CREATE OBJECT somix_data  EXPORTING model = model.
+    CREATE OBJECT somix_call EXPORTING model = model.
+    CREATE OBJECT somix_access EXPORTING model = model.
+    CREATE OBJECT somix_parentchild EXPORTING model = model.
 
   ENDMETHOD.
 
