@@ -69,21 +69,41 @@ CLASS z2mse_extr3_access IMPLEMENTATION.
   METHOD make_model.
 
     DATA using_method_id TYPE i.
+    DATA using_id TYPE i.
     DATA used_id TYPE i.
 
 
-    _get_famix_id_used_and_using( EXPORTING i_association = association
-                                  IMPORTING e_using_method_id = using_method_id
-                                            e_used_id         = used_id ).
+    IF element_manager->use_somix EQ 'X'.
+      _get_somix_id_used_and_using( EXPORTING i_association = association
+                                    IMPORTING e_using_id    = using_id
+                                              e_used_id     = used_id ).
+    ELSE.
+      _get_famix_id_used_and_using( EXPORTING i_association = association
+                                    IMPORTING e_using_method_id = using_method_id
+                                              e_used_id         = used_id ).
+    ENDIF.
 
     ASSERT using_method_id IS NOT INITIAL.
     ASSERT used_id IS NOT INITIAL.
 
     DATA last_id2 TYPE i.
-    last_id2 = element_manager->famix_access->add( ).
-    element_manager->famix_access->set_accessor_variable_relation( EXPORTING element_id = last_id2
-                                                              accessor_id = using_method_id
-                                                              variable_id = used_id ).
+    IF element_manager->use_somix EQ 'X'.
+      last_id2 = element_manager->somix_access->add( ).
+      element_manager->somix_access->set_accessor_accessed_relation(
+        EXPORTING
+          element_id   = last_id2
+          accessor_id  = using_id
+          accessed_id  = used_id
+          is_write     = 'X' " SAP2Moose cannot differenciate currently, between read, write, and dependency. So set here always.
+          is_read      = 'X' " SAP2Moose cannot differenciate currently, between read, write, and dependency. So set here always.
+          is_dependent = 'X' " SAP2Moose cannot differenciate currently, between read, write, and dependency. So set here always.
+      ).
+    ELSE.
+      last_id2 = element_manager->famix_access->add( ).
+      element_manager->famix_access->set_accessor_variable_relation( EXPORTING element_id = last_id2
+                                                                               accessor_id = using_method_id
+                                                                               variable_id = used_id ).
+    ENDIF.
 
   ENDMETHOD.
 ENDCLASS.

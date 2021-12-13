@@ -5,6 +5,12 @@ CLASS z2mse_extr3_access_or_invocatn DEFINITION
 
   PUBLIC SECTION.
   PROTECTED SECTION.
+    METHODS _get_somix_id_used_and_using
+      IMPORTING
+        i_association TYPE z2mse_extr3_element_manager=>association_type
+      EXPORTING
+        e_using_id    TYPE i
+        e_used_id     TYPE i.
     METHODS _get_famix_id_used_and_using
       IMPORTING
         i_association     TYPE z2mse_extr3_element_manager=>association_type
@@ -17,6 +23,9 @@ ENDCLASS.
 
 
 CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
+  METHOD _get_somix_id_used_and_using.
+    ASSERT 1 = 2. " Implement me
+  ENDMETHOD.
 
   METHOD _get_famix_id_used_and_using.
 
@@ -151,4 +160,5 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
                                                                method = invoicing_famix_method ).
 
   ENDMETHOD.
+
 ENDCLASS.
