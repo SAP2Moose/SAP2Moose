@@ -85,7 +85,7 @@ CLASS z2mse_extr3_invocation IMPLEMENTATION.
 
     IF element_manager->use_somix EQ 'X'.
       DATA call_id TYPE i.
-      call_id = element_manager->somix_access->add( ).
+      call_id = element_manager->somix_call->add( ).
       element_manager->somix_call->set_caller_called_relation(
         EXPORTING
           element_id   = call_id
