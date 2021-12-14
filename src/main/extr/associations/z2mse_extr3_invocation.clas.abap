@@ -65,24 +65,40 @@ CLASS z2mse_extr3_invocation IMPLEMENTATION.
 
   METHOD make_model.
 
-    DATA using_method_id TYPE i.
+    DATA using_id TYPE i.
     DATA used_id TYPE i.
 
 
-    _get_famix_id_used_and_using( EXPORTING i_association = association
-                                  IMPORTING e_using_method_id = using_method_id
-                                            e_used_id         = used_id ).
 
-    ASSERT using_method_id IS NOT INITIAL.
+    IF element_manager->use_somix EQ 'X'.
+      _get_somix_id_used_and_using( EXPORTING i_association = association
+                                    IMPORTING e_using_id    = using_id
+                                              e_used_id     = used_id ).
+    ELSE.
+      _get_famix_id_used_and_using( EXPORTING i_association = association
+                                    IMPORTING e_using_method_id = using_id
+                                              e_used_id         = used_id ).
+    ENDIF.
+
+    ASSERT using_id IS NOT INITIAL.
     ASSERT used_id IS NOT INITIAL.
 
-    DATA invocation_id TYPE i.
-    invocation_id = element_manager->famix_invocation->add( ).
-    element_manager->famix_invocation->set_invocation_by_reference( EXPORTING element_id = invocation_id
-                                                               sender_id     = using_method_id
-                                                               candidates_id = used_id
-                                                               signature     = 'DUMMY' ).
-
+    IF element_manager->use_somix EQ 'X'.
+      DATA call_id TYPE i.
+      call_id = element_manager->somix_access->add( ).
+      element_manager->somix_call->set_caller_called_relation(
+        EXPORTING
+          element_id   = call_id
+          caller_id  = using_id
+          called_id  = used_id ).
+    ELSE.
+      DATA invocation_id TYPE i.
+      invocation_id = element_manager->famix_invocation->add( ).
+      element_manager->famix_invocation->set_invocation_by_reference( EXPORTING element_id = invocation_id
+                                                                 sender_id     = using_id
+                                                                 candidates_id = used_id
+                                                                 signature     = 'DUMMY' ).
+    ENDIF.
 
 
   ENDMETHOD.
