@@ -25,16 +25,16 @@ ENDCLASS.
 CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
   METHOD _get_somix_id_used_and_using.
 
-    ASSERT 1 = 2. " Implement me
+    ASSERT 1 = 2. ##TODO " Implement method
 
-    DATA: invoced_element  TYPE REF TO z2mse_extr3_elements, ##TODO " Implement starting here
+    DATA: invoced_element  TYPE REF TO z2mse_extr3_elements,
           invocing_element TYPE REF TO z2mse_extr3_elements.
 
     DATA used_id TYPE i.
 
-    invoced_element = element_manager->get_element( i_element_id = i_association-element_id1 ).
-
     invocing_element = element_manager->get_element( i_element_id = i_association-element_id2 ).
+
+    invoced_element = element_manager->get_element( i_element_id = i_association-element_id1 ).
 
     CASE invoced_element->type.
       WHEN invoced_element->class_type.
@@ -51,14 +51,15 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
         CASE invoced_cmptype.
           WHEN classes->attribute_type.
 
-            e_used_id = element_manager->somix_data->get_id(  name_group = ng_abap_class
-                                                              grouping   = invoced_class_name ##TODO " Is technical type of grouping needed also?
-                                                              data       = invoced_cmpname ).
+            e_used_id = element_manager->somix_data->get_id(  grouping_name_group = ng_abap_class
+                                                              grouping            = invoced_class_name
+                                                              data_name_group     = ng_abap_attribute
+                                                              data                = invoced_cmpname ).
           WHEN classes->method_type OR classes->event_type.
-            e_used_id = element_manager->famix_method->get_id( class_name_group = ng_abap_class  ##TODO " Replace with SOMIX
-                                                             class            = invoced_class_name
-                                                             method_name_group = ng_abap_method
-                                                             method           = invoced_cmpname ).
+            e_used_id = element_manager->somix_code->get_id( grouping_name_group = ng_abap_class
+                                                             grouping            = invoced_class_name
+                                                             code_name_group     = ng_abap_method
+                                                             code                = invoced_cmpname ).
         ENDCASE.
       WHEN invoced_element->table_type.
         DATA tables TYPE REF TO z2mse_extr3_tables.

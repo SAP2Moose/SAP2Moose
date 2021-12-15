@@ -10,6 +10,7 @@ CLASS z2mse_extr3 DEFINITION
                ng_abap_package TYPE string VALUE 'ABAP_PACKAGE',
                ng_abap_class TYPE string VALUE 'ABAP_CLASS',
                ng_abap_method TYPE string VALUE 'ABAP_METHOD',
+               ng_abap_attribute TYPE string VALUE 'ABAP_ATTRIBUTE',
                ng_abap_program TYPE string VALUE 'ABAP_PROGRAM',
                ng_abap_webdynpro TYPE string VALUE 'ABAP_WEBDYNPRO',
                ng_sap_table TYPE string VALUE 'SAP_TABLE'.
