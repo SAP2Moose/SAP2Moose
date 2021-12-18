@@ -125,17 +125,17 @@ CLASS Z2MSE_EXTR3_PACKAGES IMPLEMENTATION.
 
     IF element_manager->use_somix EQ 'X'.
 
-      element_manager->somix_grouping->add( name            = element-devclass
-                                            name_group      = ng_abap_package
+      element_manager->somix_grouping->add( name_group      = ng_abap_package
+                                            name            = element-devclass
                                             technical_type  = z2mse_extract3=>techtype_abappackage
                                             link_to_editor  = '' ).
 
-    ELSE.
+    ELSE. " SOMIX
 
       element_manager->famix_package->add( name       = element-devclass
                                            name_group = ng_abap_package ).
 
-    ENDIF.
+    ENDIF. " SOMIX
 
   ENDMETHOD.
 

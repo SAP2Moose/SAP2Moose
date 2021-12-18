@@ -350,8 +350,8 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
 
     IF element_manager->use_somix EQ 'X'.
 
-      element_manager->somix_code->add( EXPORTING name           = element-external_program_name
-                                                  name_group     = z2mse_extr3=>ng_abap_program
+      element_manager->somix_code->add( EXPORTING name_group     = z2mse_extr3=>ng_abap_program
+                                                  name           = element-external_program_name
                                                   technical_type = z2mse_extract3=>modifier_program
                                                   link_to_editor = element-adt_or_bwmt_link
                                         IMPORTING id             = dummy_method_id ).

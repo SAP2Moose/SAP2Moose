@@ -9,10 +9,22 @@ CLASS z2mse_somix_data DEFINITION
     METHODS constructor
       IMPORTING
         !model TYPE REF TO z2mse_model .
+    "! Store the relation between class, attribute name and id in internal table to enable associations
+    "! Call before performing the next time the method add, because the ID is stored internally after creating an element
+    "! @parameter grouping_name_group | the namegroup of the grouping the data is contained in
+    "! @parameter grouping | a grouping the data is contained in
+    "! @parameter data_name_group | the the namegroup of the data
+    "! @parameter data | the data name
+    METHODS store_id
+      IMPORTING
+                grouping_name_group TYPE clike
+                grouping            TYPE clike
+                data_name_group     TYPE clike
+                data                TYPE clike.
     "! Returns the ID for a given data. May use also a grouping the data is contained.
     "! Returns 0 if the attribute is not known
-    "! @parameter grouping_name_group | the namegroup of the grouping the code is contained in
-    "! @parameter grouping | a grouping the code is contained in
+    "! @parameter grouping_name_group | the namegroup of the grouping the data is contained in
+    "! @parameter grouping | a grouping the data is contained in
     "! @parameter data_name_group | the the namegroup of the data
     "! @parameter data | the data name
     "! @parameter id | the ID of the element
@@ -56,6 +68,17 @@ CLASS z2mse_somix_data IMPLEMENTATION.
     ELSE.
       id = 0.
     ENDIF.
+  ENDMETHOD.
+
+  METHOD store_id.
+    DATA ls_data_id LIKE LINE OF g_data_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_data_id.
+    ls_data_id-id = g_last_used_id.
+    ls_data_id-grouping_name_group = grouping_name_group.
+    ls_data_id-grouping = grouping.
+    ls_data_id-data_name_group = data_name_group.
+    ls_data_id-data = data.
+    INSERT ls_data_id INTO TABLE g_data_ids.
   ENDMETHOD.
 
 ENDCLASS.

@@ -8,7 +8,7 @@ CLASS z2mse_somix_element DEFINITION
 
     METHODS add
       IMPORTING
-        !name_group                   TYPE clike OPTIONAL
+        !name_group                   TYPE clike
         !name                         TYPE clike
         !technical_type               TYPE clike
         !link_to_editor               TYPE clike
@@ -46,7 +46,7 @@ CLASS z2mse_somix_element IMPLEMENTATION.
     IF link_to_editor IS NOT INITIAL.
 
       g_model->add_string( EXPORTING element_id     = id
-                                     attribute_name = 'technicalType'
+                                     attribute_name = 'linkToEditor'
                                      string         = link_to_editor ).
     ENDIF.
 

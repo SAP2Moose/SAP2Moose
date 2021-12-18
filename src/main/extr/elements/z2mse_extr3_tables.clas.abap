@@ -165,8 +165,8 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
 
     IF element_manager->use_somix EQ 'X'.
 
-      element_manager->somix_data->add( EXPORTING name           = element-tabname
-                                                  name_group     = ng_sap_table
+      element_manager->somix_data->add( EXPORTING name_group     = ng_sap_table
+                                                  name           = element-tabname
                                                   technical_type = z2mse_extract3=>modifier_dbtable
                                                   link_to_editor = ''
                                         IMPORTING id                     = dummy_attribute_id ).

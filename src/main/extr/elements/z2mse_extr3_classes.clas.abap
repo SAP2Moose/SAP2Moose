@@ -585,31 +585,43 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
         ENDIF.
 
       ELSEIF element-clstype EQ interface_type.
-        " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
-        " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
-        element_manager->famix_class->add( EXPORTING name_group = ng_abap_class
-                                                     name       = element-class_name
-                                                     modifiers  = z2mse_extract3=>modifier_abapglobalinterface
-                                           IMPORTING id         = last_id ).
-        " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
-        element_manager->famix_class->is_interface( element_id = last_id ).
+        IF element_manager->use_somix EQ 'X'.
 
-        IF element-adt_link IS NOT INITIAL.
+          element_manager->somix_grouping->add( EXPORTING name_group             = ng_abap_class
+                                                          name                   = element-class_name
+                                                          technical_type         = z2mse_extract3=>modifier_abapglobalinterface
+                                                          link_to_editor         = element-adt_link
+                                                IMPORTING id                     = last_id ).
 
-          element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
-                                                             file_name  = element-adt_link
-                                                   IMPORTING id         = file_anchor_id ).
+        ELSE. " SOMIX
+          " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
+          " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
+          element_manager->famix_class->add( EXPORTING name_group = ng_abap_class
+                                                       name       = element-class_name
+                                                       modifiers  = z2mse_extract3=>modifier_abapglobalinterface
+                                             IMPORTING id         = last_id ).
+          " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
+          element_manager->famix_class->is_interface( element_id = last_id ).
 
-          IF file_anchor_id IS NOT INITIAL.
-            element_manager->famix_class->set_source_anchor_by_id(
-              EXPORTING
-                element_id         = last_id
-                source_anchor_id   = file_anchor_id
-            ).
+          IF element-adt_link IS NOT INITIAL.
+
+            element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                               file_name  = element-adt_link
+                                                     IMPORTING id         = file_anchor_id ).
+
+            IF file_anchor_id IS NOT INITIAL.
+              element_manager->famix_class->set_source_anchor_by_id(
+                EXPORTING
+                  element_id         = last_id
+                  source_anchor_id   = file_anchor_id
+              ).
+
+            ENDIF.
 
           ENDIF.
 
-        ENDIF.
+        ENDIF. " SOMIX
+
       ELSE.
         ASSERT 1 = 2.
       ENDIF.
@@ -639,8 +651,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
           IF element_manager->use_somix EQ 'X'.
 
-            element_manager->somix_data->add( EXPORTING name = element_comp-cmpname
-                                                        ##TODO " namegroup needed?
+            element_manager->somix_data->add( EXPORTING name_group = '' ##TODO " Improve coding generally. Without grouping name the data name is not uniquw
+                                                        name = element_comp-cmpname
                                                         technical_type = z2mse_extract3=>techtype_abapclassattribute
                                                         link_to_editor  = element-adt_link
                                               IMPORTING id = last_id ).
@@ -685,10 +697,10 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
           IF element_manager->use_somix EQ 'X'.
 
-            element_manager->somix_code->add( EXPORTING name = element_comp-cmpname
-                                                        name_group = z2mse_extr3=>ng_abap_method
+            element_manager->somix_code->add( EXPORTING name           = element_comp-cmpname
+                                                        name_group     = z2mse_extr3=>ng_abap_method
                                                         technical_type = z2mse_extract3=>techtype_abapmethod
-                                                        link_to_editor  = element-adt_link
+                                                        link_to_editor = element-adt_link
                                               IMPORTING id = last_id ).
 
           ELSE.
