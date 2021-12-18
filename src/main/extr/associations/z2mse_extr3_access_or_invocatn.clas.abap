@@ -67,9 +67,11 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
         tables = z2mse_extr3_tables=>get_instance( i_element_manager = element_manager ).
         tabname = tables->table_name( i_element_id = i_association-element_id1 ).
 
-        e_used_id = element_manager->famix_attribute->get_id(  name_group = ng_sap_table ##TODO " Replace with SOMIX
-                                                               class      = tabname
-                                                               attribute  = tabname ).
+        e_used_id = element_manager->somix_data->get_id( grouping_name_group = ng_database_schema
+                                                         grouping            = tables->database_schema
+                                                         data_name_group     = ng_sap_table
+                                                         data                = tabname ).
+
       WHEN invoced_element->program_type.
         DATA programs2 TYPE REF TO z2mse_extr3_programs.
         DATA: invoced_ext_progr_name_class  TYPE string,
@@ -80,10 +82,10 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
                                  IMPORTING external_program_name_class = invoced_ext_progr_name_class
                                            external_program_name_method = invoced_ext_progr_name_method ).
 
-        e_used_id = element_manager->famix_method->get_id( class_name_group = ng_abap_program ##TODO " Replace with SOMIX
-                                                           class             = invoced_ext_progr_name_class
-                                                           method_name_group = ng_abap_program
-                                                           method            = invoced_ext_progr_name_method ).
+        e_used_id = element_manager->somix_code->get_id( grouping_name_group = ''
+                                                         grouping            = ''
+                                                         code_name_group     = ng_abap_program
+                                                         code                = invoced_ext_progr_name_method ).
 
       WHEN OTHERS.
         ASSERT 1 = 2.
@@ -153,10 +155,11 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
     DATA using_method_id TYPE i.
     ASSERT invocing_grouping_name_group IS NOT INITIAL.
     ASSERT invocing_code_name_group IS NOT INITIAL.
-    e_using_id = element_manager->famix_method->get_id( class_name_group = invocing_grouping_name_group ##TODO " Replace with SOMIX
-                                                               class  = invocing_somix_grouping
-                                                               method_name_group = invocing_code_name_group
-                                                               method = invocing_somix_code ).
+
+    e_using_id = element_manager->somix_code->get_id( grouping_name_group = invocing_grouping_name_group
+                                                      grouping            = invocing_somix_grouping
+                                                      code_name_group     = invocing_code_name_group
+                                                      code                = invocing_somix_code ).
 
   ENDMETHOD.
 

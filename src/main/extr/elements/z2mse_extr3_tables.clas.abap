@@ -6,26 +6,34 @@ CLASS z2mse_extr3_tables DEFINITION
   CREATE PRIVATE .
 
   PUBLIC SECTION.
-    CLASS-METHODS clear.
+    DATA database_schema  TYPE db_schema.
+    METHODS constructor
+      IMPORTING
+        !i_element_manager TYPE REF TO z2mse_extr3_element_manager .
+    CLASS-METHODS clear .
     CLASS-METHODS get_instance
       IMPORTING
-        i_element_manager TYPE REF TO z2mse_extr3_element_manager
+        !i_element_manager TYPE REF TO z2mse_extr3_element_manager
       RETURNING
-        VALUE(r_instance) TYPE REF TO z2mse_extr3_tables.
+        VALUE(r_instance)  TYPE REF TO z2mse_extr3_tables .
     METHODS add
       IMPORTING
-        table                 TYPE string
+        !table                TYPE string
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
-        VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type.
+        VALUE(new_element_id) TYPE z2mse_extr3_element_manager=>element_id_type .
     METHODS table_name
       IMPORTING
-        i_element_id    TYPE i
+        !i_element_id   TYPE i
       RETURNING
-        VALUE(r_result) TYPE tabname.
-    METHODS make_model REDEFINITION.
-    METHODS name REDEFINITION.
-    METHODS collect_infos REDEFINITION.
+        VALUE(r_result) TYPE tabname .
+
+    METHODS collect_infos
+        REDEFINITION .
+    METHODS make_model
+        REDEFINITION .
+    METHODS name
+        REDEFINITION .
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO z2mse_extr3_tables.
@@ -39,7 +47,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_TABLES IMPLEMENTATION.
+CLASS z2mse_extr3_tables IMPLEMENTATION.
 
 
   METHOD add.
@@ -89,6 +97,17 @@ CLASS Z2MSE_EXTR3_TABLES IMPLEMENTATION.
 
 
   METHOD collect_infos.
+  ENDMETHOD.
+
+
+  METHOD constructor.
+    super->constructor( i_element_manager = i_element_manager ).
+
+    " Determine database schema to group database tables accordingly.
+    DATA: dbinfo TYPE dbrelinfo.
+    CALL FUNCTION 'DB_DBRELINFO' IMPORTING dbinfo = dbinfo.
+    database_schema = dbinfo-dbschema.
+
   ENDMETHOD.
 
 
@@ -149,6 +168,7 @@ CLASS Z2MSE_EXTR3_TABLES IMPLEMENTATION.
       element_manager->somix_data->add( EXPORTING name           = element-tabname
                                                   name_group     = ng_sap_table
                                                   technical_type = z2mse_extract3=>modifier_dbtable
+                                                  link_to_editor = ''
                                         IMPORTING id                     = dummy_attribute_id ).
 
     ELSE.

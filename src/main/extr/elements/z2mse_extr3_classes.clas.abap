@@ -147,7 +147,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
+CLASS z2mse_extr3_classes IMPLEMENTATION.
 
 
   METHOD add.
@@ -555,6 +555,7 @@ CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
           element_manager->somix_grouping->add( EXPORTING name_group      = ng_abap_class
                                                           name            = element-class_name
                                                           technical_type  = z2mse_extract3=>modifier_abapglobalclass
+                                                          link_to_editor  = element-adt_link
                                                 IMPORTING id              = last_id ).
 
         ELSE.
@@ -564,20 +565,20 @@ CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
                                                        modifiers  = z2mse_extract3=>modifier_abapglobalclass
                                              IMPORTING id         = last_id ).
 
-        ENDIF.
+          IF element-adt_link IS NOT INITIAL.
 
-        IF element-adt_link IS NOT INITIAL.
+            element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                               file_name  = element-adt_link
+                                                     IMPORTING id         = file_anchor_id ).
 
-          element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
-                                                             file_name  = element-adt_link
-                                                   IMPORTING id         = file_anchor_id ).
+            IF file_anchor_id IS NOT INITIAL.
+              element_manager->famix_class->set_source_anchor_by_id(
+                EXPORTING
+                  element_id         = last_id
+                  source_anchor_id   = file_anchor_id
+              ).
 
-          IF file_anchor_id IS NOT INITIAL.
-            element_manager->famix_class->set_source_anchor_by_id(
-              EXPORTING
-                element_id         = last_id
-                source_anchor_id   = file_anchor_id
-            ).
+            ENDIF.
 
           ENDIF.
 
@@ -641,6 +642,7 @@ CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
             element_manager->somix_data->add( EXPORTING name = element_comp-cmpname
                                                         ##TODO " namegroup needed?
                                                         technical_type = z2mse_extract3=>techtype_abapclassattribute
+                                                        link_to_editor  = element-adt_link
                                               IMPORTING id = last_id ).
 
           ELSE.
@@ -686,6 +688,7 @@ CLASS Z2MSE_EXTR3_CLASSES IMPLEMENTATION.
             element_manager->somix_code->add( EXPORTING name = element_comp-cmpname
                                                         name_group = z2mse_extr3=>ng_abap_method
                                                         technical_type = z2mse_extract3=>techtype_abapmethod
+                                                        link_to_editor  = element-adt_link
                                               IMPORTING id = last_id ).
 
           ELSE.

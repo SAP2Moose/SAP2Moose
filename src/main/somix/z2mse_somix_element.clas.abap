@@ -1,19 +1,21 @@
-class Z2MSE_SOMIX_ELEMENT definition
-  public
-  inheriting from Z2MSE_SOMIX_ENTITY
-  abstract
-  create public .
+CLASS z2mse_somix_element DEFINITION
+  PUBLIC
+  INHERITING FROM z2mse_somix_entity
+  ABSTRACT
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  methods ADD
-    importing
-      !NAME_GROUP type CLIKE optional
-      !NAME type CLIKE
-      !TECHNICAL_TYPE type CLIKE
-    exporting
-      value(EXISTS_ALREADY_WITH_ID) type I
-      value(ID) type I .
+    METHODS add
+      IMPORTING
+        !name_group                   TYPE clike OPTIONAL
+        !name                         TYPE clike
+        !technical_type               TYPE clike
+        !link_to_editor               TYPE clike
+      EXPORTING
+        VALUE(exists_already_with_id) TYPE i
+        VALUE(id)                     TYPE i .
+
   PROTECTED SECTION.
 
     DATA name TYPE string .
@@ -25,7 +27,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_SOMIX_ELEMENT IMPLEMENTATION.
+CLASS z2mse_somix_element IMPLEMENTATION.
 
 
   METHOD add.
@@ -40,6 +42,13 @@ CLASS Z2MSE_SOMIX_ELEMENT IMPLEMENTATION.
     g_model->add_string( EXPORTING element_id     = id
                                    attribute_name = 'technicalType'
                                    string         = technical_type ).
+
+    IF link_to_editor IS NOT INITIAL.
+
+      g_model->add_string( EXPORTING element_id     = id
+                                     attribute_name = 'technicalType'
+                                     string         = link_to_editor ).
+    ENDIF.
 
     g_last_used_id = id.
   ENDMETHOD.

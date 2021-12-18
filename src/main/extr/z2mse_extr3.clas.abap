@@ -13,6 +13,7 @@ CLASS z2mse_extr3 DEFINITION
                ng_abap_attribute TYPE string VALUE 'ABAP_ATTRIBUTE',
                ng_abap_program TYPE string VALUE 'ABAP_PROGRAM',
                ng_abap_webdynpro TYPE string VALUE 'ABAP_WEBDYNPRO',
+               ng_database_schema TYPE string VALUE 'DATABASE_SCHEMA',
                ng_sap_table TYPE string VALUE 'SAP_TABLE'.
   PROTECTED SECTION.
     DATA element_manager TYPE REF TO z2mse_extr3_element_manager.

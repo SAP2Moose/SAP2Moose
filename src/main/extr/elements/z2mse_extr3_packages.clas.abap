@@ -127,7 +127,8 @@ CLASS Z2MSE_EXTR3_PACKAGES IMPLEMENTATION.
 
       element_manager->somix_grouping->add( name            = element-devclass
                                             name_group      = ng_abap_package
-                                            technical_type  = z2mse_extract3=>techtype_abappackage ).
+                                            technical_type  = z2mse_extract3=>techtype_abappackage
+                                            link_to_editor  = '' ).
 
     ELSE.
 
