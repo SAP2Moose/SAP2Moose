@@ -71,16 +71,26 @@ CLASS z2mse_somix_data IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD add.
-    g_model->add_entity(
-               EXPORTING elementname = g_elementname
-                         is_named_entity = abap_true
-                         can_be_referenced_by_name = abap_false
-                         name = data
-               IMPORTING processed_id = id ).
+    FIELD-SYMBOLS <data_id> LIKE LINE OF g_data_ids.
 
-    g_model->add_string( EXPORTING element_id     = id
-                                   attribute_name = 'technicalType'
-                                   string         = technical_type ).
+    READ TABLE g_data_ids ASSIGNING <data_id> WITH TABLE KEY grouping_name_group = grouping_name_group grouping = grouping data_name_group = data_name_group data = data.
+    IF sy-subrc EQ 0. "OK
+      id = <data_id>-id.
+
+    ELSE.
+
+      g_model->add_entity(
+                 EXPORTING elementname = g_elementname
+                           is_named_entity = abap_true
+                           can_be_referenced_by_name = abap_false
+                           name = data
+                 IMPORTING processed_id = id ).
+
+      g_model->add_string( EXPORTING element_id     = id
+                                     attribute_name = 'technicalType'
+                                     string         = technical_type ).
+
+    ENDIF.
 
     IF link_to_editor IS NOT INITIAL.
 

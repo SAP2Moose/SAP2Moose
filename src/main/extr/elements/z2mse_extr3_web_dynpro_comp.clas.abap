@@ -187,20 +187,20 @@ CLASS Z2MSE_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
 
       IF element_manager->use_somix EQ 'X'.
 
-        element_manager->somix_grouping->add( EXPORTING name_group      = ng_abap_webdynpro
-                                                        name            = element-wdy_component_name
-                                                        technical_type  = z2mse_extract3=>modifier_webdynpro_component
-                                                        link_to_editor  = ''
-                                              IMPORTING id              = class_id ).
+        element_manager->somix_grouping->add( EXPORTING grouping_name_group = ng_abap_webdynpro
+                                                        grouping            = element-wdy_component_name
+                                                        technical_type      = z2mse_extract3=>modifier_webdynpro_component
+                                                        link_to_editor      = ''
+                                              IMPORTING id                  = class_id ).
 
-      ELSE.
+      ELSE. " SOMIX
 
         element_manager->famix_class->add( EXPORTING name_group = ng_abap_webdynpro
                                                      name       = element-wdy_component_name
                                                      modifiers  = z2mse_extract3=>modifier_webdynpro_component
                                            IMPORTING id         = class_id ).
 
-      ENDIF.
+      ENDIF. " SOMIX
 
       DATA association TYPE z2mse_extr3_element_manager=>association_type.
       LOOP AT associations INTO association WHERE element_id1 = element_id

@@ -552,8 +552,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
         " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
         IF element_manager->use_somix EQ 'X'.
 
-          element_manager->somix_grouping->add( EXPORTING name_group      = ng_abap_class
-                                                          name            = element-class_name
+          element_manager->somix_grouping->add( EXPORTING grouping_name_group      = ng_abap_class
+                                                          grouping            = element-class_name
                                                           technical_type  = z2mse_extract3=>modifier_abapglobalclass
                                                           link_to_editor  = element-adt_link
                                                 IMPORTING id              = last_id ).
@@ -587,8 +587,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       ELSEIF element-clstype EQ interface_type.
         IF element_manager->use_somix EQ 'X'.
 
-          element_manager->somix_grouping->add( EXPORTING name_group             = ng_abap_class
-                                                          name                   = element-class_name
+          element_manager->somix_grouping->add( EXPORTING grouping_name_group             = ng_abap_class
+                                                          grouping                   = element-class_name
                                                           technical_type         = z2mse_extract3=>modifier_abapglobalinterface
                                                           link_to_editor         = element-adt_link
                                                 IMPORTING id                     = last_id ).

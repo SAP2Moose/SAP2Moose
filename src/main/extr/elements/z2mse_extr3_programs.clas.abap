@@ -306,20 +306,20 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
     IF element_manager->use_somix EQ 'X'.
 
-      element_manager->somix_grouping->add( EXPORTING name_group      = name_group
-                                                      name            = name_of_mapped_class
-                                                      technical_type  = modifier
-                                                      link_to_editor  = element-adt_or_bwmt_link
-                                            IMPORTING id              = last_id ).
+      element_manager->somix_grouping->add( EXPORTING grouping_name_group  = name_group
+                                                      grouping             = name_of_mapped_class
+                                                      technical_type       = modifier
+                                                      link_to_editor       = element-adt_or_bwmt_link
+                                            IMPORTING id                   = last_id ).
 
-    ELSE.
+    ELSE. " SOMIX
 
       element_manager->famix_class->add( EXPORTING name_group             = name_group
                                                    name                   = name_of_mapped_class
                                                    modifiers              = modifier
                                          IMPORTING id         = last_id ).
 
-    ENDIF.
+    ENDIF. " SOMIX
 
     DATA association TYPE z2mse_extr3_element_manager=>association_type.
 *    DATA: package_set TYPE abap_bool.
