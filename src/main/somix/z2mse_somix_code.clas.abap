@@ -9,6 +9,18 @@ CLASS z2mse_somix_code DEFINITION
     METHODS constructor
       IMPORTING
         !model TYPE REF TO z2mse_model .
+    "! Call method to store ID before add is used the next time for the same type of element
+    METHODS add
+      IMPORTING
+        grouping_name_group           TYPE clike
+        grouping                      TYPE clike
+        code_name_group               TYPE clike
+        code                          TYPE clike
+        !technical_type               TYPE clike
+        !link_to_editor               TYPE clike
+      EXPORTING
+        VALUE(exists_already_with_id) TYPE i
+        VALUE(id)                     TYPE i .
     "! Returns the ID for a given code. May use a grouping it is contained in.
     "! Returns 0 if the data is not known
     "! @parameter grouping_name_group | the name group of the grouping
@@ -21,17 +33,6 @@ CLASS z2mse_somix_code DEFINITION
                 code_name_group     TYPE clike
                 code                TYPE clike
       RETURNING VALUE(id)           TYPE i.
-    "! Store the relation between class, method name and id in internal table to enable associations
-    "! Call before performing the next time the method add, because the ID is stored internally after creating an element
-    "! @parameter grouping_name_group | the name group of the grouping
-    "! @parameter grouping | the grouping
-    "! @parameter code_name_group | the name group of the code
-    "! @parameter code | the ID of the element
-    METHODS store_id
-      IMPORTING grouping_name_group TYPE clike
-                grouping            TYPE clike
-                code_name_group     TYPE clike
-                code                TYPE clike.
   PROTECTED SECTION.
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_code_id,
@@ -68,15 +69,34 @@ CLASS z2mse_somix_code IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-  METHOD store_id.
+  METHOD add.
+    g_model->add_entity(
+               EXPORTING elementname = g_elementname
+                         is_named_entity = abap_true
+                         can_be_referenced_by_name = abap_false
+                         name = code
+               IMPORTING processed_id = id ).
+
+    g_model->add_string( EXPORTING element_id     = id
+                                   attribute_name = 'technicalType'
+                                   string         = technical_type ).
+
+    IF link_to_editor IS NOT INITIAL.
+
+      g_model->add_string( EXPORTING element_id     = id
+                                     attribute_name = 'linkToEditor'
+                                     string         = link_to_editor ).
+    ENDIF.
+
     DATA ls_code_id LIKE LINE OF g_code_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
     CLEAR ls_code_id.
-    ls_code_id-id = g_last_used_id.
+    ls_code_id-id = id.
     ls_code_id-grouping_name_group = grouping_name_group.
     ls_code_id-grouping            = grouping.
     ls_code_id-code_name_group     = code_name_group.
     ls_code_id-code                = code.
     INSERT ls_code_id INTO TABLE g_code_ids.
+    g_last_used_id = id.
   ENDMETHOD.
 
 ENDCLASS.

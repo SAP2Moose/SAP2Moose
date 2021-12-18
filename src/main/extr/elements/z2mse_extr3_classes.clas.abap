@@ -558,7 +558,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                           link_to_editor  = element-adt_link
                                                 IMPORTING id              = last_id ).
 
-        ELSE.
+        ELSE. " SOMIX
 
           element_manager->famix_class->add( EXPORTING name_group = ng_abap_class
                                                        name       = element-class_name
@@ -582,7 +582,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
           ENDIF.
 
-        ENDIF.
+        ENDIF. " SOMIX
 
       ELSEIF element-clstype EQ interface_type.
         IF element_manager->use_somix EQ 'X'.
@@ -651,43 +651,45 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
           IF element_manager->use_somix EQ 'X'.
 
-            element_manager->somix_data->add( EXPORTING name_group = '' ##TODO " Improve coding generally. Without grouping name the data name is not uniquw
-                                                        name = element_comp-cmpname
+            element_manager->somix_data->add( EXPORTING grouping_name_group = ng_abap_class
+                                                        grouping    = element_comp-clsname
+                                                        data_name_group = '' ##TODO " Improve coding generally. Without grouping name the data name is not uniquw
+                                                        data = element_comp-cmpname
                                                         technical_type = z2mse_extract3=>techtype_abapclassattribute
                                                         link_to_editor  = element-adt_link
                                               IMPORTING id = last_id ).
 
-          ELSE.
+          ELSE. " SOMIX
 
             element_manager->famix_attribute->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
 
-          ENDIF.
+            element_manager->famix_attribute->set_parent_type( EXPORTING element_id = last_id
+                                                          parent_element = 'FAMIX.Class'
+                                                          parent_name_group = ng_abap_class
+                                                          parent_name    = element_comp-clsname ).
 
-          element_manager->famix_attribute->set_parent_type( EXPORTING element_id = last_id
-                                                        parent_element = 'FAMIX.Class'
-                                                        parent_name_group = ng_abap_class
-                                                        parent_name    = element_comp-clsname ).
+            IF element_comp-adt_link IS NOT INITIAL.
 
-          IF element_comp-adt_link IS NOT INITIAL.
+              element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                                 file_name  = element_comp-adt_link
+                                                         IMPORTING id         = file_anchor_id ).
 
-            element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
-                                                               file_name  = element_comp-adt_link
-                                                       IMPORTING id         = file_anchor_id ).
+              IF file_anchor_id IS NOT INITIAL.
+                element_manager->famix_attribute->set_source_anchor_by_id(
+                  EXPORTING
+                    element_id         = last_id
+                    source_anchor_id   = file_anchor_id
+                ).
 
-            IF file_anchor_id IS NOT INITIAL.
-              element_manager->famix_attribute->set_source_anchor_by_id(
-                EXPORTING
-                  element_id         = last_id
-                  source_anchor_id   = file_anchor_id
-              ).
+              ENDIF.
 
             ENDIF.
 
-          ENDIF.
+            element_manager->famix_attribute->store_id( EXPORTING name_group = ng_abap_class
+                                                                  class      = element_comp-clsname
+                                                                  attribute  = element_comp-cmpname ).
 
-          element_manager->famix_attribute->store_id( EXPORTING name_group = ng_abap_class
-                                                                class      = element_comp-clsname
-                                                                attribute  = element_comp-cmpname ).
+          ENDIF. " SOMIX
 
 *            sap_attribute->add( EXPORTING class     = class-clsname
 *                                          attribute = component-cmpname ).
@@ -697,49 +699,51 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
           IF element_manager->use_somix EQ 'X'.
 
-            element_manager->somix_code->add( EXPORTING name           = element_comp-cmpname
-                                                        name_group     = z2mse_extr3=>ng_abap_method
-                                                        technical_type = z2mse_extract3=>techtype_abapmethod
-                                                        link_to_editor = element-adt_link
+            element_manager->somix_code->add( EXPORTING grouping_name_group = ng_abap_class
+                                                        grouping            = element_comp-clsname
+                                                        code_name_group     = z2mse_extr3=>ng_abap_method
+                                                        code                = element_comp-cmpname
+                                                        technical_type      = z2mse_extract3=>techtype_abapmethod
+                                                        link_to_editor     = element-adt_link
                                               IMPORTING id = last_id ).
 
-          ELSE.
+          ELSE. " SOMIX
 
             element_manager->famix_method->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
 
-          ENDIF.
+            " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
+            " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
+            element_manager->famix_method->set_signature( element_id = last_id
+                                           signature = element_comp-cmpname ).
 
-          " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
-          " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
-          element_manager->famix_method->set_signature( element_id = last_id
-                                         signature = element_comp-cmpname ).
+            element_manager->famix_method->set_parent_type( EXPORTING element_id = last_id
+                                                       parent_element = 'FAMIX.Class'
+                                                       parent_name_group = ng_abap_class
+                                                       parent_name    = element_comp-clsname ).
 
-          element_manager->famix_method->set_parent_type( EXPORTING element_id = last_id
-                                                     parent_element = 'FAMIX.Class'
-                                                     parent_name_group = ng_abap_class
-                                                     parent_name    = element_comp-clsname ).
+            IF element_comp-adt_link IS NOT INITIAL.
 
-          IF element_comp-adt_link IS NOT INITIAL.
+              element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                                 file_name  = element_comp-adt_link
+                                                         IMPORTING id         = file_anchor_id ).
 
-            element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
-                                                               file_name  = element_comp-adt_link
-                                                       IMPORTING id         = file_anchor_id ).
+              IF file_anchor_id IS NOT INITIAL.
+                element_manager->famix_method->set_source_anchor_by_id(
+                  EXPORTING
+                    element_id         = last_id
+                    source_anchor_id   = file_anchor_id
+                ).
 
-            IF file_anchor_id IS NOT INITIAL.
-              element_manager->famix_method->set_source_anchor_by_id(
-                EXPORTING
-                  element_id         = last_id
-                  source_anchor_id   = file_anchor_id
-              ).
+              ENDIF.
 
             ENDIF.
 
-          ENDIF.
+            element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_class
+                                                               class  = element_comp-clsname
+                                                               method_name_group = ng_abap_method
+                                                               method = element_comp-cmpname ).
 
-          element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_class
-                                                             class  = element_comp-clsname
-                                                             method_name_group = ng_abap_method
-                                                             method = element_comp-cmpname ).
+          ENDIF. " SOMIX
 
 
 *            sap_method->add( EXPORTING class  = class-clsname

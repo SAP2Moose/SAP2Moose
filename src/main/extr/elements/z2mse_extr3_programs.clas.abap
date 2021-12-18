@@ -94,7 +94,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
+CLASS z2mse_extr3_programs IMPLEMENTATION.
 
 
   METHOD add.
@@ -350,13 +350,15 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
 
     IF element_manager->use_somix EQ 'X'.
 
-      element_manager->somix_code->add( EXPORTING name_group     = z2mse_extr3=>ng_abap_program
-                                                  name           = element-external_program_name
-                                                  technical_type = z2mse_extract3=>modifier_program
-                                                  link_to_editor = element-adt_or_bwmt_link
-                                        IMPORTING id             = dummy_method_id ).
+      element_manager->somix_code->add( EXPORTING grouping_name_group = ''
+                                                  grouping            = ''
+                                                  code_name_group     = z2mse_extr3=>ng_abap_program
+                                                  code                = element-external_program_name
+                                                  technical_type      = z2mse_extract3=>modifier_program
+                                                  link_to_editor      = element-adt_or_bwmt_link
+                                        IMPORTING id                  = dummy_method_id ).
 
-    ELSE.
+    ELSE. " SOMIX
 
       element_manager->famix_method->add( EXPORTING name = element-external_program_name
                                           IMPORTING id   = dummy_method_id ).
@@ -369,30 +371,29 @@ CLASS Z2MSE_EXTR3_PROGRAMS IMPLEMENTATION.
                                                                 parent_name_group = name_group
                                                                 parent_name       = name_of_mapped_class ).
 
-    ENDIF.
+      element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_program
+                                                         class  = name_of_mapped_class
+                                                         method_name_group = ng_abap_program
+                                                         method = element-external_program_name ).
 
+      IF element-adt_or_bwmt_link IS NOT INITIAL.
 
-    element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_program
-                                                       class  = name_of_mapped_class
-                                                       method_name_group = ng_abap_program
-                                                       method = element-external_program_name ).
+        element_manager->famix_file_anchor->add( EXPORTING element_id = dummy_method_id " Required for Moose 6.1
+                                                           file_name  = element-adt_or_bwmt_link
+                                                   IMPORTING id         = file_anchor_id ).
 
-    IF element-adt_or_bwmt_link IS NOT INITIAL.
+        IF file_anchor_id IS NOT INITIAL.
+          element_manager->famix_method->set_source_anchor_by_id(
+            EXPORTING
+              element_id         = dummy_method_id
+              source_anchor_id   = file_anchor_id
+          ).
 
-      element_manager->famix_file_anchor->add( EXPORTING element_id = dummy_method_id " Required for Moose 6.1
-                                                         file_name  = element-adt_or_bwmt_link
-                                                 IMPORTING id         = file_anchor_id ).
-
-      IF file_anchor_id IS NOT INITIAL.
-        element_manager->famix_method->set_source_anchor_by_id(
-          EXPORTING
-            element_id         = dummy_method_id
-            source_anchor_id   = file_anchor_id
-        ).
+        ENDIF.
 
       ENDIF.
 
-    ENDIF.
+    ENDIF. " SOMIX
 
   ENDMETHOD.
 

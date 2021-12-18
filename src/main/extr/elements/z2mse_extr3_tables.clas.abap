@@ -154,7 +154,7 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
       DATA package TYPE REF TO z2mse_extr3_packages.
       package ?= element_manager->get_element( i_element_id = association-element_id2 ).
 
-      element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
+      element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id ##TODO " Determine the package for a new table
                                                                   parent_package     = package->devclass( i_element_id = association-element_id2 )
                                                                   parent_package_name_group = ng_abap_package ).
 
@@ -165,18 +165,20 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
 
     IF element_manager->use_somix EQ 'X'.
 
-      element_manager->somix_data->add( EXPORTING name_group     = ng_sap_table
-                                                  name           = element-tabname
+      element_manager->somix_data->add( EXPORTING grouping_name_group = ng_database_schema
+                                                  grouping            = database_schema
+                                                  data_name_group     = ng_sap_table
+                                                  data           = element-tabname
                                                   technical_type = z2mse_extract3=>modifier_dbtable
                                                   link_to_editor = ''
                                         IMPORTING id                     = dummy_attribute_id ).
 
-    ELSE.
+    ELSE. "SOMIX
 
       element_manager->famix_attribute->add( EXPORTING name                   = element-tabname
                                              IMPORTING id                     = dummy_attribute_id ).
 
-    ENDIF.
+    ENDIF. "SOMIX
 
     element_manager->famix_attribute->set_parent_type( EXPORTING element_id         = dummy_attribute_id
                                                 parent_id          = last_id ).

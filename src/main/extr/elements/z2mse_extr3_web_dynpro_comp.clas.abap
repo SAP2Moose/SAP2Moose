@@ -217,13 +217,15 @@ CLASS Z2MSE_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
 
         IF element_manager->use_somix EQ 'X'.
 
-          element_manager->somix_code->add( EXPORTING name_group     = '' ##TODO " namegroup for WebFynpro Controller needed?
-                                                      name           = element_component-wdy_controller_name
-                                                      technical_type = z2mse_extract3=>techtype_webdynpro_controller
-                                                      link_to_editor = ''
+          element_manager->somix_code->add( EXPORTING grouping_name_group = ng_abap_webdynpro
+                                                      grouping            = element-wdy_component_name
+                                                      code_name_group     = '' ##TODO " namegroup for WebFynpro Controller needed?
+                                                      code                = element_component-wdy_controller_name
+                                                      technical_type      = z2mse_extract3=>techtype_webdynpro_controller
+                                                      link_to_editor      = ''
                                             IMPORTING id = method_id ).
 
-        ELSE.
+        ELSE. " SOMIX
 
           element_manager->famix_method->add( EXPORTING name = element_component-wdy_controller_name
                                               IMPORTING id = method_id ).
@@ -231,7 +233,7 @@ CLASS Z2MSE_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
           element_manager->famix_method->set_signature( element_id = method_id
                                          signature = element_component-wdy_controller_name ).
 
-        ENDIF.
+        ENDIF. " SOMIX
 
         element_manager->famix_method->set_parent_type(
           EXPORTING
