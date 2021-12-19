@@ -160,25 +160,31 @@ CLASS z2mse_extr3_element_manager IMPLEMENTATION.
 
     CREATE OBJECT model.
 
-    DATA f_custom_source_language TYPE REF TO z2mse_famix_custom_source_lng.
-    CREATE OBJECT f_custom_source_language EXPORTING model = model.
-    f_custom_source_language->add( name = 'SAP' name_group = z2mse_extr3=>ng_source_language ).
+    IF use_somix EQ 'X'.
 
-    CREATE OBJECT famix_package EXPORTING model = model.
-    CREATE OBJECT famix_class EXPORTING model = model.
-    CREATE OBJECT famix_method EXPORTING model = model.
-    CREATE OBJECT famix_attribute EXPORTING model = model.
-    CREATE OBJECT famix_invocation EXPORTING model = model.
-    CREATE OBJECT famix_access EXPORTING model = model.
-    CREATE OBJECT famix_file_anchor EXPORTING model = model.
+      CREATE OBJECT somix_extraction EXPORTING model = model.
+      CREATE OBJECT somix_grouping EXPORTING model = model.
+      CREATE OBJECT somix_code EXPORTING model = model.
+      CREATE OBJECT somix_data EXPORTING model = model.
+      CREATE OBJECT somix_call EXPORTING model = model.
+      CREATE OBJECT somix_access EXPORTING model = model.
+      CREATE OBJECT somix_parentchild EXPORTING model = model.
 
-    CREATE OBJECT somix_extraction EXPORTING model = model.
-    CREATE OBJECT somix_grouping EXPORTING model = model.
-    CREATE OBJECT somix_code EXPORTING model = model.
-    CREATE OBJECT somix_data  EXPORTING model = model.
-    CREATE OBJECT somix_call EXPORTING model = model.
-    CREATE OBJECT somix_access EXPORTING model = model.
-    CREATE OBJECT somix_parentchild EXPORTING model = model.
+    ELSE. " SOMIX
+
+      DATA f_custom_source_language TYPE REF TO z2mse_famix_custom_source_lng.
+      CREATE OBJECT f_custom_source_language EXPORTING model = model.
+      f_custom_source_language->add( name = 'SAP' name_group = z2mse_extr3=>ng_source_language ).
+
+      CREATE OBJECT famix_package EXPORTING model = model.
+      CREATE OBJECT famix_class EXPORTING model = model.
+      CREATE OBJECT famix_method EXPORTING model = model.
+      CREATE OBJECT famix_attribute EXPORTING model = model.
+      CREATE OBJECT famix_invocation EXPORTING model = model.
+      CREATE OBJECT famix_access EXPORTING model = model.
+      CREATE OBJECT famix_file_anchor EXPORTING model = model.
+
+    ENDIF. " SOMIX
 
   ENDMETHOD.
 

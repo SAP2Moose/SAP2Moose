@@ -312,6 +312,26 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
                                                       link_to_editor       = element-adt_or_bwmt_link
                                             IMPORTING id                   = last_id ).
 
+      DATA association TYPE z2mse_extr3_element_manager=>association_type.
+
+      LOOP AT associations INTO association WHERE element_id1 = element_id
+                                              AND association->type = z2mse_extr3_association=>parent_package_ass.
+        DATA package TYPE REF TO z2mse_extr3_packages.
+        package ?= element_manager->get_element( i_element_id = association-element_id2 ).
+
+        DATA: package_id TYPE i.
+
+        element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_package
+                                                        grouping               = package->devclass( i_element_id = association-element_id2 )
+                                                        technical_type         = z2mse_extract3=>techtype_abappackage
+                                                        link_to_editor         = ''
+                                              IMPORTING id                     = package_id ).
+
+        element_manager->somix_parentchild->add( EXPORTING parent_id = package_id
+                                                           child_id  = last_id ).
+
+      ENDLOOP.
+
     ELSE. " SOMIX
 
       element_manager->famix_class->add( EXPORTING name_group             = name_group
@@ -319,44 +339,37 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
                                                    modifiers              = modifier
                                          IMPORTING id         = last_id ).
 
+      LOOP AT associations INTO association WHERE element_id1 = element_id
+                                              AND association->type = z2mse_extr3_association=>parent_package_ass.
+
+        package ?= element_manager->get_element( i_element_id = association-element_id2 ).
+
+        element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
+                                                                    parent_package     = package->devclass( i_element_id = association-element_id2 )
+                                                                    parent_package_name_group = ng_abap_package ).
+
+      ENDLOOP.
+
     ENDIF. " SOMIX
-
-    DATA association TYPE z2mse_extr3_element_manager=>association_type.
-*    DATA: package_set TYPE abap_bool.
-    LOOP AT associations INTO association WHERE element_id1 = element_id
-                                            AND association->type = z2mse_extr3_association=>parent_package_ass.
-      DATA package TYPE REF TO z2mse_extr3_packages.
-      package ?= element_manager->get_element( i_element_id = association-element_id2 ).
-
-      element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
-                                                                  parent_package     = package->devclass( i_element_id = association-element_id2 )
-                                                                  parent_package_name_group = ng_abap_package ).
-*      package_set = abap_true.
-    ENDLOOP.
-*    IF package_set EQ abap_false.
-*
-*      DATA packages_elements TYPE REF TO z2mse_extr3_packages.
-*
-*      packages_elements = z2mse_extr3_packages=>get_instance( i_element_manager = element_manager ).
-*
-*      packages_elements->add( EXPORTING package = devclass ).
-*
-*      element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
-*                                                                  parent_package     = devclass
-*                                                                  parent_package_name_group = ng_abap_package ).
-*    ENDIF.
 
     DATA dummy_method_id TYPE i.
 
     IF element_manager->use_somix EQ 'X'.
 
-      element_manager->somix_code->add( EXPORTING grouping_name_group = ''
-                                                  grouping            = ''
-                                                  code_name_group     = z2mse_extr3=>ng_abap_program
-                                                  code                = element-external_program_name
-                                                  technical_type      = z2mse_extract3=>modifier_program
-                                                  link_to_editor      = element-adt_or_bwmt_link
-                                        IMPORTING id                  = dummy_method_id ).
+      IF name_group EQ 'ABAP_FUNCTIONGROUP'.
+
+        element_manager->somix_code->add( EXPORTING grouping_name_group = name_group
+                                                    grouping            = name_of_mapped_class
+                                                    code_name_group     = z2mse_extr3=>ng_abap_program
+                                                    code                = element-external_program_name
+                                                    technical_type      = z2mse_extract3=>techtype_abap_function
+                                                    link_to_editor      = element-adt_or_bwmt_link
+                                          IMPORTING id                  = dummy_method_id ).
+
+        element_manager->somix_parentchild->add( EXPORTING parent_id = last_id
+                                                           child_id  = dummy_method_id ).
+
+      ENDIF.
 
     ELSE. " SOMIX
 

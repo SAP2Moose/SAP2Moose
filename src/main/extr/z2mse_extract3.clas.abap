@@ -14,6 +14,7 @@ public section.
   constants TECHTYPE_ABAPPACKAGE type STRING value 'ABAPPackage' ##NO_TEXT.
   constants TECHTYPE_ABAPMETHOD type STRING value 'ABAPMethod' ##NO_TEXT.
   constants TECHTYPE_ABAPCLASSATTRIBUTE type STRING value 'ABAPClassAttribute' ##NO_TEXT.
+  constants TECHTYPE_ABAP_FUNCTION type STRING value 'ABAPFunktion' ##NO_TEXT.
   constants TECHTYPE_WEBDYNPRO_CONTROLLER type STRING value 'ABAPWebDynproController' ##NO_TEXT.
   constants MODIFIER_ABAPGLOBALCLASS type STRING value 'ABAPGlobalClass' ##NO_TEXT.
   constants MODIFIER_ABAPGLOBALINTERFACE type STRING value 'ABAPGlobalInterface' ##NO_TEXT.

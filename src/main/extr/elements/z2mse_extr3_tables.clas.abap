@@ -135,33 +135,7 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
     " SAP_2_FAMIX_54        Map database tables to FAMIX Class
     " SAP_2_FAMIX_58        Mark the FAMIX Class with the attribute modifiers = 'DBTable'
 
-    IF element_manager->use_somix EQ 'X'.
-
-      " Determine later how to group database table
-
-    ELSE.
-
-      element_manager->famix_class->add( EXPORTING name_group             = 'ABAP_TABLE'
-                                                   name                   = element-tabname
-                                                   modifiers              = z2mse_extract3=>modifier_dbtable
-                                         IMPORTING id         = last_id ).
-
-    ENDIF.
-
-    DATA association TYPE z2mse_extr3_element_manager=>association_type.
-    LOOP AT associations INTO association WHERE element_id1 = element_id
-                                            AND association->type = z2mse_extr3_association=>parent_package_ass.
-      DATA package TYPE REF TO z2mse_extr3_packages.
-      package ?= element_manager->get_element( i_element_id = association-element_id2 ).
-
-      element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id ##TODO " Determine the package for a new table
-                                                                  parent_package     = package->devclass( i_element_id = association-element_id2 )
-                                                                  parent_package_name_group = ng_abap_package ).
-
-    ENDLOOP.
-
-    DATA dummy_attribute_id TYPE i.
-    " SAP_2_FAMIX_56      Add a dummy attribute with the name of the table
+    DATA database_table_id TYPE i.
 
     IF element_manager->use_somix EQ 'X'.
 
@@ -171,30 +145,63 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
                                                   data           = element-tabname
                                                   technical_type = z2mse_extract3=>modifier_dbtable
                                                   link_to_editor = ''
-                                        IMPORTING id                     = dummy_attribute_id ).
+                                        IMPORTING id                     = database_table_id ).
+
+      DATA association TYPE z2mse_extr3_element_manager=>association_type.
+      LOOP AT associations INTO association WHERE element_id1 = element_id
+                                              AND association->type = z2mse_extr3_association=>parent_package_ass.
+        DATA package TYPE REF TO z2mse_extr3_packages.
+        package ?= element_manager->get_element( i_element_id = association-element_id2 ).
+
+        DATA: package_id TYPE i.
+
+        element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_package
+                                                        grouping               = package->devclass( i_element_id = association-element_id2 )
+                                                        technical_type         = z2mse_extract3=>techtype_abappackage
+                                                        link_to_editor         = ''
+                                              IMPORTING id                     = package_id ).
+
+        element_manager->somix_parentchild->add( EXPORTING parent_id = package_id
+                                                           child_id  = database_table_id ).
+
+      ENDLOOP.
+
+    ELSE. " SOMIX
+
+      element_manager->famix_class->add( EXPORTING name_group             = 'ABAP_TABLE'
+                                                   name                   = element-tabname
+                                                   modifiers              = z2mse_extract3=>modifier_dbtable
+                                         IMPORTING id         = last_id ).
+
+      LOOP AT associations INTO association WHERE element_id1 = element_id
+                                              AND association->type = z2mse_extr3_association=>parent_package_ass.
+
+        package ?= element_manager->get_element( i_element_id = association-element_id2 ).
+
+        element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id ##TODO " Determine the package for a new table
+                                                                    parent_package     = package->devclass( i_element_id = association-element_id2 )
+                                                                    parent_package_name_group = ng_abap_package ).
+
+      ENDLOOP.
+
+    ENDIF. " SOMIX
+    " SAP_2_FAMIX_56      Add a dummy attribute with the name of the table
+
+    IF element_manager->use_somix EQ 'X'.
 
     ELSE. "SOMIX
 
       element_manager->famix_attribute->add( EXPORTING name                   = element-tabname
-                                             IMPORTING id                     = dummy_attribute_id ).
+                                             IMPORTING id                     = database_table_id ).
+
+      element_manager->famix_attribute->set_parent_type( EXPORTING element_id         = database_table_id
+                                                  parent_id          = last_id ).
+
+      element_manager->famix_attribute->store_id( EXPORTING name_group = ng_sap_table
+                                                            class     = element-tabname
+                                                            attribute = element-tabname ).
 
     ENDIF. "SOMIX
-
-    element_manager->famix_attribute->set_parent_type( EXPORTING element_id         = dummy_attribute_id
-                                                parent_id          = last_id ).
-
-    element_manager->famix_attribute->store_id( EXPORTING name_group = ng_sap_table
-                                                          class     = element-tabname
-                                                          attribute = element-tabname ).
-
-
-
-*    DATA element TYPE element_type.
-*
-*    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
-*    ASSERT sy-subrc EQ 0.
-*
-*    element_manager->famix_package->add( name = element-devclass ).
 
   ENDMETHOD.
 
