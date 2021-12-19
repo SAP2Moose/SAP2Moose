@@ -29,19 +29,20 @@ CLASS z2mse_somix_harmonize DEFINITION
            END OF id_to_name.
 
     TYPES: BEGIN OF element,
-             elementname               TYPE string,
-             element_id                TYPE i,
-             concatenated_name         TYPE string,
-             has_no_attribute          TYPE abap_bool,
-             attribute                 TYPE string,
-             is_integer_reference      TYPE abap_bool,
-             integer_reference         TYPE i,
-             value                     TYPE string,
-             access_accessor_ref       TYPE i,
-             access_variable_ref       TYPE i,
-             invocation_sender_ref     TYPE i,
-             invocation_candidates_ref TYPE i,
-             invocation_signatur       TYPE string,
+             elementname          TYPE string,
+             element_id           TYPE i,
+             concatenated_name    TYPE string,
+             has_no_attribute     TYPE abap_bool,
+             attribute            TYPE string,
+             is_integer_reference TYPE abap_bool,
+             integer_reference    TYPE i,
+             value                TYPE string,
+             accessor_ref         TYPE i,
+             accessed_ref         TYPE i,
+             caller_ref           TYPE i,
+             called_ref           TYPE i,
+             parent_ref           TYPE i,
+             child_ref            TYPE i,
            END OF element.
 
     CLASS-METHODS _add_element_node
@@ -113,10 +114,6 @@ CLASS z2mse_somix_harmonize DEFINITION
     CLASS-METHODS _get_concatenated_names
       CHANGING
         id_to_names TYPE ty_id_to_names_2.
-    "! FileAnchors reference to elements using the attribute element, so replace element_id with the element they are referencing to.
-    CLASS-METHODS _handlefileanchor
-      CHANGING
-        elements TYPE  ty_elements_1.
 ENDCLASS.
 
 
@@ -232,8 +229,6 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
 
     ENDLOOP.
 
-    _handlefileanchor( CHANGING elements = elements ).
-
     _get_concatenated_names( CHANGING id_to_names = id_to_names ).
 
     _find_concatenated_names( EXPORTING id_to_names = id_to_names
@@ -304,30 +299,29 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
 
         _remove_apostroph( CHANGING string = cd_to_name-simple_name ).
 
-      ELSEIF ( i_attributename EQ 'parentType' OR
-               i_attributename EQ 'parentPackage' ) AND
-         is_integer_reference EQ abap_true AND
-         ( c_element-elementname <> 'FAMIX.Class' AND
-           c_element-elementname <> 'FAMIX.Package' ) .
-        cd_to_name-parent_id = integer_reference.
       ELSE.
 
         CASE c_element-elementname.
-          WHEN 'FAMIX.Access'.
+          WHEN 'SOMIX.Access'.
             CASE i_attributename.
-              WHEN 'accessor'.
-                c_element-access_accessor_ref = integer_reference.
-              WHEN 'variable'.
-                c_element-access_variable_ref = integer_reference.
+              WHEN 'accessor'. "'accessor'.
+                c_element-accessor_ref = integer_reference.
+              WHEN 'accessed'. " 'variable'.
+                c_element-accessed_ref = integer_reference.
             ENDCASE.
-          WHEN 'FAMIX.Invocation'.
+          WHEN 'SOMIX.Call'.
             CASE i_attributename.
-              WHEN 'sender'.
-                c_element-invocation_sender_ref = integer_reference.
-              WHEN 'candidates'.
-                c_element-invocation_candidates_ref = integer_reference.
-              WHEN 'signature'.
-                c_element-invocation_signatur = primitive.
+              WHEN 'caller'. " 'sender'.
+                c_element-caller_ref = integer_reference.
+              WHEN 'called'. " 'candidates'.
+                c_element-called_ref = integer_reference.
+            ENDCASE.
+          WHEN 'SOMIX.ParentChild'.
+            CASE i_attributename.
+              WHEN 'parent'. " 'sender'.
+                c_element-parent_ref = integer_reference.
+              WHEN 'child'. " 'candidates'.
+                c_element-child_ref = integer_reference.
             ENDCASE.
           WHEN OTHERS.
 
@@ -341,12 +335,8 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
             ELSEIF is_primitive EQ abap_true.
               c_element-value = primitive.
             ENDIF.
-            IF c_element-elementname EQ 'FAMIX.Method' AND c_element-attribute EQ 'parentType'.
-              " Not required
-            ELSE.
-              INSERT c_element INTO TABLE e_elements.
-              e_has_attribute = abap_true.
-            ENDIF.
+            INSERT c_element INTO TABLE e_elements.
+            e_has_attribute = abap_true.
 
         ENDCASE.
 
@@ -363,46 +353,60 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
 
     " Build result
 
-    DATA: result     TYPE string,
-          accessor   TYPE string,
-          variable   TYPE string,
-          sender     TYPE string,
-          candidates TYPE string,
-          signature  TYPE string,
-          value      TYPE string.
+    DATA: result    TYPE string,
+          accessor  TYPE string,
+          accessed  TYPE string,
+          caller    TYPE string,
+          called    TYPE string,
+          parent    TYPE string,
+          child     TYPE string,
+          signature TYPE string,
+          value     TYPE string.
 
     LOOP AT elements INTO element.
-      CLEAR: result, accessor, variable, sender, candidates, value.
+      CLEAR: result, accessor, accessed, caller, called, value.
 
-      IF  element-elementname EQ 'FAMIX.Access'.
+      IF  element-elementname EQ 'SOMIX.Access'.
 
-        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name4>) WITH TABLE KEY id = element-access_accessor_ref.
+        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name4>) WITH TABLE KEY id = element-accessor_ref.
         IF sy-subrc EQ 0.
           accessor = <id_to_name4>-concatenated_name.
         ENDIF.
 
-        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name5>) WITH TABLE KEY id = element-access_variable_ref.
+        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name5>) WITH TABLE KEY id = element-accessed_ref.
         IF sy-subrc EQ 0.
-          variable = <id_to_name5>-concatenated_name.
+          accessed = <id_to_name5>-concatenated_name.
         ENDIF.
 
-        result = |{ element-elementname } accessor | && |{ accessor } variable | && |{ variable }|.
+        result = |{ element-elementname } accessor | && |{ accessor } accessed | && |{ accessed }|.
 
-      ELSEIF element-elementname EQ 'FAMIX.Invocation'.
+      ELSEIF element-elementname EQ 'SOMIX.Call'.
 
-        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name6>) WITH TABLE KEY id = element-invocation_sender_ref.
+        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name6>) WITH TABLE KEY id = element-caller_ref.
         IF sy-subrc EQ 0.
-          sender = <id_to_name6>-concatenated_name.
+          caller = <id_to_name6>-concatenated_name.
         ENDIF.
 
-        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name7>) WITH TABLE KEY id = element-invocation_candidates_ref.
+        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name7>) WITH TABLE KEY id = element-called_ref.
         IF sy-subrc EQ 0.
-          candidates = <id_to_name7>-concatenated_name.
+          called = <id_to_name7>-concatenated_name.
         ENDIF.
 
-        _remove_apostroph( CHANGING string = element-invocation_signatur ).
+        result = |{ element-elementname } caller | && |{ caller } called | && |{ called }|.
 
-        result = |{ element-elementname } sender | && |{ sender } candidates | && |{ candidates } signature | && |{ element-invocation_signatur }|.
+      ELSEIF element-elementname EQ 'SOMIX.ParentChild'.
+
+        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name8>) WITH TABLE KEY id = element-parent_ref.
+        IF sy-subrc EQ 0.
+          parent = <id_to_name8>-concatenated_name.
+        ENDIF.
+
+        READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name9>) WITH TABLE KEY id = element-child_ref.
+        IF sy-subrc EQ 0.
+          child = <id_to_name9>-concatenated_name.
+        ENDIF.
+
+        result = |{ element-elementname } parent | && |{ parent } child | && |{ child }|.
 
       ELSE.
 
@@ -414,12 +418,12 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
 
           IF element-is_integer_reference EQ abap_true.
 
-            READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name8>) WITH TABLE KEY id = element-integer_reference.
+            READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name10>) WITH TABLE KEY id = element-integer_reference.
             IF sy-subrc EQ 0.
-              IF <id_to_name8>-concatenated_name IS NOT INITIAL.
-                value = <id_to_name8>-concatenated_name.
+              IF <id_to_name10>-concatenated_name IS NOT INITIAL.
+                value = <id_to_name10>-concatenated_name.
               ELSE.
-                value = <id_to_name8>-simple_name.
+                value = <id_to_name10>-simple_name.
               ENDIF.
 
               result = |{ element-elementname } | && |{ element-concatenated_name } | && |{ element-attribute } | && |{ value }|.
@@ -647,10 +651,7 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name3>) WITH TABLE KEY id = <element>-element_id.
         IF sy-subrc EQ 0.
           IF <id_to_name3>-simple_name IS NOT INITIAL
-          AND    <element>-elementname EQ 'FAMIX.Class'
-              OR <element>-elementname EQ 'FAMIX.Package'
-              OR <element>-elementname EQ 'FAMIX.FileAnchor'
-              OR <element>-elementname EQ 'FAMIX.CustomSourceLanguage'.
+          AND    <element>-elementname EQ 'SOMIX.Grouping'.
             <element>-concatenated_name = <id_to_name3>-simple_name.
           ELSE.
             <element>-concatenated_name = <id_to_name3>-concatenated_name.
@@ -735,29 +736,6 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
   METHOD _remove_apostroph.
 
     REPLACE ALL OCCURRENCES OF |'| IN string WITH ||.
-
-  ENDMETHOD.
-
-  METHOD _handlefileanchor.
-
-    TYPES: BEGIN OF ty_map,
-             from TYPE i,
-             to   TYPE i,
-           END OF ty_map.
-    DATA: mapping TYPE HASHED TABLE OF ty_map WITH UNIQUE KEY from.
-
-    LOOP AT elements INTO DATA(element) WHERE elementname = |FAMIX.FileAnchor| AND attribute = 'element'.
-      mapping = VALUE #( BASE mapping ( from = element-element_id to = element-integer_reference ) ).
-    ENDLOOP.
-
-    LOOP AT elements ASSIGNING FIELD-SYMBOL(<element>) WHERE elementname = |FAMIX.FileAnchor|.
-      IF     <element>-elementname = |FAMIX.FileAnchor|
-         AND <element>-attribute = 'element'.
-        DELETE elements.
-      ELSE.
-        <element>-element_id = mapping[ from = <element>-element_id ]-to.
-      ENDIF.
-    ENDLOOP.
 
   ENDMETHOD.
 

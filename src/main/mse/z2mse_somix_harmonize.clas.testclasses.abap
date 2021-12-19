@@ -9,6 +9,7 @@ CLASS ltcl_main DEFINITION FINAL FOR TESTING
   PRIVATE SECTION.
     METHODS:
       equalize_harmonized FOR TESTING RAISING cx_static_check,
+      somix_1_harmonized FOR TESTING RAISING cx_static_check,
       mse_2_harmonized FOR TESTING RAISING cx_static_check,
       mse_2_harmonized_package FOR TESTING RAISING cx_static_check,
       mse_2_harmonized_interface FOR TESTING RAISING cx_static_check,
@@ -19,12 +20,35 @@ CLASS ltcl_main DEFINITION FINAL FOR TESTING
       _ext_serial_attribute_nodes2 FOR TESTING RAISING cx_static_check,
       _ext_valuenodes FOR TESTING RAISING cx_static_check,
       _remove_apostroph FOR TESTING RAISING cx_static_check,
-      _handlefileanchor for testing RAISING cx_static_check,
       mse_2_harmonized_empty_package FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
 
 CLASS ltcl_main IMPLEMENTATION.
+
+  METHOD somix_1_harmonized.
+
+    DATA: mse                          TYPE z2mse_somix_harmonize=>string_table,
+          equalized_harmonized_mse_act TYPE z2mse_somix_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_somix_harmonize=>harmonized_mse.
+
+    mse = VALUE #( ( |( ( SOMIX.Grouping (id: 1)| )
+                   ( |  (name 'Pack_1')| )
+                   ( |  (technicalType 'ABAPPackage'))| )
+                  ).
+
+    equalized_harmonized_mse_exp = VALUE #( ( |SOMIX.Grouping Pack_1 technicalType ABAPPackage| )
+                                             ).
+
+    equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( string_table = mse ).
+    z2mse_somix_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
+    cl_abap_unit_assert=>assert_equals( EXPORTING act = equalized_harmonized_mse_act
+                                                  exp = equalized_harmonized_mse_exp
+                                                  msg = 'Harmonize simple Package specification correctly' ).
+
+
+  ENDMETHOD.
 
   METHOD _add_element_node.
 
@@ -360,13 +384,18 @@ CLASS ltcl_main IMPLEMENTATION.
           equalized_harmonized_mse_act TYPE z2mse_somix_harmonize=>harmonized_mse,
           equalized_harmonized_mse_exp TYPE z2mse_somix_harmonize=>harmonized_mse.
 
-    mse = VALUE #( ( line = |( (FAMIX.Package (id: 1 )| )
-                   ( line = |  (name 'A'))| )
-                   ( line = |(FAMIX.Package (id: 2 )| )
+    mse = VALUE #( ( line = |( (SOMIX.Grouping (id: 1 )| )
+                   ( line = |  (name 'A')| )
+                   ( line = |  (technicalType 'ABAPPackage'))| )
+                   ( line = |(SOMIX.Grouping (id: 2 )| )
                    ( line = |  (name 'A_A_A')| )
-                   ( line = |  (parentPackage (ref: 3)))| )
-                   ( line = |(FAMIX.Package (id: 3 )| )
-                   ( line = |  (name 'A_A')))| )
+                   ( line = |  (technicalType 'ABAPPackage'))| )
+                   ( line = |(SOMIX.ParentChild| )
+                   ( line = |(parent (ref: 3))| )
+                   ( line = |(child (ref: 2)))| )
+                   ( line = |(SOMIX.Grouping (id: 3 )| )
+                   ( line = |  (name 'A_A'))| )
+                   ( line = |  (technicalType 'ABAPPackage')))| )
                              ).
 
 *    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.Package Z2MSE_TEST_INITIAL_SELECTION| )
@@ -374,9 +403,9 @@ CLASS ltcl_main IMPLEMENTATION.
 *                                            ( |FAMIX.Class Z2MSE_TEST_CL_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| ) ).
 
     equalized_harmonized_mse_exp = VALUE #(
-( |FAMIX.Package A| )
-( |FAMIX.Package A_A| )
-( |FAMIX.Package A_A_A parentPackage A_A| )
+( |SOMIX.Grouping A| )
+( |SOMIX.Grouping A_A| )
+( |SOMIX.Grouping A_A_A parentPackage A_A| )
                                             ).
 
     equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( mse = mse ).
@@ -489,26 +518,6 @@ CLASS ltcl_main IMPLEMENTATION.
     cl_abap_unit_assert=>assert_equals( EXPORTING act = value_act
                                                   exp = value_exp
                                                   msg = 'Apostrophs are to be removed' ).
-
-
-  ENDMETHOD.
-
-  METHOD _handlefileanchor.
-
-    data: elements_act TYPE  z2mse_somix_harmonize=>ty_elements_1,
-          elements_exp TYPE  z2mse_somix_harmonize=>ty_elements_1.
-
-          elements_act = value #( ( elementname = |FAMIX.Class| element_id = 2 )
-                                  ( elementname = |FAMIX.FileAnchor| element_id = 7 attribute = |element| integer_reference = 2 )
-                                  ( elementname = |FAMIX.FileAnchor| element_id = 7 attribute = |fileName| value = |String| ) ).
-
-          elements_exp = value #( ( elementname = |FAMIX.Class| element_id = 2 )
-                                  ( elementname = |FAMIX.FileAnchor| element_id = 2 attribute = |fileName| value = |String| ) ).
-
-
-    z2mse_somix_harmonize=>_handlefileanchor( CHANGING elements = elements_act ).
-
-    cl_abap_unit_assert=>assert_equals( msg = 'Replace element_id for FAMIX.FileAnchor with the reference of element and delete line with element.' exp = elements_exp act = elements_act ).
 
 
   ENDMETHOD.

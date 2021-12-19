@@ -298,11 +298,11 @@ CLASS ltcl_class_SOMIX IMPLEMENTATION.
 
     mse_model_act = element_manager->make_model( ).
 
-    DATA: equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
-          equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
+    DATA: equalized_harmonized_mse_act TYPE z2mse_somix_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_somix_harmonize=>harmonized_mse.
 
 
-    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
+    equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( mse = mse_model_act ).
     equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.CustomSourceLanguage SAP| )
                                             ( |FAMIX.Class CLASS_A modifiers ABAPGlobalClass| )
                                             ( |FAMIX.Class CLASS_A parentPackage PACKAGE1| )
@@ -314,7 +314,7 @@ CLASS ltcl_class_SOMIX IMPLEMENTATION.
                                             ( |FAMIX.Attribute CLASS_A>>METHOD_A| )
                                             ( |FAMIX.Package PACKAGE1| ) ).
 
-    z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+    z2mse_somix_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
 
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
