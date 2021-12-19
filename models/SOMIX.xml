@@ -12,8 +12,8 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <attribute>METHOD_TYPE</attribute>
-        <x>-672.0</x>
-        <y>564.0</y>
+        <x>-671.0</x>
+        <y>563.0</y>
     </element>
     <element>
         <type>FAMIXPackage</type>
@@ -77,8 +77,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <method>GET_INSTANCE</method>
-        <x>-707.0</x>
-        <y>589.0</y>
+        <x>-705.0</x>
+        <y>588.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -90,8 +90,8 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <attribute>ATTRIBUTE_TYPE</attribute>
-        <x>-784.0</x>
-        <y>564.0</y>
+        <x>-783.0</x>
+        <y>563.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -130,8 +130,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <method>COMP_NAME</method>
-        <x>-783.0</x>
-        <y>584.0</y>
+        <x>-781.0</x>
+        <y>583.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -571,8 +571,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_WEB_DYNPRO_COMP</class>
         <method>MAKE_MODEL</method>
-        <x>-689.0</x>
-        <y>747.0</y>
+        <x>-666.0</x>
+        <y>741.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -603,8 +603,8 @@
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <method>MAKE_MODEL</method>
-        <x>-669.0</x>
-        <y>507.0</y>
+        <x>-667.0</x>
+        <y>506.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -919,19 +919,6 @@
     </element>
     <element>
         <type>FAMIXMethod</type>
-        <class>Z2MSE_SOMIX_PARENTCHILD</class>
-        <method>SET_PARENT_CHILD_RELATION</method>
-        <x>-1015.0</x>
-        <y>-63.0</y>
-        <ACTSuppressOthers>
-            <type>ACDStandard</type>
-            <includeMe>true</includeMe>
-            <usedByLayers>1</usedByLayers>
-            <usingLayers>1</usingLayers>
-        </ACTSuppressOthers>
-    </element>
-    <element>
-        <type>FAMIXMethod</type>
         <class>Z2MSE_FAMIX_NAMED_ENTITY</class>
         <method>ADD</method>
         <x>23.0</x>
@@ -1003,6 +990,10 @@
         <attribute>IS_PERSISTENT</attribute>
         <x>-1072.0</x>
         <y>141.0</y>
+        <comment><![CDATA[TODO: Add attribute is_persistent also to the logic]]>
+        </comment>
+        <commentx>-1305.0</commentx>
+        <commenty>-137.0</commenty>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
@@ -1208,8 +1199,8 @@
     <element>
         <type>FAMIXClass</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
-        <x>-729.0</x>
-        <y>587.0</y>
+        <x>-727.0</x>
+        <y>586.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -1261,8 +1252,8 @@
         <type>FAMIXAttribute</type>
         <class>Z2MSE_EXTR3_CLASSES</class>
         <attribute>EVENT_TYPE</attribute>
-        <x>-726.0</x>
-        <y>564.0</y>
+        <x>-725.0</x>
+        <y>563.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
