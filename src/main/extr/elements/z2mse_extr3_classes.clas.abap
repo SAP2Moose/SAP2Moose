@@ -545,6 +545,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
     IF sy-subrc EQ 0.
 
       DATA: last_id        TYPE i,
+            class_id       TYPE i,
             file_anchor_id TYPE i.
 
       IF element-clstype EQ is_class_type.
@@ -556,7 +557,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                           grouping            = element-class_name
                                                           technical_type      = z2mse_extract3=>modifier_abapglobalclass
                                                           link_to_editor      = element-adt_link
-                                                IMPORTING id                  = last_id ).
+                                                IMPORTING id                  = class_id ).
 
         ELSE. " SOMIX
 
@@ -591,7 +592,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                           grouping            = element-class_name
                                                           technical_type      = z2mse_extract3=>modifier_abapglobalinterface
                                                           link_to_editor      = element-adt_link
-                                                IMPORTING id                  = last_id ).
+                                                IMPORTING id                  = class_id ).
 
         ELSE. " SOMIX
           " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
@@ -641,7 +642,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                 IMPORTING id                     = package_id ).
 
           element_manager->somix_parentchild->add(  EXPORTING parent_id  = package_id
-                                                              child_id   = last_id  ).
+                                                              child_id   = class_id  ).
 
         ELSE. " SOMIX
 
@@ -674,6 +675,14 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                         technical_type = z2mse_extract3=>techtype_abapclassattribute
                                                         link_to_editor  = element-adt_link
                                               IMPORTING id = last_id ).
+
+            element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_class
+                                                            grouping               = element_comp-clsname
+                                                            technical_type         = '' " Leave unchanged
+                                                            link_to_editor         = ''
+                                                  IMPORTING id                     = class_id ).
+            element_manager->somix_parentchild->add( EXPORTING parent_id = class_id
+                                                               child_id  = last_id ).
 
           ELSE. " SOMIX
 
@@ -723,11 +732,10 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                         link_to_editor     = element-adt_link
                                               IMPORTING id = last_id ).
 
-            data: class_id TYPE i.
             element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_class
                                                             grouping               = element_comp-clsname
-                                                            technical_type         = z2mse_extract3=>modifier_abapglobalclass
-                                                            link_to_editor         = ''
+                                                            technical_type         = '' " Leave unchanged
+                                                            link_to_editor         = '' " Leave unchanged
                                                   IMPORTING id                     = class_id ).
             element_manager->somix_parentchild->add( EXPORTING parent_id = class_id
                                                                child_id  = last_id ).

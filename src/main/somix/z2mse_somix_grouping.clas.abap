@@ -12,8 +12,8 @@ CLASS z2mse_somix_grouping DEFINITION
     "! Call method to store ID before add is used the next time for the same type of element
     METHODS add
       IMPORTING
-        !grouping_name_group                   TYPE clike
-        !grouping                         TYPE clike
+        !grouping_name_group          TYPE clike
+        !grouping                     TYPE clike
         !technical_type               TYPE clike
         !link_to_editor               TYPE clike
       EXPORTING
@@ -75,6 +75,10 @@ CLASS z2mse_somix_grouping IMPLEMENTATION.
                                           name = grouping
                                 IMPORTING exists_already_with_id = exists_already_with_id
                                           processed_id = id ).
+
+    ENDIF.
+
+    IF technical_type IS NOT INITIAL.
 
       g_model->add_string( EXPORTING element_id     = id
                                      attribute_name = 'technicalType'
