@@ -552,11 +552,11 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
         " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
         IF element_manager->use_somix EQ 'X'.
 
-          element_manager->somix_grouping->add( EXPORTING grouping_name_group      = ng_abap_class
+          element_manager->somix_grouping->add( EXPORTING grouping_name_group = ng_abap_class
                                                           grouping            = element-class_name
-                                                          technical_type  = z2mse_extract3=>modifier_abapglobalclass
-                                                          link_to_editor  = element-adt_link
-                                                IMPORTING id              = last_id ).
+                                                          technical_type      = z2mse_extract3=>modifier_abapglobalclass
+                                                          link_to_editor      = element-adt_link
+                                                IMPORTING id                  = last_id ).
 
         ELSE. " SOMIX
 
@@ -587,11 +587,11 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       ELSEIF element-clstype EQ interface_type.
         IF element_manager->use_somix EQ 'X'.
 
-          element_manager->somix_grouping->add( EXPORTING grouping_name_group             = ng_abap_class
-                                                          grouping                   = element-class_name
-                                                          technical_type         = z2mse_extract3=>modifier_abapglobalinterface
-                                                          link_to_editor         = element-adt_link
-                                                IMPORTING id                     = last_id ).
+          element_manager->somix_grouping->add( EXPORTING grouping_name_group = ng_abap_class
+                                                          grouping            = element-class_name
+                                                          technical_type      = z2mse_extract3=>modifier_abapglobalinterface
+                                                          link_to_editor      = element-adt_link
+                                                IMPORTING id                  = last_id ).
 
         ELSE. " SOMIX
           " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
@@ -631,9 +631,25 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                               AND association->type = z2mse_extr3_association=>parent_package_ass.
         DATA package TYPE REF TO z2mse_extr3_packages.
         package ?= element_manager->get_element( i_element_id = association-element_id2 ).
-        element_manager->famix_class->set_parent_package( element_id     = last_id
-                                                          parent_package = package->devclass( i_element_id = association-element_id2 )
-                                                          parent_package_name_group = ng_abap_package ).
+
+        IF element_manager->use_somix EQ 'X'.
+          DATA: package_id TYPE i.
+          element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_package
+                                                          grouping               = package->devclass( i_element_id = association-element_id2 )
+                                                          technical_type         = z2mse_extract3=>techtype_abappackage
+                                                          link_to_editor         = ''
+                                                IMPORTING id                     = package_id ).
+
+          element_manager->somix_parentchild->add(  EXPORTING parent_id  = package_id
+                                                              child_id   = last_id  ).
+
+        ELSE. " SOMIX
+
+          element_manager->famix_class->set_parent_package( element_id     = last_id
+                                                            parent_package = package->devclass( i_element_id = association-element_id2 )
+                                                            parent_package_name_group = ng_abap_package ).
+
+        ENDIF. " SOMIX
 
       ENDLOOP.
 
@@ -706,6 +722,15 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                         technical_type      = z2mse_extract3=>techtype_abapmethod
                                                         link_to_editor     = element-adt_link
                                               IMPORTING id = last_id ).
+
+            data: class_id TYPE i.
+            element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_class
+                                                            grouping               = element_comp-clsname
+                                                            technical_type         = z2mse_extract3=>modifier_abapglobalclass
+                                                            link_to_editor         = ''
+                                                  IMPORTING id                     = class_id ).
+            element_manager->somix_parentchild->add( EXPORTING parent_id = class_id
+                                                               child_id  = last_id ).
 
           ELSE. " SOMIX
 

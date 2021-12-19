@@ -25,8 +25,6 @@ ENDCLASS.
 CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
   METHOD _get_somix_id_used_and_using.
 
-    ASSERT 1 = 2. ##TODO " Implement method
-
     DATA: invoced_element  TYPE REF TO z2mse_extr3_elements,
           invocing_element TYPE REF TO z2mse_extr3_elements.
 
@@ -107,9 +105,9 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
 
         classes = z2mse_extr3_classes=>get_instance( element_manager = element_manager ).
 
-        classes->comp_name( EXPORTING element_id  = i_association-element_id2
-                             IMPORTING class_name = invocing_class_name
-                                       cmpname    = invocing_cmpname ).
+        classes->comp_name( EXPORTING element_id = i_association-element_id2
+                            IMPORTING class_name = invocing_class_name
+                                      cmpname    = invocing_cmpname ).
 
         invocing_somix_grouping = invocing_class_name.
         invocing_somix_code = invocing_cmpname.

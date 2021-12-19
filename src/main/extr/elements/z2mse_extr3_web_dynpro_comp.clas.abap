@@ -65,7 +65,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
+CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
 
 
   METHOD add.
@@ -179,8 +179,8 @@ CLASS Z2MSE_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
     DATA: element           TYPE element_type,
           element_component TYPE element_comp_type.
 
-    DATA class_id TYPE i.
-    DATA method_id TYPE i.
+    DATA component_id TYPE i.
+    DATA controller_id TYPE i.
 
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
     IF sy-subrc EQ 0.
@@ -191,27 +191,45 @@ CLASS Z2MSE_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
                                                         grouping            = element-wdy_component_name
                                                         technical_type      = z2mse_extract3=>modifier_webdynpro_component
                                                         link_to_editor      = ''
-                                              IMPORTING id                  = class_id ).
+                                              IMPORTING id                  = component_id ).
+
+        DATA association TYPE z2mse_extr3_element_manager=>association_type.
+        LOOP AT associations INTO association WHERE element_id1 = element_id
+                                                AND association->type = z2mse_extr3_association=>parent_package_ass.
+          DATA package TYPE REF TO z2mse_extr3_packages.
+          package ?= element_manager->get_element( i_element_id = association-element_id2 ).
+
+          DATA: package_id TYPE i.
+
+          element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_package
+                                                          grouping               = package->devclass( i_element_id = association-element_id2 )
+                                                          technical_type         = z2mse_extract3=>techtype_abappackage
+                                                          link_to_editor         = ''
+                                                IMPORTING id                     = package_id ).
+
+          element_manager->somix_parentchild->add( EXPORTING parent_id = package_id
+                                                             child_id  = component_id ).
+
+        ENDLOOP.
+
 
       ELSE. " SOMIX
 
         element_manager->famix_class->add( EXPORTING name_group = ng_abap_webdynpro
                                                      name       = element-wdy_component_name
                                                      modifiers  = z2mse_extract3=>modifier_webdynpro_component
-                                           IMPORTING id         = class_id ).
+                                           IMPORTING id         = component_id ).
+
+        LOOP AT associations INTO association WHERE element_id1 = element_id
+                                                AND association->type = z2mse_extr3_association=>parent_package_ass.
+          package ?= element_manager->get_element( i_element_id = association-element_id2 ).
+          element_manager->famix_class->set_parent_package( element_id     = component_id
+                                                            parent_package = package->devclass( i_element_id = association-element_id2 )
+                                                            parent_package_name_group = ng_abap_package ).
+
+        ENDLOOP.
 
       ENDIF. " SOMIX
-
-      DATA association TYPE z2mse_extr3_element_manager=>association_type.
-      LOOP AT associations INTO association WHERE element_id1 = element_id
-                                              AND association->type = z2mse_extr3_association=>parent_package_ass.
-        DATA package TYPE REF TO z2mse_extr3_packages.
-        package ?= element_manager->get_element( i_element_id = association-element_id2 ).
-        element_manager->famix_class->set_parent_package( element_id     = class_id
-                                                          parent_package = package->devclass( i_element_id = association-element_id2 )
-                                                          parent_package_name_group = ng_abap_package ).
-
-      ENDLOOP.
 
       LOOP AT elements_comp_comp_contr_name INTO element_component WHERE wdy_component_name = element-wdy_component_name.
 
@@ -223,29 +241,31 @@ CLASS Z2MSE_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
                                                       code                = element_component-wdy_controller_name
                                                       technical_type      = z2mse_extract3=>techtype_webdynpro_controller
                                                       link_to_editor      = ''
-                                            IMPORTING id = method_id ).
+                                            IMPORTING id = controller_id ).
+          element_manager->somix_parentchild->add( EXPORTING parent_id = component_id
+                                                             child_id  = controller_id ).
 
         ELSE. " SOMIX
 
           element_manager->famix_method->add( EXPORTING name = element_component-wdy_controller_name
-                                              IMPORTING id = method_id ).
+                                              IMPORTING id = controller_id ).
 
-          element_manager->famix_method->set_signature( element_id = method_id
+          element_manager->famix_method->set_signature( element_id = controller_id
                                          signature = element_component-wdy_controller_name ).
 
+          element_manager->famix_method->set_parent_type(
+            EXPORTING
+              element_id         = controller_id
+              parent_element     = 'FAMIX.Class'
+              parent_id          = component_id ).
+
+          "! TBD Really required, this appears to be not exact, no namegroup, ...
+          element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_webdynpro
+                                                             class  = element-wdy_component_name
+                                                             method_name_group = ng_abap_webdynpro
+                                                             method = element_component-wdy_controller_name ).
+
         ENDIF. " SOMIX
-
-        element_manager->famix_method->set_parent_type(
-          EXPORTING
-            element_id         = method_id
-            parent_element     = 'FAMIX.Class'
-            parent_id          = class_id ).
-
-        "! TBD Really required, this appears to be not exact, no namegroup, ...
-        element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_webdynpro
-                                                           class  = element-wdy_component_name
-                                                           method_name_group = ng_abap_webdynpro
-                                                           method = element_component-wdy_controller_name ).
 
       ENDLOOP.
 
