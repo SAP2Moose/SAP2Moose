@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+<!--Moose2Model Layout data, visit moose2model.org on how to use this file-->
+<elements>
+    <version>v1.4.1</version>
+    <scope>method</scope>
+    <element>
+        <type>RWDiagramNoPackage</type>
+        <x>1085.0</x>
+        <y>633.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_SOMIX_HARMONIZE</class>
+        <method>_ANALYZE_ATTRIBUTE_VALUE</method>
+        <x>-533.0</x>
+        <y>-3.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_SOMIX_HARMONIZE</class>
+        <method>_FIND_CONCATENATED_NAMES</method>
+        <x>-863.0</x>
+        <y>149.0</y>
+        <comment><![CDATA[Contains explicite information which elements use simple names:<br>SOMIX.Grouping<br>SOMIX.Data<br>SOMIX.Code]]>
+        </comment>
+        <commentx>-894.0</commentx>
+        <commenty>205.0</commenty>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_SOMIX_HARMONIZE</class>
+        <method>_MAKE_LIST_OF_ELEMENT_NODES</method>
+        <x>-768.0</x>
+        <y>-65.0</y>
+        <comment><![CDATA[Returns element_nodes:<br>Row  TABLE_LINE===============================================================================1    ( SOMIX.Data (id: 1)  (name 'attr')  (technicalType 'ABAPClassAttribute'))]]>
+        </comment>
+        <commentx>-856.0</commentx>
+        <commenty>-138.0</commenty>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_SOMIX_HARMONIZE</class>
+        <method>EQUALIZE_HARMONIZED</method>
+        <x>-713.0</x>
+        <y>-3.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_SOMIX_HARMONIZE</class>
+        <x>-582.0</x>
+        <y>33.0</y>
+    </element>
+    <element>
+        <type>FAMIXPackage</type>
+        <package>Z2MSE_MAIN_MSE</package>
+        <x>357.0</x>
+        <y>66.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_SOMIX_HARMONIZE</class>
+        <method>_BUILD_RESULT</method>
+        <x>-727.0</x>
+        <y>22.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_SOMIX_HARMONIZE</class>
+        <method>_ADD_ELEMENT_NODE</method>
+        <x>-790.0</x>
+        <y>-20.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_SOMIX_HARMONIZE</class>
+        <method>_GET_CONCATENATED_NAMES</method>
+        <x>-269.0</x>
+        <y>94.0</y>
+        <comment><![CDATA[Is obsolete because parent_id will not be used anymore]]>
+        </comment>
+        <commentx>-290.0</commentx>
+        <commenty>198.0</commenty>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_SOMIX_HARMONIZE</class>
+        <method>_EXT_SERIAL_ATTRIBUTE_NODES</method>
+        <x>-875.0</x>
+        <y>82.0</y>
+        <comment><![CDATA[Analyzes nodes further]]>
+        </comment>
+        <commentx>-1053.0</commentx>
+        <commenty>44.0</commenty>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_SOMIX_HARMONIZE</class>
+        <method>MSE_2_HARMONIZED</method>
+        <x>-590.0</x>
+        <y>-134.0</y>
+        <comment><![CDATA[Receives mse:<br>( ( SOMIX.Data (id: 1)  (name 'attr')  (technicalType 'ABAPClassAttribute'))]]>
+        </comment>
+        <commentx>-622.0</commentx>
+        <commenty>-189.0</commenty>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_SOMIX_HARMONIZE</class>
+        <method>_EXTRACT_ELEMENT_NODE</method>
+        <x>-906.0</x>
+        <y>-20.0</y>
+        <comment><![CDATA[Returnselementname:SOMIX.Dataserial_attribute_nodes:Row  TABLE_LINE=========================================1    (id: 1)2    (name 'attr')3    (technicalType 'ABAPClassAttribute')]]>
+        </comment>
+        <commentx>-1060.0</commentx>
+        <commenty>-80.0</commenty>
+        <ACTSuppressOthers>
+            <type>ACDStandard</type>
+            <includeMe>true</includeMe>
+            <usedByLayers>1</usedByLayers>
+            <usingLayers>1</usingLayers>
+        </ACTSuppressOthers>
+    </element>
+</elements>
