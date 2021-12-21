@@ -10,17 +10,16 @@ CLASS ltcl_main DEFINITION FINAL FOR TESTING
     METHODS:
       equalize_harmonized FOR TESTING RAISING cx_static_check,
       somix_1_harmonized FOR TESTING RAISING cx_static_check,
-      mse_2_harmonized FOR TESTING RAISING cx_static_check,
-      mse_2_harmonized_package FOR TESTING RAISING cx_static_check,
-      mse_2_harmonized_interface FOR TESTING RAISING cx_static_check,
+      somix_2_harmonized FOR TESTING RAISING cx_static_check,
+      somix_3_harmonized FOR TESTING RAISING cx_static_check,
+      somix_4_harmonized FOR TESTING RAISING cx_static_check,
       _make_list_of_element_nodes FOR TESTING RAISING cx_static_check,
       _add_element_node FOR TESTING RAISING cx_static_check,
       _extract_element_node FOR TESTING RAISING cx_static_check,
       _ext_serial_attribute_nodes FOR TESTING RAISING cx_static_check,
       _ext_serial_attribute_nodes2 FOR TESTING RAISING cx_static_check,
       _ext_valuenodes FOR TESTING RAISING cx_static_check,
-      _remove_apostroph FOR TESTING RAISING cx_static_check,
-      mse_2_harmonized_empty_package FOR TESTING RAISING cx_static_check.
+      _remove_apostroph FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
 
@@ -39,6 +38,89 @@ CLASS ltcl_main IMPLEMENTATION.
 
     equalized_harmonized_mse_exp = VALUE #( ( |SOMIX.Grouping Pack_1 technicalType ABAPPackage| )
                                              ).
+
+    equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( string_table = mse ).
+    z2mse_somix_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
+    cl_abap_unit_assert=>assert_equals( EXPORTING act = equalized_harmonized_mse_act
+                                                  exp = equalized_harmonized_mse_exp
+                                                  msg = 'Harmonize simple Package specification correctly' ).
+
+
+  ENDMETHOD.
+
+  METHOD somix_2_harmonized.
+
+    DATA: mse                          TYPE z2mse_somix_harmonize=>string_table,
+          equalized_harmonized_mse_act TYPE z2mse_somix_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_somix_harmonize=>harmonized_mse.
+
+    mse = VALUE #( ( |( ( SOMIX.Data (id: 1)| )
+                   ( |  (name 'attr')| )
+                   ( |  (technicalType 'ABAPClassAttribute'))| )
+                  ).
+
+    equalized_harmonized_mse_exp = VALUE #( ( |SOMIX.Data attr technicalType ABAPClassAttribute| )
+                                             ).
+
+    equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( string_table = mse ).
+    z2mse_somix_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
+    cl_abap_unit_assert=>assert_equals( EXPORTING act = equalized_harmonized_mse_act
+                                                  exp = equalized_harmonized_mse_exp
+                                                  msg = 'Harmonize simple Package specification correctly' ).
+
+
+  ENDMETHOD.
+
+  METHOD somix_3_harmonized.
+
+    DATA: mse                          TYPE z2mse_somix_harmonize=>string_table,
+          equalized_harmonized_mse_act TYPE z2mse_somix_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_somix_harmonize=>harmonized_mse.
+
+    mse = VALUE #( ( |( ( SOMIX.Code (id: 1)| )
+                   ( |  (name 'meth1')| )
+                   ( |  (technicalType 'ABAPClassMethod'))| )
+                  ).
+
+    equalized_harmonized_mse_exp = VALUE #( ( |SOMIX.Code meth1 technicalType ABAPClassMethod| )
+                                             ).
+
+    equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( string_table = mse ).
+    z2mse_somix_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
+    cl_abap_unit_assert=>assert_equals( EXPORTING act = equalized_harmonized_mse_act
+                                                  exp = equalized_harmonized_mse_exp
+                                                  msg = 'Harmonize simple Package specification correctly' ).
+
+
+  ENDMETHOD.
+
+  METHOD somix_4_harmonized.
+
+    DATA: mse                          TYPE z2mse_somix_harmonize=>string_table,
+          equalized_harmonized_mse_act TYPE z2mse_somix_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_somix_harmonize=>harmonized_mse.
+
+    mse = VALUE #( ( |(| )
+                   ( |( SOMIX.Grouping (id: 1)| )
+                   ( |  (name 'Class_1')| )
+                   ( |  (technicalType 'ABAPClass'))| )
+                   ( |( SOMIX.Code (id: 2)| )
+                   ( |  (name 'meth1')| )
+                   ( |  (technicalType 'ABAPClassMethod'))| )
+                   ( |( SOMIX.ParentChild| )
+                   ( |  (parent (ref: 1))| )
+                   ( |  (child (ref: 2)))| )
+                   ( |)| )
+                  ).
+
+    equalized_harmonized_mse_exp = VALUE #(
+                                            ( |SOMIX.Grouping Class_1 technicalType ABAPClass| )
+                                            ( |SOMIX.Code meth1 technicalType ABAPClassMethod| )
+                                            ( |SOMIX.ParentChild parent Class_1 child meth1| )
+                                           ).
 
     equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( string_table = mse ).
     z2mse_somix_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
@@ -308,179 +390,6 @@ CLASS ltcl_main IMPLEMENTATION.
                                                     msg = |Expect correct is_elementnode : | && |{ valuenode }| ).
 
     ENDWHILE.
-
-  ENDMETHOD.
-
-  METHOD mse_2_harmonized.
-
-    DATA: mse                          TYPE z2mse_somix_harmonize=>string_table,
-          equalized_harmonized_mse_act TYPE z2mse_somix_harmonize=>harmonized_mse,
-          equalized_harmonized_mse_exp TYPE z2mse_somix_harmonize=>harmonized_mse.
-
-    mse = VALUE #( ( |( ( FAMIX.CustomSourceLanguage (id: 1)| )
-                   ( |  (name 'SAP'))| )
-                   ( |(FAMIX.Package (id: 2 )| )
-                   ( |  (name 'Z2MSE_TEST_INITIAL_SELECTION'))| )
-                   ( |(FAMIX.Class (id: 3 )| )
-                   ( |  (name 'Z2MSE_TEST_CL_A')| )
-                   ( |  (modifiers 'ABAPGlobalClass')| )
-                   ( |  (parentPackage (ref: 2)))| )
-                   ( |(FAMIX.FileAnchor (id: 8)| )
-                   ( |  (element (ref: 3))| )
-                   ( |  (fileName 'adt://{ sy-sysid }/sap/bc/adt/oo/classes/z2mse_extr3_access/source/main'))| )
-                   ( |(FAMIX.Attribute (id: 5 )| )
-                   ( |  (name 'Z2MSE_TEST_IF_A~ATTRIBUTE_A')| )
-                   ( |  (parentType (ref: 3)))| )
-                   ( |(FAMIX.Method (id: 6 )| )
-                   ( |  (name 'Z2MSE_TEST_IF_A~METHOD_A')| )
-                   ( |  (signature 'Z2MSE_TEST_IF_A~METHOD_A')| )
-                   ( |  (parentType (ref: 3)))| )
-                   ( |(FAMIX.FileAnchor (id: 9)| )
-                   ( |  (element (ref: 6))| )
-                   ( |  (fileName 'adt://{ sy-sysid }/sap/bc/adt/oo/classes/z2mse_extr3_access/source/main#start=27,5'))| )
-                   ( |(FAMIX.Method (id: 7 )| )
-                   ( |  (name 'METHOD_B')| )
-                   ( |  (signature 'METHOD_B')| )
-                   ( |  (parentType (ref: 3)))| )
-                   ( |(FAMIX.Access| )
-                   ( |  (accessor (ref: 6))| )
-                   ( |  (variable (ref: 5)))| )
-                   ( |(FAMIX.Invocation| )
-                   ( |  (sender (ref: 7))| )
-                   ( |  (candidates (ref: 6))| )
-                   ( |  (signature 'DUMMY')))| ) ).
-
-*    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.Package Z2MSE_TEST_INITIAL_SELECTION| )
-*                                            ( |FAMIX.Class Z2MSE_TEST_CL_A modifiers 'ABAPGlobalClass'| )
-*                                            ( |FAMIX.Class Z2MSE_TEST_CL_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| ) ).
-
-    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.CustomSourceLanguage SAP| )
-                                            ( |FAMIX.Attribute Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~ATTRIBUTE_A| )
-                                            ( |FAMIX.Access accessor  Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~METHOD_A  variable   Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~ATTRIBUTE_A | )
-                                            ( |FAMIX.Class Z2MSE_TEST_CL_A modifiers ABAPGlobalClass| )
-                                            ( |FAMIX.FileAnchor Z2MSE_TEST_CL_A fileName adt://{ sy-sysid }/sap/bc/adt/oo/classes/z2mse_extr3_access/source/main| )
-                                            ( |FAMIX.FileAnchor Z2MSE_TEST_IF_A~METHOD_A fileName adt://{ sy-sysid }/sap/bc/adt/oo/classes/z2mse_extr3_access/source/main#start=27,5| )
-                                            ( |FAMIX.Invocation sender Z2MSE_TEST_CL_A>>METHOD_B candidates Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~METHOD_A signature DUMMY| )
-                                            ( |FAMIX.Method Z2MSE_TEST_CL_A>>METHOD_B signature METHOD_B| )
-                                            ( |FAMIX.Method Z2MSE_TEST_CL_A>>Z2MSE_TEST_IF_A~METHOD_A signature Z2MSE_TEST_IF_A~METHOD_A| )
-                                            ( |FAMIX.Package Z2MSE_TEST_INITIAL_SELECTION| )
-                                            ( |FAMIX.Class Z2MSE_TEST_CL_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| )
-
-                                             ).
-
-    equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( string_table = mse ).
-    z2mse_somix_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
-
-    cl_abap_unit_assert=>assert_equals( EXPORTING act = equalized_harmonized_mse_act
-                                                  exp = equalized_harmonized_mse_exp
-                                                  msg = 'Harmonize simple Package specification correctly' ).
-
-
-  ENDMETHOD.
-
-  METHOD mse_2_harmonized_package.
-
-    DATA: mse                          TYPE z2mse_model=>lines_type,
-          equalized_harmonized_mse_act TYPE z2mse_somix_harmonize=>harmonized_mse,
-          equalized_harmonized_mse_exp TYPE z2mse_somix_harmonize=>harmonized_mse.
-
-    mse = VALUE #( ( line = |( (SOMIX.Grouping (id: 1 )| )
-                   ( line = |  (name 'A')| )
-                   ( line = |  (technicalType 'ABAPPackage'))| )
-                   ( line = |(SOMIX.Grouping (id: 2 )| )
-                   ( line = |  (name 'A_A_A')| )
-                   ( line = |  (technicalType 'ABAPPackage'))| )
-                   ( line = |(SOMIX.ParentChild| )
-                   ( line = |(parent (ref: 3))| )
-                   ( line = |(child (ref: 2)))| )
-                   ( line = |(SOMIX.Grouping (id: 3 )| )
-                   ( line = |  (name 'A_A'))| )
-                   ( line = |  (technicalType 'ABAPPackage')))| )
-                             ).
-
-*    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.Package Z2MSE_TEST_INITIAL_SELECTION| )
-*                                            ( |FAMIX.Class Z2MSE_TEST_CL_A modifiers 'ABAPGlobalClass'| )
-*                                            ( |FAMIX.Class Z2MSE_TEST_CL_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| ) ).
-
-    equalized_harmonized_mse_exp = VALUE #(
-( |SOMIX.Grouping A| )
-( |SOMIX.Grouping A_A| )
-( |SOMIX.Grouping A_A_A parentPackage A_A| )
-                                            ).
-
-    equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( mse = mse ).
-    z2mse_somix_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
-
-    cl_abap_unit_assert=>assert_equals( EXPORTING act = equalized_harmonized_mse_act
-                                                  exp = equalized_harmonized_mse_exp
-                                                  msg = 'Harmonize complex Package specification correctly' ).
-
-
-  ENDMETHOD.
-
-  METHOD mse_2_harmonized_interface.
-
-    DATA: mse                          TYPE z2mse_model=>lines_type,
-          equalized_harmonized_mse_act TYPE z2mse_somix_harmonize=>harmonized_mse,
-          equalized_harmonized_mse_exp TYPE z2mse_somix_harmonize=>harmonized_mse.
-
-    mse = VALUE #( ( line = |( (FAMIX.Package (id: 1 )| )
-                   ( line = |  (name 'A'))| )
-                             ( line = |(FAMIX.Class (id: 5 )| )
-                             ( line = |  (name 'INTERFACE_A')| )
-                             ( line = |  (modifiers 'ABAPGlobalInterface')| )
-                             ( line = |  (parentPackage (ref: 1))| )
-                             ( line = |  (isInterface true)))| )
-                             ).
-
-*    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.Package Z2MSE_TEST_INITIAL_SELECTION| )
-*                                            ( |FAMIX.Class Z2MSE_TEST_CL_A modifiers 'ABAPGlobalClass'| )
-*                                            ( |FAMIX.Class Z2MSE_TEST_CL_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| ) ).
-
-    equalized_harmonized_mse_exp = VALUE #(
-( |FAMIX.Package A| )
-( |FAMIX.Class INTERFACE_A isInterface true| )
-( |FAMIX.Class INTERFACE_A modifiers ABAPGlobalInterface| )
-( |FAMIX.Class INTERFACE_A parentPackage A| )
-                                            ).
-
-    equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( mse = mse ).
-    z2mse_somix_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
-
-    cl_abap_unit_assert=>assert_equals( EXPORTING act = equalized_harmonized_mse_act
-                                                  exp = equalized_harmonized_mse_exp
-                                                  msg = 'Harmonize complex Package specification correctly' ).
-
-
-  ENDMETHOD.
-
-  METHOD mse_2_harmonized_empty_package.
-
-    DATA: mse                          TYPE z2mse_somix_harmonize=>string_table,
-          equalized_harmonized_mse_act TYPE z2mse_somix_harmonize=>harmonized_mse,
-          equalized_harmonized_mse_exp TYPE z2mse_somix_harmonize=>harmonized_mse.
-
-    mse = VALUE #( ( |( (FAMIX.Package (id: 1 )| )
-                   ( |  (name ''))| )
-                   ( |(FAMIX.Class (id: 2 )| )
-                   ( |  (name 'Z2MSE_TEST_CL_A')| )
-                   ( |  (parentPackage (ref: 1))))| ) ).
-
-*    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.Package Z2MSE_TEST_INITIAL_SELECTION| )
-*                                            ( |FAMIX.Class Z2MSE_TEST_CL_A modifiers 'ABAPGlobalClass'| )
-*                                            ( |FAMIX.Class Z2MSE_TEST_CL_A parentPackage Z2MSE_TEST_INITIAL_SELECTION| ) ).
-
-    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.Package | )
-                                            ( |FAMIX.Class Z2MSE_TEST_CL_A parentPackage | )
-                                             ).
-
-    equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( string_table = mse ).
-    z2mse_somix_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
-
-    cl_abap_unit_assert=>assert_equals( EXPORTING act = equalized_harmonized_mse_act
-                                                  exp = equalized_harmonized_mse_exp
-                                                  msg = 'Harmonize simple Package specification correctly' ).
-
 
   ENDMETHOD.
 

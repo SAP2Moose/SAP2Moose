@@ -22,10 +22,9 @@ CLASS z2mse_somix_harmonize DEFINITION
     TYPES string_table TYPE TABLE OF string WITH DEFAULT KEY.
 
     TYPES: BEGIN OF id_to_name,
-             id                TYPE i,
-             simple_name       TYPE string,
-             parent_id         TYPE i,
-             concatenated_name TYPE string,
+             id          TYPE i,
+             simple_name TYPE string,
+             parent_id   TYPE i,
            END OF id_to_name.
 
     TYPES: BEGIN OF element,
@@ -111,9 +110,6 @@ CLASS z2mse_somix_harmonize DEFINITION
       CHANGING
         cd_to_name      TYPE z2mse_somix_harmonize=>id_to_name
         c_element       TYPE z2mse_somix_harmonize=>element.
-    CLASS-METHODS _get_concatenated_names
-      CHANGING
-        id_to_names TYPE ty_id_to_names_2.
 ENDCLASS.
 
 
@@ -199,7 +195,7 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
                                                attributename            = attributename
                                                valuenodes            = valuenodes ).
 
-        IF is_serial EQ abap_true.
+        IF is_serial EQ abap_true. "Example is a node like (id: 1)
 
           id_to_name-id = serial_id.
           element-element_id = serial_id.
@@ -228,8 +224,6 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
       ENDIF.
 
     ENDLOOP.
-
-    _get_concatenated_names( CHANGING id_to_names = id_to_names ).
 
     _find_concatenated_names( EXPORTING id_to_names = id_to_names
                               CHANGING  elements  = elements ).
@@ -370,12 +364,12 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
 
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name4>) WITH TABLE KEY id = element-accessor_ref.
         IF sy-subrc EQ 0.
-          accessor = <id_to_name4>-concatenated_name.
+          accessor = <id_to_name4>-simple_name.
         ENDIF.
 
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name5>) WITH TABLE KEY id = element-accessed_ref.
         IF sy-subrc EQ 0.
-          accessed = <id_to_name5>-concatenated_name.
+          accessed = <id_to_name5>-simple_name.
         ENDIF.
 
         result = |{ element-elementname } accessor | && |{ accessor } accessed | && |{ accessed }|.
@@ -384,12 +378,12 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
 
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name6>) WITH TABLE KEY id = element-caller_ref.
         IF sy-subrc EQ 0.
-          caller = <id_to_name6>-concatenated_name.
+          caller = <id_to_name6>-simple_name.
         ENDIF.
 
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name7>) WITH TABLE KEY id = element-called_ref.
         IF sy-subrc EQ 0.
-          called = <id_to_name7>-concatenated_name.
+          called = <id_to_name7>-simple_name.
         ENDIF.
 
         result = |{ element-elementname } caller | && |{ caller } called | && |{ called }|.
@@ -398,12 +392,12 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
 
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name8>) WITH TABLE KEY id = element-parent_ref.
         IF sy-subrc EQ 0.
-          parent = <id_to_name8>-concatenated_name.
+          parent = <id_to_name8>-simple_name.
         ENDIF.
 
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name9>) WITH TABLE KEY id = element-child_ref.
         IF sy-subrc EQ 0.
-          child = <id_to_name9>-concatenated_name.
+          child = <id_to_name9>-simple_name.
         ENDIF.
 
         result = |{ element-elementname } parent | && |{ parent } child | && |{ child }|.
@@ -420,11 +414,7 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
 
             READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name10>) WITH TABLE KEY id = element-integer_reference.
             IF sy-subrc EQ 0.
-              IF <id_to_name10>-concatenated_name IS NOT INITIAL.
-                value = <id_to_name10>-concatenated_name.
-              ELSE.
-                value = <id_to_name10>-simple_name.
-              ENDIF.
+              value = <id_to_name10>-simple_name.
 
               result = |{ element-elementname } | && |{ element-concatenated_name } | && |{ element-attribute } | && |{ value }|.
 
@@ -641,7 +631,6 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
 
   ENDMETHOD.
 
-
   METHOD _find_concatenated_names.
 
     " Find concatenated names
@@ -650,32 +639,14 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
       IF <element>-element_id IS NOT INITIAL.
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name3>) WITH TABLE KEY id = <element>-element_id.
         IF sy-subrc EQ 0.
-          IF <id_to_name3>-simple_name IS NOT INITIAL
-          AND    <element>-elementname EQ 'SOMIX.Grouping'.
-            <element>-concatenated_name = <id_to_name3>-simple_name.
-          ELSE.
-            <element>-concatenated_name = <id_to_name3>-concatenated_name.
-          ENDIF.
+
+          <element>-concatenated_name = <id_to_name3>-simple_name.
+
         ENDIF.
       ENDIF.
     ENDLOOP.
 
   ENDMETHOD.
-
-
-  METHOD _get_concatenated_names.
-
-    " Get concatenated names
-
-    LOOP AT id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name>).
-      READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name2>) WITH TABLE KEY id = <id_to_name>-parent_id.
-      IF sy-subrc EQ 0.
-        <id_to_name>-concatenated_name = |{ <id_to_name2>-simple_name }| && |>>| && |{ <id_to_name>-simple_name }|.
-      ENDIF.
-    ENDLOOP.
-
-  ENDMETHOD.
-
 
   METHOD _make_list_of_element_nodes.
 
