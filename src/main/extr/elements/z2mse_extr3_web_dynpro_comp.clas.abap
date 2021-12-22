@@ -187,11 +187,15 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
 
       IF element_manager->use_somix EQ 'X'.
 
+        DATA: unique_name TYPE string.
+        unique_name = |sap.{ element-wdy_component_name }|.
+
         element_manager->somix_grouping->add( EXPORTING grouping_name_group = ng_abap_webdynpro
                                                         grouping            = element-wdy_component_name
                                                         technical_type      = z2mse_extract3=>modifier_webdynpro_component
                                                         link_to_editor      = ''
-                                              IMPORTING id                  = component_id ).
+                                              IMPORTING id                  = component_id
+                                              CHANGING  unique_name         = unique_name ).
 
         DATA association TYPE z2mse_extr3_element_manager=>association_type.
         LOOP AT associations INTO association WHERE element_id1 = element_id
@@ -200,12 +204,16 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
           package ?= element_manager->get_element( i_element_id = association-element_id2 ).
 
           DATA: package_id TYPE i.
+          DATA: devclass TYPE devclass.
+          devclass = package->devclass( i_element_id = association-element_id2 ).
+          unique_name = |sap.{ devclass }|.
 
           element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_package
-                                                          grouping               = package->devclass( i_element_id = association-element_id2 )
+                                                          grouping               = devclass
                                                           technical_type         = z2mse_extract3=>techtype_abappackage
                                                           link_to_editor         = ''
-                                                IMPORTING id                     = package_id ).
+                                                IMPORTING id                     = package_id
+                                                CHANGING  unique_name         = unique_name ).
 
           element_manager->somix_parentchild->add( EXPORTING parent_id = package_id
                                                              child_id  = component_id ).
@@ -234,6 +242,7 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
       LOOP AT elements_comp_comp_contr_name INTO element_component WHERE wdy_component_name = element-wdy_component_name.
 
         IF element_manager->use_somix EQ 'X'.
+          unique_name = |sap.{ element-wdy_component_name }.{ element_component-wdy_controller_name }|.
 
           element_manager->somix_code->add( EXPORTING grouping_name_group = ng_abap_webdynpro
                                                       grouping            = element-wdy_component_name
@@ -241,7 +250,8 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
                                                       code                = element_component-wdy_controller_name
                                                       technical_type      = z2mse_extract3=>techtype_webdynpro_controller
                                                       link_to_editor      = ''
-                                            IMPORTING id = controller_id ).
+                                            IMPORTING id                  = controller_id
+                                            CHANGING  unique_name         = unique_name ).
           element_manager->somix_parentchild->add( EXPORTING parent_id = component_id
                                                              child_id  = controller_id ).
 

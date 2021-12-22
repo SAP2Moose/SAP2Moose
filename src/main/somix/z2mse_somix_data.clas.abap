@@ -20,7 +20,9 @@ CLASS z2mse_somix_data DEFINITION
         !link_to_editor               TYPE clike
       EXPORTING
         VALUE(exists_already_with_id) TYPE i
-        VALUE(id)                     TYPE i .
+        VALUE(id)                     TYPE i
+      CHANGING
+        unique_name                   TYPE clike..
     "! Returns the ID for a given data. May use also a grouping the data is contained.
     "! Returns 0 if the attribute is not known
     "! @parameter grouping_name_group | the namegroup of the grouping the data is contained in
@@ -91,6 +93,12 @@ CLASS z2mse_somix_data IMPLEMENTATION.
                                      string         = technical_type ).
 
     ENDIF.
+
+    ASSERT unique_name IS NOT INITIAL.
+    TRANSLATE unique_name TO LOWER CASE. " To be compatible with specification. Not case sensitive names are here in lower case.
+    g_model->add_string( EXPORTING element_id     = id
+                                   attribute_name = 'uniqueName'
+                                   string         = unique_name ).
 
     IF link_to_editor IS NOT INITIAL.
 

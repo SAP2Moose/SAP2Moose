@@ -552,12 +552,14 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
         " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
         " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
         IF element_manager->use_somix EQ 'X'.
-
+          DATA: unique_name TYPE string.
+          unique_name = |sap.{ element-class_name }|.
           element_manager->somix_grouping->add( EXPORTING grouping_name_group = ng_abap_class
                                                           grouping            = element-class_name
                                                           technical_type      = z2mse_extract3=>modifier_abapglobalclass
                                                           link_to_editor      = element-adt_link
-                                                IMPORTING id                  = class_id ).
+                                                IMPORTING id                  = class_id
+                                                CHANGING  unique_name         = unique_name ).
 
         ELSE. " SOMIX
 
@@ -588,11 +590,13 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       ELSEIF element-clstype EQ interface_type.
         IF element_manager->use_somix EQ 'X'.
 
+          unique_name = |sap.{ element-class_name }|.
           element_manager->somix_grouping->add( EXPORTING grouping_name_group = ng_abap_class
                                                           grouping            = element-class_name
                                                           technical_type      = z2mse_extract3=>modifier_abapglobalinterface
                                                           link_to_editor      = element-adt_link
-                                                IMPORTING id                  = class_id ).
+                                                IMPORTING id                  = class_id
+                                                CHANGING  unique_name         = unique_name ).
 
         ELSE. " SOMIX
           " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
@@ -635,11 +639,15 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
         IF element_manager->use_somix EQ 'X'.
           DATA: package_id TYPE i.
+          DATA: devclass TYPE devclass.
+          devclass = package->devclass( i_element_id = association-element_id2 ).
+          unique_name = |sap.{ devclass }|.
           element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_package
-                                                          grouping               = package->devclass( i_element_id = association-element_id2 )
+                                                          grouping               = devclass
                                                           technical_type         = z2mse_extract3=>techtype_abappackage
                                                           link_to_editor         = ''
-                                                IMPORTING id                     = package_id ).
+                                                IMPORTING id                     = package_id
+                                                CHANGING  unique_name            = unique_name ).
 
           element_manager->somix_parentchild->add(  EXPORTING parent_id  = package_id
                                                               child_id   = class_id  ).
@@ -668,19 +676,23 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
           IF element_manager->use_somix EQ 'X'.
 
+            unique_name = |sap.{ element_comp-clsname }.{ element_comp-cmpname }|.
             element_manager->somix_data->add( EXPORTING grouping_name_group = ng_abap_class
                                                         grouping    = element_comp-clsname
                                                         data_name_group = '' ##TODO " Improve coding generally. Without grouping name the data name is not uniquw
                                                         data = element_comp-cmpname
                                                         technical_type = z2mse_extract3=>techtype_abapclassattribute
                                                         link_to_editor  = element-adt_link
-                                              IMPORTING id = last_id ).
+                                              IMPORTING id = last_id
+                                              CHANGING  unique_name         = unique_name ).
 
+            unique_name = |sap.{ element_comp-clsname }|.
             element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_class
                                                             grouping               = element_comp-clsname
                                                             technical_type         = '' " Leave unchanged
                                                             link_to_editor         = ''
-                                                  IMPORTING id                     = class_id ).
+                                                  IMPORTING id                     = class_id
+                                                  CHANGING  unique_name            = unique_name ).
             element_manager->somix_parentchild->add( EXPORTING parent_id = class_id
                                                                child_id  = last_id ).
 
@@ -724,19 +736,23 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
           IF element_manager->use_somix EQ 'X'.
 
+            unique_name = |sap.{ element_comp-clsname }.{ element_comp-cmpname }|.
             element_manager->somix_code->add( EXPORTING grouping_name_group = ng_abap_class
                                                         grouping            = element_comp-clsname
                                                         code_name_group     = z2mse_extr3=>ng_abap_method
                                                         code                = element_comp-cmpname
                                                         technical_type      = z2mse_extract3=>techtype_abapmethod
-                                                        link_to_editor     = element-adt_link
-                                              IMPORTING id = last_id ).
+                                                        link_to_editor      = element-adt_link
+                                              IMPORTING id                  = last_id
+                                              CHANGING  unique_name         = unique_name ).
 
+            unique_name = |sap.{ element_comp-clsname }|.
             element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_class
                                                             grouping               = element_comp-clsname
                                                             technical_type         = '' " Leave unchanged
                                                             link_to_editor         = '' " Leave unchanged
-                                                  IMPORTING id                     = class_id ).
+                                                  IMPORTING id                     = class_id
+                                                  CHANGING  unique_name            = unique_name ).
             element_manager->somix_parentchild->add( EXPORTING parent_id = class_id
                                                                child_id  = last_id ).
 

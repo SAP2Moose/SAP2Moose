@@ -22,9 +22,9 @@ CLASS z2mse_somix_harmonize DEFINITION
     TYPES string_table TYPE TABLE OF string WITH DEFAULT KEY.
 
     TYPES: BEGIN OF id_to_name,
-             id          TYPE i,
-             simple_name TYPE string,
-             parent_id   TYPE i,
+             id             TYPE i,
+             technical_type TYPE string,
+             unique_name    TYPE string,
            END OF id_to_name.
 
     TYPES: BEGIN OF element,
@@ -287,11 +287,16 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
                                  ref_elementname = ref_elementname
                                  is_elementnode = is_elementnode ).
 
-      IF i_attributename EQ 'name' AND
+      IF i_attributename EQ 'uniqueName' AND
          is_primitive EQ abap_true.
-        cd_to_name-simple_name = primitive.
+        cd_to_name-unique_name = primitive.
 
-        _remove_apostroph( CHANGING string = cd_to_name-simple_name ).
+        _remove_apostroph( CHANGING string = cd_to_name-unique_name ).
+      ELSEIF i_attributename EQ 'technicalType' AND
+         is_primitive EQ abap_true.
+        cd_to_name-technical_type = primitive.
+
+        _remove_apostroph( CHANGING string = cd_to_name-technical_type ).
 
       ELSE.
 
@@ -364,12 +369,12 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
 
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name4>) WITH TABLE KEY id = element-accessor_ref.
         IF sy-subrc EQ 0.
-          accessor = <id_to_name4>-simple_name.
+          accessor = |{ <id_to_name4>-technical_type }.{ <id_to_name4>-unique_name }|.
         ENDIF.
 
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name5>) WITH TABLE KEY id = element-accessed_ref.
         IF sy-subrc EQ 0.
-          accessed = <id_to_name5>-simple_name.
+          accessed = |{ <id_to_name5>-technical_type }.{ <id_to_name5>-unique_name }|.
         ENDIF.
 
         result = |{ element-elementname } accessor | && |{ accessor } accessed | && |{ accessed }|.
@@ -378,12 +383,12 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
 
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name6>) WITH TABLE KEY id = element-caller_ref.
         IF sy-subrc EQ 0.
-          caller = <id_to_name6>-simple_name.
+          caller = |{ <id_to_name6>-technical_type }.{ <id_to_name6>-unique_name }|.
         ENDIF.
 
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name7>) WITH TABLE KEY id = element-called_ref.
         IF sy-subrc EQ 0.
-          called = <id_to_name7>-simple_name.
+          called = |{ <id_to_name7>-technical_type }.{ <id_to_name7>-unique_name }|.
         ENDIF.
 
         result = |{ element-elementname } caller | && |{ caller } called | && |{ called }|.
@@ -392,12 +397,12 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
 
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name8>) WITH TABLE KEY id = element-parent_ref.
         IF sy-subrc EQ 0.
-          parent = <id_to_name8>-simple_name.
+          parent = |{ <id_to_name8>-technical_type }.{ <id_to_name8>-unique_name }|.
         ENDIF.
 
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name9>) WITH TABLE KEY id = element-child_ref.
         IF sy-subrc EQ 0.
-          child = <id_to_name9>-simple_name.
+          child = |{ <id_to_name9>-technical_type }.{ <id_to_name9>-unique_name }|.
         ENDIF.
 
         result = |{ element-elementname } parent | && |{ parent } child | && |{ child }|.
@@ -414,7 +419,7 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
 
             READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name10>) WITH TABLE KEY id = element-integer_reference.
             IF sy-subrc EQ 0.
-              value = <id_to_name10>-simple_name.
+              value = |{ <id_to_name10>-technical_type }.{ <id_to_name10>-unique_name }|.
 
               result = |{ element-elementname } | && |{ element-concatenated_name } | && |{ element-attribute } | && |{ value }|.
 
@@ -640,7 +645,7 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
         READ TABLE id_to_names ASSIGNING FIELD-SYMBOL(<id_to_name3>) WITH TABLE KEY id = <element>-element_id.
         IF sy-subrc EQ 0.
 
-          <element>-concatenated_name = <id_to_name3>-simple_name.
+          <element>-concatenated_name = |{ <id_to_name3>-technical_type }.{ <id_to_name3>-unique_name }|.
 
         ENDIF.
       ENDIF.

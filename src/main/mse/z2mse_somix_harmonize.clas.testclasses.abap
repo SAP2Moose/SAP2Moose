@@ -33,10 +33,11 @@ CLASS ltcl_main IMPLEMENTATION.
 
     mse = VALUE #( ( |( ( SOMIX.Grouping (id: 1)| )
                    ( |  (name 'Pack_1')| )
+                   ( |  (uniqueName 'sap.pack_1')| )
                    ( |  (technicalType 'ABAPPackage'))| )
                   ).
 
-    equalized_harmonized_mse_exp = VALUE #( ( |SOMIX.Grouping Pack_1 technicalType ABAPPackage| )
+    equalized_harmonized_mse_exp = VALUE #( ( |SOMIX.Grouping ABAPPackage.sap.pack_1 name Pack_1| )
                                              ).
 
     equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( string_table = mse ).
@@ -57,10 +58,11 @@ CLASS ltcl_main IMPLEMENTATION.
 
     mse = VALUE #( ( |( ( SOMIX.Data (id: 1)| )
                    ( |  (name 'attr')| )
+                   ( |  (uniqueName 'sap.myclass.attr')| )
                    ( |  (technicalType 'ABAPClassAttribute'))| )
                   ).
 
-    equalized_harmonized_mse_exp = VALUE #( ( |SOMIX.Data attr technicalType ABAPClassAttribute| )
+    equalized_harmonized_mse_exp = VALUE #( ( |SOMIX.Data ABAPClassAttribute.sap.myclass.attr name attr| )
                                              ).
 
     equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( string_table = mse ).
@@ -81,10 +83,11 @@ CLASS ltcl_main IMPLEMENTATION.
 
     mse = VALUE #( ( |( ( SOMIX.Code (id: 1)| )
                    ( |  (name 'meth1')| )
+                   ( |  (uniqueName 'sap.myclass.meth1')| )
                    ( |  (technicalType 'ABAPClassMethod'))| )
                   ).
 
-    equalized_harmonized_mse_exp = VALUE #( ( |SOMIX.Code meth1 technicalType ABAPClassMethod| )
+    equalized_harmonized_mse_exp = VALUE #( ( |SOMIX.Code ABAPClassMethod.sap.myclass.meth1 name meth1| )
                                              ).
 
     equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( string_table = mse ).
@@ -106,9 +109,11 @@ CLASS ltcl_main IMPLEMENTATION.
     mse = VALUE #( ( |(| )
                    ( |( SOMIX.Grouping (id: 1)| )
                    ( |  (name 'Class_1')| )
+                   ( |  (uniqueName 'sap.class_1')| )
                    ( |  (technicalType 'ABAPClass'))| )
                    ( |( SOMIX.Code (id: 2)| )
                    ( |  (name 'meth1')| )
+                   ( |  (uniqueName 'sap.class_1.meth1')| )
                    ( |  (technicalType 'ABAPClassMethod'))| )
                    ( |( SOMIX.ParentChild| )
                    ( |  (parent (ref: 1))| )
@@ -117,9 +122,9 @@ CLASS ltcl_main IMPLEMENTATION.
                   ).
 
     equalized_harmonized_mse_exp = VALUE #(
-                                            ( |SOMIX.Grouping Class_1 technicalType ABAPClass| )
-                                            ( |SOMIX.Code meth1 technicalType ABAPClassMethod| )
-                                            ( |SOMIX.ParentChild parent Class_1 child meth1| )
+                                            ( |SOMIX.Grouping ABAPClass.sap.class_1 name Class_1| )
+                                            ( |SOMIX.Code ABAPClassMethod.sap.class_1.meth1 name meth1| )
+                                            ( |SOMIX.ParentChild parent ABAPClass.sap.class_1 child ABAPClassMethod.sap.class_1.meth1| )
                                            ).
 
     equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( string_table = mse ).

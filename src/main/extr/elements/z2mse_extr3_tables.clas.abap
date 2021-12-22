@@ -138,14 +138,18 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
     DATA database_table_id TYPE i.
 
     IF element_manager->use_somix EQ 'X'.
+      DATA: unique_name TYPE string.
+
+      unique_name = |sap.{ database_schema }.{ element-tabname }|.
 
       element_manager->somix_data->add( EXPORTING grouping_name_group = ng_database_schema
                                                   grouping            = database_schema
                                                   data_name_group     = ng_sap_table
-                                                  data           = element-tabname
-                                                  technical_type = z2mse_extract3=>modifier_dbtable
-                                                  link_to_editor = ''
-                                        IMPORTING id                     = database_table_id ).
+                                                  data                = element-tabname
+                                                  technical_type      = z2mse_extract3=>modifier_dbtable
+                                                  link_to_editor      = ''
+                                        IMPORTING id                  = database_table_id
+                                        CHANGING  unique_name         = unique_name ).
 
       DATA association TYPE z2mse_extr3_element_manager=>association_type.
       LOOP AT associations INTO association WHERE element_id1 = element_id
@@ -154,12 +158,17 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
         package ?= element_manager->get_element( i_element_id = association-element_id2 ).
 
         DATA: package_id TYPE i.
+        DATA: devclass TYPE devclass.
+        devclass = package->devclass( i_element_id = association-element_id2 ).
+
+        unique_name = |sap.{ devclass }|.
 
         element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_package
-                                                        grouping               = package->devclass( i_element_id = association-element_id2 )
+                                                        grouping               = devclass
                                                         technical_type         = z2mse_extract3=>techtype_abappackage
                                                         link_to_editor         = ''
-                                              IMPORTING id                     = package_id ).
+                                              IMPORTING id                     = package_id
+                                              CHANGING  unique_name         = unique_name ).
 
         element_manager->somix_parentchild->add( EXPORTING parent_id = package_id
                                                            child_id  = database_table_id ).
