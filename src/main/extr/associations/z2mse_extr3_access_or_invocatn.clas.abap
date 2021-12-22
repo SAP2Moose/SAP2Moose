@@ -115,7 +115,7 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
       WHEN invocing_element->web_dynpro_comps_type.
 
         invocing_grouping_name_group = ng_abap_webdynpro.
-        invocing_code_name_group = ng_abap_webdynpro.
+        invocing_code_name_group = ''. ##TODO " Evaluate using a code name group here "ng_abap_webdynpro.
 
         DATA web_dynpro_component TYPE REF TO z2mse_extr3_web_dynpro_comp.
 
@@ -152,7 +152,7 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
 
     DATA using_method_id TYPE i.
     ASSERT invocing_grouping_name_group IS NOT INITIAL.
-    ASSERT invocing_code_name_group IS NOT INITIAL.
+    ##TODO " Can this be activated again? ASSERT invocing_code_name_group IS NOT INITIAL.
 
     e_using_id = element_manager->somix_code->get_id( grouping_name_group = invocing_grouping_name_group
                                                       grouping            = invocing_somix_grouping

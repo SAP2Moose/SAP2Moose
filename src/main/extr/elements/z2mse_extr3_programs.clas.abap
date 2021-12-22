@@ -313,7 +313,7 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
                                                       technical_type       = modifier
                                                       link_to_editor       = element-adt_or_bwmt_link
                                             IMPORTING id                   = last_id
-                                                CHANGING  unique_name         = unique_name ).
+                                            CHANGING  unique_name          = unique_name ).
 
       DATA association TYPE z2mse_extr3_element_manager=>association_type.
 

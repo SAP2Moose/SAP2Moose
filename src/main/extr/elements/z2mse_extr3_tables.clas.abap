@@ -6,7 +6,7 @@ CLASS z2mse_extr3_tables DEFINITION
   CREATE PRIVATE .
 
   PUBLIC SECTION.
-    DATA database_schema  TYPE db_schema.
+    DATA database_schema  TYPE db_schema READ-ONLY.
     METHODS constructor
       IMPORTING
         !i_element_manager TYPE REF TO z2mse_extr3_element_manager .

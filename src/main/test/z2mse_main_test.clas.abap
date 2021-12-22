@@ -5,6 +5,7 @@ CLASS z2mse_main_test DEFINITION
   PUBLIC SECTION.
     METHODS: setup,
       z2mse_test_initial_selection,
+      z2mse_test_init_select_somix,
       z2mse_test_initial_selection2,
       specific_search_method,
       specific_search_attribute,
@@ -577,6 +578,229 @@ CLASS z2mse_main_test IMPLEMENTATION.
       CLEAR equalized_harmonized_mse_exp.
 
       equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
+
+      equalized_harmonized_mse_exp = VALUE #( ).
+
+      DATA maker TYPE REF TO z2mse_mse_harmonize_maker.
+
+      maker = NEW #( ).
+
+      maker->to_change = equalized_harmonized_mse_exp.
+      maker->add_custom_source_language( |SAP| ).
+      maker->add_package( package = |Z2MSE_TEST_INITIAL_SELECTION| ).
+      maker->add_package( package = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
+      maker->add_db_table(   name = |Z2MSE_TEST_A|     parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
+      maker->add_db_table(   name = |Z2MSE_TEST_DB_B|  parentpackage = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
+
+      maker->add_class(      name = |Z2MSE_TEST_CL_A|  parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
+      maker->add_attribute(         attribute = |Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000| ).
+
+      maker->add_method(            method  = |CONSTRUCTOR| at_line = 11 ).
+      maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |EVENTHANDLER_A| ).
+
+      maker->add_method(            method  = |EVENTHANDLER_A| at_line = 13 ).
+      maker->add_method(            method  = |EVENT_A| at_line = 9 ).
+
+      maker->add_method(            method  = |METHOD_A| at_line = 12 ).
+      maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |EVENT_A| ).
+      maker->usage(                           used_group  = |Z2MSE_TEST_CL_A2| used = |METHOD_A| ).
+      maker->access(                          used_group  = |Z2MSE_TEST_A| used = |Z2MSE_TEST_A| ).
+
+      maker->add_method(            method  = |Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000| ).
+* BEGIN INSERT when Interfaces are reversed
+      IF interface_use_structure EQ abap_true.
+        maker->usage(                           used_group  = |Z2MSE_TEST_IF_A_00000000000000| used = |EVENT_A_0000000000000000000000| ).
+      ENDIF.
+* END INSERT when Interfaces are reversed
+      maker->add_method(            method  = |Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| ).
+* BEGIN INSERT when Interfaces are reversed
+      IF interface_use_structure EQ abap_true.
+        maker->usage(                           used_group  = |Z2MSE_TEST_IF_A_00000000000000| used = |METHOD_A_000000000000000000000| ).
+      ENDIF.
+* END INSERT when Interfaces are reversed
+      maker->usage(                           used_group  = |Z2MSE_TEST_CL_B2| used = |METHOD_A| ).
+
+      maker->add_class(      name = |Z2MSE_TEST_CL_A2| parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
+
+      maker->add_method(            method  = |METHOD_A| at_line = 8 ).
+      maker->usage(                           used_group  = |Z2MSE_TEST_CL_B1| used = |METHOD_B| ).
+
+      maker->add_class(      name = |Z2MSE_TEST_CL_A3| parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
+
+      maker->add_method(            method  = |METHOD_A| at_line = 9 ).
+      maker->usage(                           used_group  = |Z2MSE_TEST_CL_B1| used = |METHOD_A| ).
+      maker->access(                          used = |Z2MSE_TEST_DB_B| ).
+
+      maker->add_class(      name = |Z2MSE_TEST_CL_B1| parentpackage = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
+      maker->add_method(            method  = |EVENT_A| at_line = 8 ).
+
+      maker->add_attribute(         attribute = |ATTRIBUTE_A| at_line = 13 ).
+
+      maker->add_method(            method  = |METHOD_A| at_line = 10 ).
+      maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |CONSTRUCTOR| ).
+      maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |METHOD_A| ).
+      maker->usage(                           used_group  = |Z2MSE_TEST_IF_A_00000000000000| used = |METHOD_A_000000000000000000000| ).
+      maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| ).
+      maker->access(                          used = |Z2MSE_TEST_A| ).
+      maker->access(                          used_group  = |Z2MSE_TEST_IF_A_00000000000000| used = |ATTRIBUTE_A_000000000000000000| ).
+      maker->access(                          used_group  = |Z2MSE_TEST_CL_A| used = |Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000| ).
+
+      maker->add_method(            method  = |METHOD_B| at_line = 11 ).
+      maker->usage(                           used_group  = |Z2MSE_TEST_CL_B1| used = |METHOD_A| ).
+      maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |CONSTRUCTOR| ).
+      maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |METHOD_A| ).
+
+      maker->add_class(      name = |Z2MSE_TEST_CL_B2| parentpackage = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
+      maker->add_attribute(         attribute = |Z2MSE_TEST_IF_A_00000000000000~ATTRIBUTE_A_000000000000000000| ).
+      maker->add_method(            method  = |METHOD_A| at_line = 12 ).
+      maker->usage(                           used_group  = |Z2MSE_TEST_CL_B1| used = |METHOD_A| ).
+      maker->add_method(            method  = |Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000| ).
+* BEGIN INSERT when Interfaces are reversed
+      IF interface_use_structure EQ abap_true.
+        maker->usage(                           used_group  = |Z2MSE_TEST_IF_A_00000000000000| used = |EVENT_A_0000000000000000000000| ).
+      ENDIF.
+* END INSERT when Interfaces are reversed
+      maker->add_method(            method  = |Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| ).
+* BEGIN INSERT when Interfaces are reversed
+      IF interface_use_structure EQ abap_true.
+        maker->usage(                           used_group  = |Z2MSE_TEST_IF_A_00000000000000| used = |METHOD_A_000000000000000000000| ).
+      ENDIF.
+* END INSERT when Interfaces are reversed
+
+      maker->add_interface(  name = |Z2MSE_TEST_IF_A_00000000000000| parentpackage = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
+      maker->add_interface_method(  method  = |EVENT_A_0000000000000000000000| at_line = 7 ).
+* BEGIN DELETE when Interfaces are reversed
+      IF interface_use_structure EQ abap_false.
+        maker->usage(                           used_group  = |Z2MSE_TEST_CL_B2| used = |Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000| ).
+        maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |Z2MSE_TEST_IF_A_00000000000000~EVENT_A_0000000000000000000000| ).
+      ENDIF.
+* END DELETE when Interfaces are reversed
+      maker->add_interface_method(  method  = |METHOD_A_000000000000000000000| at_line = 9 ).
+* BEGIN DELETE when Interfaces are reversed
+      IF interface_use_structure EQ abap_false.
+        maker->usage(                           used_group  = |Z2MSE_TEST_CL_B2| used = |Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| ).
+        maker->usage(                           used_group  = |Z2MSE_TEST_CL_A| used = |Z2MSE_TEST_IF_A_00000000000000~METHOD_A_000000000000000000000| ).
+      ENDIF.
+* END DELETE when Interfaces are reversed
+      maker->add_interface_attribute( attribute = |ATTRIBUTE_A_000000000000000000| at_line = 5 ).
+
+      maker->add_interface(  name = |ZIWCI_2MSE_TEST_WDY_A| parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
+      maker->add_interface_method(  method = |WD_GET_API| at_line = 17 ).
+
+      maker->add_web_dynpro_component( wda_name = |Z2MSE_TEST_WDY_A| parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
+      maker->add_web_dynpro_component_view(       view = |COMPONENTCONTROLLER| ).
+      maker->usage(                                      used_group  = |Z2MSE_TEST_CL_A| used = |METHOD_A| ).
+      maker->usage(                                      used_group  = |Z2MSE_TEST_CL_A| used = |CONSTRUCTOR| ).
+      maker->usage(                                      used_group  = |ZIWCI_2MSE_TEST_WDY_A| used = |WD_GET_API| ).
+      maker->access(                                     used = |Z2MSE_TEST_A| ).
+      maker->add_web_dynpro_component_view(       view = |EMPTYVIEW| ).
+      maker->add_web_dynpro_component_view(       view = |V_MAIN| ).
+      maker->add_web_dynpro_component_view(       view = |W_MAIN| ).
+
+      maker->add_program(   name = |Z2MSE_TEST_PROGRAM_A| parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
+      maker->usage(                used_group  = |Z2MSE_TEST_CL_A| used = |METHOD_A| ).
+      maker->usage(                used_group  = |Z2MSE_TEST_CL_B1| used = |METHOD_A| ).
+      maker->access(               used_group  = |Z2MSE_TEST_CL_B1| used = |ATTRIBUTE_A| ).
+      maker->access(               used = |Z2MSE_TEST_DB_B| ).
+      maker->usage(                used = |Z2MSE_TEST_PROGRAM_B| ).
+      maker->usage(                used = |Z2MSE_TEST_PROGRAM_C| ).
+      maker->usage(                used = |Z2MSE_TEST_INCLUDE_A| ).
+      maker->usage(                       used_group  = |FGR-Z2MSE_TEST_FGR_A| used = |F-Z2MSE_TEST_FUNCTION_A| ).
+      maker->usage(                       used_group  = |FGR-Z2MSE_TEST_FGR_B| used = |F-Z2MSE_TEST_FUNCTION_B| ).
+      maker->add_program(   name = |Z2MSE_TEST_PROGRAM_B| parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
+      maker->add_program(   name = |Z2MSE_TEST_PROGRAM_C| parentpackage = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
+      maker->usage(                used = |Z2MSE_TEST_PROGRAM_D| ).
+      maker->add_program(   name = |Z2MSE_TEST_PROGRAM_D| parentpackage = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
+      maker->add_program(   name = |Z2MSE_TEST_INCLUDE_A| parentpackage = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
+      maker->add_function_group( name = |Z2MSE_TEST_FGR_B| parentpackage = |Z2MSE_TEST_NO_INITIAL_SELECTN| ).
+      maker->add_function(              function = |Z2MSE_TEST_FUNCTION_B| ).
+
+      maker->add_bw_transformation( bw_transformation = |BW-ODSO-Z2MSET001-CUBE-Z2MSET002| at_line = 123 ).
+      maker->usage(                                     used_group  = |Z2MSE_TEST_CL_A| used = |CONSTRUCTOR| ).
+      maker->usage(                                     used_group  = |Z2MSE_TEST_CL_A| used = |METHOD_A| ).
+
+      maker->add_function_group( name = |Z2MSE_TEST_FGR_A| parentpackage = |Z2MSE_TEST_INITIAL_SELECTION| ).
+      maker->add_function(              function = |Z2MSE_TEST_FUNCTION_A| ).
+      maker->usage(                                used_group  = |Z2MSE_TEST_CL_A| used = |METHOD_A| ).
+      maker->usage(                                used_group  = |FGR-Z2MSE_TEST_FGR_B| used = |F-Z2MSE_TEST_FUNCTION_B| ).
+      maker->add_function_group_include( include = |LZ2MSE_TEST_FGR_AF01| ).
+      maker->usage(                                used_group  = |Z2MSE_TEST_CL_B1| used = |METHOD_A| ).
+
+      equalized_harmonized_mse_exp = maker->to_change.
+
+      z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
+      cl_abap_unit_assert=>assert_equals(
+        EXPORTING
+          act                  = equalized_harmonized_mse_act
+          exp                  = equalized_harmonized_mse_exp
+          msg                  = message ).
+
+    ENDDO.
+
+  ENDMETHOD.
+
+  METHOD z2mse_test_init_select_somix.
+
+    DATA: message                 TYPE string,
+          interface_use_structure TYPE abap_bool.
+
+    DO 2 TIMES.
+
+      setup( ).
+
+      CASE sy-index.
+        WHEN 1.
+          message = 'Wrong mse file for complex selection'.
+          interface_use_structure = abap_false.
+        WHEN 2.
+          message = 'Wrong mse file for complex selection - Option Interface use structure'.
+          interface_use_structure = abap_true.
+        WHEN OTHERS.
+          ASSERT 1 = 2.
+      ENDCASE.
+
+
+      " Variant, reverse usage of implementing method and implemented interface
+
+      DATA: mse_model_act TYPE z2mse_model=>lines_type.
+      CLEAR mse_model_act.
+      DATA: nothing_done_act TYPE abap_bool.
+      nothing_done_act = abap_false.
+      DATA(top_packages) = VALUE z2mse_extr3_initial_elements=>ty_s_pack( ( sign = 'I' option = 'EQ' low = 'Z2MSE_TEST_INITIAL_SELECTION' ) ).
+      DATA(sub_packages_filter) = VALUE z2mse_extr3_initial_elements=>ty_s_pack( ).
+
+      DATA(initial_elements) = NEW z2mse_extr3_initial_elements( ).
+      initial_elements->select_packages( EXPORTING top_packages           = top_packages
+                                                   sub_packages_filter    = sub_packages_filter
+                                                   including_sub_packages = abap_true ).
+
+      DATA(model_builder) = NEW z2mse_extr3_model_builder( ).
+
+      DATA(element_manager) = NEW z2mse_extr3_element_manager( i_model_builder          = model_builder
+                                                               i_exclude_found_sap_intf = abap_true
+                                                               i_interface_use_structure = interface_use_structure
+                                                               i_use_somix               = 'X' ).
+
+      model_builder->initialize( i_element_manager = element_manager
+                                 i_dynamic_read = |Z2MSE_TEST_DYNAMIC_USAGE| ).
+
+      DATA(f_cut) = NEW z2mse_extract3( ).
+      f_cut->extract( EXPORTING model_builder            = model_builder
+                                element_manager          = element_manager
+                                initial_elements         = initial_elements
+                                i_search_up              = -1
+                                i_search_down            = 2
+                                i_exclude_found_sap_intf = abap_true
+                      IMPORTING mse_model             = mse_model_act
+                                nothing_done          = nothing_done_act ).
+
+      DATA: equalized_harmonized_mse_act TYPE z2mse_mse_harmonize=>harmonized_mse,
+            equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
+      CLEAR equalized_harmonized_mse_act.
+      CLEAR equalized_harmonized_mse_exp.
+
+      equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( mse = mse_model_act ).
 
       equalized_harmonized_mse_exp = VALUE #( ).
 

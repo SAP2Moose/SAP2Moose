@@ -8,7 +8,7 @@ CLASS ltcl_main DEFINITION FINAL FOR TESTING
           f_cut           TYPE REF TO z2mse_extr3_tables.
     METHODS:
       setup,
-      simple FOR TESTING RAISING cx_static_check.
+      simple_somix FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
 
@@ -19,12 +19,13 @@ CLASS ltcl_main IMPLEMENTATION.
     model_builder->initial_selection_started( ).
     element_manager = NEW #( i_model_builder = model_builder
                              i_exclude_found_sap_intf = abap_true
-                             i_interface_use_structure = abap_false ).
+                             i_interface_use_structure = abap_false
+                             i_use_somix = 'X' ).
     model_builder->initialize( i_element_manager = element_manager ).
     f_cut = z2mse_extr3_tables=>get_instance( i_element_manager = element_manager ).
   ENDMETHOD.
 
-  METHOD simple.
+  METHOD simple_somix.
 
     DATA r_result TYPE REF TO z2mse_extr3_elements.
 
@@ -89,12 +90,15 @@ CLASS ltcl_main IMPLEMENTATION.
           equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
 
 
-    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
-    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.CustomSourceLanguage SAP| )
-                                            ( |FAMIX.Class TABLE_A modifiers DBTable| )
-                                            ( |FAMIX.Attribute TABLE_A>>TABLE_A| )
-                                            ( |FAMIX.Class TABLE_A parentPackage PACKAGE1| )
-                                            ( |FAMIX.Package PACKAGE1| ) ).
+    equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( mse = mse_model_act ).
+*    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.CustomSourceLanguage SAP| )
+*                                            ( |FAMIX.Class TABLE_A modifiers DBTable| )
+*                                            ( |FAMIX.Attribute TABLE_A>>TABLE_A| )
+*                                            ( |FAMIX.Class TABLE_A parentPackage PACKAGE1| )
+*                                            ( |FAMIX.Package PACKAGE1| ) ).
+    equalized_harmonized_mse_exp = VALUE #( ( |SOMIX.Data DBTable.sap.sapt80.table_a name TABLE_A| )
+                                            ( |SOMIX.Grouping ABAPPackage.sap.package1 name PACKAGE1| )
+                                            ( |SOMIX.ParentChild parent ABAPPackage.sap.package1 child DBTable.sap.{ f_cut->database_schema CASE = LOWER }.table_a| ) ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
 
