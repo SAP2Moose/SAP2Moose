@@ -306,11 +306,14 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
     IF element_manager->use_somix EQ 'X'.
 
+      DATA: unique_name TYPE string.
+      unique_name = |sap.{ name_of_mapped_class }|.
       element_manager->somix_grouping->add( EXPORTING grouping_name_group  = name_group
                                                       grouping             = name_of_mapped_class
                                                       technical_type       = modifier
                                                       link_to_editor       = element-adt_or_bwmt_link
-                                            IMPORTING id                   = last_id ).
+                                            IMPORTING id                   = last_id
+                                            CHANGING  unique_name          = unique_name ).
 
       DATA association TYPE z2mse_extr3_element_manager=>association_type.
 
@@ -321,11 +324,17 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
         DATA: package_id TYPE i.
 
+        DATA: devclass TYPE devclass.
+        devclass = package->devclass( i_element_id = association-element_id2 ).
+
+        unique_name = |sap.{ devclass }|.
+
         element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_package
-                                                        grouping               = package->devclass( i_element_id = association-element_id2 )
+                                                        grouping               = devclass
                                                         technical_type         = z2mse_extract3=>techtype_abappackage
                                                         link_to_editor         = ''
-                                              IMPORTING id                     = package_id ).
+                                              IMPORTING id                     = package_id
+                                                CHANGING  unique_name         = unique_name ).
 
         element_manager->somix_parentchild->add( EXPORTING parent_id = package_id
                                                            child_id  = last_id ).
@@ -358,13 +367,16 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
       IF name_group EQ 'ABAP_FUNCTIONGROUP'.
 
+        unique_name = |sap.{ name_of_mapped_class }|.
+
         element_manager->somix_code->add( EXPORTING grouping_name_group = name_group
                                                     grouping            = name_of_mapped_class
                                                     code_name_group     = z2mse_extr3=>ng_abap_program
                                                     code                = element-external_program_name
                                                     technical_type      = z2mse_extract3=>techtype_abap_function
                                                     link_to_editor      = element-adt_or_bwmt_link
-                                          IMPORTING id                  = dummy_method_id ).
+                                          IMPORTING id                  = dummy_method_id
+                                          CHANGING  unique_name         = unique_name ).
 
         element_manager->somix_parentchild->add( EXPORTING parent_id = last_id
                                                            child_id  = dummy_method_id ).

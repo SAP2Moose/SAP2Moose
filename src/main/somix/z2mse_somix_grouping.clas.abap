@@ -18,7 +18,9 @@ CLASS z2mse_somix_grouping DEFINITION
         !link_to_editor               TYPE clike
       EXPORTING
         VALUE(exists_already_with_id) TYPE i
-        VALUE(id)                     TYPE i .
+        VALUE(id)                     TYPE i
+      CHANGING
+        unique_name                   TYPE clike.
     "! Returns the ID for a given code. May use a grouping it is contained in.
     "! Returns 0 if the data is not known
     "! @parameter grouping_name_group | the name group of the grouping
@@ -77,6 +79,12 @@ CLASS z2mse_somix_grouping IMPLEMENTATION.
                                           processed_id = id ).
 
     ENDIF.
+
+    ASSERT unique_name IS NOT INITIAL.
+    TRANSLATE unique_name TO LOWER CASE. " To be compatible with specification. Not case sensitive names are here in lower case.
+    g_model->add_string( EXPORTING element_id     = id
+                                   attribute_name = 'uniqueName'
+                                   string         = unique_name ).
 
     IF technical_type IS NOT INITIAL.
 

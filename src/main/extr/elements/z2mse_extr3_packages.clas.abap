@@ -50,7 +50,7 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_PACKAGES IMPLEMENTATION.
+CLASS z2mse_extr3_packages IMPLEMENTATION.
 
 
   METHOD add.
@@ -125,10 +125,13 @@ CLASS Z2MSE_EXTR3_PACKAGES IMPLEMENTATION.
 
     IF element_manager->use_somix EQ 'X'.
 
-      element_manager->somix_grouping->add( grouping_name_group = ng_abap_package
-                                            grouping            = element-devclass
-                                            technical_type      = z2mse_extract3=>techtype_abappackage
-                                            link_to_editor      = '' ).
+      DATA: unique_name TYPE string.
+      unique_name = |sap.{ element-devclass }|.
+      element_manager->somix_grouping->add( EXPORTING grouping_name_group = ng_abap_package
+                                                      grouping            = element-devclass
+                                                      technical_type      = z2mse_extract3=>techtype_abappackage
+                                                      link_to_editor      = ''
+                                            CHANGING  unique_name         = unique_name ).
 
     ELSE. " SOMIX
 

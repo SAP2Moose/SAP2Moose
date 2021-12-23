@@ -8,7 +8,7 @@ CLASS ltcl_class DEFINITION FINAL FOR TESTING
           f_cut           TYPE REF TO z2mse_extr3_web_dynpro_comp.
     METHODS:
       setup,
-      simple FOR TESTING RAISING cx_static_check.
+      simple_somix FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
 
@@ -19,12 +19,13 @@ CLASS ltcl_class IMPLEMENTATION.
     model_builder->initial_selection_started( ).
     element_manager = NEW #( i_model_builder = model_builder
                              i_exclude_found_sap_intf = abap_true
-                             i_interface_use_structure = abap_false ).
+                             i_interface_use_structure = abap_false
+                             i_use_somix = 'X' ).
     model_builder->initialize( i_element_manager = element_manager ).
     f_cut = z2mse_extr3_web_dynpro_comp=>get_instance( element_manager ).
   ENDMETHOD.
 
-  METHOD simple.
+  METHOD simple_somix.
 
     DATA r_result TYPE REF TO z2mse_extr3_elements.
 
@@ -102,12 +103,18 @@ CLASS ltcl_class IMPLEMENTATION.
           equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
 
 
-    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
-    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.CustomSourceLanguage SAP| )
-                                            ( |FAMIX.Class WDY_COMP_A modifiers ABAPWebDynproComponent| )
-                                            ( |FAMIX.Class WDY_COMP_A parentPackage PACKAGE1| )
-                                            ( |FAMIX.Method WDY_COMP_A>>WDY_CONTR_1 signature WDY_CONTR_1| )
-                                            ( |FAMIX.Package PACKAGE1| )
+    equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( mse = mse_model_act ).
+*    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.CustomSourceLanguage SAP| )
+*                                            ( |FAMIX.Class WDY_COMP_A modifiers ABAPWebDynproComponent| )
+*                                            ( |FAMIX.Class WDY_COMP_A parentPackage PACKAGE1| )
+*                                            ( |FAMIX.Method WDY_COMP_A>>WDY_CONTR_1 signature WDY_CONTR_1| )
+*                                            ( |FAMIX.Package PACKAGE1| )
+*                                           ).
+    equalized_harmonized_mse_exp = VALUE #( ( |SOMIX.Code ABAPWebDynproController.sap.wdy_comp_a.wdy_contr_1 name WDY_CONTR_1| )
+                                            ( |SOMIX.Grouping ABAPPackage.sap.package1 name PACKAGE1| )
+                                            ( |SOMIX.Grouping ABAPWebDynproComponent.sap.wdy_comp_a name WDY_COMP_A| )
+                                            ( |SOMIX.ParentChild parent ABAPPackage.sap.package1 child ABAPWebDynproComponent.sap.wdy_comp_a| )
+                                            ( |SOMIX.ParentChild parent ABAPWebDynproComponent.sap.wdy_comp_a child ABAPWebDynproController.sap.wdy_comp_a.wdy_contr_1| )
                                            ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).

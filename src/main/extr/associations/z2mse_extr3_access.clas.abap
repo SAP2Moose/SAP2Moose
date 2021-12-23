@@ -77,14 +77,17 @@ CLASS z2mse_extr3_access IMPLEMENTATION.
       _get_somix_id_used_and_using( EXPORTING i_association = association
                                     IMPORTING e_using_id    = using_id
                                               e_used_id     = used_id ).
+
+      ASSERT using_id IS NOT INITIAL.
+      ASSERT used_id IS NOT INITIAL.
     ELSE.
       _get_famix_id_used_and_using( EXPORTING i_association = association
                                     IMPORTING e_using_method_id = using_method_id
                                               e_used_id         = used_id ).
-    ENDIF.
 
-    ASSERT using_method_id IS NOT INITIAL.
-    ASSERT used_id IS NOT INITIAL.
+      ASSERT using_method_id IS NOT INITIAL.
+      ASSERT used_id IS NOT INITIAL.
+    ENDIF.
 
     DATA last_id2 TYPE i.
     IF element_manager->use_somix EQ 'X'.

@@ -10,7 +10,7 @@ CLASS ltcl_main DEFINITION FINAL FOR TESTING
           f_cut           TYPE REF TO z2mse_extr3_packages.
     METHODS:
       setup,
-      simple FOR TESTING RAISING cx_static_check,
+      simple_somix FOR TESTING RAISING cx_static_check,
       _does_package_exists FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
@@ -18,16 +18,32 @@ ENDCLASS.
 CLASS ltcl_main IMPLEMENTATION.
 
   METHOD setup.
+    CLEAR model_builder.
+    CLEAR element_manager.
+    CLEAR f_cut.
+
+
+*    model_builder = NEW #( ).
+*    model_builder->initial_selection_started( ).
+*    element_manager = NEW #( i_model_builder = model_builder
+*                             i_exclude_found_sap_intf = abap_true
+*                             i_interface_use_structure = abap_false ).
+*    model_builder->initialize( i_element_manager = element_manager ).
+*    f_cut = z2mse_extr3_packages=>get_instance( i_element_manager = element_manager ).
+  ENDMETHOD.
+
+  METHOD simple_somix.
+
+*  METHOD setup.
     model_builder = NEW #( ).
     model_builder->initial_selection_started( ).
     element_manager = NEW #( i_model_builder = model_builder
                              i_exclude_found_sap_intf = abap_true
-                             i_interface_use_structure = abap_false ).
+                             i_interface_use_structure = abap_false
+                             i_use_somix = 'X' ).
     model_builder->initialize( i_element_manager = element_manager ).
     f_cut = z2mse_extr3_packages=>get_instance( i_element_manager = element_manager ).
-  ENDMETHOD.
-
-  METHOD simple.
+*  ENDMETHOD.
 
     DATA r_result TYPE REF TO z2mse_extr3_elements.
 
@@ -78,18 +94,31 @@ CLASS ltcl_main IMPLEMENTATION.
           equalized_harmonized_mse_exp TYPE z2mse_mse_harmonize=>harmonized_mse.
 
 
-    equalized_harmonized_mse_act = z2mse_mse_harmonize=>mse_2_harmonized( mse = mse_model_act ).
-    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.CustomSourceLanguage SAP| )
-                                            ( |FAMIX.Package PACKAGE_A| ) ).
+    equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( mse = mse_model_act ).
+*    equalized_harmonized_mse_exp = VALUE #( ( |FAMIX.CustomSourceLanguage SAP| )
+*                                            ( |FAMIX.Package PACKAGE_A| ) ).
+    equalized_harmonized_mse_exp = VALUE #( ( |SOMIX.Grouping ABAPPackage.sap.package_a name PACKAGE_A| ) ).
 
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
         act                  = equalized_harmonized_mse_act
         exp                  = equalized_harmonized_mse_exp
         msg                  = 'Expect mse with correct package' ).
+
   ENDMETHOD.
 
   METHOD _does_package_exists.
+
+
+*  METHOD setup.
+    model_builder = NEW #( ).
+    model_builder->initial_selection_started( ).
+    element_manager = NEW #( i_model_builder = model_builder
+                             i_exclude_found_sap_intf = abap_true
+                             i_interface_use_structure = abap_false ).
+    model_builder->initialize( i_element_manager = element_manager ).
+    f_cut = z2mse_extr3_packages=>get_instance( i_element_manager = element_manager ).
+*  ENDMETHOD.
 
     TEST-INJECTION tadir.
       sy-subrc = 4.
@@ -97,7 +126,7 @@ CLASS ltcl_main IMPLEMENTATION.
 
     " SAP_2_FAMIX_66
 
-    data(exists) = f_cut->_does_package_exists( i_package = '$LOCAL_PACKAGE' ).
+    DATA(exists) = f_cut->_does_package_exists( i_package = '$LOCAL_PACKAGE' ).
 
     cl_abap_unit_assert=>assert_equals( msg = 'Local packages exist always' exp = abap_true act = exists ).
 
