@@ -365,23 +365,19 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
 
     IF element_manager->use_somix EQ 'X'.
 
-      IF name_group EQ 'ABAP_FUNCTIONGROUP'.
+      unique_name = |sap.{ name_of_mapped_class }|.
 
-        unique_name = |sap.{ name_of_mapped_class }|.
+      element_manager->somix_code->add( EXPORTING grouping_name_group = 'ABAP_PROGRAM' ##TODO " Analyze how to improve "name_group
+                                                  grouping            = name_of_mapped_class
+                                                  code_name_group     = z2mse_extr3=>ng_abap_program
+                                                  code                = element-external_program_name
+                                                  technical_type      = z2mse_extract3=>techtype_abap_function
+                                                  link_to_editor      = element-adt_or_bwmt_link
+                                        IMPORTING id                  = dummy_method_id
+                                        CHANGING  unique_name         = unique_name ).
 
-        element_manager->somix_code->add( EXPORTING grouping_name_group = name_group
-                                                    grouping            = name_of_mapped_class
-                                                    code_name_group     = z2mse_extr3=>ng_abap_program
-                                                    code                = element-external_program_name
-                                                    technical_type      = z2mse_extract3=>techtype_abap_function
-                                                    link_to_editor      = element-adt_or_bwmt_link
-                                          IMPORTING id                  = dummy_method_id
-                                          CHANGING  unique_name         = unique_name ).
-
-        element_manager->somix_parentchild->add( EXPORTING parent_id = last_id
-                                                           child_id  = dummy_method_id ).
-
-      ENDIF.
+      element_manager->somix_parentchild->add( EXPORTING parent_id = last_id
+                                                         child_id  = dummy_method_id ).
 
     ELSE. " SOMIX
 

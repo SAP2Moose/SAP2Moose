@@ -80,8 +80,8 @@ CLASS z2mse_extr3_access_or_invocatn IMPLEMENTATION.
                                  IMPORTING external_program_name_class = invoced_ext_progr_name_class
                                            external_program_name_method = invoced_ext_progr_name_method ).
 
-        e_used_id = element_manager->somix_code->get_id( grouping_name_group = ''
-                                                         grouping            = ''
+        e_used_id = element_manager->somix_code->get_id( grouping_name_group = ng_abap_program
+                                                         grouping            = invoced_ext_progr_name_class
                                                          code_name_group     = ng_abap_program
                                                          code                = invoced_ext_progr_name_method ).
 
