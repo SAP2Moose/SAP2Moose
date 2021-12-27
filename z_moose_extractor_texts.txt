@@ -10,6 +10,7 @@ P_EX	No Where-Used: SAP Interfaces
 P_INTREV	Interface Methods reversed
 P_NDOWN	Search down (-1 if no limit)
 P_NUP	Search up (-1 if no limit)
+P_SOMIX	Export SOMIX
 P_SUB	Extract subpackages
 S_PACK	Extract object of packages
 S_SPACK	Filter subpackages if required
