@@ -117,14 +117,16 @@ CLASS ltcl_main IMPLEMENTATION.
                    ( |  (technicalType 'ABAPClassMethod'))| )
                    ( |( SOMIX.ParentChild| )
                    ( |  (parent (ref: 1))| )
-                   ( |  (child (ref: 2)))| )
+                   ( |  (child (ref: 2))| )
+                   ( |  (isMain true))| )
                    ( |)| )
                   ).
 
     equalized_harmonized_mse_exp = VALUE #(
                                             ( |SOMIX.Grouping ABAPClass.sap.class_1 name Class_1| )
                                             ( |SOMIX.Code ABAPClassMethod.sap.class_1.meth1 name meth1| )
-                                            ( |SOMIX.ParentChild parent ABAPClass.sap.class_1 child ABAPClassMethod.sap.class_1.meth1| )
+*                                            ( |SOMIX.ParentChild parent ABAPClass.sap.class_1 child ABAPClassMethod.sap.class_1.meth1| )
+                                            ( |SOMIX.ParentChild parent ABAPClass.sap.class_1 child ABAPClassMethod.sap.class_1.meth1 isMain| )
                                            ).
 
     equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( string_table = mse ).

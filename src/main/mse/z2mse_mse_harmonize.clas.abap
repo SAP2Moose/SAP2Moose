@@ -126,7 +126,6 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
 
   METHOD equalize_harmonized.
 
-    SORT harmonized_mse.
     LOOP AT harmonized_mse ASSIGNING FIELD-SYMBOL(<eq>).
 
       CONDENSE <eq>.
@@ -134,6 +133,7 @@ CLASS z2mse_mse_harmonize IMPLEMENTATION.
         DELETE harmonized_mse.
       ENDIF.
     ENDLOOP.
+    SORT harmonized_mse.
 
   ENDMETHOD.
 

@@ -171,7 +171,8 @@ CLASS z2mse_extr3_tables IMPLEMENTATION.
                                               CHANGING  unique_name         = unique_name ).
 
         element_manager->somix_parentchild->add( EXPORTING parent_id = package_id
-                                                           child_id  = database_table_id ).
+                                                           child_id  = database_table_id
+                                                           is_main   = '' ).
 
       ENDLOOP.
 

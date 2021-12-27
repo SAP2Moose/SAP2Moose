@@ -22,7 +22,7 @@ CLASS z2mse_somix_code DEFINITION
         VALUE(exists_already_with_id) TYPE i
         VALUE(id)                     TYPE i
       CHANGING
-        unique_name                   TYPE clike..
+        unique_name                   TYPE clike.
     "! Returns the ID for a given code. May use a grouping it is contained in.
     "! Returns 0 if the data is not known
     "! @parameter grouping_name_group | the name group of the grouping

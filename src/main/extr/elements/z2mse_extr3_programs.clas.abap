@@ -274,22 +274,28 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
           file_anchor_id       TYPE i,
           name_group           TYPE string,
           modifier             TYPE string,
-          name_of_mapped_class TYPE string.
+          techtype             TYPE string,
+          name_of_mapped_class TYPE string,
+          is_main              TYPE abap_bool.
 *      famix_package->add( name = table-devclass ).
 
     IF element-program_type EQ type_program.
       name_group = 'ABAP_PROGRAM'.
       modifier = z2mse_extract3=>modifier_program.
+      techtype = z2mse_extract3=>modifier_program.
       name_of_mapped_class = element-external_program_name.
     ELSEIF element-program_type EQ type_bw_transformation.
       name_group = 'BW_TRANSFORMATION'.
       modifier = z2mse_extract3=>modifier_bw_transformation.
+      techtype = z2mse_extract3=>modifier_bw_transformation.
       name_of_mapped_class = element-external_program_name.
     ELSEIF element-program_type EQ type_function OR element-program_type = type_function_include.
       name_group = 'ABAP_FUNCTIONGROUP'.
       modifier = z2mse_extract3=>modifier_function_group.
+      techtype = z2mse_extract3=>techtype_abap_function.
 *      name_of_mapped_class = element-external_program_name.
       name_of_mapped_class = _get_names_for_function_groups( element ).
+      is_main = 'X'. "Display function group always for an ABAP function
 
 *      " Get parent package for function group
 *      DATA devclass TYPE tadir-devclass.
@@ -298,6 +304,7 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
     ELSE.
       name_group = 'UNKNOWN'.
       modifier = z2mse_extract3=>modifier_unknown.
+      techtype = z2mse_extract3=>modifier_unknown.
       name_of_mapped_class = element-external_program_name.
     ENDIF.
 
@@ -337,7 +344,8 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
                                                 CHANGING  unique_name         = unique_name ).
 
         element_manager->somix_parentchild->add( EXPORTING parent_id = package_id
-                                                           child_id  = last_id ).
+                                                           child_id  = last_id
+                                                           is_main   = '' ).
 
       ENDLOOP.
 
@@ -371,13 +379,14 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
                                                   grouping            = name_of_mapped_class
                                                   code_name_group     = z2mse_extr3=>ng_abap_program
                                                   code                = element-external_program_name
-                                                  technical_type      = z2mse_extract3=>techtype_abap_function
+                                                  technical_type      = techtype
                                                   link_to_editor      = element-adt_or_bwmt_link
                                         IMPORTING id                  = dummy_method_id
                                         CHANGING  unique_name         = unique_name ).
 
       element_manager->somix_parentchild->add( EXPORTING parent_id = last_id
-                                                         child_id  = dummy_method_id ).
+                                                         child_id  = dummy_method_id
+                                                         is_main   = is_main ).
 
     ELSE. " SOMIX
 

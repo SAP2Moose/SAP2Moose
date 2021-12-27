@@ -650,7 +650,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                 CHANGING  unique_name            = unique_name ).
 
           element_manager->somix_parentchild->add(  EXPORTING parent_id  = package_id
-                                                              child_id   = class_id  ).
+                                                              child_id   = class_id
+                                                              is_main    = ''  ).
 
         ELSE. " SOMIX
 
@@ -679,7 +680,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
             unique_name = |sap.{ element_comp-clsname }.{ element_comp-cmpname }|.
             element_manager->somix_data->add( EXPORTING grouping_name_group = ng_abap_class
                                                         grouping    = element_comp-clsname
-                                                        data_name_group = '' ##TODO " Improve coding generally. Without grouping name the data name is not uniquw
+                                                        data_name_group = ng_abap_attribute ##TODO " Improve coding generally. Without grouping name the data name is not uniquw
                                                         data = element_comp-cmpname
                                                         technical_type = z2mse_extract3=>techtype_abapclassattribute
                                                         link_to_editor  = element-adt_link
@@ -694,7 +695,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                   IMPORTING id                     = class_id
                                                   CHANGING  unique_name            = unique_name ).
             element_manager->somix_parentchild->add( EXPORTING parent_id = class_id
-                                                               child_id  = last_id ).
+                                                               child_id  = last_id
+                                                               is_main   = 'X' ).
 
           ELSE. " SOMIX
 
@@ -754,7 +756,8 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                   IMPORTING id                     = class_id
                                                   CHANGING  unique_name            = unique_name ).
             element_manager->somix_parentchild->add( EXPORTING parent_id = class_id
-                                                               child_id  = last_id ).
+                                                               child_id  = last_id
+                                                               is_main   = 'X' ).
 
           ELSE. " SOMIX
 

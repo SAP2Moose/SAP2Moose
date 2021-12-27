@@ -216,7 +216,8 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
                                                 CHANGING  unique_name         = unique_name ).
 
           element_manager->somix_parentchild->add( EXPORTING parent_id = package_id
-                                                             child_id  = component_id ).
+                                                             child_id  = component_id
+                                                             is_main   = '' ).
 
         ENDLOOP.
 
@@ -253,7 +254,8 @@ CLASS z2mse_extr3_web_dynpro_comp IMPLEMENTATION.
                                             IMPORTING id                  = controller_id
                                             CHANGING  unique_name         = unique_name ).
           element_manager->somix_parentchild->add( EXPORTING parent_id = component_id
-                                                             child_id  = controller_id ).
+                                                             child_id  = controller_id
+                                                             is_main   = 'X' ).
 
         ELSE. " SOMIX
 

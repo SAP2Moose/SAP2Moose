@@ -114,7 +114,7 @@ CLASS ltcl_class IMPLEMENTATION.
                                             ( |SOMIX.Grouping ABAPPackage.sap.package1 name PACKAGE1| )
                                             ( |SOMIX.Grouping ABAPWebDynproComponent.sap.wdy_comp_a name WDY_COMP_A| )
                                             ( |SOMIX.ParentChild parent ABAPPackage.sap.package1 child ABAPWebDynproComponent.sap.wdy_comp_a| )
-                                            ( |SOMIX.ParentChild parent ABAPWebDynproComponent.sap.wdy_comp_a child ABAPWebDynproController.sap.wdy_comp_a.wdy_contr_1| )
+                                            ( |SOMIX.ParentChild parent ABAPWebDynproComponent.sap.wdy_comp_a child ABAPWebDynproController.sap.wdy_comp_a.wdy_contr_1 isMain| )
                                            ).
 
     z2mse_mse_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).

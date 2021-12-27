@@ -99,9 +99,10 @@ SELECTION-SCREEN END OF BLOCK block_infos.
 
 SELECTION-SCREEN BEGIN OF BLOCK bl_model_settings WITH FRAME TITLE TEXT-100.
 
-PARAMETERS: p_down AS CHECKBOX DEFAULT 'X',
+PARAMETERS: p_down  AS CHECKBOX DEFAULT 'X',
+            p_somix AS CHECKBOX DEFAULT 'X',
             " Default filename
-            p_df   TYPE string.
+            p_df    TYPE string.
 *"! Download model to file
 *DATA g_parameter_download_file TYPE abap_bool.
 *g_parameter_download_file = p_down.
@@ -278,9 +279,10 @@ START-OF-SELECTION.
   DATA element_manager TYPE REF TO z2mse_extr3_element_manager.
   CREATE OBJECT element_manager
     EXPORTING
-      i_model_builder          = model_builder
-      i_exclude_found_sap_intf = p_ex
-      i_interface_use_structure = p_intrev.
+      i_model_builder           = model_builder
+      i_exclude_found_sap_intf  = p_ex
+      i_interface_use_structure = p_intrev
+      i_use_somix               = p_somix.
 
   model_builder->initialize( i_element_manager = element_manager
                               i_dynamic_read = p_dyn ).

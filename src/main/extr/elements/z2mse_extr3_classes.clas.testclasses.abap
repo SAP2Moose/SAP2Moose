@@ -310,7 +310,7 @@ CLASS ltcl_class_SOMIX IMPLEMENTATION.
                                             ( |SOMIX.Grouping ABAPGlobalClass.sap.interface_a linkToEditor adt://SYS/sap/bc/adt/oo/classes/interface_a/source/main| )
                                             ( |SOMIX.Grouping ABAPGlobalClass.sap.interface_a name INTERFACE_A| )
                                             ( |SOMIX.Grouping ABAPPackage.sap.package1 name PACKAGE1| )
-                                            ( |SOMIX.ParentChild parent ABAPGlobalClass.sap.class_a child ABAPClassAttribute.sap.class_a.method_a| )
+                                            ( |SOMIX.ParentChild parent ABAPGlobalClass.sap.class_a child ABAPClassAttribute.sap.class_a.method_a isMain| )
                                             ( |SOMIX.ParentChild parent ABAPPackage.sap.package1 child ABAPGlobalClass.sap.class_a| ) ).
 
     z2mse_somix_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).

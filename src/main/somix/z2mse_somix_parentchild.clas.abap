@@ -5,11 +5,13 @@ CLASS z2mse_somix_parentchild DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    TYPES: ty_helper_type TYPE c LENGTH 1.
     METHODS constructor IMPORTING model TYPE REF TO z2mse_model.
     METHODS add
       IMPORTING
                 parent_id TYPE i
                 child_id  TYPE i
+                is_main   TYPE abap_bool
       RETURNING VALUE(id) TYPE i.
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -51,6 +53,12 @@ CLASS z2mse_somix_parentchild IMPLEMENTATION.
       g_model->add_reference_by_id( EXPORTING element_id = id
                                               attribute_name = 'child'
                                               reference_id   = child_id ).
+
+      IF is_main EQ 'X'.
+        g_model->add_boolean( EXPORTING element_id         = id
+                                        attribute_name     = 'isMain'
+                                        is_true            = 'X' ).
+      ENDIF.
 
       CLEAR ls_parent_id.
       ls_parent_id-parent_id = parent_id.

@@ -42,6 +42,7 @@ CLASS z2mse_somix_harmonize DEFINITION
              called_ref           TYPE i,
              parent_ref           TYPE i,
              child_ref            TYPE i,
+             is_main              TYPE abap_bool,
            END OF element.
 
     CLASS-METHODS _add_element_node
@@ -298,6 +299,8 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
 
         _remove_apostroph( CHANGING string = cd_to_name-technical_type ).
 
+      ELSEIF i_attributename EQ 'isMain' AND primitive EQ 'true'.
+        c_element-is_main = 'X'.
       ELSE.
 
         CASE c_element-elementname.
@@ -406,6 +409,10 @@ CLASS z2mse_somix_harmonize IMPLEMENTATION.
         ENDIF.
 
         result = |{ element-elementname } parent | && |{ parent } child | && |{ child }|.
+
+        IF element-is_main EQ 'X'.
+          result = result && | isMain|.
+        ENDIF.
 
       ELSE.
 

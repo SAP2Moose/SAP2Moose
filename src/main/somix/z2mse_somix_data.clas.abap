@@ -22,7 +22,7 @@ CLASS z2mse_somix_data DEFINITION
         VALUE(exists_already_with_id) TYPE i
         VALUE(id)                     TYPE i
       CHANGING
-        unique_name                   TYPE clike..
+        unique_name                   TYPE clike.
     "! Returns the ID for a given data. May use also a grouping the data is contained.
     "! Returns 0 if the attribute is not known
     "! @parameter grouping_name_group | the namegroup of the grouping the data is contained in
