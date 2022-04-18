@@ -1,7 +1,7 @@
-* generated on system T57 at 05.02.2021 on 13:24:39
+* generated on system T80 at 02.01.2022 on 09:38:05
 
 *
-* This is version 1.2.2
+* This is version 1.3
 *
 *The MIT License (MIT)
 *
@@ -101,9 +101,10 @@ SELECTION-SCREEN END OF BLOCK block_infos.
 
 SELECTION-SCREEN BEGIN OF BLOCK bl_model_settings WITH FRAME TITLE TEXT-100.
 
-PARAMETERS: p_down AS CHECKBOX DEFAULT 'X',
+PARAMETERS: p_down  AS CHECKBOX DEFAULT 'X',
+            p_somix AS CHECKBOX DEFAULT 'X',
             " Default filename
-            p_df   TYPE string.
+            p_df    TYPE string.
 *"! Download model to file
 *DATA g_parameter_download_file TYPE abap_bool.
 *g_parameter_download_file = p_down.
@@ -1584,6 +1585,273 @@ endif.
   endmethod.
 ENDCLASS.
 
+class CL_SOMIX_ENTITY definition
+  abstract
+  create public .
+
+public section.
+
+  methods CONSTRUCTOR
+    importing
+      !MODEL type ref to CL_MODEL .
+protected section.
+
+  data G_MODEL type ref to CL_MODEL .
+  data G_ELEMENTNAME type STRING .
+  data G_LAST_USED_ID type I .
+private section.
+ENDCLASS.
+CLASS cl_somix_element DEFINITION
+  INHERITING FROM cl_somix_entity
+  ABSTRACT
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+  PROTECTED SECTION.
+
+  PRIVATE SECTION.
+ENDCLASS.
+class CL_SOMIX_COMPONENT definition
+  inheriting from CL_SOMIX_ELEMENT
+  abstract
+  create public .
+
+public section.
+protected section.
+
+  data IS_PART_OF type ref to CL_SOMIX_COMPONENT .
+  data PART_SPECIFICATION type STRING .
+private section.
+ENDCLASS.
+CLASS cl_somix_coupling DEFINITION
+  INHERITING FROM cl_somix_entity
+  ABSTRACT
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    METHODS add
+      RETURNING VALUE(id) TYPE i.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+CLASS cl_somix_access DEFINITION
+  INHERITING FROM cl_somix_coupling
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING model TYPE REF TO cl_model.
+    METHODS set_accessor_accessed_relation
+      IMPORTING
+        element_id   TYPE i
+        accessor_id  TYPE i
+        accessed_id  TYPE i
+        is_write     TYPE abap_bool
+        is_read      TYPE abap_bool
+        is_dependent TYPE abap_bool.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+    TYPES: BEGIN OF ty_accessor_accessed_id,
+             accessor_id TYPE i,
+             accessed_id TYPE i,
+           END OF  ty_accessor_accessed_id.
+    DATA: g_accessor_accessed_ids TYPE HASHED TABLE OF ty_accessor_accessed_id WITH UNIQUE KEY accessor_id accessed_id.
+ENDCLASS.
+CLASS cl_somix_call DEFINITION
+  INHERITING FROM cl_somix_coupling
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING model TYPE REF TO cl_model.
+    METHODS set_caller_called_relation
+      IMPORTING
+        element_id TYPE i
+        caller_id  TYPE i
+        called_id  TYPE i.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+    TYPES: BEGIN OF ty_caller_called,
+             caller_id TYPE i,
+             called_id TYPE i,
+           END OF ty_caller_called.
+
+    DATA g_caller_called_ids TYPE HASHED TABLE OF ty_caller_called WITH UNIQUE KEY caller_id called_id.
+ENDCLASS.
+CLASS cl_somix_code DEFINITION
+  INHERITING FROM cl_somix_component
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    METHODS constructor
+      IMPORTING
+        !model TYPE REF TO cl_model .
+    "! Call method to store ID before add is used the next time for the same type of element
+    METHODS add
+      IMPORTING
+        grouping_name_group           TYPE clike
+        grouping                      TYPE clike
+        code_name_group               TYPE clike
+        code                          TYPE clike
+        !technical_type               TYPE clike
+        !link_to_editor               TYPE clike
+      EXPORTING
+        VALUE(exists_already_with_id) TYPE i
+        VALUE(id)                     TYPE i
+      CHANGING
+        unique_name                   TYPE clike.
+    "! Returns the ID for a given code. May use a grouping it is contained in.
+    "! Returns 0 if the data is not known
+    "! @parameter grouping_name_group | the name group of the grouping
+    "! @parameter grouping | the grouping
+    "! @parameter code_name_group | the name group of the code
+    "! @parameter code | the ID of the element
+    METHODS get_id
+      IMPORTING grouping_name_group TYPE clike
+                grouping            TYPE clike
+                code_name_group     TYPE clike
+                code                TYPE clike
+      RETURNING VALUE(id)           TYPE i.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+    TYPES: BEGIN OF ty_code_id,
+             grouping_name_group TYPE string,
+             grouping            TYPE string,
+             code_name_group     TYPE string,
+             code                TYPE string,
+             id                  TYPE i,
+           END OF ty_code_id.
+    DATA: g_code_ids TYPE HASHED TABLE OF ty_code_id WITH UNIQUE KEY grouping_name_group grouping code_name_group code.
+ENDCLASS.
+CLASS cl_somix_data DEFINITION
+  INHERITING FROM cl_somix_component
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    METHODS constructor
+      IMPORTING
+        !model TYPE REF TO cl_model .
+    "! Call method to store ID before add is used the next time for the same type of element
+    METHODS add
+      IMPORTING
+        grouping_name_group           TYPE clike
+        grouping                      TYPE clike
+        data_name_group               TYPE clike
+        data                          TYPE clike
+        !technical_type               TYPE clike
+        !link_to_editor               TYPE clike
+      EXPORTING
+        VALUE(exists_already_with_id) TYPE i
+        VALUE(id)                     TYPE i
+      CHANGING
+        unique_name                   TYPE clike.
+    "! Returns the ID for a given data. May use also a grouping the data is contained.
+    "! Returns 0 if the attribute is not known
+    "! @parameter grouping_name_group | the namegroup of the grouping the data is contained in
+    "! @parameter grouping | a grouping the data is contained in
+    "! @parameter data_name_group | the the namegroup of the data
+    "! @parameter data | the data name
+    "! @parameter id | the ID of the element
+    METHODS get_id
+      IMPORTING
+                grouping_name_group TYPE clike
+                grouping            TYPE clike
+                data_name_group     TYPE clike
+                data                TYPE clike
+      RETURNING VALUE(id)           TYPE i.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+    TYPES: BEGIN OF data_id_type,
+             grouping_name_group TYPE string,
+             grouping            TYPE string,
+             data_name_group     TYPE string,
+             data                TYPE string,
+             id                  TYPE i,
+           END OF data_id_type.
+    DATA: g_data_ids TYPE HASHED TABLE OF data_id_type WITH UNIQUE KEY grouping_name_group data_name_group grouping data.
+
+    DATA is_persistent TYPE abap_bool . ##TODO " Add attribute for this
+ENDCLASS.
+class CL_SOMIX_EXTRACTION definition
+  inheriting from CL_SOMIX_ENTITY
+  create public .
+
+public section.
+protected section.
+private section.
+ENDCLASS.
+CLASS cl_somix_grouping DEFINITION
+  INHERITING FROM cl_somix_element
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    METHODS constructor
+      IMPORTING
+        !model TYPE REF TO cl_model .
+    "! Call method to store ID before add is used the next time for the same type of element
+    METHODS add
+      IMPORTING
+        !grouping_name_group          TYPE clike
+        !grouping                     TYPE clike
+        !technical_type               TYPE clike
+        !link_to_editor               TYPE clike
+      EXPORTING
+        VALUE(exists_already_with_id) TYPE i
+        VALUE(id)                     TYPE i
+      CHANGING
+        unique_name                   TYPE clike.
+    "! Returns the ID for a given code. May use a grouping it is contained in.
+    "! Returns 0 if the data is not known
+    "! @parameter grouping_name_group | the name group of the grouping
+    "! @parameter grouping | the grouping
+    "! @parameter code_name_group | the name group of the code
+    "! @parameter code | the ID of the element
+    METHODS get_id
+      IMPORTING grouping_name_group TYPE clike
+                grouping            TYPE clike
+      RETURNING VALUE(id)           TYPE i.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+    TYPES: BEGIN OF ty_grouping_id,
+             grouping_name_group TYPE string,
+             grouping            TYPE string,
+             id                  TYPE i,
+           END OF ty_grouping_id.
+    DATA: g_grouping_ids TYPE HASHED TABLE OF ty_grouping_id WITH UNIQUE KEY grouping_name_group grouping.
+ENDCLASS.
+CLASS cl_somix_parentchild DEFINITION
+  INHERITING FROM cl_somix_entity
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    TYPES: ty_helper_type TYPE c LENGTH 1.
+    METHODS constructor IMPORTING model TYPE REF TO cl_model.
+    METHODS add
+      IMPORTING
+                parent_id TYPE i
+                child_id  TYPE i
+                is_main   TYPE abap_bool
+      RETURNING VALUE(id) TYPE i.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+    TYPES: BEGIN OF ty_parent_child_id,
+             parent_id  TYPE i,
+             child_id   TYPE i,
+             element_id TYPE i,
+           END OF  ty_parent_child_id.
+    DATA: g_parent_child_ids TYPE HASHED TABLE OF ty_parent_child_id WITH UNIQUE KEY parent_id child_id.
+ENDCLASS.
+
 " Obsolete:
 
 
@@ -1626,65 +1894,81 @@ CLASS CL_EXTR3_ELEMENTS DEFINITION DEFERRED.
 "! I know all elements and associations between elements that are currently known.
 "! I provide general methods to add new elements and associations between elements.
 CLASS cl_extr3_element_manager DEFINITION
-.
+  CREATE PUBLIC .
 
   PUBLIC SECTION.
-    DATA model            TYPE REF TO cl_model.
-    DATA famix_package     TYPE REF TO cl_famix_package.
-    DATA famix_class     TYPE REF TO cl_famix_class.
-    DATA famix_method     TYPE REF TO cl_famix_method.
-    DATA famix_attribute     TYPE REF TO cl_famix_attribute.
-    DATA famix_invocation     TYPE REF TO cl_famix_invocation.
-    DATA famix_access     TYPE REF TO cl_famix_access.
-    DATA famix_file_anchor TYPE REF TO cl_famix_file_anchor.
-    DATA exclude_found_sap_intf TYPE abap_bool READ-ONLY.
-    DATA interface_use_structure TYPE abap_bool READ-ONLY.
-    "! A unique identifier for each object extracted
-    TYPES element_id_type TYPE i.
 
-    TYPES: BEGIN OF association_type,
-             element_id1 TYPE element_id_type,
-             element_id2 TYPE element_id_type,
-             ass_type    TYPE c LENGTH 30, "To prevent problem with local classes, better would be: cl_extr3_association=>ass_type,
-             association TYPE REF TO cl_extr3_association,
-           END OF association_type.
-    TYPES associations_type TYPE STANDARD TABLE OF association_type WITH KEY element_id1 element_id2 ass_type association.
+    "! A unique identifier for each object extracted
+    TYPES element_id_type TYPE i .
+    TYPES:
+      BEGIN OF association_type,
+        element_id1 TYPE element_id_type,
+        element_id2 TYPE element_id_type,
+        ass_type    TYPE c LENGTH 30, "To prevent problem with local classes, better would be: cl_extr3_association=>ass_type,
+        association TYPE REF TO cl_extr3_association,
+      END OF association_type .
+    TYPES:
+      associations_type TYPE STANDARD TABLE OF association_type WITH KEY element_id1 element_id2 ass_type association .
+
+    DATA model TYPE REF TO cl_model .
+    DATA famix_package TYPE REF TO cl_famix_package .
+    DATA famix_class TYPE REF TO cl_famix_class .
+    DATA famix_method TYPE REF TO cl_famix_method .
+    DATA famix_attribute TYPE REF TO cl_famix_attribute .
+    DATA famix_invocation TYPE REF TO cl_famix_invocation .
+    DATA famix_access TYPE REF TO cl_famix_access .
+    DATA famix_file_anchor TYPE REF TO cl_famix_file_anchor .
+
+    DATA somix_extraction TYPE REF TO cl_somix_extraction.
+    DATA somix_grouping TYPE REF TO cl_somix_grouping.
+    DATA somix_code TYPE REF TO cl_somix_code.
+    DATA somix_data TYPE REF TO cl_somix_data.
+    DATA somix_call TYPE REF TO cl_somix_call.
+    DATA somix_access TYPE REF TO cl_somix_access.
+    DATA somix_parentchild TYPE REF TO cl_somix_parentchild.
+
+    DATA exclude_found_sap_intf TYPE abap_bool READ-ONLY .
+    DATA interface_use_structure TYPE abap_bool READ-ONLY .
+    DATA model_builder TYPE REF TO cl_extr3_model_builder .
+    DATA use_somix TYPE abap_bool READ-ONLY .
+
     METHODS constructor
-      IMPORTING i_model_builder          TYPE REF TO cl_extr3_model_builder
-                i_exclude_found_sap_intf TYPE abap_bool
-                i_interface_use_structure     TYPE abap_bool.
+      IMPORTING
+        !i_model_builder           TYPE REF TO cl_extr3_model_builder
+        !i_exclude_found_sap_intf  TYPE abap_bool
+        !i_interface_use_structure TYPE abap_bool
+        !i_use_somix               TYPE abap_bool OPTIONAL .
     "! Call if an element might be added.
     "! Add the element if it is not already part of the model.
     METHODS add_element
       IMPORTING
-                element           TYPE REF TO cl_extr3_elements
-                is_specific       TYPE abap_bool
-      RETURNING VALUE(element_id) TYPE cl_extr3_element_manager=>element_id_type.
+        !element          TYPE REF TO cl_extr3_elements
+        !is_specific      TYPE abap_bool
+      RETURNING
+        VALUE(element_id) TYPE cl_extr3_element_manager=>element_id_type .
     METHODS add_association
       IMPORTING
-        element_1   TYPE element_id_type
-        element_2   TYPE element_id_type
-        association TYPE REF TO cl_extr3_association.
+        !element_1   TYPE element_id_type
+        !element_2   TYPE element_id_type
+        !association TYPE REF TO cl_extr3_association .
     "! Call so that the classes that contain the collected elements determine further informations that are required for the model.
     METHODS collect_infos
       IMPORTING
-        sysid TYPE string OPTIONAL.
+        !sysid TYPE string OPTIONAL .
     "! Call to build the mse model
     METHODS make_model
       RETURNING
-        VALUE(r_result) TYPE cl_model=>lines_type.
+        VALUE(r_result) TYPE cl_model=>lines_type .
     METHODS get_element
       IMPORTING
-        i_element_id    TYPE element_id_type
+        !i_element_id   TYPE element_id_type
       RETURNING
-        VALUE(r_result) TYPE REF TO cl_extr3_elements.
+        VALUE(r_result) TYPE REF TO cl_extr3_elements .
     METHODS get_associations
       IMPORTING
-                i_element_id        TYPE element_id_type
-      RETURNING VALUE(associations) TYPE associations_type.
-    DATA model_builder TYPE REF TO cl_extr3_model_builder.
-
-
+        !i_element_id       TYPE element_id_type
+      RETURNING
+        VALUE(associations) TYPE associations_type .
   PROTECTED SECTION.
   PRIVATE SECTION.
     TYPES: BEGIN OF element_type,
@@ -1711,8 +1995,10 @@ CLASS cl_extr3 DEFINITION
                ng_abap_package TYPE string VALUE 'ABAP_PACKAGE',
                ng_abap_class TYPE string VALUE 'ABAP_CLASS',
                ng_abap_method TYPE string VALUE 'ABAP_METHOD',
+               ng_abap_attribute TYPE string VALUE 'ABAP_ATTRIBUTE',
                ng_abap_program TYPE string VALUE 'ABAP_PROGRAM',
                ng_abap_webdynpro TYPE string VALUE 'ABAP_WEBDYNPRO',
+               ng_database_schema TYPE string VALUE 'DATABASE_SCHEMA',
                ng_sap_table TYPE string VALUE 'SAP_TABLE'.
   PROTECTED SECTION.
     DATA element_manager TYPE REF TO cl_extr3_element_manager.
@@ -1746,6 +2032,12 @@ CLASS cl_extr3_access_or_invocatn DEFINITION
 
   PUBLIC SECTION.
   PROTECTED SECTION.
+    METHODS _get_somix_id_used_and_using
+      IMPORTING
+        i_association TYPE cl_extr3_element_manager=>association_type
+      EXPORTING
+        e_using_id    TYPE i
+        e_used_id     TYPE i.
     METHODS _get_famix_id_used_and_using
       IMPORTING
         i_association     TYPE cl_extr3_element_manager=>association_type
@@ -2183,26 +2475,34 @@ CLASS cl_extr3_tables DEFINITION
   CREATE PRIVATE .
 
   PUBLIC SECTION.
-    CLASS-METHODS clear.
+    DATA database_schema  TYPE db_schema READ-ONLY.
+    METHODS constructor
+      IMPORTING
+        !i_element_manager TYPE REF TO cl_extr3_element_manager .
+    CLASS-METHODS clear .
     CLASS-METHODS get_instance
       IMPORTING
-        i_element_manager TYPE REF TO cl_extr3_element_manager
+        !i_element_manager TYPE REF TO cl_extr3_element_manager
       RETURNING
-        VALUE(r_instance) TYPE REF TO cl_extr3_tables.
+        VALUE(r_instance)  TYPE REF TO cl_extr3_tables .
     METHODS add
       IMPORTING
-        table                 TYPE string
+        !table                TYPE string
       EXPORTING
         VALUE(is_added)       TYPE abap_bool
-        VALUE(new_element_id) TYPE cl_extr3_element_manager=>element_id_type.
+        VALUE(new_element_id) TYPE cl_extr3_element_manager=>element_id_type .
     METHODS table_name
       IMPORTING
-        i_element_id    TYPE i
+        !i_element_id   TYPE i
       RETURNING
-        VALUE(r_result) TYPE tabname.
-    METHODS make_model REDEFINITION.
-    METHODS name REDEFINITION.
-    METHODS collect_infos REDEFINITION.
+        VALUE(r_result) TYPE tabname .
+
+    METHODS collect_infos
+        REDEFINITION .
+    METHODS make_model
+        REDEFINITION .
+    METHODS name
+        REDEFINITION .
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO cl_extr3_tables.
@@ -2548,46 +2848,55 @@ CLASS cl_extr3_model_builder DEFINITION
 
 ENDCLASS.
 "! I am the starting point for an extraction. I am called from the main report.
-CLASS cl_extract3 DEFINITION
-  FINAL
-  CREATE PUBLIC .
+class CL_EXTRACT3 definition
+  final
+  create public .
 
-  PUBLIC SECTION.
-    CLASS-METHODS: check_if_tested
-      RETURNING
-        VALUE(is_tested) TYPE abap_bool.
-    TYPES: ty_s_pack TYPE RANGE OF tadir-devclass .
-    TYPES: ty_string_range TYPE RANGE OF char45.
-    CONSTANTS modifier_abapglobalclass TYPE string VALUE 'ABAPGlobalClass' ##NO_TEXT.
-    CONSTANTS modifier_abapglobalinterface TYPE string VALUE 'ABAPGlobalInterface' ##NO_TEXT.
-    CONSTANTS modifier_webdynpro_component TYPE string VALUE 'ABAPWebDynproComponent'.
-    CONSTANTS modifier_dbtable TYPE string VALUE 'DBTable' ##NO_TEXT.
-    CONSTANTS modifier_program TYPE string VALUE 'ABAPProgram' ##NO_TEXT.
-    CONSTANTS modifier_function_group TYPE string VALUE 'ABAPFunktionGroup' ##NO_TEXT.
-    CONSTANTS modifier_BW_TRANSFORMATION TYPE string VALUE 'BWTransformation' ##NO_TEXT.
-    CONSTANTS modifier_unknown TYPE string VALUE 'UNKNOWN' ##NO_TEXT.
+public section.
 
-    METHODS constructor.
+  types:
+    ty_s_pack TYPE RANGE OF tadir-devclass .
+  types:
+    ty_string_range TYPE RANGE OF char45 .
 
+  constants TECHTYPE_ABAPPACKAGE type STRING value 'ABAPPackage' ##NO_TEXT.
+  constants TECHTYPE_ABAPMETHOD type STRING value 'ABAPMethod' ##NO_TEXT.
+  constants TECHTYPE_ABAPCLASSATTRIBUTE type STRING value 'ABAPClassAttribute' ##NO_TEXT.
+  constants TECHTYPE_ABAP_FUNCTION type STRING value 'ABAPFunktion' ##NO_TEXT.
+  constants TECHTYPE_WEBDYNPRO_CONTROLLER type STRING value 'ABAPWebDynproController' ##NO_TEXT.
+  constants MODIFIER_ABAPGLOBALCLASS type STRING value 'ABAPGlobalClass' ##NO_TEXT.
+  constants MODIFIER_ABAPGLOBALINTERFACE type STRING value 'ABAPGlobalInterface' ##NO_TEXT.
+  constants MODIFIER_WEBDYNPRO_COMPONENT type STRING value 'ABAPWebDynproComponent' ##NO_TEXT.
+  constants MODIFIER_DBTABLE type STRING value 'DBTable' ##NO_TEXT.
+  constants MODIFIER_PROGRAM type STRING value 'ABAPProgram' ##NO_TEXT.
+  constants MODIFIER_FUNCTION_GROUP type STRING value 'ABAPFunktionGroup' ##NO_TEXT.
+  constants MODIFIER_BW_TRANSFORMATION type STRING value 'BWTransformation' ##NO_TEXT.
+  constants MODIFIER_UNKNOWN type STRING value 'UNKNOWN' ##NO_TEXT.
+
+  class-methods CHECK_IF_TESTED
+    returning
+      value(IS_TESTED) type ABAP_BOOL .
+  methods CONSTRUCTOR .
     "! Main start to do the extraction
     "! @parameter i_search_up | how often is a upward searched in the where-used-information to be repeated. Search infinite if < 0
     "! @parameter i_exclude_found_sap_intf | exclude found interfaces in SAP namespace in the where-used analysis
-    METHODS extract
-      IMPORTING
-        model_builder            TYPE REF TO cl_extr3_model_builder
-        element_manager          TYPE REF TO cl_extr3_element_manager
-        !initial_elements        TYPE REF TO cl_extr3_initial_elements
-        i_search_up              TYPE i
-        i_search_down            TYPE i
-        i_exclude_found_sap_intf TYPE abap_bool
-      EXPORTING
-        !mse_model               TYPE cl_model=>lines_type
-        VALUE(nothing_done)      TYPE abap_bool .
+  methods EXTRACT
+    importing
+      !MODEL_BUILDER type ref to CL_EXTR3_MODEL_BUILDER
+      !ELEMENT_MANAGER type ref to CL_EXTR3_ELEMENT_MANAGER
+      !INITIAL_ELEMENTS type ref to CL_EXTR3_INITIAL_ELEMENTS
+      !I_SEARCH_UP type I
+      !I_SEARCH_DOWN type I
+      !I_EXCLUDE_FOUND_SAP_INTF type ABAP_BOOL
+    exporting
+      !MSE_MODEL type CL_MODEL=>LINES_TYPE
+      value(NOTHING_DONE) type ABAP_BOOL .
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA: g_check_for_test_done TYPE abap_bool,
                 g_is_tested           TYPE abap_bool.
 ENDCLASS.
+
 
 
 CLASS CL_EXTR3_ACCESS IMPLEMENTATION.
@@ -2622,21 +2931,44 @@ CLASS CL_EXTR3_ACCESS IMPLEMENTATION.
   METHOD make_model.
 
     DATA using_method_id TYPE i.
+    DATA using_id TYPE i.
     DATA used_id TYPE i.
 
 
-    _get_famix_id_used_and_using( EXPORTING i_association = association
-                                  IMPORTING e_using_method_id = using_method_id
-                                            e_used_id         = used_id ).
+    IF element_manager->use_somix EQ 'X'.
+      _get_somix_id_used_and_using( EXPORTING i_association = association
+                                    IMPORTING e_using_id    = using_id
+                                              e_used_id     = used_id ).
 
-    ASSERT using_method_id IS NOT INITIAL.
-    ASSERT used_id IS NOT INITIAL.
+      ASSERT using_id IS NOT INITIAL.
+      ASSERT used_id IS NOT INITIAL.
+    ELSE.
+      _get_famix_id_used_and_using( EXPORTING i_association = association
+                                    IMPORTING e_using_method_id = using_method_id
+                                              e_used_id         = used_id ).
+
+      ASSERT using_method_id IS NOT INITIAL.
+      ASSERT used_id IS NOT INITIAL.
+    ENDIF.
 
     DATA last_id2 TYPE i.
-    last_id2 = element_manager->famix_access->add( ).
-    element_manager->famix_access->set_accessor_variable_relation( EXPORTING element_id = last_id2
-                                                              accessor_id = using_method_id
-                                                              variable_id = used_id ).
+    IF element_manager->use_somix EQ 'X'.
+      last_id2 = element_manager->somix_access->add( ).
+      element_manager->somix_access->set_accessor_accessed_relation(
+        EXPORTING
+          element_id   = last_id2
+          accessor_id  = using_id
+          accessed_id  = used_id
+          is_write     = 'X' " SAP2Moose cannot differenciate currently, between read, write, and dependency. So set here always.
+          is_read      = 'X' " SAP2Moose cannot differenciate currently, between read, write, and dependency. So set here always.
+          is_dependent = 'X' " SAP2Moose cannot differenciate currently, between read, write, and dependency. So set here always.
+      ).
+    ELSE.
+      last_id2 = element_manager->famix_access->add( ).
+      element_manager->famix_access->set_accessor_variable_relation( EXPORTING element_id = last_id2
+                                                                               accessor_id = using_method_id
+                                                                               variable_id = used_id ).
+    ENDIF.
 
   ENDMETHOD.
 ENDCLASS.
@@ -2774,6 +3106,143 @@ CLASS CL_EXTR3_ACCESS_OR_INVOCATN IMPLEMENTATION.
                                                                method = invoicing_famix_method ).
 
   ENDMETHOD.
+  METHOD _get_somix_id_used_and_using.
+
+    DATA: invoced_element  TYPE REF TO cl_extr3_elements,
+          invocing_element TYPE REF TO cl_extr3_elements.
+
+    DATA used_id TYPE i.
+
+    invocing_element = element_manager->get_element( i_element_id = i_association-element_id2 ).
+
+    invoced_element = element_manager->get_element( i_element_id = i_association-element_id1 ).
+
+    CASE invoced_element->type.
+      WHEN invoced_element->class_type.
+        DATA classes TYPE REF TO cl_extr3_classes.
+        DATA: invoced_class_name TYPE string,
+              invoced_cmpname    TYPE string,
+              invoced_cmptype    TYPE seocmptype.
+
+        classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
+        classes->comp_name( EXPORTING element_id  = i_association-element_id1
+                             IMPORTING class_name = invoced_class_name
+                                       cmpname    = invoced_cmpname
+                                       cmptype    = invoced_cmptype ).
+        CASE invoced_cmptype.
+          WHEN classes->attribute_type.
+
+            e_used_id = element_manager->somix_data->get_id(  grouping_name_group = ng_abap_class
+                                                              grouping            = invoced_class_name
+                                                              data_name_group     = ng_abap_attribute
+                                                              data                = invoced_cmpname ).
+          WHEN classes->method_type OR classes->event_type.
+            e_used_id = element_manager->somix_code->get_id( grouping_name_group = ng_abap_class
+                                                             grouping            = invoced_class_name
+                                                             code_name_group     = ng_abap_method
+                                                             code                = invoced_cmpname ).
+        ENDCASE.
+      WHEN invoced_element->table_type.
+        DATA tables TYPE REF TO cl_extr3_tables.
+        DATA tabname TYPE tabname.
+        tables = cl_extr3_tables=>get_instance( i_element_manager = element_manager ).
+        tabname = tables->table_name( i_element_id = i_association-element_id1 ).
+
+        e_used_id = element_manager->somix_data->get_id( grouping_name_group = ng_database_schema
+                                                         grouping            = tables->database_schema
+                                                         data_name_group     = ng_sap_table
+                                                         data                = tabname ).
+
+      WHEN invoced_element->program_type.
+        DATA programs2 TYPE REF TO cl_extr3_programs.
+        DATA: invoced_ext_progr_name_class  TYPE string,
+              invoced_ext_progr_name_method TYPE string.
+
+        programs2 = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
+        programs2->program_name( EXPORTING i_element_id = i_association-element_id1
+                                 IMPORTING external_program_name_class = invoced_ext_progr_name_class
+                                           external_program_name_method = invoced_ext_progr_name_method ).
+
+        e_used_id = element_manager->somix_code->get_id( grouping_name_group = ng_abap_program
+                                                         grouping            = invoced_ext_progr_name_class
+                                                         code_name_group     = ng_abap_program
+                                                         code                = invoced_ext_progr_name_method ).
+
+      WHEN OTHERS.
+        ASSERT 1 = 2.
+    ENDCASE.
+
+    DATA: invocing_somix_grouping      TYPE string,
+          invocing_somix_code          TYPE string,
+          invocing_grouping_name_group TYPE string,
+          invocing_code_name_group     TYPE string.
+
+    CASE invocing_element->type.
+      WHEN invocing_element->class_type.
+
+        invocing_grouping_name_group = ng_abap_class.
+        invocing_code_name_group = ng_abap_method.
+
+        DATA: invocing_class_name TYPE string,
+              invocing_cmpname    TYPE string.
+
+        classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
+
+        classes->comp_name( EXPORTING element_id = i_association-element_id2
+                            IMPORTING class_name = invocing_class_name
+                                      cmpname    = invocing_cmpname ).
+
+        invocing_somix_grouping = invocing_class_name.
+        invocing_somix_code = invocing_cmpname.
+
+      WHEN invocing_element->web_dynpro_comps_type.
+
+        invocing_grouping_name_group = ng_abap_webdynpro.
+        invocing_code_name_group = ''. ##TODO " Evaluate using a code name group here "ng_abap_webdynpro.
+
+        DATA web_dynpro_component TYPE REF TO cl_extr3_web_dynpro_comp.
+
+        DATA: invocing_wdy_component_name  TYPE wdy_component_name,
+              invocing_wdy_controller_name TYPE wdy_controller_name.
+
+
+        web_dynpro_component = cl_extr3_web_dynpro_comp=>get_instance( element_manager = element_manager ).
+
+        web_dynpro_component->wdy_controller_name( EXPORTING element_id          = i_association-element_id2
+                                                   IMPORTING wdy_component_name  = invocing_wdy_component_name
+                                                             wdy_controller_name = invocing_wdy_controller_name ).
+
+        invocing_somix_grouping = invocing_wdy_component_name.
+        invocing_somix_code = invocing_wdy_controller_name.
+
+      WHEN invocing_element->program_type.
+
+        invocing_grouping_name_group = ng_abap_program.
+        invocing_code_name_group = ng_abap_program.
+
+        DATA programs TYPE REF TO cl_extr3_programs.
+
+        programs = cl_extr3_programs=>get_instance( i_element_manager = element_manager ).
+
+        programs->program_name( EXPORTING i_element_id          = i_association-element_id2
+                                IMPORTING external_program_name_class = invocing_somix_grouping
+                                          external_program_name_method = invocing_somix_code ).
+
+      WHEN OTHERS.
+        ASSERT 1 = 2.
+
+    ENDCASE.
+
+    DATA using_method_id TYPE i.
+    ASSERT invocing_grouping_name_group IS NOT INITIAL.
+    ##TODO " Can this be activated again? ASSERT invocing_code_name_group IS NOT INITIAL.
+
+    e_using_id = element_manager->somix_code->get_id( grouping_name_group = invocing_grouping_name_group
+                                                      grouping            = invocing_somix_grouping
+                                                      code_name_group     = invocing_code_name_group
+                                                      code                = invocing_somix_code ).
+
+  ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_ASSOCIATION IMPLEMENTATION.
   METHOD make_model.
@@ -2812,24 +3281,40 @@ CLASS CL_EXTR3_INVOCATION IMPLEMENTATION.
   ENDMETHOD.
   METHOD make_model.
 
-    DATA using_method_id TYPE i.
+    DATA using_id TYPE i.
     DATA used_id TYPE i.
 
 
-    _get_famix_id_used_and_using( EXPORTING i_association = association
-                                  IMPORTING e_using_method_id = using_method_id
-                                            e_used_id         = used_id ).
 
-    ASSERT using_method_id IS NOT INITIAL.
+    IF element_manager->use_somix EQ 'X'.
+      _get_somix_id_used_and_using( EXPORTING i_association = association
+                                    IMPORTING e_using_id    = using_id
+                                              e_used_id     = used_id ).
+    ELSE.
+      _get_famix_id_used_and_using( EXPORTING i_association = association
+                                    IMPORTING e_using_method_id = using_id
+                                              e_used_id         = used_id ).
+    ENDIF.
+
+    ASSERT using_id IS NOT INITIAL.
     ASSERT used_id IS NOT INITIAL.
 
-    DATA invocation_id TYPE i.
-    invocation_id = element_manager->famix_invocation->add( ).
-    element_manager->famix_invocation->set_invocation_by_reference( EXPORTING element_id = invocation_id
-                                                               sender_id     = using_method_id
-                                                               candidates_id = used_id
-                                                               signature     = 'DUMMY' ).
-
+    IF element_manager->use_somix EQ 'X'.
+      DATA call_id TYPE i.
+      call_id = element_manager->somix_call->add( ).
+      element_manager->somix_call->set_caller_called_relation(
+        EXPORTING
+          element_id   = call_id
+          caller_id  = using_id
+          called_id  = used_id ).
+    ELSE.
+      DATA invocation_id TYPE i.
+      invocation_id = element_manager->famix_invocation->add( ).
+      element_manager->famix_invocation->set_invocation_by_reference( EXPORTING element_id = invocation_id
+                                                                 sender_id     = using_id
+                                                                 candidates_id = used_id
+                                                                 signature     = 'DUMMY' ).
+    ENDIF.
 
 
   ENDMETHOD.
@@ -3940,6 +4425,24 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
             AND clsname = class.
 
 
+      " Redefined methods may be in table SEOREDEF
+
+      DATA: redefined_methods TYPE STANDARD TABLE OF seoredef WITH DEFAULT KEY,
+            rm                TYPE seoredef.
+
+      SELECT * FROM seoredef INTO TABLE redefined_methods WHERE clsname = class.
+      DATA: cp TYPE ty_class_component.
+      LOOP AT redefined_methods INTO rm.
+        CLEAR cp.
+        cp-clsname = class.
+        cp-cmpname = rm-mtdname.
+        cp-cmptype = 1. " Method
+        cp-mtdtype = 0. " Method
+        APPEND cp TO class_components.
+      ENDLOOP.
+
+
+
       DATA: redefined_class_components TYPE ty_class_components,
             redefined_class_component  TYPE ty_class_component.
 
@@ -3948,6 +4451,9 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
       LOOP AT redefined_class_components INTO redefined_class_component.
         INSERT redefined_class_component INTO TABLE class_components.
       ENDLOOP.
+
+      SORT class_components.
+      DELETE ADJACENT DUPLICATES FROM class_components.
 
       LOOP AT class_components INTO class_component.
 
@@ -4244,59 +4750,88 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
     IF sy-subrc EQ 0.
 
       DATA: last_id        TYPE i,
+            class_id       TYPE i,
             file_anchor_id TYPE i.
 
       IF element-clstype EQ is_class_type.
         " SAP_2_FAMIX_59      Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalClass'
         " SAP_2_FAMIX_6     Map ABAP classes to FAMIX.Class
-        element_manager->famix_class->add( EXPORTING name_group = ng_abap_class
-                                                     name       = element-class_name
-                                                     modifiers  = cl_extract3=>modifier_abapglobalclass
-                                           IMPORTING id         = last_id ).
+        IF element_manager->use_somix EQ 'X'.
+          DATA: unique_name TYPE string.
+          unique_name = |sap.{ element-class_name }|.
+          element_manager->somix_grouping->add( EXPORTING grouping_name_group = ng_abap_class
+                                                          grouping            = element-class_name
+                                                          technical_type      = cl_extract3=>modifier_abapglobalclass
+                                                          link_to_editor      = element-adt_link
+                                                IMPORTING id                  = class_id
+                                                CHANGING  unique_name         = unique_name ).
 
-        IF element-adt_link IS NOT INITIAL.
+        ELSE. " SOMIX
 
-          element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
-                                                             file_name  = element-adt_link
-                                                   IMPORTING id         = file_anchor_id ).
+          element_manager->famix_class->add( EXPORTING name_group = ng_abap_class
+                                                       name       = element-class_name
+                                                       modifiers  = cl_extract3=>modifier_abapglobalclass
+                                             IMPORTING id         = last_id ).
 
-          IF file_anchor_id IS NOT INITIAL.
-            element_manager->famix_class->set_source_anchor_by_id(
-              EXPORTING
-                element_id         = last_id
-                source_anchor_id   = file_anchor_id
-            ).
+          IF element-adt_link IS NOT INITIAL.
+
+            element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                               file_name  = element-adt_link
+                                                     IMPORTING id         = file_anchor_id ).
+
+            IF file_anchor_id IS NOT INITIAL.
+              element_manager->famix_class->set_source_anchor_by_id(
+                EXPORTING
+                  element_id         = last_id
+                  source_anchor_id   = file_anchor_id
+              ).
+
+            ENDIF.
 
           ENDIF.
 
-        ENDIF.
+        ENDIF. " SOMIX
 
       ELSEIF element-clstype EQ interface_type.
-        " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
-        " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
-        element_manager->famix_class->add( EXPORTING name_group = ng_abap_class
-                                                     name       = element-class_name
-                                                     modifiers  = cl_extract3=>modifier_abapglobalinterface
-                                           IMPORTING id         = last_id ).
-        " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
-        element_manager->famix_class->is_interface( element_id = last_id ).
+        IF element_manager->use_somix EQ 'X'.
 
-        IF element-adt_link IS NOT INITIAL.
+          unique_name = |sap.{ element-class_name }|.
+          element_manager->somix_grouping->add( EXPORTING grouping_name_group = ng_abap_class
+                                                          grouping            = element-class_name
+                                                          technical_type      = cl_extract3=>modifier_abapglobalinterface
+                                                          link_to_editor      = element-adt_link
+                                                IMPORTING id                  = class_id
+                                                CHANGING  unique_name         = unique_name ).
 
-          element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
-                                                             file_name  = element-adt_link
-                                                   IMPORTING id         = file_anchor_id ).
+        ELSE. " SOMIX
+          " SAP_2_FAMIX_60        Mark the FAMIX Class with the attribute modifiers = 'ABAPGlobalInterface'
+          " SAP_2_FAMIX_7     Map ABAP Interfaces to FAMIX.Class
+          element_manager->famix_class->add( EXPORTING name_group = ng_abap_class
+                                                       name       = element-class_name
+                                                       modifiers  = cl_extract3=>modifier_abapglobalinterface
+                                             IMPORTING id         = last_id ).
+          " SAP_2_FAMIX_8       Set the attribute isInterface in case of ABAP Interfaces
+          element_manager->famix_class->is_interface( element_id = last_id ).
 
-          IF file_anchor_id IS NOT INITIAL.
-            element_manager->famix_class->set_source_anchor_by_id(
-              EXPORTING
-                element_id         = last_id
-                source_anchor_id   = file_anchor_id
-            ).
+          IF element-adt_link IS NOT INITIAL.
+
+            element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                               file_name  = element-adt_link
+                                                     IMPORTING id         = file_anchor_id ).
+
+            IF file_anchor_id IS NOT INITIAL.
+              element_manager->famix_class->set_source_anchor_by_id(
+                EXPORTING
+                  element_id         = last_id
+                  source_anchor_id   = file_anchor_id
+              ).
+
+            ENDIF.
 
           ENDIF.
 
-        ENDIF.
+        ENDIF. " SOMIX
+
       ELSE.
         ASSERT 1 = 2.
       ENDIF.
@@ -4306,9 +4841,30 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
                                               AND association->type = cl_extr3_association=>parent_package_ass.
         DATA package TYPE REF TO cl_extr3_packages.
         package ?= element_manager->get_element( i_element_id = association-element_id2 ).
-        element_manager->famix_class->set_parent_package( element_id     = last_id
-                                                          parent_package = package->devclass( i_element_id = association-element_id2 )
-                                                          parent_package_name_group = ng_abap_package ).
+
+        IF element_manager->use_somix EQ 'X'.
+          DATA: package_id TYPE i.
+          DATA: devclass TYPE devclass.
+          devclass = package->devclass( i_element_id = association-element_id2 ).
+          unique_name = |sap.{ devclass }|.
+          element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_package
+                                                          grouping               = devclass
+                                                          technical_type         = cl_extract3=>techtype_abappackage
+                                                          link_to_editor         = ''
+                                                IMPORTING id                     = package_id
+                                                CHANGING  unique_name            = unique_name ).
+
+          element_manager->somix_parentchild->add(  EXPORTING parent_id  = package_id
+                                                              child_id   = class_id
+                                                              is_main    = ''  ).
+
+        ELSE. " SOMIX
+
+          element_manager->famix_class->set_parent_package( element_id     = last_id
+                                                            parent_package = package->devclass( i_element_id = association-element_id2 )
+                                                            parent_package_name_group = ng_abap_package ).
+
+        ENDIF. " SOMIX
 
       ENDLOOP.
 
@@ -4323,71 +4879,128 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
 
 
 *    DATA last_id TYPE i.!
-          element_manager->famix_attribute->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
-          element_manager->famix_attribute->set_parent_type( EXPORTING element_id = last_id
-                                                        parent_element = 'FAMIX.Class'
-                                                        parent_name_group = ng_abap_class
-                                                        parent_name    = element_comp-clsname ).
 
-          IF element_comp-adt_link IS NOT INITIAL.
+          IF element_manager->use_somix EQ 'X'.
 
-            element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
-                                                               file_name  = element_comp-adt_link
-                                                       IMPORTING id         = file_anchor_id ).
+            unique_name = |sap.{ element_comp-clsname }.{ element_comp-cmpname }|.
+            element_manager->somix_data->add( EXPORTING grouping_name_group = ng_abap_class
+                                                        grouping    = element_comp-clsname
+                                                        data_name_group = ng_abap_attribute ##TODO " Improve coding generally. Without grouping name the data name is not uniquw
+                                                        data = element_comp-cmpname
+                                                        technical_type = cl_extract3=>techtype_abapclassattribute
+                                                        link_to_editor  = element-adt_link
+                                              IMPORTING id = last_id
+                                              CHANGING  unique_name         = unique_name ).
 
-            IF file_anchor_id IS NOT INITIAL.
-              element_manager->famix_attribute->set_source_anchor_by_id(
-                EXPORTING
-                  element_id         = last_id
-                  source_anchor_id   = file_anchor_id
-              ).
+            unique_name = |sap.{ element_comp-clsname }|.
+            element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_class
+                                                            grouping               = element_comp-clsname
+                                                            technical_type         = '' " Leave unchanged
+                                                            link_to_editor         = ''
+                                                  IMPORTING id                     = class_id
+                                                  CHANGING  unique_name            = unique_name ).
+            element_manager->somix_parentchild->add( EXPORTING parent_id = class_id
+                                                               child_id  = last_id
+                                                               is_main   = 'X' ).
+
+          ELSE. " SOMIX
+
+            element_manager->famix_attribute->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
+
+            element_manager->famix_attribute->set_parent_type( EXPORTING element_id = last_id
+                                                          parent_element = 'FAMIX.Class'
+                                                          parent_name_group = ng_abap_class
+                                                          parent_name    = element_comp-clsname ).
+
+            IF element_comp-adt_link IS NOT INITIAL.
+
+              element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                                 file_name  = element_comp-adt_link
+                                                         IMPORTING id         = file_anchor_id ).
+
+              IF file_anchor_id IS NOT INITIAL.
+                element_manager->famix_attribute->set_source_anchor_by_id(
+                  EXPORTING
+                    element_id         = last_id
+                    source_anchor_id   = file_anchor_id
+                ).
+
+              ENDIF.
 
             ENDIF.
 
-          ENDIF.
+            element_manager->famix_attribute->store_id( EXPORTING name_group = ng_abap_class
+                                                                  class      = element_comp-clsname
+                                                                  attribute  = element_comp-cmpname ).
 
-          element_manager->famix_attribute->store_id( EXPORTING name_group = ng_abap_class
-                                                                class      = element_comp-clsname
-                                                                attribute  = element_comp-cmpname ).
+          ENDIF. " SOMIX
 
 *            sap_attribute->add( EXPORTING class     = class-clsname
 *                                          attribute = component-cmpname ).
         WHEN method_type OR event_type.
           " SAP_2_FAMIX_15        Map methods of classes to FAMIX.Method
           " SAP_2_FAMIX_16        Map methods of interfaces to FAMIX.Method
-          element_manager->famix_method->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
 
-          " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
-          " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
-          element_manager->famix_method->set_signature( element_id = last_id
-                                         signature = element_comp-cmpname ).
+          IF element_manager->use_somix EQ 'X'.
 
-          element_manager->famix_method->set_parent_type( EXPORTING element_id = last_id
-                                                     parent_element = 'FAMIX.Class'
-                                                     parent_name_group = ng_abap_class
-                                                     parent_name    = element_comp-clsname ).
+            unique_name = |sap.{ element_comp-clsname }.{ element_comp-cmpname }|.
+            element_manager->somix_code->add( EXPORTING grouping_name_group = ng_abap_class
+                                                        grouping            = element_comp-clsname
+                                                        code_name_group     = cl_extr3=>ng_abap_method
+                                                        code                = element_comp-cmpname
+                                                        technical_type      = cl_extract3=>techtype_abapmethod
+                                                        link_to_editor      = element-adt_link
+                                              IMPORTING id                  = last_id
+                                              CHANGING  unique_name         = unique_name ).
 
-          IF element_comp-adt_link IS NOT INITIAL.
+            unique_name = |sap.{ element_comp-clsname }|.
+            element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_class
+                                                            grouping               = element_comp-clsname
+                                                            technical_type         = '' " Leave unchanged
+                                                            link_to_editor         = '' " Leave unchanged
+                                                  IMPORTING id                     = class_id
+                                                  CHANGING  unique_name            = unique_name ).
+            element_manager->somix_parentchild->add( EXPORTING parent_id = class_id
+                                                               child_id  = last_id
+                                                               is_main   = 'X' ).
 
-            element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
-                                                               file_name  = element_comp-adt_link
-                                                       IMPORTING id         = file_anchor_id ).
+          ELSE. " SOMIX
 
-            IF file_anchor_id IS NOT INITIAL.
-              element_manager->famix_method->set_source_anchor_by_id(
-                EXPORTING
-                  element_id         = last_id
-                  source_anchor_id   = file_anchor_id
-              ).
+            element_manager->famix_method->add( EXPORTING name = element_comp-cmpname IMPORTING id = last_id ).
+
+            " SAP_2_FAMIX_41      Fill the attribut signature of FAMIX.METHOD with the name of the method
+            " SAP_2_FAMIX_42        Fill the attribut signature of FAMIX.METHOD with the name of the method
+            element_manager->famix_method->set_signature( element_id = last_id
+                                           signature = element_comp-cmpname ).
+
+            element_manager->famix_method->set_parent_type( EXPORTING element_id = last_id
+                                                       parent_element = 'FAMIX.Class'
+                                                       parent_name_group = ng_abap_class
+                                                       parent_name    = element_comp-clsname ).
+
+            IF element_comp-adt_link IS NOT INITIAL.
+
+              element_manager->famix_file_anchor->add( EXPORTING element_id = last_id " Required for Moose 6.1
+                                                                 file_name  = element_comp-adt_link
+                                                         IMPORTING id         = file_anchor_id ).
+
+              IF file_anchor_id IS NOT INITIAL.
+                element_manager->famix_method->set_source_anchor_by_id(
+                  EXPORTING
+                    element_id         = last_id
+                    source_anchor_id   = file_anchor_id
+                ).
+
+              ENDIF.
 
             ENDIF.
 
-          ENDIF.
+            element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_class
+                                                               class  = element_comp-clsname
+                                                               method_name_group = ng_abap_method
+                                                               method = element_comp-cmpname ).
 
-          element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_class
-                                                             class  = element_comp-clsname
-                                                             method_name_group = ng_abap_method
-                                                             method = element_comp-cmpname ).
+          ENDIF. " SOMIX
 
 
 *            sap_method->add( EXPORTING class  = class-clsname
@@ -4494,6 +5107,26 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
         SELECT SINGLE clsname cmpname cmptype mtdtype FROM seocompo
           INTO (found_class_name, found_cmpname, found_cmptype, found_mtdtype ) WHERE clsname = clsname
                                                                                    AND cmpname = cmpname.
+
+      IF found_class_name IS INITIAL.
+        " Is it a redefined method?
+
+        DATA: redefined_methods TYPE STANDARD TABLE OF seoredef WITH DEFAULT KEY,
+              rm                TYPE seoredef.
+
+        SELECT * FROM seoredef INTO TABLE redefined_methods WHERE clsname = clsname
+                                                              AND mtdname = cmpname.
+
+        LOOP AT redefined_methods INTO rm.
+          found_class_name = clsname.
+          found_cmpname = rm-mtdname.
+          found_cmptype = 1. " Method
+          found_mtdtype = 0. " Method
+          " A method name has to be unique, so assume only a single entry here
+          EXIT.
+        ENDLOOP.
+
+      ENDIF.
 
       IF found_class_name IS NOT INITIAL.
 
@@ -4789,8 +5422,22 @@ CLASS CL_EXTR3_PACKAGES IMPLEMENTATION.
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
     ASSERT sy-subrc EQ 0.
 
-    element_manager->famix_package->add( name       = element-devclass
-                                         name_group = ng_abap_package ).
+    IF element_manager->use_somix EQ 'X'.
+
+      DATA: unique_name TYPE string.
+      unique_name = |sap.{ element-devclass }|.
+      element_manager->somix_grouping->add( EXPORTING grouping_name_group = ng_abap_package
+                                                      grouping            = element-devclass
+                                                      technical_type      = cl_extract3=>techtype_abappackage
+                                                      link_to_editor      = ''
+                                            CHANGING  unique_name         = unique_name ).
+
+    ELSE. " SOMIX
+
+      element_manager->famix_package->add( name       = element-devclass
+                                           name_group = ng_abap_package ).
+
+    ENDIF. " SOMIX
 
   ENDMETHOD.
   METHOD name.
@@ -4991,22 +5638,28 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
           file_anchor_id       TYPE i,
           name_group           TYPE string,
           modifier             TYPE string,
-          name_of_mapped_class TYPE string.
+          techtype             TYPE string,
+          name_of_mapped_class TYPE string,
+          is_main              TYPE abap_bool.
 *      famix_package->add( name = table-devclass ).
 
     IF element-program_type EQ type_program.
       name_group = 'ABAP_PROGRAM'.
       modifier = cl_extract3=>modifier_program.
+      techtype = cl_extract3=>modifier_program.
       name_of_mapped_class = element-external_program_name.
     ELSEIF element-program_type EQ type_bw_transformation.
       name_group = 'BW_TRANSFORMATION'.
       modifier = cl_extract3=>modifier_bw_transformation.
+      techtype = cl_extract3=>modifier_bw_transformation.
       name_of_mapped_class = element-external_program_name.
     ELSEIF element-program_type EQ type_function OR element-program_type = type_function_include.
       name_group = 'ABAP_FUNCTIONGROUP'.
       modifier = cl_extract3=>modifier_function_group.
+      techtype = cl_extract3=>techtype_abap_function.
 *      name_of_mapped_class = element-external_program_name.
       name_of_mapped_class = _get_names_for_function_groups( element ).
+      is_main = 'X'. "Display function group always for an ABAP function
 
 *      " Get parent package for function group
 *      DATA devclass TYPE tadir-devclass.
@@ -5015,75 +5668,126 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
     ELSE.
       name_group = 'UNKNOWN'.
       modifier = cl_extract3=>modifier_unknown.
+      techtype = cl_extract3=>modifier_unknown.
       name_of_mapped_class = element-external_program_name.
     ENDIF.
 
     " SAP_2_FAMIX_54        Map database tables to FAMIX Class
     " SAP_2_FAMIX_58        Mark the FAMIX Class with the attribute modifiers = 'DBTable'
-    element_manager->famix_class->add( EXPORTING name_group             = name_group
-                                                 name                   = name_of_mapped_class
-                                                 modifiers              = modifier
-                                       IMPORTING id         = last_id ).
-    DATA association TYPE cl_extr3_element_manager=>association_type.
-*    DATA: package_set TYPE abap_bool.
-    LOOP AT associations INTO association WHERE element_id1 = element_id
-                                            AND association->type = cl_extr3_association=>parent_package_ass.
-      DATA package TYPE REF TO cl_extr3_packages.
-      package ?= element_manager->get_element( i_element_id = association-element_id2 ).
 
-      element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
-                                                                  parent_package     = package->devclass( i_element_id = association-element_id2 )
-                                                                  parent_package_name_group = ng_abap_package ).
-*      package_set = abap_true.
-    ENDLOOP.
-*    IF package_set EQ abap_false.
-*
-*      DATA packages_elements TYPE REF TO cl_extr3_packages.
-*
-*      packages_elements = cl_extr3_packages=>get_instance( i_element_manager = element_manager ).
-*
-*      packages_elements->add( EXPORTING package = devclass ).
-*
-*      element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
-*                                                                  parent_package     = devclass
-*                                                                  parent_package_name_group = ng_abap_package ).
-*    ENDIF.
+    IF element_manager->use_somix EQ 'X'.
+
+      DATA: unique_name TYPE string.
+      unique_name = |sap.{ name_of_mapped_class }|.
+      element_manager->somix_grouping->add( EXPORTING grouping_name_group  = name_group
+                                                      grouping             = name_of_mapped_class
+                                                      technical_type       = modifier
+                                                      link_to_editor       = element-adt_or_bwmt_link
+                                            IMPORTING id                   = last_id
+                                            CHANGING  unique_name          = unique_name ).
+
+      DATA association TYPE cl_extr3_element_manager=>association_type.
+
+      LOOP AT associations INTO association WHERE element_id1 = element_id
+                                              AND association->type = cl_extr3_association=>parent_package_ass.
+        DATA package TYPE REF TO cl_extr3_packages.
+        package ?= element_manager->get_element( i_element_id = association-element_id2 ).
+
+        DATA: package_id TYPE i.
+
+        DATA: devclass TYPE devclass.
+        devclass = package->devclass( i_element_id = association-element_id2 ).
+
+        unique_name = |sap.{ devclass }|.
+
+        element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_package
+                                                        grouping               = devclass
+                                                        technical_type         = cl_extract3=>techtype_abappackage
+                                                        link_to_editor         = ''
+                                              IMPORTING id                     = package_id
+                                                CHANGING  unique_name         = unique_name ).
+
+        element_manager->somix_parentchild->add( EXPORTING parent_id = package_id
+                                                           child_id  = last_id
+                                                           is_main   = '' ).
+
+      ENDLOOP.
+
+    ELSE. " SOMIX
+
+      element_manager->famix_class->add( EXPORTING name_group             = name_group
+                                                   name                   = name_of_mapped_class
+                                                   modifiers              = modifier
+                                         IMPORTING id         = last_id ).
+
+      LOOP AT associations INTO association WHERE element_id1 = element_id
+                                              AND association->type = cl_extr3_association=>parent_package_ass.
+
+        package ?= element_manager->get_element( i_element_id = association-element_id2 ).
+
+        element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
+                                                                    parent_package     = package->devclass( i_element_id = association-element_id2 )
+                                                                    parent_package_name_group = ng_abap_package ).
+
+      ENDLOOP.
+
+    ENDIF. " SOMIX
 
     DATA dummy_method_id TYPE i.
 
-    element_manager->famix_method->add( EXPORTING name = element-external_program_name
-                                        IMPORTING id   = dummy_method_id ).
+    IF element_manager->use_somix EQ 'X'.
 
-    element_manager->famix_method->set_signature( element_id = dummy_method_id
-                                                   signature = element-external_program_name ).
+      unique_name = |sap.{ name_of_mapped_class }|.
 
-    element_manager->famix_method->set_parent_type( EXPORTING element_id        = dummy_method_id
-                                                              parent_element    = 'FAMIX.Class'
-                                                              parent_name_group = name_group
-                                                              parent_name       = name_of_mapped_class ).
+      element_manager->somix_code->add( EXPORTING grouping_name_group = 'ABAP_PROGRAM' ##TODO " Analyze how to improve "name_group
+                                                  grouping            = name_of_mapped_class
+                                                  code_name_group     = cl_extr3=>ng_abap_program
+                                                  code                = element-external_program_name
+                                                  technical_type      = techtype
+                                                  link_to_editor      = element-adt_or_bwmt_link
+                                        IMPORTING id                  = dummy_method_id
+                                        CHANGING  unique_name         = unique_name ).
 
+      element_manager->somix_parentchild->add( EXPORTING parent_id = last_id
+                                                         child_id  = dummy_method_id
+                                                         is_main   = is_main ).
 
-    element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_program
-                                                       class  = name_of_mapped_class
-                                                       method_name_group = ng_abap_program
-                                                       method = element-external_program_name ).
+    ELSE. " SOMIX
 
-    IF element-adt_or_bwmt_link IS NOT INITIAL.
+      element_manager->famix_method->add( EXPORTING name = element-external_program_name
+                                          IMPORTING id   = dummy_method_id ).
 
-      element_manager->famix_file_anchor->add( EXPORTING element_id = dummy_method_id " Required for Moose 6.1
-                                                         file_name  = element-adt_or_bwmt_link
-                                                 IMPORTING id         = file_anchor_id ).
+      element_manager->famix_method->set_signature( element_id = dummy_method_id
+                                                     signature = element-external_program_name ).
 
-      IF file_anchor_id IS NOT INITIAL.
-        element_manager->famix_method->set_source_anchor_by_id(
-          EXPORTING
-            element_id         = dummy_method_id
-            source_anchor_id   = file_anchor_id
-        ).
+      element_manager->famix_method->set_parent_type( EXPORTING element_id        = dummy_method_id
+                                                                parent_element    = 'FAMIX.Class'
+                                                                parent_name_group = name_group
+                                                                parent_name       = name_of_mapped_class ).
+
+      element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_program
+                                                         class  = name_of_mapped_class
+                                                         method_name_group = ng_abap_program
+                                                         method = element-external_program_name ).
+
+      IF element-adt_or_bwmt_link IS NOT INITIAL.
+
+        element_manager->famix_file_anchor->add( EXPORTING element_id = dummy_method_id " Required for Moose 6.1
+                                                           file_name  = element-adt_or_bwmt_link
+                                                   IMPORTING id         = file_anchor_id ).
+
+        IF file_anchor_id IS NOT INITIAL.
+          element_manager->famix_method->set_source_anchor_by_id(
+            EXPORTING
+              element_id         = dummy_method_id
+              source_anchor_id   = file_anchor_id
+          ).
+
+        ENDIF.
 
       ENDIF.
 
-    ENDIF.
+    ENDIF. " SOMIX
 
   ENDMETHOD.
   METHOD name.
@@ -5390,42 +6094,84 @@ CLASS CL_EXTR3_TABLES IMPLEMENTATION.
 
     " SAP_2_FAMIX_54        Map database tables to FAMIX Class
     " SAP_2_FAMIX_58        Mark the FAMIX Class with the attribute modifiers = 'DBTable'
-    element_manager->famix_class->add( EXPORTING name_group             = 'ABAP_TABLE'
-                                                 name                   = element-tabname
-                                                 modifiers              = cl_extract3=>modifier_dbtable
-                                       IMPORTING id         = last_id ).
-    DATA association TYPE cl_extr3_element_manager=>association_type.
-    LOOP AT associations INTO association WHERE element_id1 = element_id
-                                            AND association->type = cl_extr3_association=>parent_package_ass.
-      DATA package TYPE REF TO cl_extr3_packages.
-      package ?= element_manager->get_element( i_element_id = association-element_id2 ).
 
-      element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id
-                                                                  parent_package     = package->devclass( i_element_id = association-element_id2 )
-                                                                  parent_package_name_group = ng_abap_package ).
+    DATA database_table_id TYPE i.
 
-    ENDLOOP.
+    IF element_manager->use_somix EQ 'X'.
+      DATA: unique_name TYPE string.
 
-    DATA dummy_attribute_id TYPE i.
+      unique_name = |sap.{ database_schema }.{ element-tabname }|.
+
+      element_manager->somix_data->add( EXPORTING grouping_name_group = ng_database_schema
+                                                  grouping            = database_schema
+                                                  data_name_group     = ng_sap_table
+                                                  data                = element-tabname
+                                                  technical_type      = cl_extract3=>modifier_dbtable
+                                                  link_to_editor      = ''
+                                        IMPORTING id                  = database_table_id
+                                        CHANGING  unique_name         = unique_name ).
+
+      DATA association TYPE cl_extr3_element_manager=>association_type.
+      LOOP AT associations INTO association WHERE element_id1 = element_id
+                                              AND association->type = cl_extr3_association=>parent_package_ass.
+        DATA package TYPE REF TO cl_extr3_packages.
+        package ?= element_manager->get_element( i_element_id = association-element_id2 ).
+
+        DATA: package_id TYPE i.
+        DATA: devclass TYPE devclass.
+        devclass = package->devclass( i_element_id = association-element_id2 ).
+
+        unique_name = |sap.{ devclass }|.
+
+        element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_package
+                                                        grouping               = devclass
+                                                        technical_type         = cl_extract3=>techtype_abappackage
+                                                        link_to_editor         = ''
+                                              IMPORTING id                     = package_id
+                                              CHANGING  unique_name         = unique_name ).
+
+        element_manager->somix_parentchild->add( EXPORTING parent_id = package_id
+                                                           child_id  = database_table_id
+                                                           is_main   = '' ).
+
+      ENDLOOP.
+
+    ELSE. " SOMIX
+
+      element_manager->famix_class->add( EXPORTING name_group             = 'ABAP_TABLE'
+                                                   name                   = element-tabname
+                                                   modifiers              = cl_extract3=>modifier_dbtable
+                                         IMPORTING id         = last_id ).
+
+      LOOP AT associations INTO association WHERE element_id1 = element_id
+                                              AND association->type = cl_extr3_association=>parent_package_ass.
+
+        package ?= element_manager->get_element( i_element_id = association-element_id2 ).
+
+        element_manager->famix_class->set_parent_package( EXPORTING element_id         = last_id ##TODO " Determine the package for a new table
+                                                                    parent_package     = package->devclass( i_element_id = association-element_id2 )
+                                                                    parent_package_name_group = ng_abap_package ).
+
+      ENDLOOP.
+
+    ENDIF. " SOMIX
     " SAP_2_FAMIX_56      Add a dummy attribute with the name of the table
-    element_manager->famix_attribute->add( EXPORTING name                   = element-tabname
-                          IMPORTING id                     = dummy_attribute_id ).
 
-    element_manager->famix_attribute->set_parent_type( EXPORTING element_id         = dummy_attribute_id
-                                                parent_id          = last_id ).
+    IF element_manager->use_somix EQ 'X'.
 
-    element_manager->famix_attribute->store_id( EXPORTING name_group = ng_sap_table
-                                                          class     = element-tabname
-                                                          attribute = element-tabname ).
+    ELSE. "SOMIX
 
+      element_manager->famix_attribute->add( EXPORTING name                   = element-tabname
+                                             IMPORTING id                     = database_table_id ).
 
+      element_manager->famix_attribute->set_parent_type( EXPORTING element_id         = database_table_id
+                                                  parent_id          = last_id ).
 
-*    DATA element TYPE element_type.
-*
-*    READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
-*    ASSERT sy-subrc EQ 0.
-*
-*    element_manager->famix_package->add( name = element-devclass ).
+      element_manager->famix_attribute->store_id( EXPORTING name_group = ng_sap_table
+                                                            class     = element-tabname
+                                                            attribute = element-tabname ).
+
+    ENDIF. "SOMIX
 
   ENDMETHOD.
   METHOD name.
@@ -5447,6 +6193,15 @@ CLASS CL_EXTR3_TABLES IMPLEMENTATION.
     ASSERT sy-subrc EQ 0.
 
     r_result = element-tabname.
+
+  ENDMETHOD.
+  METHOD constructor.
+    super->constructor( i_element_manager = i_element_manager ).
+
+    " Determine database schema to group database tables accordingly.
+    DATA: dbinfo TYPE dbrelinfo.
+    CALL FUNCTION 'DB_DBRELINFO' IMPORTING dbinfo = dbinfo.
+    database_schema = dbinfo-dbschema.
 
   ENDMETHOD.
 ENDCLASS.
@@ -5548,45 +6303,105 @@ CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
     DATA: element           TYPE element_type,
           element_component TYPE element_comp_type.
 
-    DATA class_id TYPE i.
-    DATA method_id TYPE i.
+    DATA component_id TYPE i.
+    DATA controller_id TYPE i.
 
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
     IF sy-subrc EQ 0.
 
-      element_manager->famix_class->add( EXPORTING name_group = 'WEB_DYNPRO'
-                                                   name       = element-wdy_component_name
-                                                   modifiers  = 'ABAPWebDynproComponent'
-                                         IMPORTING id         = class_id ).
+      IF element_manager->use_somix EQ 'X'.
 
-      DATA association TYPE cl_extr3_element_manager=>association_type.
-      LOOP AT associations INTO association WHERE element_id1 = element_id
-                                              AND association->type = cl_extr3_association=>parent_package_ass.
-        DATA package TYPE REF TO cl_extr3_packages.
-        package ?= element_manager->get_element( i_element_id = association-element_id2 ).
-        element_manager->famix_class->set_parent_package( element_id     = class_id
-                                                          parent_package = package->devclass( i_element_id = association-element_id2 )
-                                                          parent_package_name_group = ng_abap_package ).
+        DATA: unique_name TYPE string.
+        unique_name = |sap.{ element-wdy_component_name }|.
 
-      ENDLOOP.
+        element_manager->somix_grouping->add( EXPORTING grouping_name_group = ng_abap_webdynpro
+                                                        grouping            = element-wdy_component_name
+                                                        technical_type      = cl_extract3=>modifier_webdynpro_component
+                                                        link_to_editor      = ''
+                                              IMPORTING id                  = component_id
+                                              CHANGING  unique_name         = unique_name ).
+
+        DATA association TYPE cl_extr3_element_manager=>association_type.
+        LOOP AT associations INTO association WHERE element_id1 = element_id
+                                                AND association->type = cl_extr3_association=>parent_package_ass.
+          DATA package TYPE REF TO cl_extr3_packages.
+          package ?= element_manager->get_element( i_element_id = association-element_id2 ).
+
+          DATA: package_id TYPE i.
+          DATA: devclass TYPE devclass.
+          devclass = package->devclass( i_element_id = association-element_id2 ).
+          unique_name = |sap.{ devclass }|.
+
+          element_manager->somix_grouping->add( EXPORTING grouping_name_group    = ng_abap_package
+                                                          grouping               = devclass
+                                                          technical_type         = cl_extract3=>techtype_abappackage
+                                                          link_to_editor         = ''
+                                                IMPORTING id                     = package_id
+                                                CHANGING  unique_name         = unique_name ).
+
+          element_manager->somix_parentchild->add( EXPORTING parent_id = package_id
+                                                             child_id  = component_id
+                                                             is_main   = '' ).
+
+        ENDLOOP.
+
+
+      ELSE. " SOMIX
+
+        element_manager->famix_class->add( EXPORTING name_group = ng_abap_webdynpro
+                                                     name       = element-wdy_component_name
+                                                     modifiers  = cl_extract3=>modifier_webdynpro_component
+                                           IMPORTING id         = component_id ).
+
+        LOOP AT associations INTO association WHERE element_id1 = element_id
+                                                AND association->type = cl_extr3_association=>parent_package_ass.
+          package ?= element_manager->get_element( i_element_id = association-element_id2 ).
+          element_manager->famix_class->set_parent_package( element_id     = component_id
+                                                            parent_package = package->devclass( i_element_id = association-element_id2 )
+                                                            parent_package_name_group = ng_abap_package ).
+
+        ENDLOOP.
+
+      ENDIF. " SOMIX
 
       LOOP AT elements_comp_comp_contr_name INTO element_component WHERE wdy_component_name = element-wdy_component_name.
-        element_manager->famix_method->add( EXPORTING name = element_component-wdy_controller_name
-                                            IMPORTING id = method_id ).
 
-        element_manager->famix_method->set_signature( element_id = method_id
-                                       signature = element_component-wdy_controller_name ).
-        element_manager->famix_method->set_parent_type(
-          EXPORTING
-            element_id         = method_id
-            parent_element     = 'FAMIX.Class'
-            parent_id          = class_id ).
+        IF element_manager->use_somix EQ 'X'.
+          unique_name = |sap.{ element-wdy_component_name }.{ element_component-wdy_controller_name }|.
 
-        "! TBD Really required, this appears to be not exact, no namegroup, ...
-        element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_webdynpro
-                                                           class  = element-wdy_component_name
-                                                           method_name_group = ng_abap_webdynpro
-                                                           method = element_component-wdy_controller_name ).
+          element_manager->somix_code->add( EXPORTING grouping_name_group = ng_abap_webdynpro
+                                                      grouping            = element-wdy_component_name
+                                                      code_name_group     = '' ##TODO " namegroup for WebFynpro Controller needed?
+                                                      code                = element_component-wdy_controller_name
+                                                      technical_type      = cl_extract3=>techtype_webdynpro_controller
+                                                      link_to_editor      = ''
+                                            IMPORTING id                  = controller_id
+                                            CHANGING  unique_name         = unique_name ).
+          element_manager->somix_parentchild->add( EXPORTING parent_id = component_id
+                                                             child_id  = controller_id
+                                                             is_main   = 'X' ).
+
+        ELSE. " SOMIX
+
+          element_manager->famix_method->add( EXPORTING name = element_component-wdy_controller_name
+                                              IMPORTING id = controller_id ).
+
+          element_manager->famix_method->set_signature( element_id = controller_id
+                                         signature = element_component-wdy_controller_name ).
+
+          element_manager->famix_method->set_parent_type(
+            EXPORTING
+              element_id         = controller_id
+              parent_element     = 'FAMIX.Class'
+              parent_id          = component_id ).
+
+          "! TBD Really required, this appears to be not exact, no namegroup, ...
+          element_manager->famix_method->store_id( EXPORTING class_name_group = ng_abap_webdynpro
+                                                             class  = element-wdy_component_name
+                                                             method_name_group = ng_abap_webdynpro
+                                                             method = element_component-wdy_controller_name ).
+
+        ENDIF. " SOMIX
 
       ENDLOOP.
 
@@ -5756,21 +6571,37 @@ CLASS CL_EXTR3_ELEMENT_MANAGER IMPLEMENTATION.
 
     interface_use_structure = i_interface_use_structure.
 
+    use_somix = i_use_somix.
+
     next_element_id = 1.
 
     CREATE OBJECT model.
 
-    DATA f_custom_source_language TYPE REF TO cl_famix_custom_source_lng.
-    CREATE OBJECT f_custom_source_language EXPORTING model = model.
-    f_custom_source_language->add( name = 'SAP' name_group = cl_extr3=>ng_source_language ).
+    IF use_somix EQ 'X'.
 
-    CREATE OBJECT famix_package EXPORTING model = model.
-    CREATE OBJECT famix_class EXPORTING model = model.
-    CREATE OBJECT famix_method EXPORTING model = model.
-    CREATE OBJECT famix_attribute EXPORTING model = model.
-    CREATE OBJECT famix_invocation EXPORTING model = model.
-    CREATE OBJECT famix_access EXPORTING model = model.
-    CREATE OBJECT famix_file_anchor EXPORTING model = model.
+      CREATE OBJECT somix_extraction EXPORTING model = model.
+      CREATE OBJECT somix_grouping EXPORTING model = model.
+      CREATE OBJECT somix_code EXPORTING model = model.
+      CREATE OBJECT somix_data EXPORTING model = model.
+      CREATE OBJECT somix_call EXPORTING model = model.
+      CREATE OBJECT somix_access EXPORTING model = model.
+      CREATE OBJECT somix_parentchild EXPORTING model = model.
+
+    ELSE. " SOMIX
+
+      DATA f_custom_source_language TYPE REF TO cl_famix_custom_source_lng.
+      CREATE OBJECT f_custom_source_language EXPORTING model = model.
+      f_custom_source_language->add( name = 'SAP' name_group = cl_extr3=>ng_source_language ).
+
+      CREATE OBJECT famix_package EXPORTING model = model.
+      CREATE OBJECT famix_class EXPORTING model = model.
+      CREATE OBJECT famix_method EXPORTING model = model.
+      CREATE OBJECT famix_attribute EXPORTING model = model.
+      CREATE OBJECT famix_invocation EXPORTING model = model.
+      CREATE OBJECT famix_access EXPORTING model = model.
+      CREATE OBJECT famix_file_anchor EXPORTING model = model.
+
+    ENDIF. " SOMIX
 
   ENDMETHOD.
   METHOD get_associations.
@@ -5987,26 +6818,6 @@ CLASS CL_EXTR3_INITIAL_ELEMENTS IMPLEMENTATION.
                                              i_is_specific = abap_true ).
 
   ENDMETHOD.
-  METHOD _select_class.
-
-    DATA: classes          TYPE REF TO cl_extr3_classes,
-          class_components TYPE cl_extr3_classes=>ty_class_components,
-          cc               TYPE cl_extr3_classes=>ty_class_component.
-    classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
-    classes->add( EXPORTING class            = name_filter
-                            is_specific      = abap_true
-                  IMPORTING new_element_id   = new_element_id
-                            class_components = class_components ).
-
-    LOOP AT class_components INTO cc.
-      classes->add_component(
-        EXPORTING
-          clsname        = cc-clsname
-          cmpname        = cc-cmpname
-          is_specific    = abap_true ).
-    ENDLOOP.
-
-  ENDMETHOD.
   METHOD _select_class_method.
 
     " Select class method
@@ -6094,6 +6905,26 @@ CLASS CL_EXTR3_INITIAL_ELEMENTS IMPLEMENTATION.
       ENDLOOP.
       SORT r_packages BY package.
     ENDIF.
+
+  ENDMETHOD.
+  METHOD _select_class.
+
+    DATA: classes          TYPE REF TO cl_extr3_classes,
+          class_components TYPE cl_extr3_classes=>ty_class_components,
+          cc               TYPE cl_extr3_classes=>ty_class_component.
+    classes = cl_extr3_classes=>get_instance( element_manager = element_manager ).
+    classes->add( EXPORTING class            = name_filter
+                            is_specific      = abap_true
+                  IMPORTING new_element_id   = new_element_id
+                            class_components = class_components ).
+
+    LOOP AT class_components INTO cc.
+      classes->add_component(
+        EXPORTING
+          clsname        = cc-clsname
+          cmpname        = cc-cmpname
+          is_specific    = abap_true ).
+    ENDLOOP.
 
   ENDMETHOD.
 ENDCLASS.
@@ -6545,29 +7376,6 @@ CLASS CL_EXTR3_MODEL_BUILDER IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTRACT3 IMPLEMENTATION.
-  METHOD check_if_tested.
-
-    IF g_check_for_test_done EQ 'X'.
-      " Buffer result of call to call stack
-      is_tested = g_is_tested.
-    ELSE.
-
-      DATA et_callstack  TYPE sys_callst  .
-      CALL FUNCTION 'SYSTEM_CALLSTACK'
-        IMPORTING
-          et_callstack = et_callstack.
-
-      READ TABLE et_callstack TRANSPORTING NO FIELDS WITH KEY eventname = 'INVOKE_TEST_METHOD'.
-
-      IF sy-subrc EQ 0.
-        g_is_tested = 'X'.
-        is_tested = 'X'.
-        g_check_for_test_done = 'X'.
-      ENDIF.
-
-    ENDIF.
-
-  ENDMETHOD.
   METHOD constructor.
 
   ENDMETHOD.
@@ -6613,6 +7421,343 @@ CLASS CL_EXTRACT3 IMPLEMENTATION.
 
     mse_model = element_manager->make_model( ).
 
+  ENDMETHOD.
+  METHOD check_if_tested.
+
+    IF g_check_for_test_done EQ 'X'.
+      " Buffer result of call to call stack
+      is_tested = g_is_tested.
+    ELSE.
+
+      DATA et_callstack  TYPE sys_callst  .
+      CALL FUNCTION 'SYSTEM_CALLSTACK'
+        IMPORTING
+          et_callstack = et_callstack.
+
+      READ TABLE et_callstack TRANSPORTING NO FIELDS WITH KEY eventname = 'INVOKE_TEST_METHOD'.
+
+      IF sy-subrc EQ 0.
+        g_is_tested = 'X'.
+        is_tested = 'X'.
+        g_check_for_test_done = 'X'.
+      ENDIF.
+
+    ENDIF.
+
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_SOMIX_ACCESS IMPLEMENTATION.
+  METHOD constructor.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'SOMIX.Access'.
+  ENDMETHOD.
+  METHOD set_accessor_accessed_relation.
+
+    DATA ls_accessor_id LIKE LINE OF g_accessor_accessed_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_accessor_id.
+    ls_accessor_id-accessor_id = accessor_id.
+    ls_accessor_id-accessed_id = accessed_id.
+    INSERT ls_accessor_id INTO TABLE g_accessor_accessed_ids.
+    g_model->add_reference_by_id( EXPORTING element_id = element_id
+                                            attribute_name = 'accessor'
+                                            reference_id   = accessor_id ).
+    g_model->add_reference_by_id( EXPORTING element_id = element_id
+                                            attribute_name = 'accessed'
+                                            reference_id   = accessed_id ).
+    IF is_write EQ 'X'.
+      g_model->add_boolean( EXPORTING element_id         = element_id
+                                      attribute_name     = 'isWrite'
+                                      is_true            = 'X' ).
+    ENDIF.
+    IF is_read EQ 'X'.
+      g_model->add_boolean( EXPORTING element_id         = element_id
+                                      attribute_name     = 'isRead'
+                                      is_true            = 'X' ). " SAP2Moose cannot differenciate currently, between read, write, and dependency. So set here always.
+    ENDIF.
+    IF is_dependent EQ 'X'.
+      g_model->add_boolean( EXPORTING element_id         = element_id
+                                      attribute_name     = 'isDependent'
+                                      is_true            = 'X' ). " SAP2Moose cannot differenciate currently, between read, write, and dependency. So set here always.
+
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_SOMIX_CALL IMPLEMENTATION.
+  METHOD constructor.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'SOMIX.Call'.
+  ENDMETHOD.
+  METHOD set_caller_called_relation.
+
+    DATA ls_caller_called_id LIKE LINE OF g_caller_called_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_caller_called_id.
+    ls_caller_called_id-caller_id = caller_id.
+    ls_caller_called_id-called_id = called_id.
+    INSERT ls_caller_called_id INTO TABLE g_caller_called_ids.
+    g_model->add_reference_by_id( EXPORTING element_id = element_id
+                                            attribute_name = 'caller'
+                                            reference_id   = caller_id ).
+    g_model->add_reference_by_id( EXPORTING element_id = element_id
+                                            attribute_name = 'called'
+                                            reference_id   = called_id ).
+
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_SOMIX_CODE IMPLEMENTATION.
+  METHOD constructor.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'SOMIX.Code'.
+  ENDMETHOD.
+  METHOD get_id.
+    FIELD-SYMBOLS <code_id> LIKE LINE OF g_code_ids.
+
+    READ TABLE g_code_ids ASSIGNING <code_id> WITH TABLE KEY grouping_name_group = grouping_name_group
+                                                             grouping = grouping
+                                                             code_name_group = code_name_group
+                                                             code = code.
+    IF sy-subrc EQ 0. "OK
+      id = <code_id>-id.
+    ELSE.
+      id = 0.
+    ENDIF.
+  ENDMETHOD.
+  METHOD add.
+    FIELD-SYMBOLS <code_id> LIKE LINE OF g_code_ids.
+
+    READ TABLE g_code_ids ASSIGNING <code_id> WITH TABLE KEY grouping_name_group = grouping_name_group
+                                                             grouping = grouping
+                                                             code_name_group = code_name_group
+                                                             code = code.
+
+    IF sy-subrc EQ 0.
+
+      id = <code_id>-id.
+
+    ELSE.
+
+      g_model->add_entity(
+                 EXPORTING elementname = g_elementname
+                           is_named_entity = abap_true
+                           can_be_referenced_by_name = abap_false
+                           name = code
+                 IMPORTING processed_id = id ).
+
+      g_model->add_string( EXPORTING element_id     = id
+                                     attribute_name = 'technicalType'
+                                     string         = technical_type ).
+
+    ENDIF.
+
+    ASSERT unique_name IS NOT INITIAL.
+    TRANSLATE unique_name TO LOWER CASE. " To be compatible with specification. Not case sensitive names are here in lower case.
+    g_model->add_string( EXPORTING element_id     = id
+                                   attribute_name = 'uniqueName'
+                                   string         = unique_name ).
+
+    IF link_to_editor IS NOT INITIAL.
+
+      g_model->add_string( EXPORTING element_id     = id
+                                     attribute_name = 'linkToEditor'
+                                     string         = link_to_editor ).
+    ENDIF.
+
+    DATA ls_code_id LIKE LINE OF g_code_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_code_id.
+    ls_code_id-id = id.
+    ls_code_id-grouping_name_group = grouping_name_group.
+    ls_code_id-grouping            = grouping.
+    ls_code_id-code_name_group     = code_name_group.
+    ls_code_id-code                = code.
+    INSERT ls_code_id INTO TABLE g_code_ids.
+    g_last_used_id = id.
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_SOMIX_COMPONENT IMPLEMENTATION.
+ENDCLASS.
+CLASS CL_SOMIX_COUPLING IMPLEMENTATION.
+  METHOD add.
+    g_model->add_entity( EXPORTING elementname               = g_elementname
+                                   is_named_entity           = abap_false
+                                   can_be_referenced_by_name = abap_false
+                         IMPORTING processed_id = id ).
+    g_last_used_id = id.
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_SOMIX_DATA IMPLEMENTATION.
+  METHOD constructor.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'SOMIX.Data'.
+  ENDMETHOD.
+  METHOD get_id.
+    FIELD-SYMBOLS <data_id> LIKE LINE OF g_data_ids.
+
+    READ TABLE g_data_ids ASSIGNING <data_id> WITH TABLE KEY grouping_name_group = grouping_name_group grouping = grouping data_name_group = data_name_group data = data.
+    IF sy-subrc EQ 0. "OK
+      id = <data_id>-id.
+    ELSE.
+      id = 0.
+    ENDIF.
+  ENDMETHOD.
+  METHOD add.
+    FIELD-SYMBOLS <data_id> LIKE LINE OF g_data_ids.
+
+    READ TABLE g_data_ids ASSIGNING <data_id> WITH TABLE KEY grouping_name_group = grouping_name_group grouping = grouping data_name_group = data_name_group data = data.
+    IF sy-subrc EQ 0. "OK
+      id = <data_id>-id.
+
+    ELSE.
+
+      g_model->add_entity(
+                 EXPORTING elementname = g_elementname
+                           is_named_entity = abap_true
+                           can_be_referenced_by_name = abap_false
+                           name = data
+                 IMPORTING processed_id = id ).
+
+      g_model->add_string( EXPORTING element_id     = id
+                                     attribute_name = 'technicalType'
+                                     string         = technical_type ).
+
+    ENDIF.
+
+    ASSERT unique_name IS NOT INITIAL.
+    TRANSLATE unique_name TO LOWER CASE. " To be compatible with specification. Not case sensitive names are here in lower case.
+    g_model->add_string( EXPORTING element_id     = id
+                                   attribute_name = 'uniqueName'
+                                   string         = unique_name ).
+
+    IF link_to_editor IS NOT INITIAL.
+
+      g_model->add_string( EXPORTING element_id     = id
+                                     attribute_name = 'linkToEditor'
+                                     string         = link_to_editor ).
+    ENDIF.
+
+    DATA ls_data_id LIKE LINE OF g_data_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_data_id.
+    ls_data_id-id = id.
+    ls_data_id-grouping_name_group = grouping_name_group.
+    ls_data_id-grouping = grouping.
+    ls_data_id-data_name_group = data_name_group.
+    ls_data_id-data = data.
+    INSERT ls_data_id INTO TABLE g_data_ids.
+    g_last_used_id = id.
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_SOMIX_ELEMENT IMPLEMENTATION.
+ENDCLASS.
+CLASS CL_SOMIX_ENTITY IMPLEMENTATION.
+  METHOD constructor.
+    g_model = model.
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_SOMIX_EXTRACTION IMPLEMENTATION.
+ENDCLASS.
+CLASS CL_SOMIX_GROUPING IMPLEMENTATION.
+  METHOD constructor.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'SOMIX.Grouping'.
+  ENDMETHOD.
+  METHOD get_id.
+    FIELD-SYMBOLS <grouping_id> LIKE LINE OF g_grouping_ids.
+
+    READ TABLE g_grouping_ids ASSIGNING <grouping_id> WITH TABLE KEY grouping_name_group = grouping_name_group
+                                                                     grouping = grouping.
+    IF sy-subrc EQ 0. "OK
+      id = <grouping_id>-id.
+    ELSE.
+      id = 0.
+    ENDIF.
+  ENDMETHOD.
+  METHOD add.
+    FIELD-SYMBOLS <grouping_id> LIKE LINE OF g_grouping_ids.
+
+    READ TABLE g_grouping_ids ASSIGNING <grouping_id> WITH TABLE KEY grouping_name_group = grouping_name_group
+                                                                     grouping = grouping.
+    IF sy-subrc EQ 0. "OK
+      id = <grouping_id>-id.
+    ELSE.
+      g_model->add_entity( EXPORTING elementname = g_elementname
+                                          is_named_entity = abap_true
+                                          can_be_referenced_by_name = abap_true
+                                          name_group = grouping_name_group
+                                          name = grouping
+                                IMPORTING exists_already_with_id = exists_already_with_id
+                                          processed_id = id ).
+
+    ENDIF.
+
+    ASSERT unique_name IS NOT INITIAL.
+    TRANSLATE unique_name TO LOWER CASE. " To be compatible with specification. Not case sensitive names are here in lower case.
+    g_model->add_string( EXPORTING element_id     = id
+                                   attribute_name = 'uniqueName'
+                                   string         = unique_name ).
+
+    IF technical_type IS NOT INITIAL.
+
+      g_model->add_string( EXPORTING element_id     = id
+                                     attribute_name = 'technicalType'
+                                     string         = technical_type ).
+
+    ENDIF.
+
+    IF link_to_editor IS NOT INITIAL.
+
+      g_model->add_string( EXPORTING element_id     = id
+                                     attribute_name = 'linkToEditor'
+                                     string         = link_to_editor ).
+    ENDIF.
+
+    DATA ls_grouping_id LIKE LINE OF g_grouping_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_grouping_id.
+    ls_grouping_id-id                  = id.
+    ls_grouping_id-grouping_name_group = grouping_name_group.
+    ls_grouping_id-grouping            = grouping.
+    INSERT ls_grouping_id INTO TABLE g_grouping_ids.
+
+    g_last_used_id = id.
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_SOMIX_PARENTCHILD IMPLEMENTATION.
+  METHOD add.
+
+    DATA ls_parent_id LIKE LINE OF g_parent_child_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+
+    READ TABLE g_parent_child_ids INTO ls_parent_id WITH TABLE KEY parent_id = parent_id
+                                                                   child_id  = child_id.
+
+    IF sy-subrc EQ 0.
+      id = ls_parent_id-element_id.
+    ELSE.
+
+      g_model->add_entity( EXPORTING elementname               = g_elementname
+                                     is_named_entity           = abap_false
+                                     can_be_referenced_by_name = abap_false
+                           IMPORTING processed_id = id ).
+      g_model->add_reference_by_id( EXPORTING element_id = id
+                                              attribute_name = 'parent'
+                                              reference_id   = parent_id ).
+      g_model->add_reference_by_id( EXPORTING element_id = id
+                                              attribute_name = 'child'
+                                              reference_id   = child_id ).
+
+      IF is_main EQ 'X'.
+        g_model->add_boolean( EXPORTING element_id         = id
+                                        attribute_name     = 'isMain'
+                                        is_true            = 'X' ).
+      ENDIF.
+
+      CLEAR ls_parent_id.
+      ls_parent_id-parent_id = parent_id.
+      ls_parent_id-child_id = child_id.
+      ls_parent_id-element_id = id.
+      INSERT ls_parent_id INTO TABLE g_parent_child_ids.
+    ENDIF.
+    g_last_used_id = id.
+  ENDMETHOD.
+  METHOD constructor.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'SOMIX.ParentChild'.
   ENDMETHOD.
 ENDCLASS.
 
@@ -6666,9 +7811,10 @@ START-OF-SELECTION.
   DATA element_manager TYPE REF TO cl_extr3_element_manager.
   CREATE OBJECT element_manager
     EXPORTING
-      i_model_builder          = model_builder
-      i_exclude_found_sap_intf = p_ex
-      i_interface_use_structure = p_intrev.
+      i_model_builder           = model_builder
+      i_exclude_found_sap_intf  = p_ex
+      i_interface_use_structure = p_intrev
+      i_use_somix               = p_somix.
 
   model_builder->initialize( i_element_manager = element_manager
                               i_dynamic_read = p_dyn ).

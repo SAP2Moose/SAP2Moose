@@ -8,10 +8,18 @@ Legend
 + : added
 - : removed
 
+02.01.2022 v1.3
+-----------------
++ Add classes for the Software Metamodel restricted to key aspects (SOMIX)
++ Add report documentation #126
++ Search for all elements of a class #122
+* Downsearch fails when initially found element is also found in upsearch #128
+
 30.08.2019 v1.2.2
 -----------------
 * Source Language not exported (isSmalltalk was sent to nil in new Moose) #110
   The source language is now set to SAP (Not ABAP because SAP2Moose extract not only ABAP logic)
+  
 04.01.2019 v1.2.1
 -----------------
 * Dump because class component of type type was processed #114
