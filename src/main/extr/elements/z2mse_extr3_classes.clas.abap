@@ -683,7 +683,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                         data_name_group = ng_abap_attribute ##TODO " Improve coding generally. Without grouping name the data name is not uniquw
                                                         data = element_comp-cmpname
                                                         technical_type = z2mse_extract3=>techtype_abapclassattribute
-                                                        link_to_editor  = element-adt_link
+                                                        link_to_editor  = element_comp-adt_link
                                               IMPORTING id = last_id
                                               CHANGING  unique_name         = unique_name ).
 
@@ -744,7 +744,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                         code_name_group     = z2mse_extr3=>ng_abap_method
                                                         code                = element_comp-cmpname
                                                         technical_type      = z2mse_extract3=>techtype_abapmethod
-                                                        link_to_editor      = element-adt_link
+                                                        link_to_editor      = element_comp-adt_link
                                               IMPORTING id                  = last_id
                                               CHANGING  unique_name         = unique_name ).
 
