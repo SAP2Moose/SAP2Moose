@@ -8,6 +8,10 @@ Legend
 + : added
 - : removed
 
+22.05.2022 v1.3.1
+-----------------
+* Fix missing links to code for Code and Data
+
 02.01.2022 v1.3
 -----------------
 + Add classes for the Software Metamodel restricted to key aspects (SOMIX)

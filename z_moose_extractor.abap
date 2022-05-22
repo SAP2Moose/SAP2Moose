@@ -1,7 +1,7 @@
-* generated on system T80 at 02.01.2022 on 09:38:05
+* generated on system T80 at 22.05.2022 on 11:10:51
 
 *
-* This is version 1.3
+* This is version 1.3.1
 *
 *The MIT License (MIT)
 *
@@ -1585,6 +1585,40 @@ endif.
   endmethod.
 ENDCLASS.
 
+" Obsolete:
+
+
+
+CLASS cl_famix_module DEFINITION INHERITING FROM cl_famix_named_entity
+  CREATE PUBLIC.
+
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING model TYPE REF TO cl_model.
+
+    METHODS add REDEFINITION.
+
+protected section.
+private section.
+ENDCLASS.
+CLASS CL_FAMIX_MODULE IMPLEMENTATION.
+  METHOD add.
+    g_model->add_entity( EXPORTING elementname = g_elementname
+                                        is_named_entity = abap_true
+                                        can_be_referenced_by_name = abap_true
+                                        name = name
+                                        name_group = name_group
+                              IMPORTING exists_already_with_id = exists_already_with_id
+                                        processed_id = id ).
+    g_last_used_id = id.
+  ENDMETHOD.
+  METHOD constructor.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'FAMIX.Module'.
+  ENDMETHOD.
+ENDCLASS.
+
+******************************************** End Include Z_FAMIX_ABAP *****************************
+
 class CL_SOMIX_ENTITY definition
   abstract
   create public .
@@ -1599,29 +1633,6 @@ protected section.
   data G_MODEL type ref to CL_MODEL .
   data G_ELEMENTNAME type STRING .
   data G_LAST_USED_ID type I .
-private section.
-ENDCLASS.
-CLASS cl_somix_element DEFINITION
-  INHERITING FROM cl_somix_entity
-  ABSTRACT
-  CREATE PUBLIC .
-
-  PUBLIC SECTION.
-
-  PROTECTED SECTION.
-
-  PRIVATE SECTION.
-ENDCLASS.
-class CL_SOMIX_COMPONENT definition
-  inheriting from CL_SOMIX_ELEMENT
-  abstract
-  create public .
-
-public section.
-protected section.
-
-  data IS_PART_OF type ref to CL_SOMIX_COMPONENT .
-  data PART_SPECIFICATION type STRING .
 private section.
 ENDCLASS.
 CLASS cl_somix_coupling DEFINITION
@@ -1679,6 +1690,29 @@ CLASS cl_somix_call DEFINITION
            END OF ty_caller_called.
 
     DATA g_caller_called_ids TYPE HASHED TABLE OF ty_caller_called WITH UNIQUE KEY caller_id called_id.
+ENDCLASS.
+CLASS cl_somix_element DEFINITION
+  INHERITING FROM cl_somix_entity
+  ABSTRACT
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+  PROTECTED SECTION.
+
+  PRIVATE SECTION.
+ENDCLASS.
+class CL_SOMIX_COMPONENT definition
+  inheriting from CL_SOMIX_ELEMENT
+  abstract
+  create public .
+
+public section.
+protected section.
+
+  data IS_PART_OF type ref to CL_SOMIX_COMPONENT .
+  data PART_SPECIFICATION type STRING .
+private section.
 ENDCLASS.
 CLASS cl_somix_code DEFINITION
   INHERITING FROM cl_somix_component
@@ -1827,6 +1861,7 @@ CLASS cl_somix_grouping DEFINITION
            END OF ty_grouping_id.
     DATA: g_grouping_ids TYPE HASHED TABLE OF ty_grouping_id WITH UNIQUE KEY grouping_name_group grouping.
 ENDCLASS.
+
 CLASS cl_somix_parentchild DEFINITION
   INHERITING FROM cl_somix_entity
   FINAL
@@ -1852,39 +1887,321 @@ CLASS cl_somix_parentchild DEFINITION
     DATA: g_parent_child_ids TYPE HASHED TABLE OF ty_parent_child_id WITH UNIQUE KEY parent_id child_id.
 ENDCLASS.
 
-" Obsolete:
+CLASS CL_SOMIX_ACCESS IMPLEMENTATION.
+  METHOD constructor.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'SOMIX.Access'.
+  ENDMETHOD.
+  METHOD set_accessor_accessed_relation.
 
+    DATA ls_accessor_id LIKE LINE OF g_accessor_accessed_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_accessor_id.
+    ls_accessor_id-accessor_id = accessor_id.
+    ls_accessor_id-accessed_id = accessed_id.
+    INSERT ls_accessor_id INTO TABLE g_accessor_accessed_ids.
+    g_model->add_reference_by_id( EXPORTING element_id = element_id
+                                            attribute_name = 'accessor'
+                                            reference_id   = accessor_id ).
+    g_model->add_reference_by_id( EXPORTING element_id = element_id
+                                            attribute_name = 'accessed'
+                                            reference_id   = accessed_id ).
+    IF is_write EQ 'X'.
+      g_model->add_boolean( EXPORTING element_id         = element_id
+                                      attribute_name     = 'isWrite'
+                                      is_true            = 'X' ).
+    ENDIF.
+    IF is_read EQ 'X'.
+      g_model->add_boolean( EXPORTING element_id         = element_id
+                                      attribute_name     = 'isRead'
+                                      is_true            = 'X' ). " SAP2Moose cannot differenciate currently, between read, write, and dependency. So set here always.
+    ENDIF.
+    IF is_dependent EQ 'X'.
+      g_model->add_boolean( EXPORTING element_id         = element_id
+                                      attribute_name     = 'isDependent'
+                                      is_true            = 'X' ). " SAP2Moose cannot differenciate currently, between read, write, and dependency. So set here always.
 
-
-CLASS cl_famix_module DEFINITION INHERITING FROM cl_famix_named_entity
-  CREATE PUBLIC.
-
-  PUBLIC SECTION.
-    METHODS constructor IMPORTING model TYPE REF TO cl_model.
-
-    METHODS add REDEFINITION.
-
-protected section.
-private section.
+    ENDIF.
+  ENDMETHOD.
 ENDCLASS.
-CLASS CL_FAMIX_MODULE IMPLEMENTATION.
+CLASS CL_SOMIX_CALL IMPLEMENTATION.
+  METHOD constructor.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'SOMIX.Call'.
+  ENDMETHOD.
+  METHOD set_caller_called_relation.
+
+    DATA ls_caller_called_id LIKE LINE OF g_caller_called_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_caller_called_id.
+    ls_caller_called_id-caller_id = caller_id.
+    ls_caller_called_id-called_id = called_id.
+    INSERT ls_caller_called_id INTO TABLE g_caller_called_ids.
+    g_model->add_reference_by_id( EXPORTING element_id = element_id
+                                            attribute_name = 'caller'
+                                            reference_id   = caller_id ).
+    g_model->add_reference_by_id( EXPORTING element_id = element_id
+                                            attribute_name = 'called'
+                                            reference_id   = called_id ).
+
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_SOMIX_CODE IMPLEMENTATION.
+  METHOD constructor.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'SOMIX.Code'.
+  ENDMETHOD.
+  METHOD get_id.
+    FIELD-SYMBOLS <code_id> LIKE LINE OF g_code_ids.
+
+    READ TABLE g_code_ids ASSIGNING <code_id> WITH TABLE KEY grouping_name_group = grouping_name_group
+                                                             grouping = grouping
+                                                             code_name_group = code_name_group
+                                                             code = code.
+    IF sy-subrc EQ 0. "OK
+      id = <code_id>-id.
+    ELSE.
+      id = 0.
+    ENDIF.
+  ENDMETHOD.
   METHOD add.
-    g_model->add_entity( EXPORTING elementname = g_elementname
-                                        is_named_entity = abap_true
-                                        can_be_referenced_by_name = abap_true
-                                        name = name
-                                        name_group = name_group
-                              IMPORTING exists_already_with_id = exists_already_with_id
-                                        processed_id = id ).
+    FIELD-SYMBOLS <code_id> LIKE LINE OF g_code_ids.
+
+    READ TABLE g_code_ids ASSIGNING <code_id> WITH TABLE KEY grouping_name_group = grouping_name_group
+                                                             grouping = grouping
+                                                             code_name_group = code_name_group
+                                                             code = code.
+
+    IF sy-subrc EQ 0.
+
+      id = <code_id>-id.
+
+    ELSE.
+
+      g_model->add_entity(
+                 EXPORTING elementname = g_elementname
+                           is_named_entity = abap_true
+                           can_be_referenced_by_name = abap_false
+                           name = code
+                 IMPORTING processed_id = id ).
+
+      g_model->add_string( EXPORTING element_id     = id
+                                     attribute_name = 'technicalType'
+                                     string         = technical_type ).
+
+    ENDIF.
+
+    ASSERT unique_name IS NOT INITIAL.
+    TRANSLATE unique_name TO LOWER CASE. " To be compatible with specification. Not case sensitive names are here in lower case.
+    g_model->add_string( EXPORTING element_id     = id
+                                   attribute_name = 'uniqueName'
+                                   string         = unique_name ).
+
+    IF link_to_editor IS NOT INITIAL.
+
+      g_model->add_string( EXPORTING element_id     = id
+                                     attribute_name = 'linkToEditor'
+                                     string         = link_to_editor ).
+    ENDIF.
+
+    DATA ls_code_id LIKE LINE OF g_code_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_code_id.
+    ls_code_id-id = id.
+    ls_code_id-grouping_name_group = grouping_name_group.
+    ls_code_id-grouping            = grouping.
+    ls_code_id-code_name_group     = code_name_group.
+    ls_code_id-code                = code.
+    INSERT ls_code_id INTO TABLE g_code_ids.
+    g_last_used_id = id.
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_SOMIX_COMPONENT IMPLEMENTATION.
+ENDCLASS.
+CLASS CL_SOMIX_COUPLING IMPLEMENTATION.
+  METHOD add.
+    g_model->add_entity( EXPORTING elementname               = g_elementname
+                                   is_named_entity           = abap_false
+                                   can_be_referenced_by_name = abap_false
+                         IMPORTING processed_id = id ).
+    g_last_used_id = id.
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_SOMIX_DATA IMPLEMENTATION.
+  METHOD constructor.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'SOMIX.Data'.
+  ENDMETHOD.
+  METHOD get_id.
+    FIELD-SYMBOLS <data_id> LIKE LINE OF g_data_ids.
+
+    READ TABLE g_data_ids ASSIGNING <data_id> WITH TABLE KEY grouping_name_group = grouping_name_group grouping = grouping data_name_group = data_name_group data = data.
+    IF sy-subrc EQ 0. "OK
+      id = <data_id>-id.
+    ELSE.
+      id = 0.
+    ENDIF.
+  ENDMETHOD.
+  METHOD add.
+    FIELD-SYMBOLS <data_id> LIKE LINE OF g_data_ids.
+
+    READ TABLE g_data_ids ASSIGNING <data_id> WITH TABLE KEY grouping_name_group = grouping_name_group grouping = grouping data_name_group = data_name_group data = data.
+    IF sy-subrc EQ 0. "OK
+      id = <data_id>-id.
+
+    ELSE.
+
+      g_model->add_entity(
+                 EXPORTING elementname = g_elementname
+                           is_named_entity = abap_true
+                           can_be_referenced_by_name = abap_false
+                           name = data
+                 IMPORTING processed_id = id ).
+
+      g_model->add_string( EXPORTING element_id     = id
+                                     attribute_name = 'technicalType'
+                                     string         = technical_type ).
+
+    ENDIF.
+
+    ASSERT unique_name IS NOT INITIAL.
+    TRANSLATE unique_name TO LOWER CASE. " To be compatible with specification. Not case sensitive names are here in lower case.
+    g_model->add_string( EXPORTING element_id     = id
+                                   attribute_name = 'uniqueName'
+                                   string         = unique_name ).
+
+    IF link_to_editor IS NOT INITIAL.
+
+      g_model->add_string( EXPORTING element_id     = id
+                                     attribute_name = 'linkToEditor'
+                                     string         = link_to_editor ).
+    ENDIF.
+
+    DATA ls_data_id LIKE LINE OF g_data_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_data_id.
+    ls_data_id-id = id.
+    ls_data_id-grouping_name_group = grouping_name_group.
+    ls_data_id-grouping = grouping.
+    ls_data_id-data_name_group = data_name_group.
+    ls_data_id-data = data.
+    INSERT ls_data_id INTO TABLE g_data_ids.
+    g_last_used_id = id.
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_SOMIX_ELEMENT IMPLEMENTATION.
+ENDCLASS.
+CLASS CL_SOMIX_ENTITY IMPLEMENTATION.
+  METHOD constructor.
+    g_model = model.
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_SOMIX_EXTRACTION IMPLEMENTATION.
+ENDCLASS.
+CLASS CL_SOMIX_GROUPING IMPLEMENTATION.
+  METHOD constructor.
+    CALL METHOD super->constructor( model ).
+    g_elementname = 'SOMIX.Grouping'.
+  ENDMETHOD.
+  METHOD get_id.
+    FIELD-SYMBOLS <grouping_id> LIKE LINE OF g_grouping_ids.
+
+    READ TABLE g_grouping_ids ASSIGNING <grouping_id> WITH TABLE KEY grouping_name_group = grouping_name_group
+                                                                     grouping = grouping.
+    IF sy-subrc EQ 0. "OK
+      id = <grouping_id>-id.
+    ELSE.
+      id = 0.
+    ENDIF.
+  ENDMETHOD.
+  METHOD add.
+    FIELD-SYMBOLS <grouping_id> LIKE LINE OF g_grouping_ids.
+
+    READ TABLE g_grouping_ids ASSIGNING <grouping_id> WITH TABLE KEY grouping_name_group = grouping_name_group
+                                                                     grouping = grouping.
+    IF sy-subrc EQ 0. "OK
+      id = <grouping_id>-id.
+    ELSE.
+      g_model->add_entity( EXPORTING elementname = g_elementname
+                                          is_named_entity = abap_true
+                                          can_be_referenced_by_name = abap_true
+                                          name_group = grouping_name_group
+                                          name = grouping
+                                IMPORTING exists_already_with_id = exists_already_with_id
+                                          processed_id = id ).
+
+    ENDIF.
+
+    ASSERT unique_name IS NOT INITIAL.
+    TRANSLATE unique_name TO LOWER CASE. " To be compatible with specification. Not case sensitive names are here in lower case.
+    g_model->add_string( EXPORTING element_id     = id
+                                   attribute_name = 'uniqueName'
+                                   string         = unique_name ).
+
+    IF technical_type IS NOT INITIAL.
+
+      g_model->add_string( EXPORTING element_id     = id
+                                     attribute_name = 'technicalType'
+                                     string         = technical_type ).
+
+    ENDIF.
+
+    IF link_to_editor IS NOT INITIAL.
+
+      g_model->add_string( EXPORTING element_id     = id
+                                     attribute_name = 'linkToEditor'
+                                     string         = link_to_editor ).
+    ENDIF.
+
+    DATA ls_grouping_id LIKE LINE OF g_grouping_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+    CLEAR ls_grouping_id.
+    ls_grouping_id-id                  = id.
+    ls_grouping_id-grouping_name_group = grouping_name_group.
+    ls_grouping_id-grouping            = grouping.
+    INSERT ls_grouping_id INTO TABLE g_grouping_ids.
+
+    g_last_used_id = id.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS CL_SOMIX_PARENTCHILD IMPLEMENTATION.
+  METHOD add.
+
+    DATA ls_parent_id LIKE LINE OF g_parent_child_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
+
+    READ TABLE g_parent_child_ids INTO ls_parent_id WITH TABLE KEY parent_id = parent_id
+                                                                   child_id  = child_id.
+
+    IF sy-subrc EQ 0.
+      id = ls_parent_id-element_id.
+    ELSE.
+
+      g_model->add_entity( EXPORTING elementname               = g_elementname
+                                     is_named_entity           = abap_false
+                                     can_be_referenced_by_name = abap_false
+                           IMPORTING processed_id = id ).
+      g_model->add_reference_by_id( EXPORTING element_id = id
+                                              attribute_name = 'parent'
+                                              reference_id   = parent_id ).
+      g_model->add_reference_by_id( EXPORTING element_id = id
+                                              attribute_name = 'child'
+                                              reference_id   = child_id ).
+
+      IF is_main EQ 'X'.
+        g_model->add_boolean( EXPORTING element_id         = id
+                                        attribute_name     = 'isMain'
+                                        is_true            = 'X' ).
+      ENDIF.
+
+      CLEAR ls_parent_id.
+      ls_parent_id-parent_id = parent_id.
+      ls_parent_id-child_id = child_id.
+      ls_parent_id-element_id = id.
+      INSERT ls_parent_id INTO TABLE g_parent_child_ids.
+    ENDIF.
     g_last_used_id = id.
   ENDMETHOD.
   METHOD constructor.
     CALL METHOD super->constructor( model ).
-    g_elementname = 'FAMIX.Module'.
+    g_elementname = 'SOMIX.ParentChild'.
   ENDMETHOD.
 ENDCLASS.
-
-******************************************** End Include Z_FAMIX_ABAP *****************************
 
 CLASS CL_EXTR3_ACCESS_OR_INVOCATN DEFINITION DEFERRED.
 CLASS CL_EXTR3_ASSOCIATION DEFINITION DEFERRED.
@@ -2896,6 +3213,8 @@ public section.
     CLASS-DATA: g_check_for_test_done TYPE abap_bool,
                 g_is_tested           TYPE abap_bool.
 ENDCLASS.
+
+
 
 
 
@@ -4888,7 +5207,7 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
                                                         data_name_group = ng_abap_attribute ##TODO " Improve coding generally. Without grouping name the data name is not uniquw
                                                         data = element_comp-cmpname
                                                         technical_type = cl_extract3=>techtype_abapclassattribute
-                                                        link_to_editor  = element-adt_link
+                                                        link_to_editor  = element_comp-adt_link
                                               IMPORTING id = last_id
                                               CHANGING  unique_name         = unique_name ).
 
@@ -4949,7 +5268,7 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
                                                         code_name_group     = cl_extr3=>ng_abap_method
                                                         code                = element_comp-cmpname
                                                         technical_type      = cl_extract3=>techtype_abapmethod
-                                                        link_to_editor      = element-adt_link
+                                                        link_to_editor      = element_comp-adt_link
                                               IMPORTING id                  = last_id
                                               CHANGING  unique_name         = unique_name ).
 
@@ -7446,320 +7765,8 @@ CLASS CL_EXTRACT3 IMPLEMENTATION.
 
   ENDMETHOD.
 ENDCLASS.
-CLASS CL_SOMIX_ACCESS IMPLEMENTATION.
-  METHOD constructor.
-    CALL METHOD super->constructor( model ).
-    g_elementname = 'SOMIX.Access'.
-  ENDMETHOD.
-  METHOD set_accessor_accessed_relation.
 
-    DATA ls_accessor_id LIKE LINE OF g_accessor_accessed_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-    CLEAR ls_accessor_id.
-    ls_accessor_id-accessor_id = accessor_id.
-    ls_accessor_id-accessed_id = accessed_id.
-    INSERT ls_accessor_id INTO TABLE g_accessor_accessed_ids.
-    g_model->add_reference_by_id( EXPORTING element_id = element_id
-                                            attribute_name = 'accessor'
-                                            reference_id   = accessor_id ).
-    g_model->add_reference_by_id( EXPORTING element_id = element_id
-                                            attribute_name = 'accessed'
-                                            reference_id   = accessed_id ).
-    IF is_write EQ 'X'.
-      g_model->add_boolean( EXPORTING element_id         = element_id
-                                      attribute_name     = 'isWrite'
-                                      is_true            = 'X' ).
-    ENDIF.
-    IF is_read EQ 'X'.
-      g_model->add_boolean( EXPORTING element_id         = element_id
-                                      attribute_name     = 'isRead'
-                                      is_true            = 'X' ). " SAP2Moose cannot differenciate currently, between read, write, and dependency. So set here always.
-    ENDIF.
-    IF is_dependent EQ 'X'.
-      g_model->add_boolean( EXPORTING element_id         = element_id
-                                      attribute_name     = 'isDependent'
-                                      is_true            = 'X' ). " SAP2Moose cannot differenciate currently, between read, write, and dependency. So set here always.
 
-    ENDIF.
-  ENDMETHOD.
-ENDCLASS.
-CLASS CL_SOMIX_CALL IMPLEMENTATION.
-  METHOD constructor.
-    CALL METHOD super->constructor( model ).
-    g_elementname = 'SOMIX.Call'.
-  ENDMETHOD.
-  METHOD set_caller_called_relation.
-
-    DATA ls_caller_called_id LIKE LINE OF g_caller_called_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-    CLEAR ls_caller_called_id.
-    ls_caller_called_id-caller_id = caller_id.
-    ls_caller_called_id-called_id = called_id.
-    INSERT ls_caller_called_id INTO TABLE g_caller_called_ids.
-    g_model->add_reference_by_id( EXPORTING element_id = element_id
-                                            attribute_name = 'caller'
-                                            reference_id   = caller_id ).
-    g_model->add_reference_by_id( EXPORTING element_id = element_id
-                                            attribute_name = 'called'
-                                            reference_id   = called_id ).
-
-  ENDMETHOD.
-ENDCLASS.
-CLASS CL_SOMIX_CODE IMPLEMENTATION.
-  METHOD constructor.
-    CALL METHOD super->constructor( model ).
-    g_elementname = 'SOMIX.Code'.
-  ENDMETHOD.
-  METHOD get_id.
-    FIELD-SYMBOLS <code_id> LIKE LINE OF g_code_ids.
-
-    READ TABLE g_code_ids ASSIGNING <code_id> WITH TABLE KEY grouping_name_group = grouping_name_group
-                                                             grouping = grouping
-                                                             code_name_group = code_name_group
-                                                             code = code.
-    IF sy-subrc EQ 0. "OK
-      id = <code_id>-id.
-    ELSE.
-      id = 0.
-    ENDIF.
-  ENDMETHOD.
-  METHOD add.
-    FIELD-SYMBOLS <code_id> LIKE LINE OF g_code_ids.
-
-    READ TABLE g_code_ids ASSIGNING <code_id> WITH TABLE KEY grouping_name_group = grouping_name_group
-                                                             grouping = grouping
-                                                             code_name_group = code_name_group
-                                                             code = code.
-
-    IF sy-subrc EQ 0.
-
-      id = <code_id>-id.
-
-    ELSE.
-
-      g_model->add_entity(
-                 EXPORTING elementname = g_elementname
-                           is_named_entity = abap_true
-                           can_be_referenced_by_name = abap_false
-                           name = code
-                 IMPORTING processed_id = id ).
-
-      g_model->add_string( EXPORTING element_id     = id
-                                     attribute_name = 'technicalType'
-                                     string         = technical_type ).
-
-    ENDIF.
-
-    ASSERT unique_name IS NOT INITIAL.
-    TRANSLATE unique_name TO LOWER CASE. " To be compatible with specification. Not case sensitive names are here in lower case.
-    g_model->add_string( EXPORTING element_id     = id
-                                   attribute_name = 'uniqueName'
-                                   string         = unique_name ).
-
-    IF link_to_editor IS NOT INITIAL.
-
-      g_model->add_string( EXPORTING element_id     = id
-                                     attribute_name = 'linkToEditor'
-                                     string         = link_to_editor ).
-    ENDIF.
-
-    DATA ls_code_id LIKE LINE OF g_code_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-    CLEAR ls_code_id.
-    ls_code_id-id = id.
-    ls_code_id-grouping_name_group = grouping_name_group.
-    ls_code_id-grouping            = grouping.
-    ls_code_id-code_name_group     = code_name_group.
-    ls_code_id-code                = code.
-    INSERT ls_code_id INTO TABLE g_code_ids.
-    g_last_used_id = id.
-  ENDMETHOD.
-ENDCLASS.
-CLASS CL_SOMIX_COMPONENT IMPLEMENTATION.
-ENDCLASS.
-CLASS CL_SOMIX_COUPLING IMPLEMENTATION.
-  METHOD add.
-    g_model->add_entity( EXPORTING elementname               = g_elementname
-                                   is_named_entity           = abap_false
-                                   can_be_referenced_by_name = abap_false
-                         IMPORTING processed_id = id ).
-    g_last_used_id = id.
-  ENDMETHOD.
-ENDCLASS.
-CLASS CL_SOMIX_DATA IMPLEMENTATION.
-  METHOD constructor.
-    CALL METHOD super->constructor( model ).
-    g_elementname = 'SOMIX.Data'.
-  ENDMETHOD.
-  METHOD get_id.
-    FIELD-SYMBOLS <data_id> LIKE LINE OF g_data_ids.
-
-    READ TABLE g_data_ids ASSIGNING <data_id> WITH TABLE KEY grouping_name_group = grouping_name_group grouping = grouping data_name_group = data_name_group data = data.
-    IF sy-subrc EQ 0. "OK
-      id = <data_id>-id.
-    ELSE.
-      id = 0.
-    ENDIF.
-  ENDMETHOD.
-  METHOD add.
-    FIELD-SYMBOLS <data_id> LIKE LINE OF g_data_ids.
-
-    READ TABLE g_data_ids ASSIGNING <data_id> WITH TABLE KEY grouping_name_group = grouping_name_group grouping = grouping data_name_group = data_name_group data = data.
-    IF sy-subrc EQ 0. "OK
-      id = <data_id>-id.
-
-    ELSE.
-
-      g_model->add_entity(
-                 EXPORTING elementname = g_elementname
-                           is_named_entity = abap_true
-                           can_be_referenced_by_name = abap_false
-                           name = data
-                 IMPORTING processed_id = id ).
-
-      g_model->add_string( EXPORTING element_id     = id
-                                     attribute_name = 'technicalType'
-                                     string         = technical_type ).
-
-    ENDIF.
-
-    ASSERT unique_name IS NOT INITIAL.
-    TRANSLATE unique_name TO LOWER CASE. " To be compatible with specification. Not case sensitive names are here in lower case.
-    g_model->add_string( EXPORTING element_id     = id
-                                   attribute_name = 'uniqueName'
-                                   string         = unique_name ).
-
-    IF link_to_editor IS NOT INITIAL.
-
-      g_model->add_string( EXPORTING element_id     = id
-                                     attribute_name = 'linkToEditor'
-                                     string         = link_to_editor ).
-    ENDIF.
-
-    DATA ls_data_id LIKE LINE OF g_data_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-    CLEAR ls_data_id.
-    ls_data_id-id = id.
-    ls_data_id-grouping_name_group = grouping_name_group.
-    ls_data_id-grouping = grouping.
-    ls_data_id-data_name_group = data_name_group.
-    ls_data_id-data = data.
-    INSERT ls_data_id INTO TABLE g_data_ids.
-    g_last_used_id = id.
-  ENDMETHOD.
-ENDCLASS.
-CLASS CL_SOMIX_ELEMENT IMPLEMENTATION.
-ENDCLASS.
-CLASS CL_SOMIX_ENTITY IMPLEMENTATION.
-  METHOD constructor.
-    g_model = model.
-  ENDMETHOD.
-ENDCLASS.
-CLASS CL_SOMIX_EXTRACTION IMPLEMENTATION.
-ENDCLASS.
-CLASS CL_SOMIX_GROUPING IMPLEMENTATION.
-  METHOD constructor.
-    CALL METHOD super->constructor( model ).
-    g_elementname = 'SOMIX.Grouping'.
-  ENDMETHOD.
-  METHOD get_id.
-    FIELD-SYMBOLS <grouping_id> LIKE LINE OF g_grouping_ids.
-
-    READ TABLE g_grouping_ids ASSIGNING <grouping_id> WITH TABLE KEY grouping_name_group = grouping_name_group
-                                                                     grouping = grouping.
-    IF sy-subrc EQ 0. "OK
-      id = <grouping_id>-id.
-    ELSE.
-      id = 0.
-    ENDIF.
-  ENDMETHOD.
-  METHOD add.
-    FIELD-SYMBOLS <grouping_id> LIKE LINE OF g_grouping_ids.
-
-    READ TABLE g_grouping_ids ASSIGNING <grouping_id> WITH TABLE KEY grouping_name_group = grouping_name_group
-                                                                     grouping = grouping.
-    IF sy-subrc EQ 0. "OK
-      id = <grouping_id>-id.
-    ELSE.
-      g_model->add_entity( EXPORTING elementname = g_elementname
-                                          is_named_entity = abap_true
-                                          can_be_referenced_by_name = abap_true
-                                          name_group = grouping_name_group
-                                          name = grouping
-                                IMPORTING exists_already_with_id = exists_already_with_id
-                                          processed_id = id ).
-
-    ENDIF.
-
-    ASSERT unique_name IS NOT INITIAL.
-    TRANSLATE unique_name TO LOWER CASE. " To be compatible with specification. Not case sensitive names are here in lower case.
-    g_model->add_string( EXPORTING element_id     = id
-                                   attribute_name = 'uniqueName'
-                                   string         = unique_name ).
-
-    IF technical_type IS NOT INITIAL.
-
-      g_model->add_string( EXPORTING element_id     = id
-                                     attribute_name = 'technicalType'
-                                     string         = technical_type ).
-
-    ENDIF.
-
-    IF link_to_editor IS NOT INITIAL.
-
-      g_model->add_string( EXPORTING element_id     = id
-                                     attribute_name = 'linkToEditor'
-                                     string         = link_to_editor ).
-    ENDIF.
-
-    DATA ls_grouping_id LIKE LINE OF g_grouping_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-    CLEAR ls_grouping_id.
-    ls_grouping_id-id                  = id.
-    ls_grouping_id-grouping_name_group = grouping_name_group.
-    ls_grouping_id-grouping            = grouping.
-    INSERT ls_grouping_id INTO TABLE g_grouping_ids.
-
-    g_last_used_id = id.
-  ENDMETHOD.
-ENDCLASS.
-CLASS CL_SOMIX_PARENTCHILD IMPLEMENTATION.
-  METHOD add.
-
-    DATA ls_parent_id LIKE LINE OF g_parent_child_ids. " ABAP 7.31 use prefix ls_ to prevent shadowing after conversion
-
-    READ TABLE g_parent_child_ids INTO ls_parent_id WITH TABLE KEY parent_id = parent_id
-                                                                   child_id  = child_id.
-
-    IF sy-subrc EQ 0.
-      id = ls_parent_id-element_id.
-    ELSE.
-
-      g_model->add_entity( EXPORTING elementname               = g_elementname
-                                     is_named_entity           = abap_false
-                                     can_be_referenced_by_name = abap_false
-                           IMPORTING processed_id = id ).
-      g_model->add_reference_by_id( EXPORTING element_id = id
-                                              attribute_name = 'parent'
-                                              reference_id   = parent_id ).
-      g_model->add_reference_by_id( EXPORTING element_id = id
-                                              attribute_name = 'child'
-                                              reference_id   = child_id ).
-
-      IF is_main EQ 'X'.
-        g_model->add_boolean( EXPORTING element_id         = id
-                                        attribute_name     = 'isMain'
-                                        is_true            = 'X' ).
-      ENDIF.
-
-      CLEAR ls_parent_id.
-      ls_parent_id-parent_id = parent_id.
-      ls_parent_id-child_id = child_id.
-      ls_parent_id-element_id = id.
-      INSERT ls_parent_id INTO TABLE g_parent_child_ids.
-    ENDIF.
-    g_last_used_id = id.
-  ENDMETHOD.
-  METHOD constructor.
-    CALL METHOD super->constructor( model ).
-    g_elementname = 'SOMIX.ParentChild'.
-  ENDMETHOD.
-ENDCLASS.
 
 AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_eltyp.
   PERFORM fill_f4_eltyp.
