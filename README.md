@@ -10,7 +10,7 @@ You typically will run the program, select a package and download the file (pref
 
 # SAP2Moose
 
-This repository provides a program to extract model data from a SAP system to a SOMIX model. THe SOMIX model can be used in the new version of Moose2Model.
+This repository provides a program to extract model data from a SAP system to a SOMIX model. The SOMIX model can be used in the new version of Moose2Model.
 (An extraction to a FAMIX model is still possible but will soon not be supported anymore. To use the analysis platform Moose on Pharo Smalltalk it can still be used. You may also enhance Moose and load the SOMIX model to Moose.)
 
 This is not a tool made or owned by SAP.
