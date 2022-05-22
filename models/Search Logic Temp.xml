@@ -6,8 +6,8 @@
     <scope>method</scope>
     <element>
         <type>RWDiagramNoPackage</type>
-        <x>778.0</x>
-        <y>179.0</y>
+        <x>838.0</x>
+        <y>598.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -131,8 +131,8 @@
         <y>214.0</y>
         <comment><![CDATA[Improve, add also FUGR<br>to the elements that are handled]]>
         </comment>
-        <commentx>-1531.0</commentx>
-        <commenty>110.0</commenty>
+        <commentx>-1563.0</commentx>
+        <commenty>112.0</commenty>
         <ACTSuppressOthers>
             <type>ACDStandard</type>
             <includeMe>true</includeMe>
@@ -195,17 +195,17 @@
         </ACTSuppressOthers>
     </element>
     <element>
+        <type>FAMIXPackage</type>
+        <package>SWDP_DWB_WORKBENCH_TOOLS_MISC</package>
+        <x>138.0</x>
+        <y>36.0</y>
+    </element>
+    <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_WEB_DYNPRO_COMP</class>
         <method>ADD</method>
         <x>-753.0</x>
         <y>392.0</y>
-    </element>
-    <element>
-        <type>FAMIXPackage</type>
-        <package>SWDP_DWB_WORKBENCH_TOOLS_MISC</package>
-        <x>138.0</x>
-        <y>36.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -237,8 +237,8 @@
     <element>
         <type>FAMIXClass</type>
         <class>FGR-SGUI</class>
-        <x>1159.0</x>
-        <y>548.0</y>
+        <x>-1152.0</x>
+        <y>146.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -248,17 +248,17 @@
         <y>479.0</y>
     </element>
     <element>
+        <type>FAMIXPackage</type>
+        <package>Z2MSE_MAIN_EXTR_ELEMENTS</package>
+        <x>532.0</x>
+        <y>107.0</y>
+    </element>
+    <element>
         <type>FAMIXMethod</type>
         <class>Z2MSE_EXTR3_INVOCATION</class>
         <method>GET_INSTANCE</method>
         <x>-801.0</x>
         <y>516.0</y>
-    </element>
-    <element>
-        <type>FAMIXPackage</type>
-        <package>Z2MSE_MAIN_EXTR_ELEMENTS</package>
-        <x>532.0</x>
-        <y>107.0</y>
     </element>
     <element>
         <type>FAMIXAttribute</type>
@@ -658,15 +658,15 @@
         </ACTSuppressOthers>
     </element>
     <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_MAIN_TEST</class>
-        <method>_SEARCH_SPECIFIC</method>
-    </element>
-    <element>
         <type>FAMIXPackage</type>
         <package>SEOE</package>
         <x>446.0</x>
         <y>41.0</y>
+    </element>
+    <element>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_MAIN_TEST</class>
+        <method>_SEARCH_SPECIFIC</method>
     </element>
     <element>
         <type>FAMIXClass</type>
@@ -759,11 +759,10 @@
         <y>370.0</y>
     </element>
     <element>
-        <type>FAMIXMethod</type>
-        <class>Z2MSE_EXTR3_INVOCATION</class>
-        <method>ADD</method>
-        <x>-751.0</x>
-        <y>506.0</y>
+        <type>FAMIXPackage</type>
+        <package>Z2MSE_MAIN_EXTR</package>
+        <x>365.0</x>
+        <y>325.0</y>
     </element>
     <element>
         <type>FAMIXPackage</type>
@@ -772,16 +771,11 @@
         <y>327.0</y>
     </element>
     <element>
-        <type>FAMIXPackage</type>
-        <package>Z2MSE_MAIN_EXTR</package>
-        <x>365.0</x>
-        <y>325.0</y>
-    </element>
-    <element>
-        <type>FAMIXClass</type>
-        <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
-        <x>-992.0</x>
-        <y>-65.0</y>
+        <type>FAMIXMethod</type>
+        <class>Z2MSE_EXTR3_INVOCATION</class>
+        <method>ADD</method>
+        <x>-751.0</x>
+        <y>506.0</y>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -789,6 +783,12 @@
         <method>GET_INSTANCE</method>
         <x>-1312.0</x>
         <y>499.0</y>
+    </element>
+    <element>
+        <type>FAMIXClass</type>
+        <class>Z2MSE_EXTR3_MODEL_BUILDER</class>
+        <x>-992.0</x>
+        <y>-65.0</y>
     </element>
     <element>
         <type>FAMIXPackage</type>
@@ -828,6 +828,10 @@
         <class>Z2MSE_EXTR3_TADIR_BUILDER</class>
         <x>-1517.0</x>
         <y>201.0</y>
+        <comment><![CDATA[This is the class<br>Z2MSE_EXTR3_TADIR_BUILDER]]>
+        </comment>
+        <commentx>-1736.0</commentx>
+        <commenty>188.0</commenty>
     </element>
     <element>
         <type>FAMIXMethod</type>
@@ -948,8 +952,8 @@
         <type>FAMIXMethod</type>
         <class>FGR-SGUI</class>
         <method>F-SAPGUI_PROGRESS_INDICATOR</method>
-        <x>1159.0</x>
-        <y>538.0</y>
+        <x>-1151.0</x>
+        <y>135.0</y>
     </element>
     <element>
         <type>FAMIXClass</type>
