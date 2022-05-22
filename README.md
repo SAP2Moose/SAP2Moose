@@ -10,9 +10,8 @@ You typically will run the program, select a package and download the file (pref
 
 # SAP2Moose
 
-This repository provides a program to extract model data from a SAP system into the analysis platform Moose on Pharo Smalltalk. It uses FAMIX as a flexible enhancable meta model.
-
-It allows drawing diagrams that visualize SAP applications with Moose Analysis. It is currently used mainly to generate customizable Dependency Diagrams with the application RW-Moose-Diagram. But it is open to other usages.
+This repository provides a program to extract model data from a SAP system to a SOMIX model. THe SOMIX model can be used in the new version of Moose2Model.
+(An extraction to a FAMIX model is still possible but will soon not be supported anymore. To use the analysis platform Moose on Pharo Smalltalk it can still be used. You may also enhance Moose and load the SOMIX model to Moose.)
 
 This is not a tool made or owned by SAP.
 
