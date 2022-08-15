@@ -1,7 +1,7 @@
-* generated on system T80 at 22.05.2022 on 11:10:51
+* generated on system T80 at 15.08.2022 on 19:30:56
 
 *
-* This is version 1.3.1
+* This is version 1.3.2
 *
 *The MIT License (MIT)
 *
@@ -6057,6 +6057,9 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
     IF element_manager->use_somix EQ 'X'.
 
       unique_name = |sap.{ name_of_mapped_class }|.
+      IF techtype EQ 'ABAPFunktion'.
+        unique_name = |{ unique_name }.{ element-program_attribute_2 }|.
+      ENDIF.
 
       element_manager->somix_code->add( EXPORTING grouping_name_group = 'ABAP_PROGRAM' ##TODO " Analyze how to improve "name_group
                                                   grouping            = name_of_mapped_class
