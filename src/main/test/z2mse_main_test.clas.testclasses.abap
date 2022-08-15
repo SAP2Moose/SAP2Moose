@@ -108,11 +108,13 @@ CLASS ltcl_main IMPLEMENTATION.
 
   METHOD z2mse_test_2021.
 
-    " The SAP2Moose extractor does not analyze test methods.
-    " Performing the test in the normal methods add them to the extracted model data.
+   " This is currently not implemented
 
-    DATA(test) = NEW z2mse_main_test( ).
-    test->z2mse_test_2021( ).
+*    " The SAP2Moose extractor does not analyze test methods.
+*    " Performing the test in the normal methods add them to the extracted model data.
+*
+*    DATA(test) = NEW z2mse_main_test( ).
+*    test->z2mse_test_2021( ).
   ENDMETHOD.
 
 ENDCLASS.
@@ -197,11 +199,13 @@ CLASS ltcl_main_somix IMPLEMENTATION.
 
   METHOD z2mse_test_init_select_somix2.
 
-    " The SAP2Moose extractor does not analyze test methods.
-    " Performing the test in the normal methods add them to the extracted model data.
+    " This is currently not implemented
 
-    DATA(test) = NEW z2mse_main_test( ).
-    test->z2mse_test_initial_selection2( ).##TODO " Reimplement
+*    " The SAP2Moose extractor does not analyze test methods.
+*    " Performing the test in the normal methods add them to the extracted model data.
+*
+*    DATA(test) = NEW z2mse_main_test( ).
+*    test->z2mse_test_initial_selection2( ).##TODO " Reimplement
 
   ENDMETHOD.
 
@@ -227,11 +231,13 @@ CLASS ltcl_main_somix IMPLEMENTATION.
 
   METHOD z2mse_test_2021_somix.
 
-    " The SAP2Moose extractor does not analyze test methods.
-    " Performing the test in the normal methods add them to the extracted model data.
+   " This is currently not implemented
 
-    DATA(test) = NEW z2mse_main_test( ).
-    test->z2mse_test_2021( ).##TODO " Reimplement
+*    " The SAP2Moose extractor does not analyze test methods.
+*    " Performing the test in the normal methods add them to the extracted model data.
+*
+*    DATA(test) = NEW z2mse_main_test( ).
+*    test->z2mse_test_2021( ).##TODO " Reimplement
   ENDMETHOD.
 
 ENDCLASS.

@@ -13,6 +13,7 @@ CLASS ltcl_main DEFINITION FINAL FOR TESTING
       somix_2_harmonized FOR TESTING RAISING cx_static_check,
       somix_3_harmonized FOR TESTING RAISING cx_static_check,
       somix_4_harmonized FOR TESTING RAISING cx_static_check,
+      somix_5_function_call FOR TESTING RAISING cx_static_check,
       _make_list_of_element_nodes FOR TESTING RAISING cx_static_check,
       _add_element_node FOR TESTING RAISING cx_static_check,
       _extract_element_node FOR TESTING RAISING cx_static_check,
@@ -127,6 +128,51 @@ CLASS ltcl_main IMPLEMENTATION.
                                             ( |SOMIX.Code ABAPClassMethod.sap.class_1.meth1 name meth1| )
 *                                            ( |SOMIX.ParentChild parent ABAPClass.sap.class_1 child ABAPClassMethod.sap.class_1.meth1| )
                                             ( |SOMIX.ParentChild parent ABAPClass.sap.class_1 child ABAPClassMethod.sap.class_1.meth1 isMain| )
+                                           ).
+
+    equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( string_table = mse ).
+    z2mse_somix_harmonize=>equalize_harmonized( CHANGING harmonized_mse = equalized_harmonized_mse_exp ).
+
+    cl_abap_unit_assert=>assert_equals( EXPORTING act = equalized_harmonized_mse_act
+                                                  exp = equalized_harmonized_mse_exp
+                                                  msg = 'Harmonize simple Package specification correctly' ).
+
+
+  ENDMETHOD.
+
+  METHOD somix_5_function_call.
+
+    DATA: mse                          TYPE z2mse_somix_harmonize=>string_table,
+          equalized_harmonized_mse_act TYPE z2mse_somix_harmonize=>harmonized_mse,
+          equalized_harmonized_mse_exp TYPE z2mse_somix_harmonize=>harmonized_mse.
+
+    mse = VALUE #( ( |(| )
+                   ( |( SOMIX.Grouping (id: 1)| )
+                   ( |  (name 'Class_1')| )
+                   ( |  (uniqueName 'sap.class_1')| )
+                   ( |  (technicalType 'ABAPClass'))| )
+                   ( |( SOMIX.Code (id: 2)| )
+                   ( |  (name 'meth1')| )
+                   ( |  (uniqueName 'sap.class_1.meth1')| )
+                   ( |  (technicalType 'ABAPClassMethod'))| )
+                   ( |  (SOMIX.Code (id: 3 )| )
+                   ( |  (name 'F-F1')| )
+                   ( |  (technicalType 'ABAPFunktion')| )
+                   ( |  (uniqueName 'sap.fgr-a.f-f1')| )
+                   ( |  )| )
+                   ( |(SOMIX.Call| )
+                   ( |  (caller (ref: 2))| )
+                   ( |  (called (ref: 3)))| )
+                   ( |)| )
+                  ).
+
+    equalized_harmonized_mse_exp = VALUE #(
+                                            ( |SOMIX.Call caller ABAPClassMethod.sap.class_1.meth1 called ABAPFunktion.sap.fgr-a.f-f1| )
+                                            ( |SOMIX.Grouping ABAPClass.sap.class_1 name Class_1| )
+                                            ( |SOMIX.Code ABAPClassMethod.sap.class_1.meth1 name meth1| )
+                                            ( |SOMIX.Code ABAPFunktion.sap.fgr-a.f-f1 name F-F1| )
+*                                            ( |SOMIX.ParentChild parent ABAPClass.sap.class_1 child ABAPClassMethod.sap.class_1.meth1| )
+*                                            ( |SOMIX.ParentChild parent ABAPClass.sap.class_1 child ABAPClassMethod.sap.class_1.meth1 isMain| )
                                            ).
 
     equalized_harmonized_mse_act = z2mse_somix_harmonize=>mse_2_harmonized( string_table = mse ).

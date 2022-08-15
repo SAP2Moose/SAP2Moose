@@ -1,5 +1,5 @@
 *
-* This is version 1.3.1
+* This is version 1.3.2
 *
 *The MIT License (MIT)
 *
