@@ -1,4 +1,4 @@
-<code>This project is actively maintained and used (28 September 2021). Please open an issue to get support :-)</code>
+<code>This project is actively maintained and used (08 November 2022). Please open an issue to get support :-)</code>
 
 # Installation to analyze applications
 
@@ -57,6 +57,10 @@ This repository will use [abapGit](http://abapgit.org) for all objects relevant 
 The local classes of the extractor are now generated using global classes. This allows ABAP Unit to be used to improve the quality and reduce the time needed for implementation. There is now also a new program z_moose_translate_to_local for this conversion. This program can also be used for other projects.
 
 See [Blog on SAP developer network](https://blogs.sap.com/2017/07/23/software-exploration-tool-next-steps/).
+
+# Mailing list
+
+Please join the Google Group https://groups.google.com/g/somixsuite to get updates about the tool and contact other users.
 
 # Thanks
 
