@@ -760,7 +760,7 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
                                                                child_id  = last_id
                                                                is_main   = 'X' ).
 
-            " Add usage by Planing function
+            " Add usage by Planing function #140
 
             FIND 'IF_RSPLFA' IN element_comp-cmpname.
             IF sy-subrc = 0.
