@@ -1,0 +1,121 @@
+{
+	"newElementBox": {
+		"isInitial": false,
+		"newElBoxX": 232.6943359375,
+		"newElBoxY": -432.4,
+		"newElBoxWidth": 400,
+		"newElBoxHeight": 912.4
+	},
+	"addedWithNeighbors": [
+		"ABAPMethod..sap.z2mse_somix_harmonize._make_list_of_element_nodes",
+		"ABAPMethod..sap.z2mse_somix_harmonize._ext_serial_attribute_nodes",
+		"ABAPMethod..sap.z2mse_somix_harmonize.mse_2_harmonized",
+		"ABAPMethod..sap.z2mse_somix_harmonize._extract_element_node"
+	],
+	"positions": [
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_harmonize",
+			"x": 80.52,
+			"y": 33.44
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_harmonize.equalize_harmonized",
+			"x": -1212.1,
+			"y": -5.1
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_harmonize.mse_2_harmonized",
+			"x": -1003,
+			"y": -227.8
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_harmonize._add_element_node",
+			"x": -1343,
+			"y": -34
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_harmonize._analyze_attribute_value",
+			"x": -906.1,
+			"y": -5.1
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_harmonize._build_result",
+			"x": -1235.9,
+			"y": 37.4
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_harmonize._extract_element_node",
+			"x": -1540.2,
+			"y": -34
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_harmonize._ext_serial_attribute_nodes",
+			"x": -1487.5,
+			"y": 139.4
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_harmonize._find_concatenated_names",
+			"x": -1467.1,
+			"y": 253.3
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_harmonize._make_list_of_element_nodes",
+			"x": -1305.6,
+			"y": -110.5
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_main_test",
+			"x": 54.46,
+			"y": 2.02
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_main_test.z2mse_test_init_select_somix",
+			"x": 21.53,
+			"y": 30.78
+		}
+	],
+	"comments": [
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_harmonize.mse_2_harmonized",
+			"x": -1057.4,
+			"y": -321.3,
+			"text": "Receives mse:\n( ( SOMIX.Data (id: 1)  (name 'attr')  (technicalType 'ABAPClassAttribute'))\n        "
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_harmonize._extract_element_node",
+			"x": -1802,
+			"y": -136,
+			"text": "Returns\relementname:\rSOMIX.Data\rserial_attribute_nodes:\rRow  TABLE_LINE\r=========================================\r1    (id: 1)\r2    (name 'attr')\r3    (technicalType 'ABAPClassAttribute')\r\n        "
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_harmonize._ext_serial_attribute_nodes",
+			"x": -1790.1,
+			"y": 74.8,
+			"text": "Analyzes nodes further\n        "
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_harmonize._find_concatenated_names",
+			"x": -1519.8,
+			"y": 348.5,
+			"text": "Contains explicite information which elements use simple names:\nSOMIX.Grouping<br>SOMIX.Data<br>SOMIX.Code\n        "
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_harmonize._make_list_of_element_nodes",
+			"x": -1455.2,
+			"y": -234.6,
+			"text": "Returns element_nodes:\nRow  TABLE_LINE\r===============================================================================\r1    ( SOMIX.Data (id: 1)  (name 'attr')  (technicalType 'ABAPClassAttribute'))\r\n        "
+		}
+	],
+	"pinned": [
+		"ABAPMethod..sap.z2mse_somix_harmonize._analyze_attribute_value",
+		"ABAPMethod..sap.z2mse_somix_harmonize._find_concatenated_names",
+		"ABAPMethod..sap.z2mse_somix_harmonize._make_list_of_element_nodes",
+		"ABAPMethod..sap.z2mse_somix_harmonize.equalize_harmonized",
+		"ABAPMethod..sap.z2mse_somix_harmonize._build_result",
+		"ABAPMethod..sap.z2mse_somix_harmonize._add_element_node",
+		"ABAPMethod..sap.z2mse_somix_harmonize._ext_serial_attribute_nodes",
+		"ABAPMethod..sap.z2mse_somix_harmonize.mse_2_harmonized",
+		"ABAPMethod..sap.z2mse_somix_harmonize._extract_element_node"
+	],
+	"suppressed": []
+}

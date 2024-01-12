@@ -1,0 +1,125 @@
+{
+	"newElementBox": {
+		"isInitial": false,
+		"newElBoxX": -1316,
+		"newElBoxY": -154,
+		"newElBoxWidth": 400,
+		"newElBoxHeight": 828
+	},
+	"addedWithNeighbors": [
+		"ABAPMethod..sap.z2mse_extr3_element_manager.add_element"
+	],
+	"positions": [
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_element_manager",
+			"x": 20.14,
+			"y": 2.89
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_element_manager.add_element",
+			"x": -1783.3,
+			"y": 433.5
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_element_manager.elements",
+			"x": -1885.3,
+			"y": 368.9
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_element_manager.model_builder",
+			"x": -1999.2,
+			"y": 370.6
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_element_manager.next_element_id",
+			"x": -1982.2,
+			"y": 436.9
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_model_builder",
+			"x": 6.05,
+			"y": 77.03
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_model_builder.new_element_id",
+			"x": -1819,
+			"y": 552.5
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_classes",
+			"x": 34.2,
+			"y": 58.17
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes.add",
+			"x": -1686.4,
+			"y": -42.5
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes._add_single_component_to_class",
+			"x": -1892.1,
+			"y": -45.9
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_packages",
+			"x": 43.9,
+			"y": 79.08
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_packages.add",
+			"x": -1445,
+			"y": 209.1
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_programs",
+			"x": 92.81,
+			"y": 45.78
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_programs.add",
+			"x": -1565.7,
+			"y": 102
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_tables",
+			"x": 97.81,
+			"y": 98.67
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tables.add",
+			"x": -2140.3,
+			"y": 249.9
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_web_dynpro_comp",
+			"x": 41.8,
+			"y": 6.4
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_web_dynpro_comp.add",
+			"x": -2160.7,
+			"y": 98.6
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_web_dynpro_comp._add_component",
+			"x": -2036.6,
+			"y": 96.9
+		}
+	],
+	"comments": [],
+	"pinned": [
+		"ABAPClassAttribute..sap.z2mse_extr3_element_manager.model_builder",
+		"ABAPMethod..sap.z2mse_extr3_web_dynpro_comp.add",
+		"ABAPMethod..sap.z2mse_extr3_element_manager.add_element",
+		"ABAPMethod..sap.z2mse_extr3_model_builder.new_element_id",
+		"ABAPMethod..sap.z2mse_extr3_tables.add",
+		"ABAPMethod..sap.z2mse_extr3_classes._add_single_component_to_class",
+		"ABAPMethod..sap.z2mse_extr3_classes.add",
+		"ABAPMethod..sap.z2mse_extr3_programs.add",
+		"ABAPClassAttribute..sap.z2mse_extr3_element_manager.next_element_id",
+		"ABAPMethod..sap.z2mse_extr3_web_dynpro_comp._add_component",
+		"ABAPClassAttribute..sap.z2mse_extr3_element_manager.elements",
+		"ABAPMethod..sap.z2mse_extr3_packages.add"
+	],
+	"suppressed": []
+}

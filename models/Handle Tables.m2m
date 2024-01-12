@@ -1,0 +1,162 @@
+{
+	"newElementBox": {
+		"isInitial": false,
+		"newElBoxX": -350.38750000000005,
+		"newElBoxY": -294,
+		"newElBoxWidth": 400,
+		"newElBoxHeight": 728
+	},
+	"addedWithNeighbors": [
+		"ABAPMethod..sap.z2mse_extr3_tables.table_name",
+		"ABAPMethod..sap.z2mse_extr3_tables.add"
+	],
+	"positions": [
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3",
+			"x": 52.51,
+			"y": 70.76
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3.element_manager",
+			"x": -1176.4,
+			"y": -185.3
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_element_manager",
+			"x": 84.92,
+			"y": 38.75
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_element_manager.add_element",
+			"x": -768.4,
+			"y": 329.8
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_initial_elements",
+			"x": 17.61,
+			"y": 14.2
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_initial_elements._select_table",
+			"x": -873.8,
+			"y": -85
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_tadir_builder",
+			"x": 10.99,
+			"y": 74.19
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tadir_builder.search_down",
+			"x": -1349.8,
+			"y": 64.6
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tadir_builder.search_up",
+			"x": -1441.6,
+			"y": 64.6
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_where_used_builder",
+			"x": 5.26,
+			"y": 39.44
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_where_used_builder.search_down",
+			"x": -814.3,
+			"y": 68
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_where_used_builder.search_up",
+			"x": -911.2,
+			"y": 68
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_access_or_invocatn",
+			"x": 41.78,
+			"y": 9.67
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_access_or_invocatn._get_famix_id_used_and_using",
+			"x": -1394,
+			"y": -66.3
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_access_or_invocatn._get_somix_id_used_and_using",
+			"x": -1112.45,
+			"y": 31.87
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_tables",
+			"x": 83.26,
+			"y": 80.76
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tables.add",
+			"x": -1176.4,
+			"y": 253.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_tables.elements_element_id",
+			"x": -1176.4,
+			"y": 324.7
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_tables.elements_tabname",
+			"x": -1033.6,
+			"y": 324.7
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tables.name",
+			"x": -1288.6,
+			"y": 324.7
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tables.table_name",
+			"x": -1288.6,
+			"y": 239.7
+		},
+		{
+			"uniqueKey": "DBTable..sap.saphanadb.dd02l",
+			"x": -814.3,
+			"y": 253.3
+		}
+	],
+	"comments": [
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tables.add",
+			"x": -1081.2,
+			"y": 178.5,
+			"text": "Adds database table to model\n        "
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tables.table_name",
+			"x": -1463.7,
+			"y": 202.3,
+			"text": "Return database table name for ID\n        "
+		},
+		{
+			"uniqueKey": "DBTable..sap.saphanadb.dd02l",
+			"x": -705.5,
+			"y": 195.5,
+			"text": "Database Table with all\ndatabase tables<br>used in the SAP system\n        "
+		}
+	],
+	"pinned": [
+		"ABAPMethod..sap.z2mse_extr3_initial_elements._select_table",
+		"ABAPClassAttribute..sap.z2mse_extr3.element_manager",
+		"ABAPMethod..sap.z2mse_extr3_tadir_builder.search_down",
+		"ABAPMethod..sap.z2mse_extr3_tadir_builder.search_up",
+		"ABAPClassAttribute..sap.z2mse_extr3_tables.elements_element_id",
+		"ABAPMethod..sap.z2mse_extr3_tables.table_name",
+		"DBTable..sap.saphanadb.dd02l",
+		"ABAPMethod..sap.z2mse_extr3_access_or_invocatn._get_famix_id_used_and_using",
+		"ABAPMethod..sap.z2mse_extr3_where_used_builder.search_up",
+		"ABAPMethod..sap.z2mse_extr3_tables.name",
+		"ABAPMethod..sap.z2mse_extr3_where_used_builder.search_down",
+		"ABAPMethod..sap.z2mse_extr3_element_manager.add_element",
+		"ABAPClassAttribute..sap.z2mse_extr3_tables.elements_tabname",
+		"ABAPMethod..sap.z2mse_extr3_tables.add"
+	],
+	"suppressed": []
+}

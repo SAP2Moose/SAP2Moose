@@ -1,0 +1,161 @@
+{
+	"newElementBox": {
+		"isInitial": false,
+		"newElBoxX": 237.337890625,
+		"newElBoxY": -254,
+		"newElBoxWidth": 400,
+		"newElBoxHeight": 748
+	},
+	"addedWithNeighbors": [
+		"ABAPMethod..sap.z2mse_extr3_parent_package.add",
+		"ABAPMethod..sap.z2mse_extr3_invocation.add",
+		"ABAPMethod..sap.z2mse_extr3_element_manager.add_association",
+		"ABAPMethod..sap.z2mse_extr3_access.add"
+	],
+	"positions": [
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3",
+			"x": 66.88,
+			"y": 58.16
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3.element_manager",
+			"x": -853.4,
+			"y": -146.2
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_element_manager",
+			"x": 99.92,
+			"y": 39.92
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_element_manager.add_association",
+			"x": -994.5,
+			"y": 387.6
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_element_manager.associations1",
+			"x": -1127.1,
+			"y": 372.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_element_manager.associations2",
+			"x": -841.5,
+			"y": 351.9
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_tadir_builder",
+			"x": 21.33,
+			"y": 50.6
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tadir_builder.search_down",
+			"x": -511.7,
+			"y": -69.7
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tadir_builder.search_up",
+			"x": -382.5,
+			"y": -68
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_where_used_builder",
+			"x": 31.08,
+			"y": 12.1
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_where_used_builder.search_down",
+			"x": 79.59,
+			"y": 63.7
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_where_used_builder.search_up",
+			"x": -1441.6,
+			"y": -78.2
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_access",
+			"x": 30.9,
+			"y": 4.91
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_access.add",
+			"x": -1314.1,
+			"y": 115.6
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_access.associations",
+			"x": -1429.7,
+			"y": 112.2
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_association",
+			"x": 94.04,
+			"y": 15.42
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_association.type",
+			"x": -688.5,
+			"y": 215.9
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_invocation",
+			"x": 72.87,
+			"y": 72.72
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_invocation.add",
+			"x": -979.2,
+			"y": 113.9
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_invocation.associations",
+			"x": -1088,
+			"y": 112.2
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_parent_package",
+			"x": 46.32,
+			"y": 22.84
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_parent_package.add",
+			"x": -596.7,
+			"y": 105.4
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_parent_package.associations",
+			"x": -674.9,
+			"y": 102
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_classes",
+			"x": 25.14,
+			"y": 74.84
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes._add_metarel",
+			"x": -1099.9,
+			"y": -141.1
+		}
+	],
+	"comments": [],
+	"pinned": [
+		"ABAPMethod..sap.z2mse_extr3_where_used_builder.search_up",
+		"ABAPMethod..sap.z2mse_extr3_parent_package.add",
+		"ABAPMethod..sap.z2mse_extr3_invocation.add",
+		"ABAPClassAttribute..sap.z2mse_extr3.element_manager",
+		"ABAPMethod..sap.z2mse_extr3_element_manager.add_association",
+		"ABAPMethod..sap.z2mse_extr3_tadir_builder.search_up",
+		"ABAPMethod..sap.z2mse_extr3_access.add",
+		"ABAPMethod..sap.z2mse_extr3_classes._add_metarel",
+		"ABAPClassAttribute..sap.z2mse_extr3_parent_package.associations",
+		"ABAPClassAttribute..sap.z2mse_extr3_invocation.associations",
+		"ABAPClassAttribute..sap.z2mse_extr3_element_manager.associations1",
+		"ABAPClassAttribute..sap.z2mse_extr3_association.type",
+		"ABAPClassAttribute..sap.z2mse_extr3_access.associations",
+		"ABAPClassAttribute..sap.z2mse_extr3_element_manager.associations2",
+		"ABAPMethod..sap.z2mse_extr3_tadir_builder.search_down"
+	],
+	"suppressed": []
+}

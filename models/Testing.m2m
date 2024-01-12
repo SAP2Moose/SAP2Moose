@@ -1,0 +1,286 @@
+{
+	"newElementBox": {
+		"isInitial": false,
+		"newElBoxX": -1378.455027370185,
+		"newElBoxY": -274,
+		"newElBoxWidth": 400,
+		"newElBoxHeight": 1048
+	},
+	"addedWithNeighbors": [
+		"ABAPMethod..sap.z2mse_main_test.z2mse_test_initial_selection",
+		"ABAPMethod..sap.z2mse_main_test.setup"
+	],
+	"positions": [
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3",
+			"x": 81.96,
+			"y": 43.5
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3.clear_all",
+			"x": -2546.6,
+			"y": -18.7
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_element_manager",
+			"x": 69.1,
+			"y": 18.61
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_element_manager.constructor",
+			"x": -1628.6,
+			"y": -49.3
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_initial_elements",
+			"x": 91.42,
+			"y": 34.13
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_initial_elements.constructor",
+			"x": -2504.1,
+			"y": -159.8
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_initial_elements.select_packages",
+			"x": -2390.2,
+			"y": -159.8
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_model_builder",
+			"x": 9.93,
+			"y": 51.92
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_model_builder.initialize",
+			"x": -1999.2,
+			"y": -158.1
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extract3",
+			"x": 93.63,
+			"y": 49.5
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extract3.constructor",
+			"x": -2199.8,
+			"y": -35.7
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extract3.extract",
+			"x": -2114.8,
+			"y": -35.7
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_mse_harmonize",
+			"x": 89.3,
+			"y": 94.8
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize.equalize_harmonized",
+			"x": -2578.9,
+			"y": 506.6
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize.mse_2_harmonized",
+			"x": -2434.4,
+			"y": 506.6
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_mse_harmonize_maker",
+			"x": 63.17,
+			"y": 66.7
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.access",
+			"x": -1886.67,
+			"y": 652.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_attribute",
+			"x": -2146.67,
+			"y": 612.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_bw_transformation",
+			"x": -1706.67,
+			"y": 612.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_class",
+			"x": -1946.67,
+			"y": 512.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_custom_source_language",
+			"x": -1746.67,
+			"y": 432.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_db_table",
+			"x": -2046.67,
+			"y": 512.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_function",
+			"x": -2166.67,
+			"y": 652.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_function_group",
+			"x": -2306.67,
+			"y": 652.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_function_group_include",
+			"x": -2006.67,
+			"y": 652.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_interface",
+			"x": -2326.67,
+			"y": 572.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_interface_attribute",
+			"x": -2286.67,
+			"y": 612.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_interface_method",
+			"x": -1786.67,
+			"y": 572.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_method",
+			"x": -1906.67,
+			"y": 572.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_package",
+			"x": -2146.67,
+			"y": 512.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_program",
+			"x": -2006.67,
+			"y": 572.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_web_dynpro_component",
+			"x": -2166.67,
+			"y": 572.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.add_web_dynpro_component_view",
+			"x": -1926.67,
+			"y": 612.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.constructor",
+			"x": -2246.67,
+			"y": 512.12
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_mse_harmonize_maker.to_change",
+			"x": -2326.67,
+			"y": 512.12
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_mse_harmonize_maker.usage",
+			"x": -2066.67,
+			"y": 612.12
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_main_test",
+			"x": 13.76,
+			"y": 14.22
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_main_test.equalized_harmonized_mse_act",
+			"x": -1677.61,
+			"y": 250.87
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_main_test.equalized_harmonized_mse_exp",
+			"x": -1689.6,
+			"y": 315.35
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_main_test.fes_act",
+			"x": -1711.68,
+			"y": 116.52
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_main_test.fes_exp",
+			"x": -1704.73,
+			"y": 188.92
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_main_test.mse_model_act",
+			"x": -1625.01,
+			"y": 164.91
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_main_test.setup",
+			"x": -2254.2,
+			"y": 273.7
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_main_test.z2mse_test_initial_selection",
+			"x": -2177.7,
+			"y": 231.2
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_main_test.z2mse_test_init_select_somix",
+			"x": -2100.09,
+			"y": 114.8
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.cl_abap_unit_assert",
+			"x": 94.81,
+			"y": 49.41
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.cl_abap_unit_assert.assert_equals",
+			"x": -1538.5,
+			"y": 306
+		}
+	],
+	"comments": [],
+	"pinned": [
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.usage",
+		"ABAPMethod..sap.z2mse_extr3_initial_elements.constructor",
+		"ABAPMethod..sap.z2mse_mse_harmonize.mse_2_harmonized",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_attribute",
+		"ABAPMethod..sap.z2mse_extract3.constructor",
+		"ABAPMethod..sap.z2mse_main_test.z2mse_test_initial_selection",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_package",
+		"ABAPMethod..sap.z2mse_extr3.clear_all",
+		"ABAPMethod..sap.z2mse_mse_harmonize.equalize_harmonized",
+		"ABAPMethod..sap.z2mse_main_test.setup",
+		"ABAPMethod..sap.z2mse_extr3_element_manager.constructor",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_program",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_function_group_include",
+		"ABAPMethod..sap.z2mse_extract3.extract",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.access",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_method",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_interface_attribute",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_bw_transformation",
+		"ABAPMethod..sap.z2mse_extr3_model_builder.initialize",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_web_dynpro_component",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_interface_method",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_class",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_function_group",
+		"ABAPMethod..sap.cl_abap_unit_assert.assert_equals",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.constructor",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_interface",
+		"ABAPMethod..sap.z2mse_extr3_initial_elements.select_packages",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_web_dynpro_component_view",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_db_table",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_function",
+		"ABAPClassAttribute..sap.z2mse_mse_harmonize_maker.to_change",
+		"ABAPMethod..sap.z2mse_mse_harmonize_maker.add_custom_source_language"
+	],
+	"suppressed": []
+}

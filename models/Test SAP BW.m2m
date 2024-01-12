@@ -1,0 +1,100 @@
+{
+	"newElementBox": {
+		"isInitial": false,
+		"newElBoxX": 186.6734237622561,
+		"newElBoxY": -192.4,
+		"newElBoxWidth": 400,
+		"newElBoxHeight": 526.4
+	},
+	"addedWithNeighbors": [
+		"ABAPMethod..sap.z2mse_extr3_programs._convert_program_2_ext_name",
+		"ABAPMethod..sap.z2mse_extr3_programs._extract_sap_bw_logic"
+	],
+	"positions": [
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extract3",
+			"x": 45.13,
+			"y": 51.9
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extract3.check_if_tested",
+			"x": 16.81,
+			"y": 66.38
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_programs",
+			"x": 22.1,
+			"y": 22.33
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_programs.add",
+			"x": -1275,
+			"y": 168.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_programs.type_bw_transformation",
+			"x": -1312.4,
+			"y": 125.8
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_programs.type_function",
+			"x": -1167.9,
+			"y": 125.8
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_programs.type_function_include",
+			"x": -1030.2,
+			"y": 125.8
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_programs.type_program",
+			"x": -1402.5,
+			"y": 168.3
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_programs._convert_program_2_ext_name",
+			"x": -1298.8,
+			"y": 22.1
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_programs._extract_function_name",
+			"x": -1314.1,
+			"y": 210.8
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_programs._extract_sap_bw_logic",
+			"x": -1067.6,
+			"y": 27.2
+		},
+		{
+			"uniqueKey": "DBTable..sap.saphanadb.rstran",
+			"x": 15.25,
+			"y": 13.17
+		}
+	],
+	"comments": [
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_programs._convert_program_2_ext_name",
+			"x": -1456.9,
+			"y": -76.5,
+			"text": "Special handling for SAP BW reports for test\n        "
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_programs._extract_sap_bw_logic",
+			"x": -846.6,
+			"y": -22.1,
+			"text": "Special handling for SAP BW reports for test\n        "
+		}
+	],
+	"pinned": [
+		"ABAPClassAttribute..sap.z2mse_extr3_programs.type_function",
+		"ABAPMethod..sap.z2mse_extr3_programs._convert_program_2_ext_name",
+		"ABAPClassAttribute..sap.z2mse_extr3_programs.type_bw_transformation",
+		"ABAPClassAttribute..sap.z2mse_extr3_programs.type_function_include",
+		"ABAPMethod..sap.z2mse_extr3_programs.add",
+		"ABAPClassAttribute..sap.z2mse_extr3_programs.type_program",
+		"ABAPMethod..sap.z2mse_extr3_programs._extract_sap_bw_logic",
+		"ABAPMethod..sap.z2mse_extr3_programs._extract_function_name"
+	],
+	"suppressed": []
+}

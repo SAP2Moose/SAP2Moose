@@ -1,0 +1,62 @@
+{
+	"newElementBox": {
+		"isInitial": false,
+		"newElBoxX": 291.4638671875,
+		"newElBoxY": -114,
+		"newElBoxWidth": 400,
+		"newElBoxHeight": 368
+	},
+	"addedWithNeighbors": [
+		"ABAPFunktion..sap.fgr-sgui.sapgui_progress_indicator"
+	],
+	"positions": [
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_model_builder",
+			"x": 36.22,
+			"y": 68.68
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_model_builder._post_search",
+			"x": 259.28,
+			"y": -0.39
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_model_builder._search_down",
+			"x": -90.77,
+			"y": 4.03
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_model_builder._search_up",
+			"x": 94.57,
+			"y": 4.15
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extract3",
+			"x": 50.47,
+			"y": 23.45
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extract3.extract",
+			"x": -301.83,
+			"y": 5.63
+		},
+		{
+			"uniqueKey": "ABAPFunktionGroup..sap.fgr-sgui",
+			"x": 4.82,
+			"y": 39.66
+		},
+		{
+			"uniqueKey": "ABAPFunktion..sap.fgr-sgui.sapgui_progress_indicator",
+			"x": -46.98,
+			"y": 146.46
+		}
+	],
+	"comments": [],
+	"pinned": [
+		"ABAPMethod..sap.z2mse_extract3.extract",
+		"ABAPMethod..sap.z2mse_extr3_model_builder._post_search",
+		"ABAPMethod..sap.z2mse_extr3_model_builder._search_up",
+		"ABAPFunktion..sap.fgr-sgui.sapgui_progress_indicator"
+	],
+	"suppressed": []
+}

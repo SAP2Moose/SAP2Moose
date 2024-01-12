@@ -1,0 +1,745 @@
+{
+	"newElementBox": {
+		"isInitial": false,
+		"newElBoxX": -800.6483946438948,
+		"newElBoxY": -394,
+		"newElBoxWidth": 400,
+		"newElBoxHeight": 1388
+	},
+	"addedWithNeighbors": [
+		"ABAPMethod..sap.z2mse_extr3_model_builder.search",
+		"ABAPMethod..sap.z2mse_extr3_tadir_builder.search_down",
+		"ABAPMethod..sap.z2mse_extr3_association_build.search_down",
+		"ABAPMethod..sap.z2mse_extr3_tadir_builder.search_up",
+		"ABAPClassAttribute..sap.z2mse_extr3_model_builder.found_in_levels",
+		"ABAPMethod..sap.z2mse_extr3_association_build.search_up",
+		"ABAPMethod..sap.z2mse_extr3_model_builder._search_up",
+		"ABAPMethod..sap.z2mse_extr3_model_builder._search_down",
+		"ABAPMethod..sap.z2mse_extr3_model_builder._initial_search",
+		"ABAPMethod..sap.z2mse_extr3_where_used_builder.search_up",
+		"ABAPMethod..sap.z2mse_extr3_model_builder._post_search",
+		"ABAPMethod..sap.z2mse_extr3_where_used_builder.search_down",
+		"ABAPMethod..sap.cl_oo_classname_service.get_all_method_includes",
+		"ABAPMethod..sap.z2mse_extr3_model_builder.initialize",
+		"ABAPMethod..sap.z2mse_extr3_where_used_builder.set_dynamic_read"
+	],
+	"positions": [
+		{
+			"uniqueKey": "ABAPProgram..sap.z2mse_moose_extractor2",
+			"x": -2521.1,
+			"y": -119
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3",
+			"x": 92.58,
+			"y": 34.88
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3.constructor",
+			"x": -2138.6,
+			"y": 831.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3.element_manager",
+			"x": -2271.2,
+			"y": 829.6
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_element_manager",
+			"x": 26.58,
+			"y": 14.95
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_element_manager.exclude_found_sap_intf",
+			"x": -1324.3,
+			"y": 469.2
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_element_manager.get_element",
+			"x": -1358.3,
+			"y": 511.7
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_element_manager.model_builder",
+			"x": -1179.8,
+			"y": 469.2
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_model_builder",
+			"x": 21.38,
+			"y": 86.23
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_model_builder.association_builders",
+			"x": -1657.5,
+			"y": -193.8
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_model_builder.association_builders_init",
+			"x": -1985.6,
+			"y": -166.6
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_model_builder.association_builders_post",
+			"x": -1536.8,
+			"y": -115.6
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_model_builder.element_manager",
+			"x": -1628.6,
+			"y": -277.1
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_model_builder.found_in_levels",
+			"x": -1341.3,
+			"y": -5.1
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_model_builder.initialize",
+			"x": -1502.8,
+			"y": -244.8
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_model_builder.is_down_search",
+			"x": -1545.3,
+			"y": -176.8
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_model_builder.is_initial_selection",
+			"x": -2038.3,
+			"y": -23.8
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_model_builder.is_post_selection",
+			"x": -1558.9,
+			"y": 47.6
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_model_builder.is_up_search",
+			"x": -1434.8,
+			"y": -176.8
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_model_builder.is_usage_of_single_element",
+			"x": -2109.7,
+			"y": -57.8
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_model_builder.level_for_found_in_downsearch",
+			"x": -1638.8,
+			"y": 25.5
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_model_builder.level_for_found_in_upsearch",
+			"x": -1773.1,
+			"y": 8.5
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_model_builder.new_element_id",
+			"x": -1456.9,
+			"y": -76.5
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_model_builder.search",
+			"x": -1807.1,
+			"y": -163.2
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_model_builder.tadir_builder",
+			"x": -1332.8,
+			"y": -282.2
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_model_builder.where_used_builder",
+			"x": -1317.5,
+			"y": -210.8
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_model_builder.write_found_elements",
+			"x": -1875.1,
+			"y": -214.2
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_model_builder._initial_search",
+			"x": -2058.7,
+			"y": -120.7
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_model_builder._post_search",
+			"x": -1662.6,
+			"y": -73.1
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_model_builder._search_down",
+			"x": -1783.3,
+			"y": -59.5
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_model_builder._search_up",
+			"x": -1915.9,
+			"y": -78.2
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extract3",
+			"x": 8.76,
+			"y": 77.46
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extract3.extract",
+			"x": -2274.6,
+			"y": 40.8
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_main_test",
+			"x": 58.73,
+			"y": 67.05
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_main_test.specific_search_function",
+			"x": -1156,
+			"y": -317.9
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_main_test.specific_search_program",
+			"x": -943.5,
+			"y": -290.7
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_main_test.z2mse_test_2021",
+			"x": null,
+			"y": null
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_main_test.z2mse_test_initial_selection",
+			"x": -1198.5,
+			"y": -367.2
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_main_test.z2mse_test_initial_selection2",
+			"x": -1025.1,
+			"y": -351.9
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_main_test.z2mse_test_init_select_somix",
+			"x": 81.29,
+			"y": 70.27
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_main_test._search_specific",
+			"x": null,
+			"y": null
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_association_build",
+			"x": 9.45,
+			"y": 91.08
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_association_build.search_down",
+			"x": -1853,
+			"y": 76.5
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_association_build.search_up",
+			"x": -1938,
+			"y": 76.5
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_tadir_builder",
+			"x": 46.45,
+			"y": 94.06
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_tadir_builder.classes",
+			"x": -2448,
+			"y": 278.8
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tadir_builder.constructor",
+			"x": -2470.1,
+			"y": 236.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_tadir_builder.parent_package",
+			"x": -2679.2,
+			"y": 321.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_tadir_builder.programs",
+			"x": -2704.7,
+			"y": 278.8
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tadir_builder.search_down",
+			"x": -2500.7,
+			"y": 363.8
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tadir_builder.search_up",
+			"x": -2660.5,
+			"y": 363.8
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_tadir_builder.tables",
+			"x": -2592.5,
+			"y": 321.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_tadir_builder.web_dynpro_components",
+			"x": -2567,
+			"y": 278.8
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_where_used_builder",
+			"x": 88.67,
+			"y": 19.39
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_where_used_builder.g_dynamic_usage",
+			"x": -1708.5,
+			"y": 263.5
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_where_used_builder.search_down",
+			"x": -1598,
+			"y": 348.5
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_where_used_builder.search_up",
+			"x": -1810.5,
+			"y": 323
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_where_used_builder.set_dynamic_read",
+			"x": -1528.3,
+			"y": 231.2
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_access",
+			"x": 94.59,
+			"y": 76.96
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_access.add",
+			"x": -2136.9,
+			"y": 848.3
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_access.get_instance",
+			"x": -2230.4,
+			"y": 848.3
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_invocation",
+			"x": 20.9,
+			"y": 63.1
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_invocation.add",
+			"x": -1276.7,
+			"y": 860.2
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_invocation.get_instance",
+			"x": -1361.7,
+			"y": 877.2
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_parent_package",
+			"x": 43.52,
+			"y": 62.68
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_parent_package.add",
+			"x": -2708.1,
+			"y": 627.3
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_classes",
+			"x": 57.11,
+			"y": 78.3
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes.add",
+			"x": -1989,
+			"y": 737.8
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes.add_component",
+			"x": -1810.5,
+			"y": 703.8
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.attribute_type",
+			"x": -1955,
+			"y": 797.3
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes.class_name",
+			"x": -1496,
+			"y": 703.8
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes.comp_name",
+			"x": -1870,
+			"y": 831.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.event_type",
+			"x": -1691.5,
+			"y": 742.9
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes.get_instance",
+			"x": -1768,
+			"y": 788.8
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.interface_type",
+			"x": -1666,
+			"y": 788.8
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.is_class_type",
+			"x": -1555.5,
+			"y": 746.3
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes.is_redefinition_of_method",
+			"x": -1649,
+			"y": 678.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.method_type",
+			"x": -1677.9,
+			"y": 827.9
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_elements",
+			"x": 34.29,
+			"y": 66.77
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_elements.class_type",
+			"x": -2493.9,
+			"y": -168.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_elements.package_type",
+			"x": -2621.4,
+			"y": -219.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_elements.program_type",
+			"x": -2446.3,
+			"y": -210.8
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_elements.table_type",
+			"x": -2578.9,
+			"y": -168.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_elements.type",
+			"x": -2468.4,
+			"y": -219.3
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_packages",
+			"x": 14.54,
+			"y": 85.53
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_packages.add",
+			"x": -2509.2,
+			"y": 771.8
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_packages.devclass",
+			"x": -2595.9,
+			"y": 814.3
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_packages.get_instance",
+			"x": -2577.2,
+			"y": 771.8
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_programs",
+			"x": 15.5,
+			"y": 89.45
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_programs.add",
+			"x": -1876.8,
+			"y": 629
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_programs.add_function",
+			"x": -1885.3,
+			"y": 530.4
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_programs.add_function_group",
+			"x": -2164.1,
+			"y": 646
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_programs.get_instance",
+			"x": -2196.4,
+			"y": 504.9
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_programs.program_name",
+			"x": -1989,
+			"y": 617.1
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_programs.type_function",
+			"x": -2167.5,
+			"y": 598.4
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_programs.type_function_include",
+			"x": -2089.3,
+			"y": 576.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_programs.type_program",
+			"x": -2101.2,
+			"y": 629
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_tables",
+			"x": 67.1,
+			"y": 1.2
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tables.add",
+			"x": -2335.8,
+			"y": 549.1
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tables.get_instance",
+			"x": -2310.3,
+			"y": 600.1
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tables.table_name",
+			"x": -2412.3,
+			"y": 591.6
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_web_dynpro_comp",
+			"x": 23.99,
+			"y": 7.68
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_web_dynpro_comp.add",
+			"x": -1280.1,
+			"y": 666.4
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_web_dynpro_comp.add_component",
+			"x": -1195.1,
+			"y": 725.9
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_web_dynpro_comp.get_instance",
+			"x": -1161.1,
+			"y": 649.4
+		},
+		{
+			"uniqueKey": "DBTable..sap.saphanadb.tadir",
+			"x": -2526.2,
+			"y": 91.8
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.cl_oo_include_naming",
+			"x": 94.93,
+			"y": 81.8
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.cl_oo_include_naming.get_trkey_by_include",
+			"x": -2177.7,
+			"y": 289
+		},
+		{
+			"uniqueKey": "DBTable..sap.saphanadb.wbcrossgt",
+			"x": -1295.4,
+			"y": 141.1
+		},
+		{
+			"uniqueKey": "ABAPFunktionGroup..sap.fgr-sgui",
+			"x": 19.75,
+			"y": 35.28
+		},
+		{
+			"uniqueKey": "ABAPFunktion..sap.fgr-sgui.sapgui_progress_indicator",
+			"x": -1956.7,
+			"y": 229.5
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.cl_oo_classname_service",
+			"x": 52.86,
+			"y": 57.63
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.cl_oo_classname_service.get_all_method_includes",
+			"x": -991.1,
+			"y": 368.9
+		},
+		{
+			"uniqueKey": "DBTable..sap.saphanadb.cross",
+			"x": -1269.9,
+			"y": 316.2
+		},
+		{
+			"uniqueKey": "DBTable..sap.saphanadb.dd02l",
+			"x": -1302.2,
+			"y": 409.7
+		},
+		{
+			"uniqueKey": "DBTable..sap.saphanadb.wbcrossi",
+			"x": -1276.7,
+			"y": 227.8
+		},
+		{
+			"uniqueKey": "DBTable..sap.saphanadb.wdy_wb_sourcemap",
+			"x": -1144.1,
+			"y": 265.2
+		}
+	],
+	"comments": [
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_model_builder.found_in_levels",
+			"x": -1273.3,
+			"y": 49.3,
+			"text": "Table to manage during what search an element was found\n        "
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_tadir_builder",
+			"x": -2951.2,
+			"y": 319.6,
+			"text": "This is the class\nZ2MSE_EXTR3_TADIR_BUILDER\n        "
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tadir_builder.search_down",
+			"x": -2657.1,
+			"y": 190.4,
+			"text": "Improve, add also FUGR\nto the elements that are handled\n        "
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_where_used_builder.search_up",
+			"x": -1762.9,
+			"y": 319.6,
+			"text": "\n \n        "
+		}
+	],
+	"pinned": [
+		"ABAPClassAttribute..sap.z2mse_extr3_classes.method_type",
+		"ABAPMethod..sap.z2mse_extr3_element_manager.get_element",
+		"ABAPClassAttribute..sap.z2mse_extr3_classes.is_class_type",
+		"ABAPClassAttribute..sap.z2mse_extr3_model_builder.level_for_found_in_downsearch",
+		"ABAPMethod..sap.z2mse_extr3_classes.class_name",
+		"ABAPClassAttribute..sap.z2mse_extr3_programs.type_function",
+		"ABAPMethod..sap.z2mse_extr3_classes.get_instance",
+		"ABAPClassAttribute..sap.z2mse_extr3_classes.attribute_type",
+		"ABAPClassAttribute..sap.z2mse_extr3_model_builder.association_builders_init",
+		"ABAPClassAttribute..sap.z2mse_extr3.element_manager",
+		"ABAPMethod..sap.z2mse_extr3_model_builder.search",
+		"ABAPMethod..sap.z2mse_extr3_programs.program_name",
+		"ABAPMethod..sap.z2mse_extr3_tadir_builder.search_down",
+		"ABAPMethod..sap.z2mse_extr3_classes.comp_name",
+		"ABAPMethod..sap.z2mse_extr3_association_build.search_down",
+		"DBTable..sap.saphanadb.tadir",
+		"ABAPClassAttribute..sap.z2mse_extr3_tadir_builder.classes",
+		"ABAPMethod..sap.z2mse_extr3_tadir_builder.search_up",
+		"ABAPMethod..sap.z2mse_extr3_web_dynpro_comp.add",
+		"ABAPMethod..sap.z2mse_extr3_web_dynpro_comp.get_instance",
+		"ABAPClassAttribute..sap.z2mse_extr3_model_builder.is_initial_selection",
+		"ABAPClassAttribute..sap.z2mse_extr3_tadir_builder.web_dynpro_components",
+		"ABAPMethod..sap.z2mse_extr3_packages.devclass",
+		"ABAPMethod..sap.z2mse_extr3_invocation.get_instance",
+		"ABAPClassAttribute..sap.z2mse_extr3_elements.type",
+		"ABAPClassAttribute..sap.z2mse_extr3_model_builder.association_builders_post",
+		"ABAPMethod..sap.z2mse_extr3_parent_package.add",
+		"ABAPMethod..sap.z2mse_main_test.z2mse_test_initial_selection2",
+		"ABAPMethod..sap.z2mse_extr3_model_builder.new_element_id",
+		"ABAPClassAttribute..sap.z2mse_extr3_model_builder.element_manager",
+		"ABAPClassAttribute..sap.z2mse_extr3_elements.package_type",
+		"ABAPMethod..sap.z2mse_extr3_programs.add_function_group",
+		"ABAPMethod..sap.z2mse_extr3_classes.add",
+		"ABAPMethod..sap.z2mse_extr3_tables.table_name",
+		"ABAPClassAttribute..sap.z2mse_extr3_model_builder.is_up_search",
+		"ABAPMethod..sap.z2mse_extr3_classes.is_redefinition_of_method",
+		"ABAPClassAttribute..sap.z2mse_extr3_model_builder.found_in_levels",
+		"ABAPMethod..sap.z2mse_extr3_association_build.search_up",
+		"ABAPMethod..sap.z2mse_extr3_model_builder._search_up",
+		"ABAPMethod..sap.z2mse_extr3_programs.add_function",
+		"ABAPMethod..sap.z2mse_extr3_model_builder._search_down",
+		"DBTable..sap.saphanadb.wdy_wb_sourcemap",
+		"ABAPMethod..sap.z2mse_extr3_tables.get_instance",
+		"DBTable..sap.saphanadb.cross",
+		"ABAPClassAttribute..sap.z2mse_extr3_elements.program_type",
+		"DBTable..sap.saphanadb.dd02l",
+		"ABAPMethod..sap.z2mse_extr3_classes.add_component",
+		"ABAPClassAttribute..sap.z2mse_extr3_model_builder.is_down_search",
+		"ABAPMethod..sap.z2mse_extr3_model_builder._initial_search",
+		"ABAPClassAttribute..sap.z2mse_extr3_model_builder.is_post_selection",
+		"ABAPClassAttribute..sap.z2mse_extr3_where_used_builder.g_dynamic_usage",
+		"ABAPMethod..sap.z2mse_extr3_tadir_builder.constructor",
+		"ABAPMethod..sap.z2mse_extr3_where_used_builder.search_up",
+		"ABAPClassAttribute..sap.z2mse_extr3_tadir_builder.programs",
+		"ABAPClassAttribute..sap.z2mse_extr3_tadir_builder.tables",
+		"ABAPClassAttribute..sap.z2mse_extr3_element_manager.model_builder",
+		"ABAPMethod..sap.z2mse_extr3_packages.add",
+		"ABAPClassAttribute..sap.z2mse_extr3_element_manager.exclude_found_sap_intf",
+		"DBTable..sap.saphanadb.wbcrossi",
+		"ABAPProgram..sap.z2mse_moose_extractor2",
+		"ABAPMethod..sap.z2mse_extr3_model_builder._post_search",
+		"ABAPMethod..sap.z2mse_main_test._search_specific",
+		"ABAPMethod..sap.z2mse_extr3_where_used_builder.search_down",
+		"ABAPClassAttribute..sap.z2mse_extr3_programs.type_function_include",
+		"ABAPClassAttribute..sap.z2mse_extr3_model_builder.is_usage_of_single_element",
+		"ABAPClassAttribute..sap.z2mse_extr3_model_builder.association_builders",
+		"ABAPMethod..sap.z2mse_extr3_packages.get_instance",
+		"ABAPMethod..sap.cl_oo_include_naming.get_trkey_by_include",
+		"ABAPClassAttribute..sap.z2mse_extr3_model_builder.where_used_builder",
+		"DBTable..sap.saphanadb.wbcrossgt",
+		"ABAPClassAttribute..sap.z2mse_extr3_elements.table_type",
+		"ABAPMethod..sap.z2mse_extr3_programs.add",
+		"ABAPMethod..sap.z2mse_extr3_invocation.add",
+		"ABAPMethod..sap.z2mse_extr3_access.get_instance",
+		"ABAPMethod..sap.z2mse_extr3_access.add",
+		"ABAPClassAttribute..sap.z2mse_extr3_model_builder.tadir_builder",
+		"ABAPMethod..sap.z2mse_extr3_web_dynpro_comp.add_component",
+		"ABAPMethod..sap.z2mse_main_test.z2mse_test_2021",
+		"ABAPClassAttribute..sap.z2mse_extr3_programs.type_program",
+		"ABAPMethod..sap.cl_oo_classname_service.get_all_method_includes",
+		"ABAPMethod..sap.z2mse_extr3_model_builder.initialize",
+		"ABAPClassAttribute..sap.z2mse_extr3_classes.event_type",
+		"ABAPClassAttribute..sap.z2mse_extr3_tadir_builder.parent_package",
+		"ABAPMethod..sap.z2mse_extr3_model_builder.write_found_elements",
+		"ABAPMethod..sap.z2mse_extr3_programs.get_instance",
+		"ABAPFunktion..sap.fgr-sgui.sapgui_progress_indicator",
+		"ABAPMethod..sap.z2mse_main_test.specific_search_program",
+		"ABAPClassAttribute..sap.z2mse_extr3_model_builder.level_for_found_in_upsearch",
+		"ABAPMethod..sap.z2mse_extr3_where_used_builder.set_dynamic_read",
+		"ABAPMethod..sap.z2mse_main_test.specific_search_function",
+		"ABAPClassAttribute..sap.z2mse_extr3_classes.interface_type",
+		"ABAPMethod..sap.z2mse_extract3.extract",
+		"ABAPClassAttribute..sap.z2mse_extr3_elements.class_type",
+		"ABAPMethod..sap.z2mse_extr3.constructor",
+		"ABAPMethod..sap.z2mse_extr3_tables.add",
+		"ABAPMethod..sap.z2mse_main_test.z2mse_test_initial_selection"
+	],
+	"suppressed": [
+		"DBTable..sap.saphanadb.tadir",
+		"ABAPGlobalClass..sap.z2mse_extr3_elements",
+		"ABAPProgram..sap.z2mse_moose_extractor2",
+		"ABAPPackage..sap.z2mse_main_test",
+		"ABAPGlobalClass..sap.z2mse_main_test",
+		"ABAPGlobalClass..sap.z2mse_extr3"
+	]
+}

@@ -1,0 +1,162 @@
+{
+	"newElementBox": {
+		"isInitial": false,
+		"newElBoxX": 1307.5780711604077,
+		"newElBoxY": 166,
+		"newElBoxWidth": 400,
+		"newElBoxHeight": 708
+	},
+	"addedWithNeighbors": [
+		"ABAPProgram..sap.z2mse_translate_to_local"
+	],
+	"positions": [
+		{
+			"uniqueKey": "ABAPProgram..sap.z2mse_translate_to_local",
+			"x": 642.6,
+			"y": 273.7
+		},
+		{
+			"uniqueKey": "ABAPFunktionGroup..sap.fgr-sfes",
+			"x": 2.47,
+			"y": 3.94
+		},
+		{
+			"uniqueKey": "ABAPFunktion..sap.fgr-sfes.gui_download",
+			"x": 843.2,
+			"y": 542.3
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.cl_gui_frontend_services",
+			"x": 81.56,
+			"y": 28.86
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.cl_gui_frontend_services.action_cancel",
+			"x": 1030.2,
+			"y": 542.3
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.cl_gui_frontend_services.file_save_dialog",
+			"x": 1145.8,
+			"y": 542.3
+		},
+		{
+			"uniqueKey": "ABAPGlobalInterface..sap.if_oo_class_incl_naming",
+			"x": 83.58,
+			"y": 28.98
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.class_pool",
+			"x": -54.4,
+			"y": 535.5
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.if_oo_class_incl_naming.get_all_method_includes",
+			"x": 246.5,
+			"y": 620.5
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.locals_def",
+			"x": 34,
+			"y": 535.5
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.locals_imp",
+			"x": 120.7,
+			"y": 535.5
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.locals_old",
+			"x": -54.4,
+			"y": 578
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.macros",
+			"x": 20.4,
+			"y": 578
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.private_section",
+			"x": 110.5,
+			"y": 578
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.protected_section",
+			"x": -28.9,
+			"y": 620.5
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.public_section",
+			"x": 96.9,
+			"y": 620.5
+		},
+		{
+			"uniqueKey": "ABAPGlobalInterface..sap.if_oo_clif_incl_naming",
+			"x": 25.75,
+			"y": 56.73
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_clif_incl_naming.clstype",
+			"x": 341.7,
+			"y": 715.7
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_clif_incl_naming.pool",
+			"x": 396.1,
+			"y": 715.7
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_clif_incl_naming.public_section",
+			"x": 367.2,
+			"y": 758.2
+		},
+		{
+			"uniqueKey": "ABAPGlobalInterface..sap.if_oo_interface_incl_naming",
+			"x": 21.2,
+			"y": 58.56
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_interface_incl_naming.interface_pool",
+			"x": 489.6,
+			"y": 535.5
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_interface_incl_naming.public_section",
+			"x": 603.5,
+			"y": 535.5
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.cl_oo_include_naming",
+			"x": 16.09,
+			"y": 36.99
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.cl_oo_include_naming.get_instance_by_cifkey",
+			"x": 49.3,
+			"y": 715.7
+		}
+	],
+	"comments": [],
+	"pinned": [
+		"ABAPMethod..sap.cl_gui_frontend_services.file_save_dialog",
+		"ABAPClassAttribute..sap.if_oo_class_incl_naming.private_section",
+		"ABAPClassAttribute..sap.if_oo_class_incl_naming.locals_imp",
+		"ABAPClassAttribute..sap.if_oo_interface_incl_naming.public_section",
+		"ABAPClassAttribute..sap.if_oo_clif_incl_naming.pool",
+		"ABAPClassAttribute..sap.if_oo_interface_incl_naming.interface_pool",
+		"ABAPClassAttribute..sap.if_oo_clif_incl_naming.public_section",
+		"ABAPClassAttribute..sap.if_oo_clif_incl_naming.clstype",
+		"ABAPFunktion..sap.fgr-sfes.gui_download",
+		"ABAPClassAttribute..sap.if_oo_class_incl_naming.class_pool",
+		"ABAPMethod..sap.cl_oo_include_naming.get_instance_by_cifkey",
+		"ABAPMethod..sap.if_oo_class_incl_naming.get_all_method_includes",
+		"ABAPClassAttribute..sap.if_oo_class_incl_naming.locals_old",
+		"ABAPClassAttribute..sap.if_oo_class_incl_naming.public_section",
+		"ABAPClassAttribute..sap.cl_gui_frontend_services.action_cancel",
+		"ABAPClassAttribute..sap.if_oo_class_incl_naming.protected_section",
+		"ABAPProgram..sap.z2mse_translate_to_local",
+		"ABAPClassAttribute..sap.if_oo_class_incl_naming.macros",
+		"ABAPClassAttribute..sap.if_oo_class_incl_naming.locals_def"
+	],
+	"suppressed": []
+}

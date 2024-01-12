@@ -1,0 +1,127 @@
+{
+	"newElementBox": {
+		"isInitial": false,
+		"newElBoxX": 399.63984374999995,
+		"newElBoxY": -394,
+		"newElBoxWidth": 400,
+		"newElBoxHeight": 808
+	},
+	"addedWithNeighbors": [
+		"ABAPMethod..sap.z2mse_extr3_classes._add_metarel"
+	],
+	"positions": [
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3",
+			"x": 97.07,
+			"y": 47.01
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3.element_manager",
+			"x": -265.2,
+			"y": -289
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_element_manager",
+			"x": 17.66,
+			"y": 10.6
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_element_manager.interface_use_structure",
+			"x": 80.9,
+			"y": 92.79
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_access",
+			"x": 59.53,
+			"y": 30.58
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_access.get_instance",
+			"x": -734.4,
+			"y": 304.3
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_invocation",
+			"x": 2.1,
+			"y": 83
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_invocation.add",
+			"x": -1144.1,
+			"y": 287.3
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_invocation.get_instance",
+			"x": -1072.7,
+			"y": 287.3
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_classes",
+			"x": 99.99,
+			"y": 63.55
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes.add",
+			"x": -1069.3,
+			"y": -188.7
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes.add_component",
+			"x": -671.5,
+			"y": 32.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.attribute_type",
+			"x": -1062.5,
+			"y": -61.2
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.elements_metarel_element_id",
+			"x": -899.3,
+			"y": -61.2
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.elements_metarel_refclsname",
+			"x": -683.4,
+			"y": -61.2
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes._add_metarel",
+			"x": -836.4,
+			"y": -136
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes._add_single_component_to_class",
+			"x": -1042.1,
+			"y": 23.8
+		},
+		{
+			"uniqueKey": "DBTable..sap.saphanadb.seometarel",
+			"x": -693.6,
+			"y": -207.4
+		}
+	],
+	"comments": [
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes._add_metarel",
+			"x": 0,
+			"y": 0,
+			"text": "The direction of the usage of an implementing method\nand an interface method is specified here\n        "
+		}
+	],
+	"pinned": [
+		"ABAPClassAttribute..sap.z2mse_extr3_classes.attribute_type",
+		"ABAPMethod..sap.z2mse_extr3_classes._add_metarel",
+		"ABAPClassAttribute..sap.z2mse_extr3.element_manager",
+		"ABAPMethod..sap.z2mse_extr3_invocation.get_instance",
+		"ABAPClassAttribute..sap.z2mse_extr3_classes.elements_metarel_refclsname",
+		"ABAPMethod..sap.z2mse_extr3_classes.add",
+		"ABAPMethod..sap.z2mse_extr3_classes.add_component",
+		"ABAPMethod..sap.z2mse_extr3_invocation.add",
+		"ABAPMethod..sap.z2mse_extr3_access.get_instance",
+		"ABAPClassAttribute..sap.z2mse_extr3_classes.elements_metarel_element_id",
+		"DBTable..sap.saphanadb.seometarel",
+		"ABAPMethod..sap.z2mse_extr3_classes._add_single_component_to_class"
+	],
+	"suppressed": []
+}
