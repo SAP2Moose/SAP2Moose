@@ -1,7 +1,7 @@
-* generated on system T80 at 12.01.2024 on 11:54:54
+* generated on system T80 at 17.12.2025 on 21:24:18
 
 *
-* This is version 1.3.2
+* This is version 1.3.3
 *
 *The MIT License (MIT)
 *
@@ -2420,8 +2420,8 @@ CLASS cl_extr3_elements DEFINITION
         element_id   TYPE cl_extr3_element_manager=>element_id_type
       EXPORTING
         element_type TYPE string
-        parent_name TYPE string
-        name TYPE string.
+        parent_name  TYPE string
+        name         TYPE string.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -2500,12 +2500,108 @@ CLASS cl_extr3_association_build DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
+CLASS cl_extr3_bw_infoprovider DEFINITION
+  INHERITING FROM cl_extr3_elements
+  FINAL
+  CREATE PRIVATE .
+
+  PUBLIC SECTION.
+    CLASS-METHODS get_instance
+      IMPORTING
+        element_manager   TYPE REF TO cl_extr3_element_manager
+      RETURNING
+        VALUE(r_instance) TYPE REF TO cl_extr3_bw_infoprovider.
+    METHODS add_infoprovider
+      IMPORTING infoprovider    TYPE clike
+      EXPORTING infoprovider_id TYPE i
+                is_data         TYPE abap_bool.
+    METHODS add_hcpr_components
+      IMPORTING infoprovider    TYPE clike
+                infoprovider_id TYPE i.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+    CLASS-DATA instance TYPE REF TO cl_extr3_bw_infoprovider.
+ENDCLASS.
+CLASS cl_extr3_bw_query DEFINITION
+  INHERITING FROM cl_extr3_elements
+  FINAL
+  CREATE PRIVATE .
+
+  PUBLIC SECTION.
+    CLASS-METHODS get_instance
+      IMPORTING
+        element_manager   TYPE REF TO cl_extr3_element_manager
+      RETURNING
+        VALUE(r_instance) TYPE REF TO cl_extr3_bw_query.
+    METHODS add_bw_filter
+      IMPORTING bw_filter           TYPE clike
+                infoprovider        TYPE clike
+      RETURNING VALUE(bw_filter_id) TYPE i.
+    METHODS add_variable
+      IMPORTING variable_eltuid    TYPE clike
+      RETURNING VALUE(variable_id) TYPE i.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+    CLASS-DATA instance TYPE REF TO cl_extr3_bw_query.
+    DATA extr3_bw_infoprovider TYPE REF TO cl_extr3_bw_infoprovider.
+ENDCLASS.
+CLASS cl_extr3_process_chain DEFINITION
+  INHERITING FROM cl_extr3_elements
+  FINAL
+  CREATE PRIVATE .
+
+  PUBLIC SECTION.
+    CLASS-METHODS get_instance
+      IMPORTING
+        element_manager   TYPE REF TO cl_extr3_element_manager
+      RETURNING
+        VALUE(r_instance) TYPE REF TO cl_extr3_process_chain.
+    METHODS plan_seq_used_in_pc_chain
+      IMPORTING seqnm    TYPE clike
+                plseq_id TYPE i.
+    METHODS program_used_in_pc_chain
+      IMPORTING program    TYPE clike
+                program_id TYPE i.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+    CLASS-DATA instance TYPE REF TO cl_extr3_process_chain.
+ENDCLASS.
+CLASS cl_extr3_planing DEFINITION
+  INHERITING FROM cl_extr3_elements
+  FINAL
+  CREATE PRIVATE .
+
+  PUBLIC SECTION.
+    CLASS-METHODS get_instance
+      IMPORTING
+        element_manager   TYPE REF TO cl_extr3_element_manager
+      RETURNING
+        VALUE(r_instance) TYPE REF TO cl_extr3_planing.
+    METHODS class_used_in_planing
+      IMPORTING
+        clsname   TYPE string
+        method_id TYPE i.
+    METHODS plan_func_used_in_plan_seq
+      IMPORTING
+        planfunc    TYPE clike
+        planfunc_id TYPE i.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+    CLASS-DATA instance TYPE REF TO cl_extr3_planing.
+    DATA extr3_process_chain TYPE REF TO cl_extr3_process_chain.
+    DATA extr3_bw_query TYPE REF TO cl_extr3_bw_query.
+    DATA extr3_bw_infoprovider TYPE REF TO cl_extr3_bw_infoprovider.
+ENDCLASS.
 CLASS cl_extr3_classes DEFINITION
   INHERITING FROM cl_extr3_elements
   FINAL
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+
+    DATA extr3_planing TYPE REF TO cl_extr3_planing.
+
     CONSTANTS: is_class_type  TYPE seoclstype VALUE 0,
                interface_type TYPE seoclstype VALUE 1,
                attribute_type TYPE seocmptype VALUE 0,
@@ -2745,6 +2841,7 @@ CLASS cl_extr3_programs DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO cl_extr3_programs.
+    DATA extr3_process_chain TYPE REF TO cl_extr3_process_chain.
     TYPES: BEGIN OF element_type,
              element_id            TYPE cl_extr3_element_manager=>element_id_type,
              program               TYPE progname,
@@ -5027,8 +5124,9 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
       CREATE OBJECT instance
         EXPORTING
           i_element_manager = element_manager.
+      instance->type = class_type.
+      instance->extr3_planing = cl_extr3_planing=>get_instance( element_manager = element_manager ).
     ENDIF.
-    instance->type = class_type.
     r_instance = instance.
   ENDMETHOD.
   METHOD is_redefinition_of_method.
@@ -5288,85 +5386,95 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
 
             FIND 'IF_RSPLFA' IN element_comp-cmpname.
             IF sy-subrc = 0.
-              DATA planing_function TYPE rsplf_srv.
-              DATA planing_functions TYPE STANDARD TABLE OF rsplf_srv WITH DEFAULT KEY.
-              CLEAR planing_functions.
-              " Find direct usages of method in planing function
-              DATA planing_function_parameters TYPE STANDARD TABLE OF rsplf_srv_p WITH DEFAULT KEY.
-              SELECT * FROM rsplf_srv_p INTO TABLE planing_function_parameters WHERE objvers = 'A' AND parnm = 'CLASS' AND value = element_comp-clsname.
-              IF sy-subrc = 0.
-                DATA pfp TYPE rsplf_srv_p.
-                LOOP AT planing_function_parameters INTO pfp.
-                  SELECT SINGLE * FROM rsplf_srv INTO planing_function WHERE objvers = 'A' AND srvnm = pfp-srvnm.
-                  IF sy-subrc = 0.
-                    APPEND planing_function TO planing_functions.
-                  ENDIF.
-                ENDLOOP.
-              ENDIF.
-              " Find usages of method in service types
-              DATA service_types TYPE STANDARD TABLE OF rsplf_srvtype WITH DEFAULT KEY.
-              DATA st TYPE rsplf_srvtype.
-              SELECT * FROM rsplf_srvtype INTO TABLE service_types WHERE objvers = 'A' AND classnm = element_comp-clsname.
-              LOOP AT service_types INTO st.
+* BEGIN DELETE #140
+*              DATA planing_function TYPE rsplf_srv.
+*              DATA planing_functions TYPE STANDARD TABLE OF rsplf_srv WITH DEFAULT KEY.
+*              CLEAR planing_functions.
+*              " Find direct usages of method in planing function
+*              DATA planing_function_parameters TYPE STANDARD TABLE OF rsplf_srv_p WITH DEFAULT KEY.
+*              SELECT * FROM rsplf_srv_p INTO TABLE planing_function_parameters WHERE objvers = 'A' AND parnm = 'CLASS' AND value = element_comp-clsname.
+*              IF sy-subrc = 0.
+*                DATA pfp TYPE rsplf_srv_p.
+*                LOOP AT planing_function_parameters INTO pfp.
+*                  SELECT SINGLE * FROM rsplf_srv INTO planing_function WHERE objvers = 'A' AND srvnm = pfp-srvnm.
+*                  IF sy-subrc = 0.
+*                    APPEND planing_function TO planing_functions.
+*                  ENDIF.
+*                ENDLOOP.
+*              ENDIF.
+*              " Find usages of method in service types
+*              DATA service_types TYPE STANDARD TABLE OF rsplf_srvtype WITH DEFAULT KEY.
+*              DATA st TYPE rsplf_srvtype.
+*              SELECT * FROM rsplf_srvtype INTO TABLE service_types WHERE objvers = 'A' AND classnm = element_comp-clsname.
+*              LOOP AT service_types INTO st.
+*
+*                SELECT * FROM rsplf_srv INTO planing_function WHERE objvers = 'A' AND srvtypenm = st-srvtypenm.
+*                  APPEND planing_function TO planing_functions.
+*                ENDSELECT.
+*              ENDLOOP.
+*
+*              SORT planing_functions.
+*              DELETE ADJACENT DUPLICATES FROM planing_functions.
+*
+*              LOOP AT planing_functions INTO planing_function.
+*                unique_name            = |sap.{ planing_function-infoprov }|.
+*                DATA aggr_id TYPE i.
+*                element_manager->somix_grouping->add(
+*                  EXPORTING
+*                    grouping_name_group    = 'AGGR_LEVEL'
+*                    grouping               = planing_function-infoprov
+*                    technical_type         = 'AGGR_LEVEL'
+*                    link_to_editor         = ''
+*                  IMPORTING
+**                  exists_already_with_id =
+*                    id                     = aggr_id
+*                  CHANGING
+*                    unique_name            = unique_name
+*                ).
+*                unique_name            = |sap.{ planing_function-infoprov }.{ planing_function-srvnm }|.
+*                DATA planfunc_id TYPE i.
+*                element_manager->somix_code->add(
+*                  EXPORTING
+*                    grouping_name_group    = 'AGGR_LEVEL'
+*                    grouping               = planing_function-infoprov
+*                    code_name_group        = 'PLANING_FUNCTION'
+*                    code                   = planing_function-srvnm
+*                    technical_type         = 'PLANING_FUNCTION'
+*                    link_to_editor         = ''
+*                  IMPORTING
+**                  exists_already_with_id =
+*                    id                     = planfunc_id
+*                  CHANGING
+*                    unique_name            = unique_name
+*                ).
+*                element_manager->somix_parentchild->add(
+*                  EXPORTING
+*                    parent_id = aggr_id
+*                    child_id  = planfunc_id
+*                    is_main   = 'X'
+**                RECEIVING
+**                  id        =
+*                ).
+*                DATA: call_id TYPE i.
+*                call_id = element_manager->somix_call->add( ).
+*                element_manager->somix_call->set_caller_called_relation(
+*                  EXPORTING
+*                    element_id = call_id
+*                    caller_id  = planfunc_id
+*                    called_id  = last_id
+*                ).
+*
+*
+*              ENDLOOP.
+* BEGIN REPLACE #140
 
-                SELECT * FROM rsplf_srv INTO planing_function WHERE objvers = 'A' AND srvtypenm = st-srvtypenm.
-                  APPEND planing_function TO planing_functions.
-                ENDSELECT.
-              ENDLOOP.
+              extr3_planing->class_used_in_planing(
+                     clsname = element_comp-clsname
+                     method_id = last_id
+               ).
 
-              SORT planing_functions.
-              DELETE ADJACENT DUPLICATES FROM planing_functions.
+* END REPLACE #140
 
-              LOOP AT planing_functions INTO planing_function.
-                unique_name            = |sap.{ planing_function-infoprov }|.
-                DATA aggr_id TYPE i.
-                element_manager->somix_grouping->add(
-                  EXPORTING
-                    grouping_name_group    = 'AGGR_LEVEL'
-                    grouping               = planing_function-infoprov
-                    technical_type         = 'AGGR_LEVEL'
-                    link_to_editor         = ''
-                  IMPORTING
-*                  exists_already_with_id =
-                    id                     = aggr_id
-                  CHANGING
-                    unique_name            = unique_name
-                ).
-                unique_name            = |sap.{ planing_function-infoprov }.{ planing_function-srvnm }|.
-                DATA planfunc_id TYPE i.
-                element_manager->somix_code->add(
-                  EXPORTING
-                    grouping_name_group    = 'AGGR_LEVEL'
-                    grouping               = planing_function-infoprov
-                    code_name_group        = 'PLANING_FUNCTION'
-                    code                   = planing_function-srvnm
-                    technical_type         = 'PLANING_FUNCTION'
-                    link_to_editor         = ''
-                  IMPORTING
-*                  exists_already_with_id =
-                    id                     = planfunc_id
-                  CHANGING
-                    unique_name            = unique_name
-                ).
-                element_manager->somix_parentchild->add(
-                  EXPORTING
-                    parent_id = aggr_id
-                    child_id  = planfunc_id
-                    is_main   = 'X'
-*                RECEIVING
-*                  id        =
-                ).
-                DATA: call_id TYPE i.
-                call_id = element_manager->somix_call->add( ).
-                element_manager->somix_call->set_caller_called_relation(
-                  EXPORTING
-                    element_id = call_id
-                    caller_id  = planfunc_id
-                    called_id  = last_id
-                ).
-
-
-              ENDLOOP.
             ENDIF.
 
             " End Insert Planing Function
@@ -5755,7 +5863,7 @@ CLASS CL_EXTR3_CLASSES IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 CLASS CL_EXTR3_ELEMENTS IMPLEMENTATION.
-  METHOD COLLECT_INFOS.
+  METHOD collect_infos.
     " Redefine me
     ASSERT 1 = 2.
   ENDMETHOD.
@@ -5763,7 +5871,7 @@ CLASS CL_EXTR3_ELEMENTS IMPLEMENTATION.
     " Redefine me
     ASSERT 1 = 2.
   ENDMETHOD.
-  METHOD NAME.
+  METHOD name.
     " Redefine me
     ASSERT 1 = 2.
   ENDMETHOD.
@@ -6030,8 +6138,9 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
       CREATE OBJECT instance
         EXPORTING
           i_element_manager = i_element_manager.
+      instance->type = program_type.
+      instance->extr3_process_chain = cl_extr3_process_chain=>get_instance( element_manager = i_element_manager ).
     ENDIF.
-    instance->type = program_type.
     r_instance = instance.
   ENDMETHOD.
   METHOD make_model.
@@ -6161,6 +6270,15 @@ CLASS CL_EXTR3_PROGRAMS IMPLEMENTATION.
       element_manager->somix_parentchild->add( EXPORTING parent_id = last_id
                                                          child_id  = dummy_method_id
                                                          is_main   = is_main ).
+
+      " Add usage in process chains
+
+      extr3_process_chain->program_used_in_pc_chain(
+        EXPORTING
+          program    = element-program
+          program_id = dummy_method_id
+      ).
+*
 
     ELSE. " SOMIX
 
@@ -6910,6 +7028,869 @@ CLASS CL_EXTR3_WEB_DYNPRO_COMP IMPLEMENTATION.
 
     ENDIF.
 
+
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_EXTR3_PLANING IMPLEMENTATION.
+  METHOD class_used_in_planing.
+    DATA planing_function TYPE rsplf_srv.
+    DATA planing_functions TYPE STANDARD TABLE OF rsplf_srv WITH DEFAULT KEY.
+    CLEAR planing_functions.
+    " Find direct usages of method in planing function
+    DATA planing_function_parameters TYPE STANDARD TABLE OF rsplf_srv_p WITH DEFAULT KEY.
+    SELECT * FROM rsplf_srv_p INTO TABLE planing_function_parameters WHERE objvers = 'A' AND parnm = 'CLASS' AND value = clsname.
+    IF sy-subrc = 0.
+      DATA pfp TYPE rsplf_srv_p.
+      LOOP AT planing_function_parameters INTO pfp.
+        SELECT SINGLE * FROM rsplf_srv INTO planing_function WHERE objvers = 'A' AND srvnm = pfp-srvnm.
+        IF sy-subrc = 0.
+          APPEND planing_function TO planing_functions.
+        ENDIF.
+      ENDLOOP.
+    ENDIF.
+    " Find usages of method in service types
+    DATA service_types TYPE STANDARD TABLE OF rsplf_srvtype WITH DEFAULT KEY.
+    DATA st TYPE rsplf_srvtype.
+    SELECT * FROM rsplf_srvtype INTO TABLE service_types WHERE objvers = 'A' AND classnm = clsname.
+    LOOP AT service_types INTO st.
+
+      SELECT * FROM rsplf_srv INTO planing_function WHERE objvers = 'A' AND srvtypenm = st-srvtypenm.
+        APPEND planing_function TO planing_functions.
+      ENDSELECT.
+    ENDLOOP.
+
+    SORT planing_functions.
+    DELETE ADJACENT DUPLICATES FROM planing_functions.
+
+    LOOP AT planing_functions INTO planing_function.
+      DATA unique_name TYPE string.
+      " Keep this to prevent that old diagrams break:
+      unique_name            = |sap.{ planing_function-infoprov }.{ planing_function-srvnm }|.
+      DATA planfunc_id TYPE i.
+      element_manager->somix_code->add(
+        EXPORTING
+          grouping_name_group    = ''
+          grouping               = ''
+          code_name_group        = 'PLANING_FUNCTION'
+          code                   = planing_function-srvnm
+          technical_type         = 'PLANING_FUNCTION'
+          link_to_editor         = |bwmt://{ sy-sysid }/sap/bw/modeling/plse/{ planing_function-srvnm }/a|
+        IMPORTING
+*                  exists_already_with_id =
+          id                     = planfunc_id
+        CHANGING
+          unique_name            = unique_name
+      ).
+
+*                element_manager->somix_parentchild->add(
+*                  EXPORTING
+*                    parent_id = aggr_id
+*                    child_id  = planfunc_id
+*                    is_main   = 'X'
+**                RECEIVING
+**                  id        =
+*                ).
+      DATA: call_id TYPE i.
+      call_id = element_manager->somix_call->add( ).
+      element_manager->somix_call->set_caller_called_relation(
+        EXPORTING
+          element_id = call_id
+          caller_id  = planfunc_id
+          called_id  = method_id
+      ).
+
+      IF planing_function-infoprov IS NOT INITIAL.
+
+        " Duplicate 1 / 2 - Aggregation Level
+        unique_name            = |sap.{ planing_function-infoprov }|.
+        DATA aggr_id TYPE i.
+        element_manager->somix_code->add(
+          EXPORTING
+            grouping_name_group    = ''
+            grouping               = ''
+            code_name_group        = 'AGGR_LEVEL'
+            code                   = planing_function-infoprov
+            technical_type         = 'AGGR_LEVEL'
+            link_to_editor         = |bwmt://{ sy-sysid }/sap/bw/modeling/alvl/{ planing_function-infoprov }/m|
+          IMPORTING
+*                    exists_already_with_id =
+            id                     = aggr_id
+          CHANGING
+            unique_name            = unique_name
+        ).
+
+        call_id = element_manager->somix_call->add( ).
+        element_manager->somix_call->set_caller_called_relation(
+          EXPORTING
+            element_id = call_id
+            caller_id  = planfunc_id
+            called_id  = aggr_id
+        ).
+
+        plan_func_used_in_plan_seq( planfunc    = planing_function-srvnm
+                                    planfunc_id = planfunc_id ).
+
+        " Find provider of aggregation level Duplicate 1/2
+
+        DATA: aggregation_level TYPE rspls_alvl.
+
+        CLEAR aggregation_level.
+
+        SELECT SINGLE * FROM rspls_alvl INTO aggregation_level WHERE objvers = 'A' AND aggrlevel = planing_function-infoprov.
+        DATA infoprov_id TYPE i.
+        DATA infoprovider_is_data TYPE abap_bool.
+
+        extr3_bw_infoprovider->add_infoprovider(
+          EXPORTING
+            infoprovider    = aggregation_level-infoprov
+          IMPORTING
+            infoprovider_id = infoprov_id
+            is_data         = infoprovider_is_data
+        ).
+        " In most cases is an infoprovider only a view to data which is modelled as code
+        IF infoprovider_is_data = ''.
+          call_id = element_manager->somix_call->add( ).
+          element_manager->somix_call->set_caller_called_relation(
+            EXPORTING
+              element_id = call_id
+              caller_id  = aggr_id
+              called_id  = infoprov_id
+          ).
+
+        ELSE.
+          DATA access_id TYPE i.
+          access_id = element_manager->somix_access->add( ).
+          element_manager->somix_access->set_accessor_accessed_relation(
+            EXPORTING
+              element_id   = access_id
+              accessor_id  = aggr_id
+              accessed_id  = infoprov_id
+              is_write     = 'X'
+              is_read      = 'X'
+              is_dependent = 'X'
+          ).
+        ENDIF.
+
+      ENDIF.
+
+
+    ENDLOOP.
+
+  ENDMETHOD.
+  METHOD plan_func_used_in_plan_seq.
+
+    DATA planing_sequence_steps TYPE STANDARD TABLE OF rspls_sequence_s WITH DEFAULT KEY.
+    DATA planing_sequence_step TYPE rspls_sequence_s.
+
+    SELECT * FROM rspls_sequence_s INTO TABLE planing_sequence_steps WHERE objvers = 'A' AND srvnm = planfunc.
+
+    LOOP AT planing_sequence_steps INTO planing_sequence_step.
+
+      DATA unique_name TYPE string.
+      unique_name            = |sap.{ planing_sequence_step-seqnm }.{ planing_sequence_step-stepid }|.
+      DATA plseq_step_id TYPE i.
+      element_manager->somix_code->add(
+        EXPORTING
+          grouping_name_group    = ''
+          grouping               = ''
+          code_name_group        = 'PLANING_SEQUENCE_STEP'
+          code                   = |{ planing_sequence_step-seqnm }-{ planing_sequence_step-stepid }|
+          technical_type         = 'PLANING_SEQUENCE_STEP'
+          link_to_editor         = |bwmt://{ sy-sysid }/sap/bw/modeling/plsq/{ planing_sequence_step-seqnm }/a|
+        IMPORTING
+*                    exists_already_with_id =
+          id                     = plseq_step_id
+        CHANGING
+          unique_name            = unique_name
+      ).
+
+      DATA call_id TYPE i.
+      call_id = element_manager->somix_call->add( ).
+      element_manager->somix_call->set_caller_called_relation(
+        EXPORTING
+          element_id = call_id
+          caller_id  = plseq_step_id
+          called_id  = planfunc_id
+      ).
+
+      " Add Filter
+
+      IF planing_sequence_step-selobj IS NOT INITIAL.
+
+        DATA bw_filter_id TYPE i.
+
+        bw_filter_id = extr3_bw_query->add_bw_filter( bw_filter    = planing_sequence_step-selobj
+                                                      infoprovider = planing_sequence_step-aggrlevel ).
+
+        call_id = element_manager->somix_call->add( ).
+        element_manager->somix_call->set_caller_called_relation(
+          EXPORTING
+            element_id = call_id
+            caller_id  = plseq_step_id
+            called_id  = bw_filter_id
+        ).
+
+        " Add Aggregation Level
+
+        " Duplicate 2 / 2 - Aggregation Level
+        unique_name            = |sap.{ planing_sequence_step-aggrlevel }|.
+        DATA aggr_id TYPE i.
+        element_manager->somix_code->add(
+          EXPORTING
+            grouping_name_group    = ''
+            grouping               = ''
+            code_name_group        = 'AGGR_LEVEL'
+            code                   = planing_sequence_step-aggrlevel
+            technical_type         = 'AGGR_LEVEL'
+            link_to_editor         = |bwmt://{ sy-sysid }/sap/bw/modeling/alvl/{ planing_sequence_step-aggrlevel }/m|
+          IMPORTING
+*                    exists_already_with_id =
+            id                     = aggr_id
+          CHANGING
+            unique_name            = unique_name
+        ).
+
+        call_id = element_manager->somix_call->add( ).
+        element_manager->somix_call->set_caller_called_relation(
+          EXPORTING
+            element_id = call_id
+            caller_id  = plseq_step_id
+            called_id  = aggr_id
+        ).
+
+        " Add Planing Sequence
+        unique_name            = |sap.{ planing_sequence_step-seqnm }|.
+        DATA plseq_id TYPE i.
+        element_manager->somix_code->add(
+          EXPORTING
+            grouping_name_group    = ''
+            grouping               = ''
+            code_name_group        = 'PLANING_SEQUENCE'
+            code                   = planing_sequence_step-seqnm
+            technical_type         = 'PLANING_SEQUENCE'
+            link_to_editor         = |bwmt://{ sy-sysid }/sap/bw/modeling/plsq/{ planing_sequence_step-seqnm }/a|
+          IMPORTING
+*                    exists_already_with_id =
+            id                     = plseq_id
+          CHANGING
+            unique_name            = unique_name
+        ).
+
+        call_id = element_manager->somix_call->add( ).
+        element_manager->somix_call->set_caller_called_relation(
+          EXPORTING
+            element_id = call_id
+            caller_id  = plseq_id
+            called_id  = plseq_step_id
+        ).
+
+        extr3_process_chain->plan_seq_used_in_pc_chain(
+          EXPORTING
+            seqnm    = planing_sequence_step-seqnm
+            plseq_id = plseq_id
+        ).
+
+
+      ENDIF.
+
+
+    ENDLOOP.
+
+  ENDMETHOD.
+  METHOD get_instance.
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = element_manager.
+      instance->extr3_process_chain = cl_extr3_process_chain=>get_instance( element_manager = element_manager ).
+      instance->extr3_bw_infoprovider = cl_extr3_bw_infoprovider=>get_instance( element_manager = element_manager ).
+      instance->extr3_bw_query = cl_extr3_bw_query=>get_instance( element_manager = element_manager ).
+    ENDIF.
+    r_instance = instance.
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_EXTR3_PROCESS_CHAIN IMPLEMENTATION.
+  METHOD get_instance.
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = element_manager.
+    ENDIF.
+    r_instance = instance.
+
+  ENDMETHOD.
+  METHOD plan_seq_used_in_pc_chain.
+
+    DATA variants TYPE STANDARD TABLE OF rspcvariant WITH DEFAULT KEY.
+    DATA variant TYPE rspcvariant.
+    DATA pc_chains TYPE STANDARD TABLE OF rspcchain WITH DEFAULT KEY.
+    DATA pc_chain TYPE rspcchain.
+
+    SELECT * FROM rspcvariant INTO TABLE variants WHERE type = 'PLSEQ' AND objvers = 'A' AND fnam = 'SEQNM' AND low = seqnm.
+
+    LOOP AT variants INTO variant.
+
+      " Add variant
+      DATA unique_name TYPE string.
+      unique_name            = |sap.{ variant-variante }|.
+      DATA variant_id TYPE i.
+      element_manager->somix_code->add(
+        EXPORTING
+          grouping_name_group    = ''
+          grouping               = ''
+          code_name_group        = 'PROCESS_CHAIN_VARIANT'
+          code                   = variant-variante
+          technical_type         = 'PROCESS_CHAIN_VARIANT'
+          link_to_editor         = ''
+        IMPORTING
+*                    exists_already_with_id =
+          id                     = variant_id
+        CHANGING
+          unique_name            = unique_name
+      ).
+
+      DATA call_id TYPE i.
+      call_id = element_manager->somix_call->add( ).
+      element_manager->somix_call->set_caller_called_relation(
+        EXPORTING
+          element_id = call_id
+          caller_id  = variant_id
+          called_id  = plseq_id
+      ).
+
+      " Get Process Chains from variant Duplicate 1 / 2
+      CLEAR pc_chains.
+
+      SELECT * FROM rspcchain INTO TABLE pc_chains WHERE objvers = 'A' AND type = 'PLSEQ' AND variante = variant-variante.
+
+      LOOP AT pc_chains INTO pc_chain.
+        unique_name            = |sap.{ pc_chain-chain_id }|.
+        DATA pc_chain_id TYPE i.
+        element_manager->somix_code->add(
+          EXPORTING
+            grouping_name_group    = ''
+            grouping               = ''
+            code_name_group        = 'PROCESS_CHAIN'
+            code                   = pc_chain-chain_id
+            technical_type         = 'PROCESS_CHAIN'
+            link_to_editor         = ''
+          IMPORTING
+*                    exists_already_with_id =
+            id                     = pc_chain_id
+          CHANGING
+            unique_name            = unique_name
+        ).
+
+        call_id = element_manager->somix_call->add( ).
+        element_manager->somix_call->set_caller_called_relation(
+          EXPORTING
+            element_id = call_id
+            caller_id  = pc_chain_id
+            called_id  = variant_id
+        ).
+
+        " Add selected called logic from the process chain
+
+        DATA pc_chains_2 TYPE STANDARD TABLE OF rspcchain WITH DEFAULT KEY.
+        DATA pc_chain_2 TYPE rspcchain.
+
+        CLEAR pc_chains_2.
+
+        " Called logic
+        SELECT * FROM rspcchain INTO TABLE pc_chains_2 WHERE chain_id = pc_chain-chain_id AND objvers = 'A' AND type = 'CHAIN'.
+
+        LOOP AT pc_chains_2 INTO pc_chain_2.
+          unique_name            = |sap.{ variant-type }_{ pc_chain_2-variante }|.
+          DATA pc_chain2_id TYPE i.
+          element_manager->somix_code->add(
+            EXPORTING
+              grouping_name_group    = ''
+              grouping               = ''
+              code_name_group        = 'PROCESS_CHAIN'
+              code                   = pc_chain_2-variante
+              technical_type         = 'PROCESS_CHAIN'
+              link_to_editor         = ''
+            IMPORTING
+*                    exists_already_with_id =
+              id                     = pc_chain2_id
+            CHANGING
+              unique_name            = unique_name
+          ).
+
+          call_id = element_manager->somix_call->add( ).
+          element_manager->somix_call->set_caller_called_relation(
+            EXPORTING
+              element_id = call_id
+              caller_id  = pc_chain_id
+              called_id  = pc_chain2_id
+          ).
+
+
+        ENDLOOP.
+
+      ENDLOOP.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+  METHOD program_used_in_pc_chain.
+
+    DATA variants TYPE STANDARD TABLE OF rspcvariant WITH DEFAULT KEY.
+    DATA variant TYPE rspcvariant.
+    DATA pc_chains TYPE STANDARD TABLE OF rspcchain WITH DEFAULT KEY.
+    DATA pc_chain TYPE rspcchain.
+
+    SELECT * FROM rspcvariant INTO TABLE variants WHERE type = 'ABAP' AND objvers = 'A' AND fnam = 'PROGRAM' AND low = program.
+
+    LOOP AT variants INTO variant.
+
+      " Add variant
+      DATA unique_name TYPE string.
+      unique_name            = |sap.{ variant-type }_{ variant-variante }|.
+      DATA variant_id TYPE i.
+      element_manager->somix_code->add(
+        EXPORTING
+          grouping_name_group    = ''
+          grouping               = ''
+          code_name_group        = 'PROCESS_CHAIN_VARIANT'
+          code                   = variant-variante
+          technical_type         = 'PROCESS_CHAIN_VARIANT'
+          link_to_editor         = ''
+        IMPORTING
+*                    exists_already_with_id =
+          id                     = variant_id
+        CHANGING
+          unique_name            = unique_name
+      ).
+
+      DATA call_id TYPE i.
+      call_id = element_manager->somix_call->add( ).
+      element_manager->somix_call->set_caller_called_relation(
+        EXPORTING
+          element_id = call_id
+          caller_id  = variant_id
+          called_id  = program_id
+      ).
+
+      " Get Process Chains from variant Duplicate 2 / 2
+
+      CLEAR pc_chains.
+
+      SELECT * FROM rspcchain INTO TABLE pc_chains WHERE objvers = 'A' AND type = 'ABAP' AND variante = variant-variante.
+
+      LOOP AT pc_chains INTO pc_chain.
+        unique_name            = |sap.{ pc_chain-chain_id }|.
+        DATA pc_chain_id TYPE i.
+        element_manager->somix_code->add(
+          EXPORTING
+            grouping_name_group    = ''
+            grouping               = ''
+            code_name_group        = 'PROCESS_CHAIN'
+            code                   = pc_chain-chain_id
+            technical_type         = 'PROCESS_CHAIN'
+            link_to_editor         = ''
+          IMPORTING
+*                    exists_already_with_id =
+            id                     = pc_chain_id
+          CHANGING
+            unique_name            = unique_name
+        ).
+
+        call_id = element_manager->somix_call->add( ).
+        element_manager->somix_call->set_caller_called_relation(
+          EXPORTING
+            element_id = call_id
+            caller_id  = pc_chain_id
+            called_id  = variant_id
+        ).
+
+        " Add selected called logic from the process chain
+
+        DATA pc_chains_2 TYPE STANDARD TABLE OF rspcchain WITH DEFAULT KEY.
+        DATA pc_chain_2 TYPE rspcchain.
+
+        CLEAR pc_chains_2.
+
+        " Called logic
+        SELECT * FROM rspcchain INTO TABLE pc_chains_2 WHERE chain_id = pc_chain-chain_id AND objvers = 'A' AND type = 'CHAIN'.
+
+        LOOP AT pc_chains_2 INTO pc_chain_2.
+          unique_name            = |sap.{ pc_chain_2-variante }|.
+          DATA pc_chain2_id TYPE i.
+          element_manager->somix_code->add(
+            EXPORTING
+              grouping_name_group    = ''
+              grouping               = ''
+              code_name_group        = 'PROCESS_CHAIN'
+              code                   = pc_chain_2-variante
+              technical_type         = 'PROCESS_CHAIN'
+              link_to_editor         = ''
+            IMPORTING
+*                    exists_already_with_id =
+              id                     = pc_chain2_id
+            CHANGING
+              unique_name            = unique_name
+          ).
+
+          call_id = element_manager->somix_call->add( ).
+          element_manager->somix_call->set_caller_called_relation(
+            EXPORTING
+              element_id = call_id
+              caller_id  = pc_chain_id
+              called_id  = pc_chain2_id
+          ).
+
+
+        ENDLOOP.
+
+      ENDLOOP.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_EXTR3_BW_QUERY IMPLEMENTATION.
+  METHOD get_instance.
+
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = element_manager.
+      instance->extr3_bw_infoprovider = cl_extr3_bw_infoprovider=>get_instance( element_manager = element_manager ).
+    ENDIF.
+    r_instance = instance.
+
+  ENDMETHOD.
+  METHOD add_bw_filter.
+
+    DATA unique_name TYPE string.
+    unique_name            = |sap.{ bw_filter }|.
+    element_manager->somix_code->add(
+      EXPORTING
+        grouping_name_group    = ''
+        grouping               = ''
+        code_name_group        = 'BW_FILTER'
+        code                   = |{ bw_filter }|
+        technical_type         = 'BW_FILTER'
+        link_to_editor         = |bwmt://{ sy-sysid }/sap/bw/modeling/filter/{ bw_filter }/a|
+      IMPORTING
+        id                     = bw_filter_id
+      CHANGING
+        unique_name            = unique_name
+    ).
+
+    " Find filter range
+
+    DATA bw_filter_h_s TYPE STANDARD TABLE OF rsrrepdir WITH DEFAULT KEY.
+    DATA bw_filter_h TYPE rsrrepdir.
+
+    SELECT * FROM rsrrepdir INTO TABLE bw_filter_h_s WHERE objvers = 'A' AND infocube = infoprovider AND compid = bw_filter.
+
+    LOOP AT bw_filter_h_s INTO bw_filter_h.
+
+      " Find xref
+
+      DATA eltxrefs TYPE STANDARD TABLE OF rszeltxref WITH DEFAULT KEY.
+      DATA eltxref TYPE rszeltxref.
+
+      CLEAR eltxrefs.
+
+      SELECT * FROM rszeltxref INTO TABLE eltxrefs WHERE seltuid = bw_filter_h-compuid AND objvers = 'A'.
+
+      LOOP AT eltxrefs INTO eltxref.
+
+        " Analyze range
+
+        DATA ranges TYPE STANDARD TABLE OF rszrange WITH DEFAULT KEY.
+        DATA range TYPE rszrange.
+
+        CLEAR ranges.
+
+        SELECT * FROM rszrange INTO TABLE ranges WHERE eltuid = eltxref-teltuid AND objvers = 'A'.
+
+        LOOP AT ranges INTO range.
+
+          IF range-iobjnm = '0INFOPROV' AND range-lowflag = 1. " Value
+
+            DATA infoprovider_id TYPE i.
+
+            CLEAR infoprovider_id.
+            DATA: infoprovider_is_data TYPE abap_bool.
+            extr3_bw_infoprovider->add_infoprovider( EXPORTING infoprovider    = range-low
+                                                     IMPORTING infoprovider_id = infoprovider_id
+                                                               is_data         = infoprovider_is_data ).
+            " In most cases is an infoprovider only a view to data which is modelled as code
+            IF infoprovider_is_data = ''.
+              DATA call_id TYPE i.
+              call_id = element_manager->somix_call->add( ).
+              element_manager->somix_call->set_caller_called_relation(
+                EXPORTING
+                  element_id = call_id
+                  caller_id  = bw_filter_id
+                  called_id  = infoprovider_id
+              ).
+
+            ELSE.
+              DATA access_id TYPE i.
+              access_id = element_manager->somix_access->add( ).
+              element_manager->somix_access->set_accessor_accessed_relation(
+                EXPORTING
+                  element_id   = access_id
+                  accessor_id  = bw_filter_id
+                  accessed_id  = infoprovider_id
+                  is_write     = 'X'
+                  is_read      = 'X'
+                  is_dependent = 'X'
+              ).
+            ENDIF.
+
+          ENDIF.
+
+          IF range-lowflag = 3. " Variable CIN
+
+            DATA variable_id TYPE i.
+
+            variable_id = add_variable( variable_eltuid = range-low ).
+
+            call_id = element_manager->somix_call->add( ).
+            element_manager->somix_call->set_caller_called_relation(
+              EXPORTING
+                element_id = call_id
+                caller_id  = bw_filter_id
+                called_id  = variable_id
+            ).
+
+          ENDIF.
+
+
+        ENDLOOP.
+
+      ENDLOOP.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+  METHOD add_variable.
+
+    DATA: variable TYPE rszglobv.
+
+    SELECT SINGLE * FROM rszglobv INTO variable WHERE varuniid = variable_eltuid AND objvers = 'A'.
+
+    IF sy-subrc = 0.
+
+      DATA unique_name TYPE string.
+      unique_name            = |sap.{ variable-vnam }|.
+
+      element_manager->somix_code->add(
+        EXPORTING
+          grouping_name_group    = ''
+          grouping               = ''
+          code_name_group        = |BW_VARIABLE|
+          code                   = |{ variable-vnam }|
+          technical_type         = |BW_VARIABLE|
+          link_to_editor         = |bwmt://{ sy-sysid }/sap/bw/modeling/variable/{ variable-vnam }/a|
+        IMPORTING
+          id                     = variable_id
+        CHANGING
+          unique_name            = unique_name ).
+
+    ENDIF.
+
+  ENDMETHOD.
+ENDCLASS.
+CLASS CL_EXTR3_BW_INFOPROVIDER IMPLEMENTATION.
+  METHOD get_instance.
+
+    IF instance IS NOT BOUND.
+      CREATE OBJECT instance
+        EXPORTING
+          i_element_manager = element_manager.
+    ENDIF.
+    r_instance = instance.
+
+  ENDMETHOD.
+  METHOD add_infoprovider.
+
+    CLEAR infoprovider_id.
+    CLEAR is_data.
+
+    DATA infoprovider_directory TYPE tadir.
+    DATA infoprovider_directories TYPE STANDARD TABLE OF tadir.
+    DATA: infoprovider_object_type TYPE trobjtype.
+    DATA link_to_editor TYPE string.
+
+    SELECT * FROM tadir INTO TABLE infoprovider_directories WHERE obj_name = infoprovider.
+
+    DATA: lines TYPE i.
+
+    lines = lines( infoprovider_directories ).
+
+    IF lines = 0.
+      CLEAR infoprovider_object_type.
+    ELSEIF lines = 1.
+      LOOP AT infoprovider_directories INTO infoprovider_directory.
+        infoprovider_object_type = infoprovider_directory-object.
+      ENDLOOP.
+    ELSE.
+      LOOP AT infoprovider_directories INTO infoprovider_directory.
+        CASE infoprovider_directory-object.
+          WHEN 'ADSO'.
+            infoprovider_object_type = 'ADSO'.
+          WHEN 'HCPR'.
+            infoprovider_object_type = 'HCPR'.
+        ENDCASE.
+      ENDLOOP.
+
+      IF infoprovider_object_type IS INITIAL.
+        infoprovider_object_type = 'XXXX'.
+      ENDIF.
+    ENDIF.
+    CASE infoprovider_object_type.
+      WHEN 'ADSO'.
+        link_to_editor = |bwmt://{ sy-sysid }/sap/bw/modeling/adso/{ infoprovider }/m|.
+      WHEN 'HCPR'.
+        link_to_editor = |bwmt://{ sy-sysid }/sap/bw/modeling/hcpr/{ infoprovider }/m|.
+    ENDCASE.
+    DATA unique_name TYPE string.
+    unique_name            = |sap.{ infoprovider }|.
+    DATA inprovider_type TYPE string.
+    inprovider_type = |BW_INFOPROVIDER_{ infoprovider_object_type }|.
+
+    IF is_data = ''. " This is currently the default
+
+      element_manager->somix_code->add(
+        EXPORTING
+          grouping_name_group    = ''
+          grouping               = ''
+          code_name_group        = inprovider_type
+          code                   = |{ infoprovider }|
+          technical_type         = inprovider_type
+          link_to_editor         = link_to_editor
+        IMPORTING
+          id                     = infoprovider_id
+        CHANGING
+          unique_name            = unique_name ).
+
+      IF infoprovider_object_type = 'HCPR'.
+        add_hcpr_components( EXPORTING infoprovider    = infoprovider
+                                       infoprovider_id = infoprovider_id ).
+      ENDIF.
+
+    ELSE.
+
+      element_manager->somix_data->add(
+        EXPORTING
+          grouping_name_group    = ''
+          grouping               = ''
+          data_name_group        = inprovider_type
+          data                   = |{ infoprovider }|
+          technical_type         = inprovider_type
+          link_to_editor         = link_to_editor
+        IMPORTING
+          id                     = infoprovider_id
+        CHANGING
+          unique_name            = unique_name ).
+
+    ENDIF.
+
+  ENDMETHOD.
+  METHOD add_hcpr_components.
+
+    TYPES:
+      BEGIN OF ty_hcp_mapping,
+        provider TYPE rsdodsobject,
+        source   TYPE rsdiobjnm,
+        target   TYPE rsohcprcolnm,
+      END OF ty_hcp_mapping .
+    TYPES:
+      ty_hcp_mappings TYPE STANDARD TABLE OF ty_hcp_mapping WITH DEFAULT KEY .
+
+    DATA: mapping_as_xml TYPE xstring,
+          parsed_xml     TYPE STANDARD TABLE OF smum_xmltb,
+          return         TYPE STANDARD TABLE OF bapiret2,
+          cvalue         TYPE char255,
+          offset         TYPE i,
+          mapping        TYPE ty_hcp_mapping,
+          mappings       TYPE ty_hcp_mappings.
+
+    SELECT SINGLE xml_ui FROM rsohcpr INTO mapping_as_xml WHERE hcprnm = infoprovider AND objvers = 'A'.
+    ASSERT sy-subrc EQ 0.
+
+    CALL FUNCTION 'SMUM_XML_PARSE'
+      EXPORTING
+        xml_input = mapping_as_xml
+      TABLES
+        xml_table = parsed_xml
+        return    = return.
+
+    FIELD-SYMBOLS: <xml> TYPE smum_xmltb.
+
+    LOOP AT parsed_xml ASSIGNING <xml>.
+      IF <xml>-cname = 'entity'.
+        cvalue = <xml>-cvalue.
+        SEARCH cvalue FOR 'composite'.
+        IF sy-subrc EQ 0.
+          offset = sy-fdpos.
+          offset = offset - 1.
+          IF offset EQ 0.
+            ASSERT 1 = 1.
+          ENDIF.
+          mapping-provider = <xml>-cvalue(offset). "CompositeProvider
+        ENDIF.
+
+      ELSEIF
+       <xml>-cname = 'targetName'.
+        " A simple hack to get only the providers
+*        mapping-target = <xml>-cvalue.
+      ELSEIF
+        <xml>-cname = 'sourceName'.
+        " A simple hack to get only the providers
+*        mapping-source = <xml>-cvalue.
+        APPEND mapping TO mappings.
+      ENDIF.
+    ENDLOOP.
+
+    " A simple hack to get only the providers
+    SORT mappings.
+    DELETE ADJACENT DUPLICATES FROM mappings.
+
+    LOOP AT mappings INTO mapping.
+
+      DATA: part_provider_id      TYPE i,
+            part_provider_is_data TYPE abap_bool.
+
+      add_infoprovider(
+        EXPORTING
+          infoprovider    = mapping-provider
+        IMPORTING
+          infoprovider_id = part_provider_id
+          is_data         = part_provider_is_data ).
+
+      IF part_provider_is_data = ''.
+        DATA call_id TYPE i.
+        call_id = element_manager->somix_call->add( ).
+        element_manager->somix_call->set_caller_called_relation(
+          EXPORTING
+            element_id = call_id
+            caller_id  = infoprovider_id
+            called_id  = part_provider_id
+        ).
+
+      ELSE.
+        DATA access_id TYPE i.
+        access_id = element_manager->somix_access->add( ).
+        element_manager->somix_access->set_accessor_accessed_relation(
+          EXPORTING
+            element_id   = access_id
+            accessor_id  = infoprovider_id
+            accessed_id  = part_provider_id
+            is_write     = 'X'
+            is_read      = 'X'
+            is_dependent = 'X'
+        ).
+      ENDIF.
+
+    ENDLOOP.
 
   ENDMETHOD.
 ENDCLASS.

@@ -1,0 +1,190 @@
+{
+	"newElementBox": {
+		"isInitial": false,
+		"newElBoxX": 283.353515625,
+		"newElBoxY": -654,
+		"newElBoxWidth": 400,
+		"newElBoxHeight": 848
+	},
+	"addedWithNeighbors": [
+		"ABAPMethod..sap.z2mse_extr3_classes.collect_infos",
+		"ABAPMethod..sap.z2mse_extr3_programs.collect_infos"
+	],
+	"positions": [
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_classes",
+			"x": -563,
+			"y": -146.87
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.attribute_type",
+			"x": -142,
+			"y": -286
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes.collect_infos",
+			"x": -462,
+			"y": -366
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.elements_comp_clsname_cmpname",
+			"x": -202,
+			"y": -366
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.elements_comp_element_id",
+			"x": -2,
+			"y": -426
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.elements_element_id",
+			"x": 98,
+			"y": -366
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.event_type",
+			"x": -22,
+			"y": -366
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.interface_type",
+			"x": -282,
+			"y": -286
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.is_class_type",
+			"x": -22,
+			"y": -286
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_classes.method_type",
+			"x": -162,
+			"y": -426
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_elements",
+			"x": 57.37,
+			"y": 63.64
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_elements.collect_infos",
+			"x": -455.34,
+			"y": -537.39
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_programs",
+			"x": 48.65,
+			"y": -471.5
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_programs.collect_infos",
+			"x": -1029,
+			"y": -428
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_programs.elements_element_id",
+			"x": -889,
+			"y": -428
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_programs.elements_program",
+			"x": -729,
+			"y": -428
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_programs.type_bw_transformation",
+			"x": -989,
+			"y": -348
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_programs.type_function",
+			"x": -829,
+			"y": -348
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_programs.type_function_include",
+			"x": -689,
+			"y": -348
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_programs.type_program",
+			"x": -1029,
+			"y": -288
+		},
+		{
+			"uniqueKey": "ABAPGlobalInterface..sap.if_oo_class_incl_naming",
+			"x": -627.91,
+			"y": 23.74
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.private_section",
+			"x": -730,
+			"y": 58
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.protected_section",
+			"x": -590,
+			"y": -22
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.public_section",
+			"x": -730,
+			"y": -22
+		},
+		{
+			"uniqueKey": "ABAPGlobalInterface..sap.if_oo_clif_incl_naming",
+			"x": -46.19,
+			"y": 127.17
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_clif_incl_naming.clstype",
+			"x": -100,
+			"y": 17
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_clif_incl_naming.public_section",
+			"x": -200,
+			"y": 17
+		},
+		{
+			"uniqueKey": "ABAPGlobalInterface..sap.if_oo_interface_incl_naming",
+			"x": 11.02,
+			"y": 48.21
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_interface_incl_naming.public_section",
+			"x": -32.44,
+			"y": -84.7
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.cl_oo_include_naming",
+			"x": 48.22,
+			"y": 19.65
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.cl_oo_include_naming.get_instance_by_cifkey",
+			"x": 63.56,
+			"y": 80.35
+		}
+	],
+	"comments": [
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes.collect_infos",
+			"x": -339,
+			"y": -535,
+			"text": "Build ADT links to classes"
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_programs.collect_infos",
+			"x": -1068,
+			"y": -537,
+			"text": "Build ADT links to programs, functions and \nBW transformations"
+		}
+	],
+	"pinned": [
+		"ABAPMethod..sap.z2mse_extr3_classes.collect_infos",
+		"ABAPMethod..sap.z2mse_extr3_elements.collect_infos",
+		"ABAPMethod..sap.z2mse_extr3_programs.collect_infos"
+	],
+	"suppressed": []
+}

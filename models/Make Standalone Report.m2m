@@ -1,0 +1,273 @@
+{
+	"newElementBox": {
+		"isInitial": false,
+		"newElBoxX": 1339.6401744068917,
+		"newElBoxY": -672.4,
+		"newElBoxWidth": 400,
+		"newElBoxHeight": 946.4
+	},
+	"addedWithNeighbors": [
+		"ABAPProgram..sap.z2mse_moose_extractor2",
+		"ABAPProgram..sap.z2mse_translate_to_local"
+	],
+	"positions": [
+		{
+			"uniqueKey": "ABAPProgram..sap.z2mse_moose_extractor2",
+			"x": -137.97,
+			"y": -460.74
+		},
+		{
+			"uniqueKey": "ABAPProgram..sap.z2mse_translate_to_local",
+			"x": -407.17,
+			"y": -452.01
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_element_manager",
+			"x": 654.58,
+			"y": -689.85
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_element_manager.constructor",
+			"x": 1131.31,
+			"y": 32.43
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_initial_elements",
+			"x": -350.57,
+			"y": 431.38
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_initial_elements.constructor",
+			"x": 775.18,
+			"y": 75.78
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_initial_elements.select_class_method",
+			"x": 955.18,
+			"y": 15.78
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_initial_elements.select_function",
+			"x": 795.18,
+			"y": 15.78
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_initial_elements.select_packages",
+			"x": 675.18,
+			"y": 15.78
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_initial_elements.select_program",
+			"x": 915.18,
+			"y": 75.78
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_initial_elements.select_specific",
+			"x": 655.18,
+			"y": 75.78
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_initial_elements.select_table",
+			"x": 655.18,
+			"y": 155.78
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_model_builder",
+			"x": 390.18,
+			"y": -471.79
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_model_builder.initialize",
+			"x": 1197.53,
+			"y": -277.37
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_model_builder.write_found_elements",
+			"x": 1068.25,
+			"y": -277.37
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extract3",
+			"x": 1062.34,
+			"y": 16.23
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extract3.constructor",
+			"x": 385.66,
+			"y": 12.74
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extract3.extract",
+			"x": 485.66,
+			"y": 12.74
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_output_model",
+			"x": -492.91,
+			"y": 915.69
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_output_model.make",
+			"x": -26.89,
+			"y": -183.37
+		},
+		{
+			"uniqueKey": "ABAPFunktionGroup..sap.fgr-sdhi",
+			"x": -624.01,
+			"y": -233.3
+		},
+		{
+			"uniqueKey": "ABAPFunktion..sap.fgr-sdhi.f4if_int_table_value_request",
+			"x": 407.97,
+			"y": -480.63
+		},
+		{
+			"uniqueKey": "DBTable..sap.sapt80.tadir",
+			"x": 251.52,
+			"y": 32.23
+		},
+		{
+			"uniqueKey": "ABAPFunktionGroup..sap.fgr-sfes",
+			"x": -136.99,
+			"y": -913.11
+		},
+		{
+			"uniqueKey": "ABAPFunktion..sap.fgr-sfes.gui_download",
+			"x": -127.29,
+			"y": -136.14
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.cl_gui_frontend_services",
+			"x": 423.76,
+			"y": 463.11
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.cl_gui_frontend_services.action_cancel",
+			"x": -12.62,
+			"y": -23.04
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.cl_gui_frontend_services.file_save_dialog",
+			"x": 115.24,
+			"y": -23.04
+		},
+		{
+			"uniqueKey": "ABAPGlobalInterface..sap.if_oo_class_incl_naming",
+			"x": -1090.35,
+			"y": -611.1
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.class_pool",
+			"x": -873.96,
+			"y": -88.09
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.if_oo_class_incl_naming.get_all_method_includes",
+			"x": -773.96,
+			"y": -148.09
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.locals_def",
+			"x": -953.96,
+			"y": -208.09
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.locals_imp",
+			"x": -853.96,
+			"y": -208.09
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.locals_old",
+			"x": -633.96,
+			"y": -148.09
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.macros",
+			"x": -953.96,
+			"y": -88.09
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.private_section",
+			"x": -733.96,
+			"y": -208.09
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.protected_section",
+			"x": -753.96,
+			"y": -88.09
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_class_incl_naming.public_section",
+			"x": -933.96,
+			"y": -148.09
+		},
+		{
+			"uniqueKey": "ABAPGlobalInterface..sap.if_oo_clif_incl_naming",
+			"x": -208.5,
+			"y": -1165.82
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_clif_incl_naming.clstype",
+			"x": -192.31,
+			"y": 57.69
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_clif_incl_naming.pool",
+			"x": -202.97,
+			"y": 123.69
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_clif_incl_naming.public_section",
+			"x": -93.34,
+			"y": 57.69
+		},
+		{
+			"uniqueKey": "ABAPGlobalInterface..sap.if_oo_interface_incl_naming",
+			"x": 376.73,
+			"y": -126.9
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_interface_incl_naming.interface_pool",
+			"x": -468.13,
+			"y": 16.05
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.if_oo_interface_incl_naming.public_section",
+			"x": -608.13,
+			"y": 16.05
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.cl_oo_include_naming",
+			"x": 781.09,
+			"y": 181.43
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.cl_oo_include_naming.get_instance_by_cifkey",
+			"x": -464.47,
+			"y": 128.02
+		}
+	],
+	"comments": [
+		{
+			"uniqueKey": "ABAPProgram..sap.z2mse_moose_extractor2",
+			"x": -138.47,
+			"y": -564.24,
+			"text": "Template for the Standalone Report\nContains pseudo comments for local classes\nThese are to be adapted, when new classes\nare implemented"
+		},
+		{
+			"uniqueKey": "ABAPProgram..sap.z2mse_translate_to_local",
+			"x": -456.17,
+			"y": -560.01,
+			"text": "Report to generate Standalone Report\nwhere global classes are inserted as\nlocal classes"
+		}
+	],
+	"pinned": [
+		"ABAPProgram..sap.z2mse_moose_extractor2",
+		"ABAPMethod..sap.z2mse_extr3_element_manager.constructor",
+		"ABAPMethod..sap.z2mse_output_model.make",
+		"ABAPFunktion..sap.fgr-sfes.gui_download",
+		"ABAPProgram..sap.z2mse_translate_to_local",
+		"ABAPMethod..sap.cl_oo_include_naming.get_instance_by_cifkey"
+	],
+	"suppressed": []
+}

@@ -1,0 +1,283 @@
+{
+	"newElementBox": {
+		"isInitial": false,
+		"newElBoxX": 1469.3387013756114,
+		"newElBoxY": -334,
+		"newElBoxWidth": 400,
+		"newElBoxHeight": 848
+	},
+	"addedWithNeighbors": [
+		"DBTable..sap.sapt80.rsplf_srv_p",
+		"DBTable..sap.sapt80.rsplf_srvtype",
+		"DBTable..sap.sapt80.rsplf_srv",
+		"ABAPMethod..sap.z2mse_extr3_planing.class_used_in_planing",
+		"ABAPMethod..sap.z2mse_extr3_planing.plan_func_used_in_plan_seq",
+		"ABAPMethod..sap.z2mse_extr3_bw_query.add_bw_filter",
+		"ABAPMethod..sap.z2mse_extr3_bw_infoprovider.add_infoprovider",
+		"ABAPMethod..sap.z2mse_extr3_process_chain.plan_seq_used_in_pc_chain"
+	],
+	"positions": [
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3",
+			"x": 146.81,
+			"y": -131.65
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3.element_manager",
+			"x": 290.74,
+			"y": -174.4
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_element_manager",
+			"x": -130.86,
+			"y": -103.01
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_element_manager.somix_access",
+			"x": -360.65,
+			"y": 57.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_element_manager.somix_call",
+			"x": -360.65,
+			"y": -62.7
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_element_manager.somix_code",
+			"x": -360.65,
+			"y": -22.7
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_element_manager.somix_data",
+			"x": -360.65,
+			"y": 17.3
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_code",
+			"x": 308.8,
+			"y": -81.39
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_code.add",
+			"x": 125.56,
+			"y": 288.34
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_data",
+			"x": 1397.48,
+			"y": 56.59
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_data.add",
+			"x": 844.57,
+			"y": 385.72
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_access",
+			"x": 1453.16,
+			"y": -201.3
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_access.set_accessor_accessed_relation",
+			"x": 1092.05,
+			"y": 393.08
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_call",
+			"x": 267.27,
+			"y": -37.77
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_call.set_caller_called_relation",
+			"x": 596.43,
+			"y": 261.32
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_coupling",
+			"x": 137.34,
+			"y": 20.93
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_coupling.add",
+			"x": 319.07,
+			"y": 250.58
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_classes",
+			"x": 399.38,
+			"y": 29.43
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_classes.make_model",
+			"x": -7.41,
+			"y": -213.16
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_planing",
+			"x": 193.97,
+			"y": -103.64
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_planing.class_used_in_planing",
+			"x": -22.45,
+			"y": -69.94
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_planing.extr3_bw_infoprovider",
+			"x": 181.98,
+			"y": 90.87
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_planing.extr3_bw_query",
+			"x": 129.05,
+			"y": 4.69
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_planing.extr3_process_chain",
+			"x": 329.12,
+			"y": 19.82
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_planing.plan_func_used_in_plan_seq",
+			"x": 183.78,
+			"y": -39.82
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_process_chain",
+			"x": 714.61,
+			"y": 244.56
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_process_chain.plan_seq_used_in_pc_chain",
+			"x": 597.11,
+			"y": -70.93
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_bw_query",
+			"x": 518.63,
+			"y": 222.7
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_bw_query.add_bw_filter",
+			"x": 719.21,
+			"y": 10.57
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_bw_query.add_variable",
+			"x": 878.07,
+			"y": 48.91
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_bw_query.extr3_bw_infoprovider",
+			"x": 819.21,
+			"y": 110.57
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_bw_infoprovider",
+			"x": 1241.24,
+			"y": -165.01
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_bw_infoprovider.add_hcpr_components",
+			"x": 1287.47,
+			"y": 134.84
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_bw_infoprovider.add_infoprovider",
+			"x": 1059.49,
+			"y": 99.24
+		},
+		{
+			"uniqueKey": "DBTable..sap.sapt80.tadir",
+			"x": 1099.64,
+			"y": 268.58
+		},
+		{
+			"uniqueKey": "DBTable..sap.sapt80.rsplf_srv",
+			"x": -144.84,
+			"y": 167.58
+		},
+		{
+			"uniqueKey": "DBTable..sap.sapt80.rsplf_srvtype",
+			"x": 50.87,
+			"y": 171.58
+		},
+		{
+			"uniqueKey": "DBTable..sap.sapt80.rsplf_srv_p",
+			"x": -264.87,
+			"y": 159.11
+		},
+		{
+			"uniqueKey": "DBTable..sap.sapt80.rspls_alvl",
+			"x": 236.52,
+			"y": 182.9
+		},
+		{
+			"uniqueKey": "DBTable..sap.sapt80.rspls_sequence_s",
+			"x": 395.88,
+			"y": 179.1
+		},
+		{
+			"uniqueKey": "DBTable..sap.sapt80.rspcchain",
+			"x": 547.65,
+			"y": 188.24
+		},
+		{
+			"uniqueKey": "DBTable..sap.sapt80.rspcvariant",
+			"x": 674.56,
+			"y": 195.82
+		},
+		{
+			"uniqueKey": "DBTable..sap.sapt80.rsrrepdir",
+			"x": 793.13,
+			"y": 254.56
+		},
+		{
+			"uniqueKey": "DBTable..sap.sapt80.rszeltxref",
+			"x": 996.99,
+			"y": 264.05
+		},
+		{
+			"uniqueKey": "DBTable..sap.sapt80.rszrange",
+			"x": 894.26,
+			"y": 257.37
+		}
+	],
+	"comments": [],
+	"pinned": [
+		"ABAPMethod..sap.z2mse_extr3_classes.make_model",
+		"DBTable..sap.sapt80.rsplf_srv_p",
+		"DBTable..sap.sapt80.rsplf_srv",
+		"DBTable..sap.sapt80.rsplf_srvtype",
+		"ABAPMethod..sap.z2mse_extr3_planing.class_used_in_planing",
+		"ABAPMethod..sap.z2mse_somix_call.set_caller_called_relation",
+		"ABAPMethod..sap.z2mse_somix_coupling.add",
+		"ABAPClassAttribute..sap.z2mse_extr3.element_manager",
+		"ABAPMethod..sap.z2mse_somix_parentchild.add",
+		"ABAPMethod..sap.z2mse_somix_grouping.add",
+		"ABAPMethod..sap.z2mse_somix_code.add",
+		"ABAPMethod..sap.z2mse_extr3_planing.plan_func_used_in_plan_seq",
+		"ABAPClassAttribute..sap.z2mse_extr3_planing.extr3_bw_query",
+		"ABAPClassAttribute..sap.z2mse_extr3_planing.extr3_process_chain",
+		"ABAPMethod..sap.z2mse_extr3_process_chain.plan_seq_used_in_pc_chain",
+		"DBTable..sap.sapt80.rspls_alvl",
+		"DBTable..sap.sapt80.rspls_sequence_s",
+		"ABAPMethod..sap.z2mse_extr3_bw_query.add_bw_filter",
+		"DBTable..sap.sapt80.rsrrepdir",
+		"DBTable..sap.sapt80.rszrange",
+		"DBTable..sap.sapt80.rszeltxref",
+		"ABAPMethod..sap.z2mse_extr3_bw_infoprovider.add_infoprovider",
+		"DBTable..sap.sapt80.rspcvariant",
+		"DBTable..sap.sapt80.rspcchain",
+		"ABAPMethod..sap.z2mse_extr3_bw_infoprovider.add_hcpr_components",
+		"ABAPMethod..sap.z2mse_somix_access.set_accessor_accessed_relation",
+		"ABAPMethod..sap.z2mse_extr3_bw_query.add_variable",
+		"ABAPMethod..sap.z2mse_somix_data.add",
+		"ABAPClassAttribute..sap.z2mse_extr3_element_manager.somix_access",
+		"ABAPClassAttribute..sap.z2mse_extr3_planing.extr3_bw_infoprovider",
+		"ABAPClassAttribute..sap.z2mse_extr3_element_manager.somix_code",
+		"DBTable..sap.sapt80.tadir",
+		"ABAPClassAttribute..sap.z2mse_extr3_element_manager.somix_data"
+	],
+	"suppressed": []
+}

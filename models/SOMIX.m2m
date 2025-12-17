@@ -1,4 +1,11 @@
 {
+	"newElementBox": {
+		"isInitial": false,
+		"newElBoxX": 596.5060077794396,
+		"newElBoxY": -594,
+		"newElBoxWidth": 400,
+		"newElBoxHeight": 2308
+	},
 	"addedWithNeighbors": [
 		"ABAPMethod..sap.z2mse_famix_invocation.is_new_invocation_to_candidate",
 		"ABAPMethod..sap.z2mse_famix_module.add",
@@ -99,73 +106,73 @@
 		},
 		{
 			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3",
-			"x": 234.62,
-			"y": 48.08
+			"x": 227.48,
+			"y": -465.66
 		},
 		{
 			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3.element_manager",
-			"x": -493,
-			"y": 2058.7
+			"x": -513.19,
+			"y": 1552
 		},
 		{
 			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3.ng_abap_attribute",
-			"x": -494.7,
-			"y": 2014.5
+			"x": -513.19,
+			"y": 1512
 		},
 		{
 			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3.ng_abap_class",
-			"x": -498.1,
-			"y": 2036.6
+			"x": -513.19,
+			"y": 1532
 		},
 		{
 			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3.ng_abap_method",
-			"x": -380.8,
-			"y": 2036.6
+			"x": -393.19,
+			"y": 1532
 		},
 		{
 			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3.ng_abap_program",
-			"x": -618.8,
-			"y": 2079.1
+			"x": -633.19,
+			"y": 1572
 		},
 		{
 			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3.ng_abap_webdynpro",
-			"x": -477.7,
-			"y": 2079.1
+			"x": -493.19,
+			"y": 1572
 		},
 		{
 			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3.ng_database_schema",
-			"x": -618.8,
-			"y": 2099.5
+			"x": -633.19,
+			"y": 1592
 		},
 		{
 			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3.ng_sap_table",
-			"x": -353.6,
-			"y": 2079.1
+			"x": -373.19,
+			"y": 1572
 		},
 		{
 			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_element_manager",
-			"x": 38.12,
-			"y": 344.49
+			"x": -447.08,
+			"y": -138.33
 		},
 		{
 			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_element_manager.constructor",
-			"x": -946.9,
-			"y": 2040
+			"x": -1419.46,
+			"y": 1563.46
 		},
 		{
 			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_element_manager.get_element",
-			"x": -853.4,
-			"y": 2068.9
+			"x": -1339.46,
+			"y": 1583.46
 		},
 		{
 			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_element_manager.somix_code",
-			"x": -826.2,
-			"y": 2012.8
+			"x": -1279.46,
+			"y": 1543.46
 		},
 		{
 			"uniqueKey": "ABAPClassAttribute..sap.z2mse_extr3_element_manager.somix_data",
-			"x": -807.5,
-			"y": 1949.9
+			"x": -1279.46,
+			"y": 1463.46
 		},
 		{
 			"uniqueKey": "ABAPGlobalClass..sap.z2mse_famix_access",
@@ -458,6 +465,36 @@
 			"y": 78.2
 		},
 		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_coupling",
+			"x": 265.84,
+			"y": 376.32
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_coupling.add",
+			"x": -1460.3,
+			"y": -132.6
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_parentchild",
+			"x": 334.66,
+			"y": 218.1
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_parentchild.add",
+			"x": -1790.1,
+			"y": -154.7
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_parentchild.constructor",
+			"x": -1887,
+			"y": -102
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_somix_parentchild.g_parent_child_ids",
+			"x": -1902.3,
+			"y": -156.4
+		},
+		{
 			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_code",
 			"x": 313.59,
 			"y": 210.4
@@ -498,16 +535,6 @@
 			"y": 85
 		},
 		{
-			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_coupling",
-			"x": 265.84,
-			"y": 376.32
-		},
-		{
-			"uniqueKey": "ABAPMethod..sap.z2mse_somix_coupling.add",
-			"x": -1460.3,
-			"y": -132.6
-		},
-		{
 			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_data",
 			"x": 264.89,
 			"y": 254.01
@@ -538,51 +565,6 @@
 			"y": 239.7
 		},
 		{
-			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_grouping",
-			"x": 286.9,
-			"y": 204.59
-		},
-		{
-			"uniqueKey": "ABAPMethod..sap.z2mse_somix_grouping.add",
-			"x": -2181.1,
-			"y": 56.1
-		},
-		{
-			"uniqueKey": "ABAPMethod..sap.z2mse_somix_grouping.constructor",
-			"x": -2255.9,
-			"y": 62.9
-		},
-		{
-			"uniqueKey": "ABAPMethod..sap.z2mse_somix_grouping.get_id",
-			"x": -2339.2,
-			"y": 100.3
-		},
-		{
-			"uniqueKey": "ABAPClassAttribute..sap.z2mse_somix_grouping.g_grouping_ids",
-			"x": -2293.3,
-			"y": -3.4
-		},
-		{
-			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_parentchild",
-			"x": 334.66,
-			"y": 218.1
-		},
-		{
-			"uniqueKey": "ABAPMethod..sap.z2mse_somix_parentchild.add",
-			"x": -1790.1,
-			"y": -154.7
-		},
-		{
-			"uniqueKey": "ABAPMethod..sap.z2mse_somix_parentchild.constructor",
-			"x": -1887,
-			"y": -102
-		},
-		{
-			"uniqueKey": "ABAPClassAttribute..sap.z2mse_somix_parentchild.g_parent_child_ids",
-			"x": -1902.3,
-			"y": -156.4
-		},
-		{
 			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_entity",
 			"x": 293.65,
 			"y": 388.96
@@ -606,6 +588,31 @@
 			"uniqueKey": "ABAPClassAttribute..sap.z2mse_somix_entity.g_model",
 			"x": -1771.4,
 			"y": -278.8
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_grouping",
+			"x": 286.9,
+			"y": 204.59
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_grouping.add",
+			"x": -2181.1,
+			"y": 56.1
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_grouping.constructor",
+			"x": -2255.9,
+			"y": 62.9
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_grouping.get_id",
+			"x": -2339.2,
+			"y": 100.3
+		},
+		{
+			"uniqueKey": "ABAPClassAttribute..sap.z2mse_somix_grouping.g_grouping_ids",
+			"x": -2293.3,
+			"y": -3.4
 		},
 		{
 			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_access",
@@ -738,6 +745,26 @@
 			"y": 1310.7
 		},
 		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_web_dynpro_comp",
+			"x": 302.07,
+			"y": 223.61
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_web_dynpro_comp.get_instance",
+			"x": -1217.2,
+			"y": 1249.5
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_web_dynpro_comp.make_model",
+			"x": -1132.2,
+			"y": 1259.7
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_web_dynpro_comp.wdy_controller_name",
+			"x": -1184.9,
+			"y": 1292
+		},
+		{
 			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_tables",
 			"x": 112.79,
 			"y": 328.04
@@ -761,26 +788,6 @@
 			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tables.table_name",
 			"x": -1011.5,
 			"y": 1171.3
-		},
-		{
-			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_web_dynpro_comp",
-			"x": 302.07,
-			"y": 223.61
-		},
-		{
-			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_web_dynpro_comp.get_instance",
-			"x": -1217.2,
-			"y": 1249.5
-		},
-		{
-			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_web_dynpro_comp.make_model",
-			"x": -1132.2,
-			"y": 1259.7
-		},
-		{
-			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_web_dynpro_comp.wdy_controller_name",
-			"x": -1184.9,
-			"y": 1292
 		}
 	],
 	"comments": [
@@ -788,7 +795,7 @@
 			"uniqueKey": "ABAPClassAttribute..sap.z2mse_somix_data.is_persistent",
 			"x": -2218.5,
 			"y": -232.9,
-			"text": "TODO: Add attribute is_persistent also to the logic\n        "
+			"text": "TODO: Add attribute is_persistent also to the logic"
 		}
 	],
 	"pinned": [
