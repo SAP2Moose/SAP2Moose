@@ -44,7 +44,7 @@ CLASS z2mse_extr3_bw_infoprovider IMPLEMENTATION.
     DATA infoprovider_directory TYPE tadir.
     DATA infoprovider_directories TYPE STANDARD TABLE OF tadir.
     DATA: infoprovider_object_type TYPE trobjtype.
-    data link_to_editor TYPE string.
+    DATA link_to_editor TYPE string.
 
     SELECT * FROM tadir INTO TABLE infoprovider_directories WHERE obj_name = infoprovider.
 
@@ -63,17 +63,21 @@ CLASS z2mse_extr3_bw_infoprovider IMPLEMENTATION.
         CASE infoprovider_directory-object.
           WHEN 'ADSO'.
             infoprovider_object_type = 'ADSO'.
-            link_to_editor = |bwmt://{ sy-sysid }/sap/bw/modeling/adso/{ infoprovider }/m|.
           WHEN 'HCPR'.
             infoprovider_object_type = 'HCPR'.
-            link_to_editor = |bwmt://{ sy-sysid }/sap/bw/modeling/hcpr/{ infoprovider }/m|.
         ENDCASE.
       ENDLOOP.
+
       IF infoprovider_object_type IS INITIAL.
         infoprovider_object_type = 'XXXX'.
       ENDIF.
     ENDIF.
-
+    CASE infoprovider_object_type.
+      WHEN 'ADSO'.
+        link_to_editor = |bwmt://{ sy-sysid }/sap/bw/modeling/adso/{ infoprovider }/m|.
+      WHEN 'HCPR'.
+        link_to_editor = |bwmt://{ sy-sysid }/sap/bw/modeling/hcpr/{ infoprovider }/m|.
+    ENDCASE.
     DATA unique_name TYPE string.
     unique_name            = |sap.{ infoprovider }|.
     DATA inprovider_type TYPE string.
