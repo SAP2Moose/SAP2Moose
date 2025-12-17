@@ -5,6 +5,9 @@ CLASS z2mse_extr3_classes DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+
+    DATA extr3_planing TYPE REF TO z2mse_extr3_planing.
+
     CONSTANTS: is_class_type  TYPE seoclstype VALUE 0,
                interface_type TYPE seoclstype VALUE 1,
                attribute_type TYPE seocmptype VALUE 0,
@@ -499,8 +502,9 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
       CREATE OBJECT instance
         EXPORTING
           i_element_manager = element_manager.
+      instance->type = class_type.
+      instance->extr3_planing = z2mse_extr3_planing=>get_instance( element_manager = element_manager ).
     ENDIF.
-    instance->type = class_type.
     r_instance = instance.
   ENDMETHOD.
 
@@ -764,85 +768,95 @@ CLASS z2mse_extr3_classes IMPLEMENTATION.
 
             FIND 'IF_RSPLFA' IN element_comp-cmpname.
             IF sy-subrc = 0.
-              DATA planing_function TYPE rsplf_srv.
-              DATA planing_functions TYPE STANDARD TABLE OF rsplf_srv WITH DEFAULT KEY.
-              CLEAR planing_functions.
-              " Find direct usages of method in planing function
-              DATA planing_function_parameters TYPE STANDARD TABLE OF rsplf_srv_p WITH DEFAULT KEY.
-              SELECT * FROM rsplf_srv_p INTO TABLE planing_function_parameters WHERE objvers = 'A' AND parnm = 'CLASS' AND value = element_comp-clsname.
-              IF sy-subrc = 0.
-                DATA pfp TYPE rsplf_srv_p.
-                LOOP AT planing_function_parameters INTO pfp.
-                  SELECT SINGLE * FROM rsplf_srv INTO planing_function WHERE objvers = 'A' AND srvnm = pfp-srvnm.
-                  IF sy-subrc = 0.
-                    APPEND planing_function TO planing_functions.
-                  ENDIF.
-                ENDLOOP.
-              ENDIF.
-              " Find usages of method in service types
-              DATA service_types TYPE STANDARD TABLE OF rsplf_srvtype WITH DEFAULT KEY.
-              DATA st TYPE rsplf_srvtype.
-              SELECT * FROM rsplf_srvtype INTO TABLE service_types WHERE objvers = 'A' AND classnm = element_comp-clsname.
-              LOOP AT service_types INTO st.
+* BEGIN DELETE #140
+*              DATA planing_function TYPE rsplf_srv.
+*              DATA planing_functions TYPE STANDARD TABLE OF rsplf_srv WITH DEFAULT KEY.
+*              CLEAR planing_functions.
+*              " Find direct usages of method in planing function
+*              DATA planing_function_parameters TYPE STANDARD TABLE OF rsplf_srv_p WITH DEFAULT KEY.
+*              SELECT * FROM rsplf_srv_p INTO TABLE planing_function_parameters WHERE objvers = 'A' AND parnm = 'CLASS' AND value = element_comp-clsname.
+*              IF sy-subrc = 0.
+*                DATA pfp TYPE rsplf_srv_p.
+*                LOOP AT planing_function_parameters INTO pfp.
+*                  SELECT SINGLE * FROM rsplf_srv INTO planing_function WHERE objvers = 'A' AND srvnm = pfp-srvnm.
+*                  IF sy-subrc = 0.
+*                    APPEND planing_function TO planing_functions.
+*                  ENDIF.
+*                ENDLOOP.
+*              ENDIF.
+*              " Find usages of method in service types
+*              DATA service_types TYPE STANDARD TABLE OF rsplf_srvtype WITH DEFAULT KEY.
+*              DATA st TYPE rsplf_srvtype.
+*              SELECT * FROM rsplf_srvtype INTO TABLE service_types WHERE objvers = 'A' AND classnm = element_comp-clsname.
+*              LOOP AT service_types INTO st.
+*
+*                SELECT * FROM rsplf_srv INTO planing_function WHERE objvers = 'A' AND srvtypenm = st-srvtypenm.
+*                  APPEND planing_function TO planing_functions.
+*                ENDSELECT.
+*              ENDLOOP.
+*
+*              SORT planing_functions.
+*              DELETE ADJACENT DUPLICATES FROM planing_functions.
+*
+*              LOOP AT planing_functions INTO planing_function.
+*                unique_name            = |sap.{ planing_function-infoprov }|.
+*                DATA aggr_id TYPE i.
+*                element_manager->somix_grouping->add(
+*                  EXPORTING
+*                    grouping_name_group    = 'AGGR_LEVEL'
+*                    grouping               = planing_function-infoprov
+*                    technical_type         = 'AGGR_LEVEL'
+*                    link_to_editor         = ''
+*                  IMPORTING
+**                  exists_already_with_id =
+*                    id                     = aggr_id
+*                  CHANGING
+*                    unique_name            = unique_name
+*                ).
+*                unique_name            = |sap.{ planing_function-infoprov }.{ planing_function-srvnm }|.
+*                DATA planfunc_id TYPE i.
+*                element_manager->somix_code->add(
+*                  EXPORTING
+*                    grouping_name_group    = 'AGGR_LEVEL'
+*                    grouping               = planing_function-infoprov
+*                    code_name_group        = 'PLANING_FUNCTION'
+*                    code                   = planing_function-srvnm
+*                    technical_type         = 'PLANING_FUNCTION'
+*                    link_to_editor         = ''
+*                  IMPORTING
+**                  exists_already_with_id =
+*                    id                     = planfunc_id
+*                  CHANGING
+*                    unique_name            = unique_name
+*                ).
+*                element_manager->somix_parentchild->add(
+*                  EXPORTING
+*                    parent_id = aggr_id
+*                    child_id  = planfunc_id
+*                    is_main   = 'X'
+**                RECEIVING
+**                  id        =
+*                ).
+*                DATA: call_id TYPE i.
+*                call_id = element_manager->somix_call->add( ).
+*                element_manager->somix_call->set_caller_called_relation(
+*                  EXPORTING
+*                    element_id = call_id
+*                    caller_id  = planfunc_id
+*                    called_id  = last_id
+*                ).
+*
+*
+*              ENDLOOP.
+* BEGIN REPLACE #140
 
-                SELECT * FROM rsplf_srv INTO planing_function WHERE objvers = 'A' AND srvtypenm = st-srvtypenm.
-                  APPEND planing_function TO planing_functions.
-                ENDSELECT.
-              ENDLOOP.
+              extr3_planing->class_used_in_planing(
+                     clsname = element_comp-clsname
+                     method_id = last_id
+               ).
 
-              SORT planing_functions.
-              DELETE ADJACENT DUPLICATES FROM planing_functions.
+* END REPLACE #140
 
-              LOOP AT planing_functions INTO planing_function.
-                unique_name            = |sap.{ planing_function-infoprov }|.
-                DATA aggr_id TYPE i.
-                element_manager->somix_grouping->add(
-                  EXPORTING
-                    grouping_name_group    = 'AGGR_LEVEL'
-                    grouping               = planing_function-infoprov
-                    technical_type         = 'AGGR_LEVEL'
-                    link_to_editor         = ''
-                  IMPORTING
-*                  exists_already_with_id =
-                    id                     = aggr_id
-                  CHANGING
-                    unique_name            = unique_name
-                ).
-                unique_name            = |sap.{ planing_function-infoprov }.{ planing_function-srvnm }|.
-                DATA planfunc_id TYPE i.
-                element_manager->somix_code->add(
-                  EXPORTING
-                    grouping_name_group    = 'AGGR_LEVEL'
-                    grouping               = planing_function-infoprov
-                    code_name_group        = 'PLANING_FUNCTION'
-                    code                   = planing_function-srvnm
-                    technical_type         = 'PLANING_FUNCTION'
-                    link_to_editor         = ''
-                  IMPORTING
-*                  exists_already_with_id =
-                    id                     = planfunc_id
-                  CHANGING
-                    unique_name            = unique_name
-                ).
-                element_manager->somix_parentchild->add(
-                  EXPORTING
-                    parent_id = aggr_id
-                    child_id  = planfunc_id
-                    is_main   = 'X'
-*                RECEIVING
-*                  id        =
-                ).
-                DATA: call_id TYPE i.
-                call_id = element_manager->somix_call->add( ).
-                element_manager->somix_call->set_caller_called_relation(
-                  EXPORTING
-                    element_id = call_id
-                    caller_id  = planfunc_id
-                    called_id  = last_id
-                ).
-
-
-              ENDLOOP.
             ENDIF.
 
             " End Insert Planing Function

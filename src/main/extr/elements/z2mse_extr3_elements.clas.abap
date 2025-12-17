@@ -29,8 +29,8 @@ CLASS z2mse_extr3_elements DEFINITION
         element_id   TYPE z2mse_extr3_element_manager=>element_id_type
       EXPORTING
         element_type TYPE string
-        parent_name TYPE string
-        name TYPE string.
+        parent_name  TYPE string
+        name         TYPE string.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -39,10 +39,10 @@ ENDCLASS.
 
 
 
-CLASS Z2MSE_EXTR3_ELEMENTS IMPLEMENTATION.
+CLASS z2mse_extr3_elements IMPLEMENTATION.
 
 
-  METHOD COLLECT_INFOS.
+  METHOD collect_infos.
     " Redefine me
     ASSERT 1 = 2.
   ENDMETHOD.
@@ -54,7 +54,7 @@ CLASS Z2MSE_EXTR3_ELEMENTS IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD NAME.
+  METHOD name.
     " Redefine me
     ASSERT 1 = 2.
   ENDMETHOD.

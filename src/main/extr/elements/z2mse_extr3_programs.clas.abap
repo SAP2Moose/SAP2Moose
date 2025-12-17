@@ -51,6 +51,7 @@ CLASS z2mse_extr3_programs DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA instance TYPE REF TO z2mse_extr3_programs.
+    DATA extr3_process_chain TYPE REF TO z2mse_extr3_process_chain.
     TYPES: BEGIN OF element_type,
              element_id            TYPE z2mse_extr3_element_manager=>element_id_type,
              program               TYPE progname,
@@ -257,8 +258,9 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
       CREATE OBJECT instance
         EXPORTING
           i_element_manager = i_element_manager.
+      instance->type = program_type.
+      instance->extr3_process_chain = z2mse_extr3_process_chain=>get_instance( element_manager = i_element_manager ).
     ENDIF.
-    instance->type = program_type.
     r_instance = instance.
   ENDMETHOD.
 
@@ -390,6 +392,15 @@ CLASS z2mse_extr3_programs IMPLEMENTATION.
       element_manager->somix_parentchild->add( EXPORTING parent_id = last_id
                                                          child_id  = dummy_method_id
                                                          is_main   = is_main ).
+
+      " Add usage in process chains
+
+      extr3_process_chain->program_used_in_pc_chain(
+        EXPORTING
+          program    = element-program
+          program_id = dummy_method_id
+      ).
+*
 
     ELSE. " SOMIX
 
