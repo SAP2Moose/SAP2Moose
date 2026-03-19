@@ -73,6 +73,36 @@ The JSON diagrams are created and maintained by the user in Moose2Model. Claude 
 
 Always specify which element or diagram you need changed so the user can act on it in Moose2Model.
 
+## Session Summaries
+
+When the user asks to save/summarize a session, write it to `ai/issues/<issue-number>-<short-name>.md` using this structure:
+
+```markdown
+# Context
+Short description of the problem
+
+# Current Understanding
+What we found out so far
+
+# Decisions
+- ...
+
+# Open Questions
+- ...
+
+# Next Steps
+- ...
+
+# Relevant Files
+- src/...
+- ...
+
+# Notes
+Free text / thoughts
+```
+
+The user may say "save the session under ai/issues/..." or "update ai/issues/...". Create or update the file accordingly.
+
 ## Key Conventions
 
 - All ABAP classes use prefix `z2mse_`
