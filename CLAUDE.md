@@ -62,6 +62,17 @@ Each SAP object type (classes, programs, packages, tables, functions, BW objects
 - `*.m2m` files — Transformation models for Moose2Model visualization tool
 - `*.json` files — Focused circuit diagrams of this project's own code in condensed SOMIX format, exported from Moose2Model for AI analysis. Each file covers a specific aspect of the codebase (indicated by its `diagramTitle`), not the complete model. They contain nodes (classes, methods, attributes with their SOMIX type), calls (method-to-method), and accesses (method-to-data). The `AwN` flag ("Added with Neighbors") is critical: only elements with this flag have **all** their calls and accesses shown in the diagram. Elements without `AwN` appear as context but may have relationships in the code that are not visible in that diagram. To get the full picture for a given element, look for it with `AwN` in the relevant diagram, or fall back to reading the source code.
 
+### Working with Diagrams
+
+The JSON diagrams are created and maintained by the user in Moose2Model. Claude Code can request changes:
+
+- **New diagram:** Ask the user to create a diagram for a specific aspect not yet covered.
+- **Add element with AwN:** If an element's relationships are needed but it only appears as context (without `AwN`), ask the user to add it with all neighbors in the relevant diagram.
+- **Comment corrections:** If a diagram contains wrong or outdated comments, ask the user to update them.
+- **New comments:** Ask the user to add comments to diagrams where they would help clarify intent.
+
+Always specify which element or diagram you need changed so the user can act on it in Moose2Model.
+
 ## Key Conventions
 
 - All ABAP classes use prefix `z2mse_`
