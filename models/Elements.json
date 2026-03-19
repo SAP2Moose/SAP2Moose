@@ -1,0 +1,186 @@
+{
+  "FileContent": "This file contains a circuit diagram of software in a condensed SOMIX format, exported from Moose2Model2 (www.moose2model.org) for AI analysis. See legend for format.",
+  "m2m_export": "somix-circuit-diagram",
+  "version": 3,
+  "modelName": "Z2MSE_T80_20251217_205307.mse",
+  "diagramTitle": "Elements",
+  "timestamp": "2026-03-19T15:51:05.367Z",
+  "legend": {
+    "nodes": "[id, SOMIXelement, technicalType, name, flags?]",
+    "flags": {
+      "AwN": "Added with Neighbors - all calls and accesses of this element are visible in the diagram"
+    },
+    "calls": "[from, to]",
+    "accesses": "[from, to]"
+  },
+  "nodes": [
+    [
+      "sap.z2mse_extr3_element_manager",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_EXTR3_ELEMENT_MANAGER"
+    ],
+    [
+      "sap.z2mse_extr3_element_manager.add_element",
+      "Code",
+      "ABAPMethod",
+      "ADD_ELEMENT",
+      "AwN"
+    ],
+    [
+      "sap.z2mse_extr3_element_manager.elements",
+      "Data",
+      "ABAPClassAttribute",
+      "ELEMENTS"
+    ],
+    [
+      "sap.z2mse_extr3_element_manager.model_builder",
+      "Data",
+      "ABAPClassAttribute",
+      "MODEL_BUILDER"
+    ],
+    [
+      "sap.z2mse_extr3_element_manager.next_element_id",
+      "Data",
+      "ABAPClassAttribute",
+      "NEXT_ELEMENT_ID"
+    ],
+    [
+      "sap.z2mse_extr3_model_builder",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_EXTR3_MODEL_BUILDER"
+    ],
+    [
+      "sap.z2mse_extr3_model_builder.new_element_id",
+      "Code",
+      "ABAPMethod",
+      "NEW_ELEMENT_ID"
+    ],
+    [
+      "sap.z2mse_extr3_tables",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_EXTR3_TABLES"
+    ],
+    [
+      "sap.z2mse_extr3_tables.add",
+      "Code",
+      "ABAPMethod",
+      "ADD"
+    ],
+    [
+      "sap.z2mse_extr3_classes",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_EXTR3_CLASSES"
+    ],
+    [
+      "sap.z2mse_extr3_classes.add",
+      "Code",
+      "ABAPMethod",
+      "ADD"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_single_component_to_class",
+      "Code",
+      "ABAPMethod",
+      "_ADD_SINGLE_COMPONENT_TO_CLASS"
+    ],
+    [
+      "sap.z2mse_extr3_packages",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_EXTR3_PACKAGES"
+    ],
+    [
+      "sap.z2mse_extr3_packages.add",
+      "Code",
+      "ABAPMethod",
+      "ADD"
+    ],
+    [
+      "sap.z2mse_extr3_programs",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_EXTR3_PROGRAMS"
+    ],
+    [
+      "sap.z2mse_extr3_programs.add",
+      "Code",
+      "ABAPMethod",
+      "ADD"
+    ],
+    [
+      "sap.z2mse_extr3_web_dynpro_comp",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_EXTR3_WEB_DYNPRO_COMP"
+    ],
+    [
+      "sap.z2mse_extr3_web_dynpro_comp.add",
+      "Code",
+      "ABAPMethod",
+      "ADD"
+    ],
+    [
+      "sap.z2mse_extr3_web_dynpro_comp._add_component",
+      "Code",
+      "ABAPMethod",
+      "_ADD_COMPONENT"
+    ]
+  ],
+  "calls": [
+    [
+      "sap.z2mse_extr3_element_manager.add_element",
+      "sap.z2mse_extr3_model_builder.new_element_id"
+    ],
+    [
+      "sap.z2mse_extr3_tables.add",
+      "sap.z2mse_extr3_element_manager.add_element"
+    ],
+    [
+      "sap.z2mse_extr3_classes.add",
+      "sap.z2mse_extr3_element_manager.add_element"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_single_component_to_class",
+      "sap.z2mse_extr3_element_manager.add_element"
+    ],
+    [
+      "sap.z2mse_extr3_packages.add",
+      "sap.z2mse_extr3_element_manager.add_element"
+    ],
+    [
+      "sap.z2mse_extr3_programs.add",
+      "sap.z2mse_extr3_element_manager.add_element"
+    ],
+    [
+      "sap.z2mse_extr3_web_dynpro_comp.add",
+      "sap.z2mse_extr3_element_manager.add_element"
+    ],
+    [
+      "sap.z2mse_extr3_web_dynpro_comp.add",
+      "sap.z2mse_extr3_web_dynpro_comp._add_component"
+    ],
+    [
+      "sap.z2mse_extr3_web_dynpro_comp._add_component",
+      "sap.z2mse_extr3_element_manager.add_element"
+    ]
+  ],
+  "accesses": [
+    [
+      "sap.z2mse_extr3_element_manager.add_element",
+      "sap.z2mse_extr3_element_manager.elements"
+    ],
+    [
+      "sap.z2mse_extr3_element_manager.add_element",
+      "sap.z2mse_extr3_element_manager.model_builder"
+    ],
+    [
+      "sap.z2mse_extr3_element_manager.add_element",
+      "sap.z2mse_extr3_element_manager.next_element_id"
+    ]
+  ],
+  "comments": []
+}

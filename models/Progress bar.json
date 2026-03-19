@@ -1,0 +1,87 @@
+{
+  "FileContent": "This file contains a circuit diagram of software in a condensed SOMIX format, exported from Moose2Model2 (www.moose2model.org) for AI analysis. See legend for format.",
+  "m2m_export": "somix-circuit-diagram",
+  "version": 3,
+  "modelName": "Z2MSE_T80_20251217_205307.mse",
+  "diagramTitle": "Progress bar",
+  "timestamp": "2026-03-19T15:54:31.732Z",
+  "legend": {
+    "nodes": "[id, SOMIXelement, technicalType, name, flags?]",
+    "flags": {
+      "AwN": "Added with Neighbors - all calls and accesses of this element are visible in the diagram"
+    },
+    "calls": "[from, to]",
+    "accesses": "[from, to]"
+  },
+  "nodes": [
+    [
+      "sap.z2mse_extr3_model_builder",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_EXTR3_MODEL_BUILDER"
+    ],
+    [
+      "sap.z2mse_extr3_model_builder._post_search",
+      "Code",
+      "ABAPMethod",
+      "_POST_SEARCH"
+    ],
+    [
+      "sap.z2mse_extr3_model_builder._search_down",
+      "Code",
+      "ABAPMethod",
+      "_SEARCH_DOWN"
+    ],
+    [
+      "sap.z2mse_extr3_model_builder._search_up",
+      "Code",
+      "ABAPMethod",
+      "_SEARCH_UP"
+    ],
+    [
+      "sap.z2mse_extract3",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_EXTRACT3"
+    ],
+    [
+      "sap.z2mse_extract3.extract",
+      "Code",
+      "ABAPMethod",
+      "EXTRACT"
+    ],
+    [
+      "sap.fgr-sgui",
+      "Grouping",
+      "ABAPFunktionGroup",
+      "FGR-SGUI"
+    ],
+    [
+      "sap.fgr-sgui.sapgui_progress_indicator",
+      "Code",
+      "ABAPFunktion",
+      "F-SAPGUI_PROGRESS_INDICATOR",
+      "AwN"
+    ]
+  ],
+  "calls": [
+    [
+      "sap.z2mse_extr3_model_builder._post_search",
+      "sap.fgr-sgui.sapgui_progress_indicator"
+    ],
+    [
+      "sap.z2mse_extr3_model_builder._search_down",
+      "sap.fgr-sgui.sapgui_progress_indicator"
+    ],
+    [
+      "sap.z2mse_extr3_model_builder._search_up",
+      "sap.fgr-sgui.sapgui_progress_indicator"
+    ],
+    [
+      "sap.z2mse_extract3.extract",
+      "sap.fgr-sgui.sapgui_progress_indicator"
+    ]
+  ],
+  "accesses": [],
+  "comments": []
+}

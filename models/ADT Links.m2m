@@ -80,6 +80,16 @@
 			"y": -418.2
 		},
 		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_famix_file_anchor",
+			"x": 50,
+			"y": 60.57
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_famix_file_anchor.add",
+			"x": -1836,
+			"y": 222.7
+		},
+		{
 			"uniqueKey": "ABAPGlobalClass..sap.z2mse_famix_association",
 			"x": 20.26,
 			"y": 29.42
@@ -123,16 +133,6 @@
 			"uniqueKey": "ABAPClassAttribute..sap.z2mse_famix_entity.g_model",
 			"x": -770.1,
 			"y": 164.9
-		},
-		{
-			"uniqueKey": "ABAPGlobalClass..sap.z2mse_famix_file_anchor",
-			"x": 50,
-			"y": 60.57
-		},
-		{
-			"uniqueKey": "ABAPMethod..sap.z2mse_famix_file_anchor.add",
-			"x": -1836,
-			"y": 222.7
 		},
 		{
 			"uniqueKey": "ABAPGlobalClass..sap.z2mse_famix_method",
@@ -220,16 +220,6 @@
 			"y": 11.21
 		},
 		{
-			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_coupling",
-			"x": 16.07,
-			"y": 27.16
-		},
-		{
-			"uniqueKey": "ABAPMethod..sap.z2mse_somix_coupling.add",
-			"x": 21.66,
-			"y": 50.3
-		},
-		{
 			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_data",
 			"x": 35.3,
 			"y": 6.14
@@ -248,6 +238,16 @@
 			"uniqueKey": "ABAPMethod..sap.z2mse_somix_grouping.add",
 			"x": 19.82,
 			"y": 87.94
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_coupling",
+			"x": 16.07,
+			"y": 27.16
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_somix_coupling.add",
+			"x": 21.66,
+			"y": 50.3
 		},
 		{
 			"uniqueKey": "ABAPGlobalClass..sap.z2mse_somix_parentchild",
@@ -303,6 +303,16 @@
 			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_invocation.get_instance",
 			"x": 515.1,
 			"y": 164.9
+		},
+		{
+			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_tables",
+			"x": 51.81,
+			"y": 72.86
+		},
+		{
+			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tables.make_model",
+			"x": -91.8,
+			"y": -411.4
 		},
 		{
 			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_classes",
@@ -375,16 +385,6 @@
 			"y": -263.5
 		},
 		{
-			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_tables",
-			"x": 51.81,
-			"y": 72.86
-		},
-		{
-			"uniqueKey": "ABAPMethod..sap.z2mse_extr3_tables.make_model",
-			"x": -91.8,
-			"y": -411.4
-		},
-		{
 			"uniqueKey": "ABAPGlobalClass..sap.z2mse_extr3_web_dynpro_comp",
 			"x": 58.5,
 			"y": 45.23
@@ -395,9 +395,9 @@
 			"y": -542.3
 		},
 		{
-			"uniqueKey": "DBTable..sap.saphanadb.rstran",
-			"x": 22.75,
-			"y": 71.68
+			"uniqueKey": "DBTable..sap.sapt80.rstran",
+			"x": 1015.93,
+			"y": -327.57
 		}
 	],
 	"comments": [

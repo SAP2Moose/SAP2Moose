@@ -1,0 +1,209 @@
+{
+  "FileContent": "This file contains a circuit diagram of software in a condensed SOMIX format, exported from Moose2Model2 (www.moose2model.org) for AI analysis. See legend for format.",
+  "m2m_export": "somix-circuit-diagram",
+  "version": 3,
+  "modelName": "Z2MSE_T80_20251217_205307.mse",
+  "diagramTitle": "Interface Special Handling",
+  "timestamp": "2026-03-19T15:52:11.683Z",
+  "legend": {
+    "nodes": "[id, SOMIXelement, technicalType, name, flags?]",
+    "flags": {
+      "AwN": "Added with Neighbors - all calls and accesses of this element are visible in the diagram"
+    },
+    "calls": "[from, to]",
+    "accesses": "[from, to]"
+  },
+  "nodes": [
+    [
+      "sap.z2mse_extr3",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_EXTR3"
+    ],
+    [
+      "sap.z2mse_extr3.element_manager",
+      "Data",
+      "ABAPClassAttribute",
+      "ELEMENT_MANAGER"
+    ],
+    [
+      "sap.z2mse_extr3_element_manager",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_EXTR3_ELEMENT_MANAGER"
+    ],
+    [
+      "sap.z2mse_extr3_element_manager.interface_use_structure",
+      "Data",
+      "ABAPClassAttribute",
+      "INTERFACE_USE_STRUCTURE"
+    ],
+    [
+      "sap.z2mse_extr3_access",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_EXTR3_ACCESS"
+    ],
+    [
+      "sap.z2mse_extr3_access.get_instance",
+      "Code",
+      "ABAPMethod",
+      "GET_INSTANCE"
+    ],
+    [
+      "sap.z2mse_extr3_invocation",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_EXTR3_INVOCATION"
+    ],
+    [
+      "sap.z2mse_extr3_invocation.add",
+      "Code",
+      "ABAPMethod",
+      "ADD"
+    ],
+    [
+      "sap.z2mse_extr3_invocation.get_instance",
+      "Code",
+      "ABAPMethod",
+      "GET_INSTANCE"
+    ],
+    [
+      "sap.z2mse_extr3_classes",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_EXTR3_CLASSES"
+    ],
+    [
+      "sap.z2mse_extr3_classes.add",
+      "Code",
+      "ABAPMethod",
+      "ADD"
+    ],
+    [
+      "sap.z2mse_extr3_classes.add_component",
+      "Code",
+      "ABAPMethod",
+      "ADD_COMPONENT"
+    ],
+    [
+      "sap.z2mse_extr3_classes.attribute_type",
+      "Data",
+      "ABAPClassAttribute",
+      "ATTRIBUTE_TYPE"
+    ],
+    [
+      "sap.z2mse_extr3_classes.elements_metarel_element_id",
+      "Data",
+      "ABAPClassAttribute",
+      "ELEMENTS_METAREL_ELEMENT_ID"
+    ],
+    [
+      "sap.z2mse_extr3_classes.elements_metarel_refclsname",
+      "Data",
+      "ABAPClassAttribute",
+      "ELEMENTS_METAREL_REFCLSNAME"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_metarel",
+      "Code",
+      "ABAPMethod",
+      "_ADD_METAREL",
+      "AwN"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_single_component_to_class",
+      "Code",
+      "ABAPMethod",
+      "_ADD_SINGLE_COMPONENT_TO_CLASS"
+    ],
+    [
+      "sap.sapt80.seometarel",
+      "Data",
+      "DBTable",
+      "SEOMETAREL"
+    ]
+  ],
+  "calls": [
+    [
+      "sap.z2mse_extr3_classes.add",
+      "sap.z2mse_extr3_classes._add_metarel"
+    ],
+    [
+      "sap.z2mse_extr3_classes.add_component",
+      "sap.z2mse_extr3_classes.add"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_metarel",
+      "sap.z2mse_extr3_access.get_instance"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_metarel",
+      "sap.z2mse_extr3_invocation.add"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_metarel",
+      "sap.z2mse_extr3_invocation.get_instance"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_metarel",
+      "sap.z2mse_extr3_classes.add"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_metarel",
+      "sap.z2mse_extr3_classes.add_component"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_metarel",
+      "sap.z2mse_extr3_classes._add_single_component_to_class"
+    ]
+  ],
+  "accesses": [
+    [
+      "sap.z2mse_extr3_invocation.add",
+      "sap.z2mse_extr3.element_manager"
+    ],
+    [
+      "sap.z2mse_extr3_classes.add",
+      "sap.z2mse_extr3.element_manager"
+    ],
+    [
+      "sap.z2mse_extr3_classes.add_component",
+      "sap.z2mse_extr3.element_manager"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_metarel",
+      "sap.z2mse_extr3.element_manager"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_metarel",
+      "sap.z2mse_extr3_element_manager.interface_use_structure"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_metarel",
+      "sap.z2mse_extr3_classes.attribute_type"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_metarel",
+      "sap.z2mse_extr3_classes.elements_metarel_element_id"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_metarel",
+      "sap.z2mse_extr3_classes.elements_metarel_refclsname"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_metarel",
+      "sap.sapt80.seometarel"
+    ],
+    [
+      "sap.z2mse_extr3_classes._add_single_component_to_class",
+      "sap.z2mse_extr3.element_manager"
+    ]
+  ],
+  "comments": [
+    {
+      "elementId": "sap.z2mse_extr3_classes._add_metarel",
+      "text": "The direction of the usage of an implementing method\nand an interface method is specified here\n        "
+    }
+  ]
+}

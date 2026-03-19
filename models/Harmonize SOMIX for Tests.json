@@ -1,0 +1,155 @@
+{
+  "FileContent": "This file contains a circuit diagram of software in a condensed SOMIX format, exported from Moose2Model2 (www.moose2model.org) for AI analysis. See legend for format.",
+  "m2m_export": "somix-circuit-diagram",
+  "version": 3,
+  "modelName": "Z2MSE_T80_20251217_205307.mse",
+  "diagramTitle": "Harmonize SOMIX for Tests",
+  "timestamp": "2026-03-19T15:52:01.488Z",
+  "legend": {
+    "nodes": "[id, SOMIXelement, technicalType, name, flags?]",
+    "flags": {
+      "AwN": "Added with Neighbors - all calls and accesses of this element are visible in the diagram"
+    },
+    "calls": "[from, to]",
+    "accesses": "[from, to]"
+  },
+  "nodes": [
+    [
+      "sap.z2mse_somix_harmonize",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_SOMIX_HARMONIZE"
+    ],
+    [
+      "sap.z2mse_somix_harmonize.equalize_harmonized",
+      "Code",
+      "ABAPMethod",
+      "EQUALIZE_HARMONIZED"
+    ],
+    [
+      "sap.z2mse_somix_harmonize.mse_2_harmonized",
+      "Code",
+      "ABAPMethod",
+      "MSE_2_HARMONIZED",
+      "AwN"
+    ],
+    [
+      "sap.z2mse_somix_harmonize._add_element_node",
+      "Code",
+      "ABAPMethod",
+      "_ADD_ELEMENT_NODE"
+    ],
+    [
+      "sap.z2mse_somix_harmonize._analyze_attribute_value",
+      "Code",
+      "ABAPMethod",
+      "_ANALYZE_ATTRIBUTE_VALUE"
+    ],
+    [
+      "sap.z2mse_somix_harmonize._build_result",
+      "Code",
+      "ABAPMethod",
+      "_BUILD_RESULT"
+    ],
+    [
+      "sap.z2mse_somix_harmonize._extract_element_node",
+      "Code",
+      "ABAPMethod",
+      "_EXTRACT_ELEMENT_NODE",
+      "AwN"
+    ],
+    [
+      "sap.z2mse_somix_harmonize._ext_serial_attribute_nodes",
+      "Code",
+      "ABAPMethod",
+      "_EXT_SERIAL_ATTRIBUTE_NODES",
+      "AwN"
+    ],
+    [
+      "sap.z2mse_somix_harmonize._find_concatenated_names",
+      "Code",
+      "ABAPMethod",
+      "_FIND_CONCATENATED_NAMES"
+    ],
+    [
+      "sap.z2mse_somix_harmonize._make_list_of_element_nodes",
+      "Code",
+      "ABAPMethod",
+      "_MAKE_LIST_OF_ELEMENT_NODES",
+      "AwN"
+    ],
+    [
+      "sap.z2mse_main_test",
+      "Grouping",
+      "ABAPGlobalClass",
+      "Z2MSE_MAIN_TEST"
+    ],
+    [
+      "sap.z2mse_main_test.z2mse_test_init_select_somix",
+      "Code",
+      "ABAPMethod",
+      "Z2MSE_TEST_INIT_SELECT_SOMIX"
+    ]
+  ],
+  "calls": [
+    [
+      "sap.z2mse_somix_harmonize.mse_2_harmonized",
+      "sap.z2mse_somix_harmonize.equalize_harmonized"
+    ],
+    [
+      "sap.z2mse_somix_harmonize.mse_2_harmonized",
+      "sap.z2mse_somix_harmonize._analyze_attribute_value"
+    ],
+    [
+      "sap.z2mse_somix_harmonize.mse_2_harmonized",
+      "sap.z2mse_somix_harmonize._build_result"
+    ],
+    [
+      "sap.z2mse_somix_harmonize.mse_2_harmonized",
+      "sap.z2mse_somix_harmonize._extract_element_node"
+    ],
+    [
+      "sap.z2mse_somix_harmonize.mse_2_harmonized",
+      "sap.z2mse_somix_harmonize._ext_serial_attribute_nodes"
+    ],
+    [
+      "sap.z2mse_somix_harmonize.mse_2_harmonized",
+      "sap.z2mse_somix_harmonize._find_concatenated_names"
+    ],
+    [
+      "sap.z2mse_somix_harmonize.mse_2_harmonized",
+      "sap.z2mse_somix_harmonize._make_list_of_element_nodes"
+    ],
+    [
+      "sap.z2mse_somix_harmonize._make_list_of_element_nodes",
+      "sap.z2mse_somix_harmonize._add_element_node"
+    ],
+    [
+      "sap.z2mse_main_test.z2mse_test_init_select_somix",
+      "sap.z2mse_somix_harmonize.mse_2_harmonized"
+    ]
+  ],
+  "accesses": [],
+  "comments": [
+    {
+      "elementId": "sap.z2mse_somix_harmonize.mse_2_harmonized",
+      "text": "Receives mse:\n( ( SOMIX.Data (id: 1)  (name 'attr')  (technicalType 'ABAPClassAttribute'))\n        "
+    },
+    {
+      "elementId": "sap.z2mse_somix_harmonize._extract_element_node",
+      "text": "Returns\relementname:\rSOMIX.Data\rserial_attribute_nodes:\rRow  TABLE_LINE\r=========================================\r1    (id: 1)\r2    (name 'attr')\r3    (technicalType 'ABAPClassAttribute')\r\n        "
+    },
+    {
+      "elementId": "sap.z2mse_somix_harmonize._ext_serial_attribute_nodes",
+      "text": "Analyzes nodes further\n        "
+    },
+    {
+      "elementId": "sap.z2mse_somix_harmonize._find_concatenated_names",
+      "text": "Contains explicite information which elements use simple names:\nSOMIX.Grouping<br>SOMIX.Data<br>SOMIX.Code\n        "
+    },
+    {
+      "elementId": "sap.z2mse_somix_harmonize._make_list_of_element_nodes",
+      "text": "Returns element_nodes:\nRow  TABLE_LINE\r===============================================================================\r1    ( SOMIX.Data (id: 1)  (name 'attr')  (technicalType 'ABAPClassAttribute'))\r\n        "
+    }
+  ]
+}
