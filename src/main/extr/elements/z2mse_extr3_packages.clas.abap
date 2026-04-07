@@ -123,6 +123,7 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
     ASSERT sy-subrc EQ 0.
 
+
     IF element_manager->use_somix EQ 'X'.
 
       DATA: unique_name TYPE string.
@@ -132,6 +133,7 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
                                                       technical_type      = z2mse_extract3=>techtype_abappackage
                                                       link_to_editor      = ''
                                             CHANGING  unique_name         = unique_name ).
+
 
     ELSE. " SOMIX
 
