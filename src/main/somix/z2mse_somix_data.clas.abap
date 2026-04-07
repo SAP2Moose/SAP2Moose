@@ -39,14 +39,14 @@ CLASS z2mse_somix_data DEFINITION
       RETURNING VALUE(id)           TYPE i.
   PROTECTED SECTION.
   PRIVATE SECTION.
-    TYPES: BEGIN OF data_id_type,
+    TYPES: BEGIN OF ty_data_id,
              grouping_name_group TYPE string,
              grouping            TYPE string,
              data_name_group     TYPE string,
              data                TYPE string,
              id                  TYPE i,
-           END OF data_id_type.
-    DATA: g_data_ids TYPE HASHED TABLE OF data_id_type WITH UNIQUE KEY grouping_name_group data_name_group grouping data.
+           END OF ty_data_id.
+    DATA: g_data_ids TYPE HASHED TABLE OF ty_data_id WITH UNIQUE KEY grouping_name_group data_name_group grouping data.
 
     DATA is_persistent TYPE abap_bool . ##TODO " Add attribute for this
 ENDCLASS.
