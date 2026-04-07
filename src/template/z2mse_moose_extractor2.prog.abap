@@ -100,7 +100,6 @@ SELECTION-SCREEN END OF BLOCK block_infos.
 SELECTION-SCREEN BEGIN OF BLOCK bl_model_settings WITH FRAME TITLE TEXT-100.
 
 PARAMETERS: p_down  AS CHECKBOX DEFAULT 'X',
-            p_somix AS CHECKBOX DEFAULT 'X',
             " Default filename
             p_df    TYPE string.
 *"! Download model to file
@@ -321,7 +320,7 @@ START-OF-SELECTION.
       i_model_builder           = model_builder
       i_exclude_found_sap_intf  = p_ex
       i_interface_use_structure = p_intrev
-      i_use_somix               = p_somix.
+      i_use_somix               = 'X'.
 
   model_builder->initialize( i_element_manager = element_manager
                               i_dynamic_read = p_dyn ).
