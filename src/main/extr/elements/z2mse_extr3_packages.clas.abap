@@ -123,6 +123,8 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
     READ TABLE elements_element_id INTO element WITH TABLE KEY element_id = element_id.
     ASSERT sy-subrc EQ 0.
 
+    IF element_manager->use_somix EQ 'X'.
+
       DATA: unique_name TYPE string.
       unique_name = |sap.{ element-devclass }|.
       element_manager->somix_grouping->add( EXPORTING grouping_name_group = ng_abap_package
@@ -130,6 +132,13 @@ CLASS z2mse_extr3_packages IMPLEMENTATION.
                                                       technical_type      = z2mse_extract3=>techtype_abappackage
                                                       link_to_editor      = ''
                                             CHANGING  unique_name         = unique_name ).
+
+    ELSE. " SOMIX
+
+      element_manager->famix_package->add( name       = element-devclass
+                                           name_group = ng_abap_package ).
+
+    ENDIF. " SOMIX
 
   ENDMETHOD.
 
