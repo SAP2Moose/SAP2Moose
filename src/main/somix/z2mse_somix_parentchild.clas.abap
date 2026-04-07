@@ -5,7 +5,6 @@ CLASS z2mse_somix_parentchild DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
-    TYPES: ty_helper_type TYPE c LENGTH 1.
     METHODS constructor IMPORTING model TYPE REF TO z2mse_model.
     METHODS add
       IMPORTING
